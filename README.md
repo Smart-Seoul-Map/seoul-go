@@ -4,13 +4,13 @@
 
 ## 기술 스택
 
-| 영역       | 기술                                                    |
-| ---------- | ------------------------------------------------------- |
-| 프론트엔드 | Vite, React, TypeScript, HTML/CSS                       |
-| 지도       | MapLibre GL JS                                          |
-| 데이터     | 스마트서울맵 테마 OpenAPI                               |
-| 배포       | Cloudflare Pages           |
-| 품질       | ESLint, Prettier, Vitest, GitHub Actions                |
+| 영역       | 기술                                     |
+| ---------- | ---------------------------------------- |
+| 프론트엔드 | Vite, React, TypeScript, HTML/CSS        |
+| 지도       | MapLibre GL JS                           |
+| 데이터     | 스마트서울맵 테마 OpenAPI                |
+| 배포       | Cloudflare Pages                         |
+| 품질       | ESLint, Prettier, Vitest, GitHub Actions |
 
 ## 개발 명령
 
