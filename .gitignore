@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.tmp/
+.cargo-home/
+dist/
+core/target/
+src/wasm/pkg/
+public/assets/generated/
+.env
+.env.local
+.dev.vars
+.wrangler/
+.DS_Store
+*.log

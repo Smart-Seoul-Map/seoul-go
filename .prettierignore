@@ -1,0 +1,7 @@
+dist/
+node_modules/
+core/target/
+src/wasm/pkg/*
+!src/wasm/pkg/game_core.js.d.ts
+public/assets/generated/
+.wrangler/
