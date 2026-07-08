@@ -54,6 +54,7 @@
   "dependencies": {
     "maplibre-gl": "^5.24.0",
     "react": "^19.2.7",
+    "react-custom-roulette": "1.4.1",
     "react-dom": "^19.2.7",
     "three": "^0.185.0",
     "zustand": "^5.0.14"

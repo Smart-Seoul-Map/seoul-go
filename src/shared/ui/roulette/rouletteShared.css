@@ -1,0 +1,47 @@
+.roulette-shared-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 18% 72%, rgba(255, 102, 94, 0.18), transparent 28%),
+    linear-gradient(180deg, #fffaf0 0%, #fff8e9 58%, #fff4dc 100%);
+  color: #111827;
+  font-family:
+    Pretendard,
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.roulette-back-link {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(36, 36, 38, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 24px rgba(31, 48, 87, 0.12);
+  color: #242426;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.roulette-back-link:hover {
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(31, 48, 87, 0.16);
+  transform: translateY(-1px);
+}

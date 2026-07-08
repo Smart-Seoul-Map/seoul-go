@@ -13,6 +13,9 @@ importers:
       react:
         specifier: ^19.2.7
         version: 19.2.7
+      react-custom-roulette:
+        specifier: 1.4.1
+        version: 1.4.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-dom:
         specifier: ^19.2.7
         version: 19.2.7(react@19.2.7)
@@ -2835,6 +2838,15 @@ packages:
         integrity: sha512-XdjUArbK4Bm5fLLvlm5KpTFOiOThgfWWI4axAZDWg4E/0mKdZyI9tNEfds27qCi1ze/vwTR16kvmmGhRra3c2g==,
       }
 
+  react-custom-roulette@1.4.1:
+    resolution:
+      {
+        integrity: sha512-v5Mrww/lbysSNcAF0PHU7KzdY+ljtTysu6A5Hx5s0Fi2V7CIj36Q2Df+l/1izl8yzX06nnQzvgbwSLenm8vYDQ==,
+      }
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+
   react-dom@19.2.7:
     resolution:
       {
@@ -4900,6 +4912,11 @@ snapshots:
   punycode@2.3.1: {}
 
   quickselect@3.0.0: {}
+
+  react-custom-roulette@1.4.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   react-dom@19.2.7(react@19.2.7):
     dependencies:
