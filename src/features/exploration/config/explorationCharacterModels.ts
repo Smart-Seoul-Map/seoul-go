@@ -10,5 +10,10 @@ export const CHARACTER_MODEL_MANIFEST = {
   },
 } as const;
 
-// 필요한 경우 타입도 구조에 맞춰 업데이트합니다.
+export const CHARACTER_ANIMATION_TIME_SCALE = {
+  idlePrimary: 1,
+  idleSecondary: 1,
+  run: 1.6,
+} as const;
+
 export type CharacterModelKey = keyof typeof CHARACTER_MODEL_MANIFEST.animations;
