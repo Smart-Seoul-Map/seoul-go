@@ -1,19 +1,87 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import {
+  CHARACTER_ANIMATION_TIME_SCALE,
   CHARACTER_MODEL_MANIFEST,
   type CharacterModelKey,
 } from "../config/explorationCharacterModels";
 
 interface CharacterModelOverlayProps {
+  headingRadians: number;
   modelKey: CharacterModelKey;
 }
 
-export function CharacterModelOverlay({ modelKey }: CharacterModelOverlayProps): ReactElement {
+const gltfLoader = new GLTFLoader();
+const gltfCache = new Map<string, Promise<GLTF>>();
+
+function loadGltf(path: string): Promise<GLTF> {
+  const cachedGltf = gltfCache.get(path);
+
+  if (cachedGltf) {
+    return cachedGltf;
+  }
+
+  const gltf = new Promise<GLTF>((resolve, reject) => {
+    gltfLoader.load(path, resolve, undefined, reject);
+  });
+
+  gltfCache.set(path, gltf);
+
+  return gltf;
+}
+
+export function CharacterModelOverlay({
+  headingRadians,
+  modelKey,
+}: CharacterModelOverlayProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const modelRef = useRef<THREE.Object3D | null>(null);
+  const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
+  const headingRadiansRef = useRef(headingRadians);
+  const currentModelKeyRef = useRef(modelKey);
+
+  const playAnimation = useCallback(async (nextModelKey: CharacterModelKey) => {
+    const mixer = mixerRef.current;
+
+    if (!mixer) {
+      return;
+    }
+
+    const animationPath = CHARACTER_MODEL_MANIFEST.animations[nextModelKey];
+    const animationGltf = await loadGltf(animationPath);
+
+    if (mixerRef.current !== mixer || currentModelKeyRef.current !== nextModelKey) {
+      return;
+    }
+
+    activeActionsRef.current.forEach((action) => {
+      action.stop();
+    });
+    activeActionsRef.current = animationGltf.animations.map((clip) => {
+      const action = mixer.clipAction(clip).reset().play();
+
+      action.timeScale = CHARACTER_ANIMATION_TIME_SCALE[nextModelKey];
+
+      return action;
+    });
+  }, []);
+
+  useEffect(() => {
+    currentModelKeyRef.current = modelKey;
+    void playAnimation(modelKey);
+  }, [modelKey, playAnimation]);
+
+  useEffect(() => {
+    headingRadiansRef.current = headingRadians;
+
+    if (modelRef.current) {
+      modelRef.current.rotation.y = headingRadians;
+    }
+  }, [headingRadians]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -37,8 +105,6 @@ export function CharacterModelOverlay({ modelKey }: CharacterModelOverlayProps):
     keyLight.position.set(2, 4, 3);
     scene.add(keyLight);
 
-    let mixer: THREE.AnimationMixer | null = null;
-    let model: THREE.Object3D | null = null;
     let frameId = 0;
     let lastTime = performance.now();
     let disposed = false;
@@ -52,37 +118,29 @@ export function CharacterModelOverlay({ modelKey }: CharacterModelOverlayProps):
       renderer.setSize(width, height, false);
     };
 
-    const loader = new GLTFLoader();
-    // 1단계: 기본 메쉬 로드
-    loader.load(CHARACTER_MODEL_MANIFEST.mesh, (gltf) => {
+    void loadGltf(CHARACTER_MODEL_MANIFEST.mesh).then((gltf) => {
       if (disposed) return;
 
-      model = gltf.scene;
+      const model = gltf.scene;
 
-      // 자동 크기 조절 로직
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3();
       box.getSize(size);
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
       model.scale.setScalar(0.86 / maxAxis);
-      model.position.set(0, -0.2, 0); // 모델 중심 조정
+      model.position.set(0, -0.2, 0);
+      model.rotation.y = headingRadiansRef.current;
 
+      modelRef.current = model;
       scene.add(model);
-      mixer = new THREE.AnimationMixer(model);
-
-      // 2단계: 해당 상태의 애니메이션 로드
-      const animPath = CHARACTER_MODEL_MANIFEST.animations[modelKey];
-      loader.load(animPath, (animGltf) => {
-        if (disposed) return;
-        animGltf.animations.forEach((clip) => {
-          mixer?.clipAction(clip).play();
-        });
-      });
+      mixerRef.current = new THREE.AnimationMixer(model);
+      void playAnimation(currentModelKeyRef.current);
     });
+
     const render = (time: number) => {
       const deltaSeconds = (time - lastTime) / 1000;
       lastTime = time;
-      mixer?.update(deltaSeconds);
+      mixerRef.current?.update(deltaSeconds);
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(render);
     };
@@ -93,17 +151,16 @@ export function CharacterModelOverlay({ modelKey }: CharacterModelOverlayProps):
 
     return () => {
       disposed = true;
+      mixerRef.current = null;
+      modelRef.current = null;
+      activeActionsRef.current = [];
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(frameId);
-      model?.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry.dispose();
-        }
-      });
       renderer.dispose();
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     };
-  }, [modelKey]);
+  }, [playAnimation]);
 
   return <div ref={containerRef} aria-hidden="true" className="character-overlay" />;
 }
