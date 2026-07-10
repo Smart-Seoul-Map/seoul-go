@@ -1,28 +1,77 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import type { ReactElement } from "react";
 
-import { buildRasterMapStyle, DEFAULT_TILE_URL_TEMPLATE } from "@shared/lib/maplibre/maplibreStyle";
+import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
-import { advanceTrackedMovement } from "../application/explorationMovementFrame";
-import type { CharacterModelKey } from "../config/explorationCharacterModels";
-import type { Coordinates } from "../domain/explorationGeo";
-import { createMovement, type CharacterMovement } from "../domain/explorationMovement";
+import { lockMapZoomInteractions } from "../application/explorationMapInteractions";
+import { createExplorationMapOptions } from "../application/explorationMapCreation";
+import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
+import {
+  addExplorationPlaceMarkersLayer,
+  getExplorationPlaceMarkerName,
+  updateExplorationPlaceMarkersSource,
+} from "../application/explorationPlaceMarkers";
+import {
+  type ExplorationSmartSeoulMosaicCenter,
+  useExplorationSmartSeoulMosaicLayer,
+} from "../application/useExplorationSmartSeoulMosaicLayer";
+import { useCharacterMovementController } from "../application/useCharacterMovementController";
+import {
+  CHARACTER_ARRIVAL_RADIUS_METERS,
+  CHARACTER_SPEED_METERS_PER_SECOND,
+  EXPLORATION_MAP_BEARING,
+  EXPLORATION_MAP_CENTER,
+  resolveExplorationMapTileSourceConfig,
+} from "../config/explorationMapConfig";
+import { EXPLORATION_PLACE_MARKERS_LAYER_ID } from "../config/explorationPlaceMarkerLayer";
+import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
-const SEOUL_CENTER: [number, number] = [126.9784147, 37.5666805];
-const CHARACTER_SPEED_METERS_PER_SECOND = 180;
+type ExplorationMapProps = {
+  placeMarkers?: MapMarkerFeatureCollection;
+};
 
-export function ExplorationMap(): ReactElement {
+export function ExplorationMap({
+  placeMarkers = createEmptyMapMarkerFeatureCollection(),
+}: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const positionRef = useRef<Coordinates>({ lng: SEOUL_CENTER[0], lat: SEOUL_CENTER[1] });
-  const movementRef = useRef<CharacterMovement | null>(null);
-  const frameRef = useRef<number | null>(null);
-  const lastFrameTimeRef = useRef<number | null>(null);
-  const modelKeyRef = useRef<CharacterModelKey>("idlePrimary");
-  const [modelKey, setModelKey] = useState<CharacterModelKey>("idlePrimary");
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const positionRef = useRef<Coordinates>({
+    lng: EXPLORATION_MAP_CENTER[0],
+    lat: EXPLORATION_MAP_CENTER[1],
+  });
+  const requestSmartSeoulMosaicForMovementRef = useRef<
+    (position: Coordinates, target: Coordinates) => void
+  >(() => {});
+  const smartSeoulMosaicLayer = useExplorationSmartSeoulMosaicLayer({
+    beforeLayerId: EXPLORATION_PLACE_MARKERS_LAYER_ID,
+  });
+  const characterMovement = useCharacterMovementController<Coordinates>({
+    arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
+    getDistance: distanceMeters,
+    getHeadingRadians: (from, to) =>
+      calculateCharacterHeadingRadians(from, to, EXPLORATION_MAP_BEARING),
+    initialPosition: {
+      lng: EXPLORATION_MAP_CENTER[0],
+      lat: EXPLORATION_MAP_CENTER[1],
+    },
+    interpolate: (from, to, ratio) => ({
+      lng: from.lng + (to.lng - from.lng) * ratio,
+      lat: from.lat + (to.lat - from.lat) * ratio,
+    }),
+    onFrame: ({ position, target }) => {
+      positionRef.current = position;
+      mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
+      requestSmartSeoulMosaicForMovementRef.current(position, target);
+    },
+    speedPerSecond: CHARACTER_SPEED_METERS_PER_SECOND,
+  });
+  const characterMovementRef = useRef(characterMovement);
+  characterMovementRef.current = characterMovement;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -31,86 +80,113 @@ export function ExplorationMap(): ReactElement {
       return;
     }
 
-    const tileUrlTemplate =
-      import.meta.env.VITE_SMART_SEOUL_TILE_URL_TEMPLATE ?? DEFAULT_TILE_URL_TEMPLATE;
-    const map = new maplibregl.Map({
-      container,
-      style: buildRasterMapStyle(tileUrlTemplate),
-      center: SEOUL_CENTER,
-      zoom: 15,
-      pitch: 58,
-      bearing: -28,
-      attributionControl: false,
+    const { isSmartSeoulMapTileEnabled, smartSeoulMapTileProxyPath } =
+      resolveExplorationMapTileSourceConfig({
+        VITE_SMART_SEOUL_MAP_KEY: import.meta.env.VITE_SMART_SEOUL_MAP_KEY,
+        VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH: import.meta.env.VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH,
+      });
+
+    const map = new maplibregl.Map(
+      createExplorationMapOptions({
+        container,
+        isSmartSeoulMapTileEnabled,
+      })
+    );
+    mapRef.current = map;
+
+    lockMapZoomInteractions(map);
+    map.addControl(
+      new maplibregl.NavigationControl({ showZoom: false, visualizePitch: true }),
+      "top-right"
+    );
+
+    smartSeoulMosaicLayer.prepareSmartSeoulMosaicLayer();
+
+    const requestSmartSeoulMosaic = (center?: ExplorationSmartSeoulMosaicCenter) =>
+      smartSeoulMosaicLayer.requestSmartSeoulMosaic({
+        center,
+        isSmartSeoulMapTileEnabled,
+        map,
+        proxyBasePath: smartSeoulMapTileProxyPath,
+      });
+
+    requestSmartSeoulMosaicForMovementRef.current = (position, target) => {
+      smartSeoulMosaicLayer.requestSmartSeoulMosaicForMovement({
+        isSmartSeoulMapTileEnabled,
+        map,
+        position,
+        proxyBasePath: smartSeoulMapTileProxyPath,
+        target,
+      });
+    };
+
+    map.on("load", () => {
+      void requestSmartSeoulMosaic();
+      addExplorationPlaceMarkersLayer(map);
     });
 
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
+    map.on("click", EXPLORATION_PLACE_MARKERS_LAYER_ID, (event) => {
+      const name = getExplorationPlaceMarkerName(event.features?.[0]);
 
-    const setCharacterModel = (nextModelKey: CharacterModelKey) => {
-      if (modelKeyRef.current === nextModelKey) {
+      if (!name) {
         return;
       }
 
-      modelKeyRef.current = nextModelKey;
-      setModelKey(nextModelKey);
-    };
-
-    const stopTracking = () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-      }
-
-      frameRef.current = null;
-      lastFrameTimeRef.current = null;
-    };
-
-    const tick = (time: number) => {
-      const movement = movementRef.current;
-
-      if (!movement) {
-        stopTracking();
-        return;
-      }
-
-      const lastTime = lastFrameTimeRef.current ?? time;
-      lastFrameTimeRef.current = time;
-      const deltaSeconds = Math.min((time - lastTime) / 1000, 0.05);
-      const frame = advanceTrackedMovement(
-        movement,
-        deltaSeconds,
-        CHARACTER_SPEED_METERS_PER_SECOND
-      );
-
-      movementRef.current = frame.movement;
-      positionRef.current = frame.movement.position;
-      setCharacterModel(frame.modelKey);
-      map.jumpTo({ center: [frame.cameraCenter.lng, frame.cameraCenter.lat] });
-
-      if (frame.movement.status === "arrived") {
-        stopTracking();
-        return;
-      }
-
-      frameRef.current = requestAnimationFrame(tick);
-    };
+      new maplibregl.Popup({ closeButton: true }).setLngLat(event.lngLat).setText(name).addTo(map);
+    });
 
     map.on("click", (event) => {
+      if (map.getLayer(EXPLORATION_PLACE_MARKERS_LAYER_ID)) {
+        const clickedPlaces = map.queryRenderedFeatures(event.point, {
+          layers: [EXPLORATION_PLACE_MARKERS_LAYER_ID],
+        });
+
+        if (clickedPlaces.length > 0) {
+          return;
+        }
+      }
+
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
-      movementRef.current = createMovement(positionRef.current, target);
-      setCharacterModel("run");
-      stopTracking();
-      frameRef.current = requestAnimationFrame(tick);
+      characterMovementRef.current.moveTo(target);
+    });
+    map.on("moveend", () => {
+      if (!characterMovementRef.current.getIsMoving()) {
+        void requestSmartSeoulMosaic();
+      }
     });
 
     return () => {
-      stopTracking();
+      smartSeoulMosaicLayer.disposeSmartSeoulMosaicLayer();
+      requestSmartSeoulMosaicForMovementRef.current = () => {};
       map.remove();
+      mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    const updateSource = () => updateExplorationPlaceMarkersSource(map, placeMarkers);
+
+    if (map.isStyleLoaded()) {
+      updateSource();
+      return;
+    }
+
+    map.once("load", updateSource);
+  }, [placeMarkers]);
 
   return (
     <div className="map-canvas-stack">
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
-      <CharacterModelOverlay modelKey={modelKey} />
+      <CharacterModelOverlay
+        headingRadians={characterMovement.headingRadians}
+        modelKey={characterMovement.modelKey}
+      />
     </div>
   );
 }
