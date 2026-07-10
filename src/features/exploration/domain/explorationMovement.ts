@@ -34,18 +34,26 @@ export function advanceMovement(
   }
 
   if (hasArrived(movement.position, movement.target, movement.arrivalRadiusMeters)) {
-    return { ...movement, position: movement.target, status: "arrived" };
+    return { ...movement, status: "arrived" };
   }
 
   const totalDistance = distanceMeters(movement.position, movement.target);
-  const stepRatio = Math.min((deltaSeconds * speedMetersPerSecond) / totalDistance, 1);
+  const remainingDistanceToArrivalRadius = Math.max(
+    totalDistance - movement.arrivalRadiusMeters,
+    0
+  );
+  const travelDistance = Math.min(
+    deltaSeconds * speedMetersPerSecond,
+    remainingDistanceToArrivalRadius
+  );
+  const stepRatio = totalDistance === 0 ? 0 : travelDistance / totalDistance;
   const nextPosition = {
     lng: movement.position.lng + (movement.target.lng - movement.position.lng) * stepRatio,
     lat: movement.position.lat + (movement.target.lat - movement.position.lat) * stepRatio,
   };
 
-  if (hasArrived(nextPosition, movement.target, movement.arrivalRadiusMeters)) {
-    return { ...movement, position: movement.target, status: "arrived" };
+  if (travelDistance >= remainingDistanceToArrivalRadius) {
+    return { ...movement, position: nextPosition, status: "arrived" };
   }
 
   return { ...movement, position: nextPosition };

@@ -5,13 +5,34 @@ import { describe, expect, test } from "vitest";
 
 import { ExplorationPage } from "./ExplorationPage";
 
-describe("서울고 React 앱", () => {
-  test("지도 탐색 시작 화면을 렌더링한다", () => {
-    render(<ExplorationPage />);
+const themeProgressItems = [
+  {
+    id: "all",
+    markerColor: null,
+    name: "방문지",
+    totalCount: 3,
+    visitedCount: 0,
+  },
+  {
+    id: "night",
+    markerColor: "#1971c2",
+    name: "서울 야경명소",
+    totalCount: 2,
+    visitedCount: 0,
+  },
+] as const;
 
-    expect(screen.getByRole("heading", { name: "서울고" })).toBeInTheDocument();
-    expect(screen.getAllByText("500m")).toHaveLength(2);
-    expect(screen.getByText("서울 미래유산")).toBeInTheDocument();
-    expect(screen.getByLabelText("서울 지도")).toBeInTheDocument();
+describe("ExplorationPage", () => {
+  test("지도 위에 실제 장소 개수 기반 테마 현황 칩만 표시한다", () => {
+    render(<ExplorationPage themeProgressItems={themeProgressItems} />);
+
+    expect(screen.getByLabelText("서울 지도 탐색")).toBeInTheDocument();
+    expect(screen.getByLabelText("장소 테마 현황")).toBeInTheDocument();
+    expect(screen.getByText("방문지")).toBeInTheDocument();
+    expect(screen.getByText("서울 야경명소")).toBeInTheDocument();
+    expect(screen.getByText("0/3")).toBeInTheDocument();
+    expect(screen.getByText("0/2")).toBeInTheDocument();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
