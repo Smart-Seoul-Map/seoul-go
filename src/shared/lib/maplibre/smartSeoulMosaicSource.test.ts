@@ -127,7 +127,7 @@ describe("Smart Seoul mosaic source", () => {
     const abortController = new AbortController();
     const fetchImpl = vi.fn(
       async () =>
-        new Response(new Blob(["tile"], { type: "image/png" }), {
+        new Response("tile", {
           headers: { "Content-Type": "image/png" },
         })
     );
@@ -149,7 +149,7 @@ describe("Smart Seoul mosaic source", () => {
   test("creates the mosaic image URL without synchronous data URL encoding", async () => {
     const fetchImpl = vi.fn(
       async () =>
-        new Response(new Blob(["tile"], { type: "image/png" }), {
+        new Response("tile", {
           headers: { "Content-Type": "image/png" },
         })
     );
@@ -179,7 +179,7 @@ describe("Smart Seoul mosaic source", () => {
             setTimeout(() => {
               activeRequests -= 1;
               resolve(
-                new Response(new Blob(["tile"], { type: "image/png" }), {
+                new Response("tile", {
                   headers: { "Content-Type": "image/png" },
                 })
               );
@@ -201,7 +201,7 @@ describe("Smart Seoul mosaic source", () => {
   test("reuses cached Smart Seoul tile responses for repeated mosaics", async () => {
     const fetchImpl = vi.fn(
       async () =>
-        new Response(new Blob(["tile"], { type: "image/png" }), {
+        new Response("tile", {
           headers: { "Content-Type": "image/png" },
         })
     );
