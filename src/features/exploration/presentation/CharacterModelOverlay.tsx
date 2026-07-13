@@ -33,6 +33,10 @@ function loadGltf(path: string): Promise<GLTF> {
   return gltf;
 }
 
+function toModelRotationRadians(headingRadians: number): number {
+  return -headingRadians;
+}
+
 export function CharacterModelOverlay({
   headingRadians,
   modelKey,
@@ -79,7 +83,7 @@ export function CharacterModelOverlay({
     headingRadiansRef.current = headingRadians;
 
     if (modelRef.current) {
-      modelRef.current.rotation.y = headingRadians;
+      modelRef.current.rotation.y = toModelRotationRadians(headingRadians);
     }
   }, [headingRadians]);
 
@@ -129,7 +133,7 @@ export function CharacterModelOverlay({
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
       model.scale.setScalar(0.86 / maxAxis);
       model.position.set(0, -0.2, 0);
-      model.rotation.y = headingRadiansRef.current;
+      model.rotation.y = toModelRotationRadians(headingRadiansRef.current);
 
       modelRef.current = model;
       scene.add(model);
