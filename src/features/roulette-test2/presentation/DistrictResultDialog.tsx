@@ -1,15 +1,23 @@
 import { useCallback } from "react";
 import type { MouseEvent } from "react";
 
+import { createDistrictExplorationPath } from "@shared/constants/path";
+
 type DistrictResultDialogProps = {
   onClose: () => void;
-  result: string;
+  result: {
+    id: number;
+    name: string;
+  };
 };
 
 export function DistrictResultDialog({ onClose, result }: DistrictResultDialogProps) {
   const stopPopupClick = useCallback((event: MouseEvent<HTMLElement>) => {
     event.stopPropagation();
   }, []);
+  const moveToDistrictExploration = useCallback(() => {
+    window.location.href = createDistrictExplorationPath(result.id);
+  }, [result.id]);
 
   return (
     <div className="district-result-backdrop" role="presentation" onClick={onClose}>
@@ -21,8 +29,8 @@ export function DistrictResultDialog({ onClose, result }: DistrictResultDialogPr
         onClick={stopPopupClick}
       >
         <span id="district-result-title">선정 결과</span>
-        <strong>{result}</strong>
-        <button type="button" onClick={onClose}>
+        <strong>{result.name}</strong>
+        <button type="button" onClick={moveToDistrictExploration}>
           확인
         </button>
       </section>

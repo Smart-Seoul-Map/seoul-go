@@ -37,6 +37,16 @@ describe("createExplorationMapOptions", () => {
     });
   });
 
+  it("uses custom initial center when provided", () => {
+    const options = createExplorationMapOptions({
+      container: document.createElement("div"),
+      initialCenter: { lng: 126.990703, lat: 37.532326 },
+      isSmartSeoulMapTileEnabled: true,
+    });
+
+    expect(options.center).toEqual([126.990703, 37.532326]);
+  });
+
   it("uses an empty base style when Smart Seoul mosaic tiles are enabled", () => {
     const options = createExplorationMapOptions({
       container: document.createElement("div"),

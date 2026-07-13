@@ -9,10 +9,10 @@ const hiddenPointerStyle: CSSProperties = { display: "none" };
 
 export const topPointerPrizeOffset = 3;
 export const hiddenPointerProps = { style: hiddenPointerStyle };
-export const wheelDistricts = SEOUL_DISTRICTS.map((district) => district.name);
+export const wheelDistricts = SEOUL_DISTRICTS.map(({ id, name }) => ({ id, name }));
 
 export const wheelData: WheelDataType[] = wheelDistricts.map((district, index) => ({
-  option: district,
+  option: district.name,
   style: {
     backgroundColor: palette[index % palette.length],
     textColor: textPalette[index % textPalette.length],

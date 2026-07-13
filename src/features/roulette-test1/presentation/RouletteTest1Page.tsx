@@ -9,11 +9,11 @@ import { WheelDistrictRoulette } from "./WheelDistrictRoulette";
 import { WheelResultDialog } from "./WheelResultDialog";
 
 export function RouletteTest1Page() {
-  const getDistrictName = useCallback((index: number) => wheelDistricts[index] ?? null, []);
+  const getDistrict = useCallback((index: number) => wheelDistricts[index] ?? null, []);
   const { closeResult, finishSpin, mustSpin, prizeNumber, result, spin } =
     useWheelDistrictSelection({
       districtCount: wheelData.length,
-      getDistrictName,
+      getDistrict,
       topPointerPrizeOffset,
     });
 

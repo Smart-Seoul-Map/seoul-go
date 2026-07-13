@@ -8,17 +8,35 @@ import {
   createPlaceThemeProgressItems,
   useSmartSeoulThemePlacesQuery,
 } from "@features/places";
-import { PATH } from "@shared/constants/path";
+import { getSeoulDistrictById } from "@shared/constants/district";
+import { PATH, matchDistrictExplorationPath } from "@shared/constants/path";
 import type { ComponentType, ReactElement } from "react";
+import { useEffect, useState } from "react";
 
 const ROUTE_COMPONENTS: Readonly<Record<string, ComponentType>> = {
   [PATH.ROULETTE]: RouletteSelectionPage,
-  [PATH.ROULETTE_TEST1]: RouletteTest1Page,
-  [PATH.ROULETTE_TEST2]: RouletteTest2Page,
+  [PATH.ROULETTE_WHEEL]: RouletteTest1Page,
+  [PATH.ROULETTE_MAP]: RouletteTest2Page,
 };
 
-function ExplorationApp(): ReactElement {
+function useAppPathname(): string {
+  const [pathname, setPathname] = useState(window.location.pathname);
+
+  useEffect(() => {
+    if (pathname !== PATH.HOME) {
+      return;
+    }
+
+    window.history.replaceState(null, "", PATH.ROULETTE);
+    setPathname(PATH.ROULETTE);
+  }, [pathname]);
+
+  return pathname === PATH.HOME ? PATH.ROULETTE : pathname;
+}
+
+function ExplorationApp({ districtId }: { districtId?: number }): ReactElement {
   const { data: places = [] } = useSmartSeoulThemePlacesQuery();
+  const district = districtId === undefined ? null : getSeoulDistrictById(districtId);
   const themeProgressItems = createPlaceThemeProgressItems({
     places,
     themes: SMART_SEOUL_PLACE_THEMES,
@@ -26,6 +44,11 @@ function ExplorationApp(): ReactElement {
 
   return (
     <ExplorationPage
+      initialCenter={
+        district
+          ? { lng: district.officePosition.lng, lat: district.officePosition.lat }
+          : undefined
+      }
       placeMarkers={createPlacesFeatureCollection(places)}
       themeProgressItems={themeProgressItems}
     />
@@ -33,11 +56,17 @@ function ExplorationApp(): ReactElement {
 }
 
 export function App(): ReactElement {
-  const RouteComponent = ROUTE_COMPONENTS[window.location.pathname];
+  const pathname = useAppPathname();
+  const RouteComponent = ROUTE_COMPONENTS[pathname];
+  const districtId = matchDistrictExplorationPath(pathname);
 
   if (RouteComponent) {
     return <RouteComponent />;
   }
 
-  return <ExplorationApp />;
+  if (pathname === PATH.EXPLORATION || districtId !== null) {
+    return <ExplorationApp districtId={districtId ?? undefined} />;
+  }
+
+  return <RouletteSelectionPage />;
 }

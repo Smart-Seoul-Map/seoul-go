@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type SelectableDistrict = {
+  id: number;
   name: string;
 };
 
@@ -10,9 +11,9 @@ const maxDelayMs = 172;
 const resultRevealDelayMs = 180;
 
 export function useDistrictSelection(districts: readonly SelectableDistrict[]) {
-  const [activeDistrict, setActiveDistrict] = useState<string | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
-  const [result, setResult] = useState<string | null>(null);
+  const [activeDistrict, setActiveDistrict] = useState<SelectableDistrict | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<SelectableDistrict | null>(null);
+  const [result, setResult] = useState<SelectableDistrict | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const timerRef = useRef<number | null>(null);
 
@@ -42,7 +43,7 @@ export function useDistrictSelection(districts: readonly SelectableDistrict[]) {
     const runStep = () => {
       const isFinalStep = step >= totalSelectionSteps;
       const currentIndex = isFinalStep ? finalIndex : (startIndex + step) % districts.length;
-      const currentDistrict = districts[currentIndex]?.name ?? null;
+      const currentDistrict = districts[currentIndex] ?? null;
 
       setActiveDistrict(currentDistrict);
 

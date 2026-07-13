@@ -32,18 +32,29 @@ import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 type ExplorationMapProps = {
+  initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
 };
 
+function resolveInitialCenter(initialCenter?: Coordinates): Coordinates {
+  if (initialCenter) {
+    return initialCenter;
+  }
+
+  return {
+    lng: EXPLORATION_MAP_CENTER[0],
+    lat: EXPLORATION_MAP_CENTER[1],
+  };
+}
+
 export function ExplorationMap({
+  initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const positionRef = useRef<Coordinates>({
-    lng: EXPLORATION_MAP_CENTER[0],
-    lat: EXPLORATION_MAP_CENTER[1],
-  });
+  const initialCenterRef = useRef(resolveInitialCenter(initialCenter));
+  const positionRef = useRef<Coordinates>(initialCenterRef.current);
   const requestSmartSeoulMosaicForMovementRef = useRef<
     (position: Coordinates, target: Coordinates) => void
   >(() => {});
@@ -55,10 +66,7 @@ export function ExplorationMap({
     getDistance: distanceMeters,
     getHeadingRadians: (from, to) =>
       calculateCharacterHeadingRadians(from, to, EXPLORATION_MAP_BEARING),
-    initialPosition: {
-      lng: EXPLORATION_MAP_CENTER[0],
-      lat: EXPLORATION_MAP_CENTER[1],
-    },
+    initialPosition: initialCenterRef.current,
     interpolate: (from, to, ratio) => ({
       lng: from.lng + (to.lng - from.lng) * ratio,
       lat: from.lat + (to.lat - from.lat) * ratio,
@@ -89,6 +97,7 @@ export function ExplorationMap({
     const map = new maplibregl.Map(
       createExplorationMapOptions({
         container,
+        initialCenter: initialCenterRef.current,
         isSmartSeoulMapTileEnabled,
       })
     );

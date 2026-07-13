@@ -16,9 +16,9 @@ export function RoulettePage() {
 
       <section className="district-picker-shell" aria-label="자치구 랜덤 선정">
         <SeoulDistrictMap
-          activeDistrict={activeDistrict}
+          activeDistrict={activeDistrict?.name ?? null}
           districts={districtLayers}
-          selectedDistrict={selectedDistrict}
+          selectedDistrict={selectedDistrict?.name ?? null}
         />
 
         <div className="district-picker-controls">
@@ -34,9 +34,9 @@ export function RoulettePage() {
 
         <p className="district-picker-status" aria-live="polite">
           {isSelecting
-            ? `${activeDistrict ?? "자치구"} 선택 중`
+            ? `${activeDistrict?.name ?? "자치구"} 선택 중`
             : selectedDistrict
-              ? `${selectedDistrict} 선정`
+              ? `${selectedDistrict.name} 선정`
               : "대기 중"}
         </p>
       </section>

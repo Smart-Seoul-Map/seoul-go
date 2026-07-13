@@ -12,20 +12,23 @@ import {
   EXPLORATION_MAP_LOCKED_ZOOM,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
+import type { Coordinates } from "../domain/explorationGeo";
 
 type CreateExplorationMapOptionsParams = {
   container: MapOptions["container"];
+  initialCenter?: Coordinates;
   isSmartSeoulMapTileEnabled: boolean;
 };
 
 export function createExplorationMapOptions({
   container,
+  initialCenter,
   isSmartSeoulMapTileEnabled,
 }: CreateExplorationMapOptionsParams): MapOptions {
   return {
     attributionControl: false,
     bearing: EXPLORATION_MAP_BEARING,
-    center: EXPLORATION_MAP_CENTER,
+    center: initialCenter ? [initialCenter.lng, initialCenter.lat] : EXPLORATION_MAP_CENTER,
     container,
     maxZoom: EXPLORATION_MAP_LOCKED_ZOOM,
     minZoom: EXPLORATION_MAP_LOCKED_ZOOM,
