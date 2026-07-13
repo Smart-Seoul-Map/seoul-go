@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
   const smartSeoulMapKey = env.SMART_SEOUL_MAP_KEY ?? env.VITE_SMART_SEOUL_MAP_KEY ?? "";
 
   return {
-    base: "./",
+    base: "/",
     plugins: [react()],
     resolve: {
       alias: {
