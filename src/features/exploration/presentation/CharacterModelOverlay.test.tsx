@@ -182,7 +182,7 @@ describe("CharacterModelOverlay", () => {
 
     rerender(renderCharacter("run", Math.PI / 2));
 
-    expect((threeMock.sourceScene as { rotation: { y: number } }).rotation.y).toBe(Math.PI / 2);
+    expect((threeMock.sourceScene as { rotation: { y: number } }).rotation.y).toBe(-Math.PI / 2);
     expect(
       threeMock.load.mock.calls.filter(([url]) => url === CHARACTER_MODEL_MANIFEST.mesh)
     ).toHaveLength(0);
