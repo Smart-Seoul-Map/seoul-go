@@ -1,13 +1,6 @@
 import type { CSSProperties } from "react";
 
-import districtData from "../../../data/randomDistricts.json";
-
-type DistrictRecord = {
-  id: number;
-  district: string;
-  x: number;
-  y: number;
-};
+import { SEOUL_DISTRICTS } from "@shared/constants/district";
 
 type DistrictLayerLayout = {
   left: number;
@@ -74,21 +67,19 @@ function toDistrictImagePath(id: number): string {
   return `/roulette-map/map${String(id).padStart(2, "0")}.png`;
 }
 
-export const districtLayers: DistrictLayer[] = (districtData as DistrictRecord[])
-  .flatMap(({ id, district }) => {
-    const layout = districtLayerLayoutById[id];
+export const districtLayers: DistrictLayer[] = SEOUL_DISTRICTS.flatMap(({ id, name }) => {
+  const layout = districtLayerLayoutById[id];
 
-    if (!layout) {
-      return [];
-    }
+  if (!layout) {
+    return [];
+  }
 
-    return [
-      {
-        id,
-        name: district,
-        image: toDistrictImagePath(id),
-        layerStyle: toLayerStyle(id, layout),
-      },
-    ];
-  })
-  .sort((a, b) => a.id - b.id);
+  return [
+    {
+      id,
+      name,
+      image: toDistrictImagePath(id),
+      layerStyle: toLayerStyle(id, layout),
+    },
+  ];
+}).sort((a, b) => a.id - b.id);
