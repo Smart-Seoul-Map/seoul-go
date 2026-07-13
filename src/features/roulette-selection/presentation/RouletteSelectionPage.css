@@ -1,0 +1,68 @@
+.roulette-selection-page {
+  min-height: 100dvh;
+}
+
+.roulette-selection-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: clamp(18px, 4vw, 44px);
+  align-content: center;
+  width: min(980px, calc(100% - 40px));
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.roulette-selection-card {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-height: min(54dvh, 420px);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 22px;
+  color: #ffffff;
+  box-shadow: 0 24px 54px rgba(36, 36, 38, 0.18);
+  text-align: center;
+  text-decoration: none;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.roulette-selection-card:hover {
+  box-shadow: 0 30px 64px rgba(36, 36, 38, 0.24);
+  transform: translateY(-4px);
+}
+
+.roulette-selection-card span {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.roulette-selection-card strong {
+  display: block;
+  margin-top: 14px;
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  line-height: 1;
+}
+
+.roulette-selection-card-wheel {
+  background: #244fd1;
+}
+
+.roulette-selection-card-map {
+  background: #33ad8c;
+}
+
+@media (max-width: 720px) {
+  .roulette-selection-layout {
+    grid-template-columns: 1fr;
+    align-content: start;
+    padding-top: 24px;
+  }
+
+  .roulette-selection-card {
+    min-height: 240px;
+  }
+}
