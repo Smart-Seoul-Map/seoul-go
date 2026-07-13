@@ -2,20 +2,42 @@ import { ExplorationPage } from "@features/exploration";
 import { RouletteSelectionPage } from "@features/roulette-selection";
 import { RouletteTest1Page } from "@features/roulette-test1";
 import { RoulettePage as RouletteTest2Page } from "@features/roulette-test2";
-import type { ReactElement } from "react";
+import {
+  SMART_SEOUL_PLACE_THEMES,
+  createPlacesFeatureCollection,
+  createPlaceThemeProgressItems,
+  useSmartSeoulThemePlacesQuery,
+} from "@features/places";
+import { PATH } from "@shared/constants/path";
+import type { ComponentType, ReactElement } from "react";
+
+const ROUTE_COMPONENTS: Readonly<Record<string, ComponentType>> = {
+  [PATH.ROULETTE]: RouletteSelectionPage,
+  [PATH.ROULETTE_TEST1]: RouletteTest1Page,
+  [PATH.ROULETTE_TEST2]: RouletteTest2Page,
+};
+
+function ExplorationApp(): ReactElement {
+  const { data: places = [] } = useSmartSeoulThemePlacesQuery();
+  const themeProgressItems = createPlaceThemeProgressItems({
+    places,
+    themes: SMART_SEOUL_PLACE_THEMES,
+  });
+
+  return (
+    <ExplorationPage
+      placeMarkers={createPlacesFeatureCollection(places)}
+      themeProgressItems={themeProgressItems}
+    />
+  );
+}
 
 export function App(): ReactElement {
-  if (window.location.pathname === "/roulette") {
-    return <RouletteSelectionPage />;
+  const RouteComponent = ROUTE_COMPONENTS[window.location.pathname];
+
+  if (RouteComponent) {
+    return <RouteComponent />;
   }
 
-  if (window.location.pathname === "/roulette-test1") {
-    return <RouletteTest1Page />;
-  }
-
-  if (window.location.pathname === "/roulette-test2") {
-    return <RouletteTest2Page />;
-  }
-
-  return <ExplorationPage />;
+  return <ExplorationApp />;
 }

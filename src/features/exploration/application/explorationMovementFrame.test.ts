@@ -1,13 +1,18 @@
 import { describe, expect, test } from "vitest";
 
 import { createMovement } from "../domain/explorationMovement";
-import { advanceTrackedMovement, selectCharacterModelKey } from "./explorationMovementFrame";
+import {
+  advanceTrackedMovement,
+  calculateCharacterHeadingRadians,
+  calculateLookaheadCoordinates,
+  selectCharacterModelKey,
+} from "./explorationMovementFrame";
 
 const start = { lng: 126.9784147, lat: 37.5666805 };
 const target = { lng: 126.975264, lat: 37.565804 };
 
-describe("지도 추적 이동 프레임", () => {
-  test("이동 중에는 run 모델과 다음 지도 중심 좌표를 만든다", () => {
+describe("tracked exploration movement frame", () => {
+  test("uses the run model and next camera center while moving", () => {
     const movement = createMovement(start, target);
     const frame = advanceTrackedMovement(movement, 1, 2);
 
@@ -16,17 +21,38 @@ describe("지도 추적 이동 프레임", () => {
     expect(frame.cameraCenter.lat).toBeLessThan(start.lat);
   });
 
-  test("도착하면 idle 모델과 목표 좌표 중심을 만든다", () => {
+  test("uses the idle model without snapping the camera center after arrival", () => {
     const movement = createMovement(start, target, 350);
     const frame = advanceTrackedMovement(movement, 1, 2);
 
     expect(frame.modelKey).toBe("idlePrimary");
-    expect(frame.cameraCenter).toEqual(target);
+    expect(frame.cameraCenter).toEqual(start);
   });
 
-  test("상태별 캐릭터 모델을 고른다", () => {
+  test("selects the character model by movement status", () => {
     expect(selectCharacterModelKey("idle")).toBe("idlePrimary");
     expect(selectCharacterModelKey("moving")).toBe("run");
     expect(selectCharacterModelKey("arrived")).toBe("idlePrimary");
+  });
+
+  test("eastward movement turns the character toward the right side of the map", () => {
+    expect(
+      calculateCharacterHeadingRadians(start, { ...start, lng: start.lng + 0.01 })
+    ).toBeCloseTo(-Math.PI / 2);
+  });
+
+  test("map bearing offsets the character heading", () => {
+    expect(
+      calculateCharacterHeadingRadians(start, { ...start, lat: start.lat + 0.01 }, -30)
+    ).toBeCloseTo((-5 * Math.PI) / 6);
+  });
+
+  test("limits lookahead movement so mosaic loading does not jump straight to a far target", () => {
+    const farTarget = { lng: start.lng + 0.02, lat: start.lat };
+    const lookahead = calculateLookaheadCoordinates(start, farTarget, 200);
+
+    expect(lookahead.lng).toBeGreaterThan(start.lng);
+    expect(lookahead.lng).toBeLessThan(farTarget.lng);
+    expect(lookahead.lat).toBe(start.lat);
   });
 });
