@@ -1,9 +1,3 @@
-type SmartSeoulMapTileEnv = {
-  SMART_SEOUL_MAP_KEY?: string;
-  VITE_SMART_SEOUL_MAP_KEY?: string;
-};
-
-const SMART_SEOUL_OPENAPI_TILE_BASE_URL = "https://map.seoul.go.kr/openapi/v5";
 const SMART_SEOUL_TMS_TILE_BASE_URL = "https://map.seoul.go.kr/tms";
 const SMART_SEOUL_TMS_KOREAN_MAP_ID = "dawul_kor_normal_3857_20260223";
 const SMART_SEOUL_TILE_CACHE_CONTROL = "public, max-age=86400";
@@ -12,14 +6,8 @@ const SMART_SEOUL_TILE_ACCEPT_HEADER =
   "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 const SMART_SEOUL_TILE_PROXY_HEADER_NAME = "X-Smart-Seoul-Map-Proxy";
 const SMART_SEOUL_TILE_PROXY_HEADER_VALUE = "hit";
-const SMART_SEOUL_LEGACY_TILE_PATH_PATTERN =
-  /^\/api\/smart-seoul-map\/public\/map\/base\/dawul_kor_normal\/\d+\/\d+\/\d+\/\d+\/\d+\/png$/;
 const SMART_SEOUL_TMS_TILE_PATH_PATTERN =
   /^\/api\/smart-seoul-map\/tms\/dawul_kor_normal_3857_20260223\/\d+\/\d+\/\d+\.png$/;
-
-function readSmartSeoulMapKey(env: SmartSeoulMapTileEnv): string {
-  return env.SMART_SEOUL_MAP_KEY ?? env.VITE_SMART_SEOUL_MAP_KEY ?? "";
-}
 
 function createTextResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -44,17 +32,7 @@ function buildSmartSeoulTmsTileUrl(pathname: string): string | null {
   return `${SMART_SEOUL_TMS_TILE_BASE_URL}/${smartSeoulPath}`;
 }
 
-function buildSmartSeoulLegacyTileUrl(pathname: string, apiKey: string): string | null {
-  if (!SMART_SEOUL_LEGACY_TILE_PATH_PATTERN.test(pathname)) {
-    return null;
-  }
-
-  const smartSeoulPath = pathname.replace("/api/smart-seoul-map", "");
-
-  return `${SMART_SEOUL_OPENAPI_TILE_BASE_URL}/${encodeURIComponent(apiKey)}${smartSeoulPath}`;
-}
-
-export const onRequestGet: PagesFunction<SmartSeoulMapTileEnv> = async ({ request, env }) => {
+export const onRequestGet: PagesFunction = async ({ request }) => {
   const { pathname } = new URL(request.url);
   const tmsTileUrl = buildSmartSeoulTmsTileUrl(pathname);
 
@@ -62,17 +40,7 @@ export const onRequestGet: PagesFunction<SmartSeoulMapTileEnv> = async ({ reques
     return proxySmartSeoulTile(tmsTileUrl);
   }
 
-  if (SMART_SEOUL_LEGACY_TILE_PATH_PATTERN.test(pathname) && !readSmartSeoulMapKey(env)) {
-    return createTextResponse("Smart Seoul map key is not configured.", 500);
-  }
-
-  const tileUrl = buildSmartSeoulLegacyTileUrl(pathname, readSmartSeoulMapKey(env));
-
-  if (!tileUrl) {
-    return createTextResponse("Invalid Smart Seoul tile path.", 400);
-  }
-
-  return proxySmartSeoulTile(tileUrl);
+  return createTextResponse("Invalid Smart Seoul TMS tile path.", 400);
 };
 
 async function proxySmartSeoulTile(tileUrl: string): Promise<Response> {

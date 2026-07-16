@@ -2,27 +2,20 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
-import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 
 const fromRoot = (path) => resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
 const SMART_SEOUL_TILE_PROXY_PATH = "/api/smart-seoul-map";
-const SMART_SEOUL_OPENAPI_TILE_BASE_PATH = "/openapi/v5";
 const SMART_SEOUL_TMS_TILE_BASE_PATH = "/tms";
 const SMART_SEOUL_TMS_MAP_ID = "dawul_kor_normal_3857_20260223";
-const SMART_SEOUL_MAP_KIND = "base";
-const SMART_SEOUL_MAP_ID = "dawul_kor_normal";
 const SMART_SEOUL_TILE_ACCEPT_HEADER =
   "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
-const SMART_SEOUL_LEGACY_TILE_PATH_PATTERN = new RegExp(
-  `^/public/map/${SMART_SEOUL_MAP_KIND}/${SMART_SEOUL_MAP_ID}/\\d+/\\d+/\\d+/\\d+/\\d+/png$`
-);
 const SMART_SEOUL_TMS_TILE_PATH_PATTERN = new RegExp(
   `^${SMART_SEOUL_TMS_TILE_BASE_PATH}/${SMART_SEOUL_TMS_MAP_ID}/\\d+/\\d+/\\d+\\.png$`
 );
 
-const rewriteSmartSeoulTileProxyPath = (path, apiKey) => {
+const rewriteSmartSeoulTileProxyPath = (path) => {
   const url = new URL(path, "http://localhost");
   const smartSeoulPath = url.pathname.slice(SMART_SEOUL_TILE_PROXY_PATH.length);
 
@@ -30,21 +23,10 @@ const rewriteSmartSeoulTileProxyPath = (path, apiKey) => {
     return smartSeoulPath;
   }
 
-  if (!apiKey) {
-    return `${SMART_SEOUL_OPENAPI_TILE_BASE_PATH}/invalid-smart-seoul-tile-request`;
-  }
-
-  if (!SMART_SEOUL_LEGACY_TILE_PATH_PATTERN.test(smartSeoulPath)) {
-    return `${SMART_SEOUL_OPENAPI_TILE_BASE_PATH}/invalid-smart-seoul-tile-request`;
-  }
-
-  return `${SMART_SEOUL_OPENAPI_TILE_BASE_PATH}/${encodeURIComponent(apiKey)}${smartSeoulPath}`;
+  return `${SMART_SEOUL_TMS_TILE_BASE_PATH}/invalid-smart-seoul-tile-request.png`;
 };
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  const smartSeoulMapKey = env.SMART_SEOUL_MAP_KEY ?? env.VITE_SMART_SEOUL_MAP_KEY ?? "";
-
+export default defineConfig(() => {
   return {
     base: "./",
     plugins: [react()],
@@ -70,7 +52,7 @@ export default defineConfig(({ mode }) => {
               proxyReq.setHeader("Accept", SMART_SEOUL_TILE_ACCEPT_HEADER);
             });
           },
-          rewrite: (path) => rewriteSmartSeoulTileProxyPath(path, smartSeoulMapKey),
+          rewrite: rewriteSmartSeoulTileProxyPath,
         },
       },
     },
