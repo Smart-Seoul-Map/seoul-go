@@ -1,5 +1,5 @@
 import type { CharacterModelKey } from "../config/explorationCharacterModels";
-import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
+import type { Coordinates } from "../domain/explorationGeo";
 import {
   advanceMovement,
   type CharacterMovement,
@@ -41,25 +41,6 @@ export function calculateCharacterHeadingRadians(
   return normalizeRadians(
     Math.atan2(eastDelta, northDelta) - toRadians(mapBearingDegrees) + Math.PI
   );
-}
-
-export function calculateLookaheadCoordinates(
-  from: Coordinates,
-  to: Coordinates,
-  maxDistanceMeters: number
-): Coordinates {
-  const totalDistanceMeters = distanceMeters(from, to);
-
-  if (totalDistanceMeters <= maxDistanceMeters || totalDistanceMeters === 0) {
-    return to;
-  }
-
-  const ratio = maxDistanceMeters / totalDistanceMeters;
-
-  return {
-    lng: from.lng + (to.lng - from.lng) * ratio,
-    lat: from.lat + (to.lat - from.lat) * ratio,
-  };
 }
 
 export function advanceTrackedMovement(

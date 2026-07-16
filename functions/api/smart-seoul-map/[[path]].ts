@@ -1,21 +1,13 @@
-type SmartSeoulMapTileEnv = {
-  SMART_SEOUL_MAP_KEY?: string;
-  VITE_SMART_SEOUL_MAP_KEY?: string;
-};
-
-const SMART_SEOUL_TILE_BASE_URL = "https://map.seoul.go.kr/openapi/v5";
+const SMART_SEOUL_TMS_TILE_BASE_URL = "https://map.seoul.go.kr/tms";
+const SMART_SEOUL_TMS_KOREAN_MAP_ID = "dawul_kor_normal_3857_20260223";
 const SMART_SEOUL_TILE_CACHE_CONTROL = "public, max-age=86400";
 const SMART_SEOUL_TILE_FALLBACK_CONTENT_TYPE = "image/png";
 const SMART_SEOUL_TILE_ACCEPT_HEADER =
   "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 const SMART_SEOUL_TILE_PROXY_HEADER_NAME = "X-Smart-Seoul-Map-Proxy";
 const SMART_SEOUL_TILE_PROXY_HEADER_VALUE = "hit";
-const SMART_SEOUL_TILE_PATH_PATTERN =
-  /^\/api\/smart-seoul-map\/public\/map\/base\/dawul_kor_normal\/\d+\/\d+\/\d+\/\d+\/\d+\/png$/;
-
-function readSmartSeoulMapKey(env: SmartSeoulMapTileEnv): string {
-  return env.SMART_SEOUL_MAP_KEY ?? env.VITE_SMART_SEOUL_MAP_KEY ?? "";
-}
+const SMART_SEOUL_TMS_TILE_PATH_PATTERN =
+  /^\/api\/smart-seoul-map\/tms\/dawul_kor_normal_3857_20260223\/\d+\/\d+\/\d+\.png$/;
 
 function createTextResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -27,31 +19,31 @@ function createTextResponse(message: string, status: number): Response {
   });
 }
 
-function buildSmartSeoulTileUrl(request: Request, apiKey: string): string | null {
-  const url = new URL(request.url);
-
-  if (!SMART_SEOUL_TILE_PATH_PATTERN.test(url.pathname)) {
+function buildSmartSeoulTmsTileUrl(pathname: string): string | null {
+  if (!SMART_SEOUL_TMS_TILE_PATH_PATTERN.test(pathname)) {
     return null;
   }
 
-  const smartSeoulPath = url.pathname.replace("/api/smart-seoul-map", "");
+  const smartSeoulPath = pathname.replace(
+    `/api/smart-seoul-map/tms/${SMART_SEOUL_TMS_KOREAN_MAP_ID}`,
+    SMART_SEOUL_TMS_KOREAN_MAP_ID
+  );
 
-  return `${SMART_SEOUL_TILE_BASE_URL}/${encodeURIComponent(apiKey)}${smartSeoulPath}`;
+  return `${SMART_SEOUL_TMS_TILE_BASE_URL}/${smartSeoulPath}`;
 }
 
-export const onRequestGet: PagesFunction<SmartSeoulMapTileEnv> = async ({ request, env }) => {
-  const apiKey = readSmartSeoulMapKey(env);
+export const onRequestGet: PagesFunction = async ({ request }) => {
+  const { pathname } = new URL(request.url);
+  const tmsTileUrl = buildSmartSeoulTmsTileUrl(pathname);
 
-  if (!apiKey) {
-    return createTextResponse("Smart Seoul map key is not configured.", 500);
+  if (tmsTileUrl) {
+    return proxySmartSeoulTile(tmsTileUrl);
   }
 
-  const tileUrl = buildSmartSeoulTileUrl(request, apiKey);
+  return createTextResponse("Invalid Smart Seoul TMS tile path.", 400);
+};
 
-  if (!tileUrl) {
-    return createTextResponse("Invalid Smart Seoul tile path.", 400);
-  }
-
+async function proxySmartSeoulTile(tileUrl: string): Promise<Response> {
   const tileResponse = await fetch(tileUrl, {
     headers: {
       Accept: SMART_SEOUL_TILE_ACCEPT_HEADER,
@@ -79,4 +71,4 @@ export const onRequestGet: PagesFunction<SmartSeoulMapTileEnv> = async ({ reques
     status: tileResponse.status,
     headers: responseHeaders,
   });
-};
+}

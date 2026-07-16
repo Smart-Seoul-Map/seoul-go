@@ -4,7 +4,6 @@ import { createMovement } from "../domain/explorationMovement";
 import {
   advanceTrackedMovement,
   calculateCharacterHeadingRadians,
-  calculateLookaheadCoordinates,
   selectCharacterModelKey,
 } from "./explorationMovementFrame";
 
@@ -45,14 +44,5 @@ describe("tracked exploration movement frame", () => {
     expect(
       calculateCharacterHeadingRadians(start, { ...start, lat: start.lat + 0.01 }, -30)
     ).toBeCloseTo((-5 * Math.PI) / 6);
-  });
-
-  test("limits lookahead movement so mosaic loading does not jump straight to a far target", () => {
-    const farTarget = { lng: start.lng + 0.02, lat: start.lat };
-    const lookahead = calculateLookaheadCoordinates(start, farTarget, 200);
-
-    expect(lookahead.lng).toBeGreaterThan(start.lng);
-    expect(lookahead.lng).toBeLessThan(farTarget.lng);
-    expect(lookahead.lat).toBe(start.lat);
   });
 });

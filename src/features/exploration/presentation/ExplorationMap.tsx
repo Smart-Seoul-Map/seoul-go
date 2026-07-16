@@ -1,13 +1,13 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import type { ReactElement } from "react";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
-import { lockMapZoomInteractions } from "../application/explorationMapInteractions";
+import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import {
@@ -15,10 +15,6 @@ import {
   getExplorationPlaceMarkerName,
   updateExplorationPlaceMarkersSource,
 } from "../application/explorationPlaceMarkers";
-import {
-  type ExplorationSmartSeoulMosaicCenter,
-  useExplorationSmartSeoulMosaicLayer,
-} from "../application/useExplorationSmartSeoulMosaicLayer";
 import { useCharacterMovementController } from "../application/useCharacterMovementController";
 import {
   CHARACTER_ARRIVAL_RADIUS_METERS,
@@ -35,21 +31,18 @@ type ExplorationMapProps = {
   placeMarkers?: MapMarkerFeatureCollection;
 };
 
+const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
+
+function formatMapZoomLevel(zoomLevel: number): string {
+  return zoomLevel.toFixed(ZOOM_LEVEL_DECIMAL_DIGITS).replace(/\.0$/, "");
+}
+
 export function ExplorationMap({
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const positionRef = useRef<Coordinates>({
-    lng: EXPLORATION_MAP_CENTER[0],
-    lat: EXPLORATION_MAP_CENTER[1],
-  });
-  const requestSmartSeoulMosaicForMovementRef = useRef<
-    (position: Coordinates, target: Coordinates) => void
-  >(() => {});
-  const smartSeoulMosaicLayer = useExplorationSmartSeoulMosaicLayer({
-    beforeLayerId: EXPLORATION_PLACE_MARKERS_LAYER_ID,
-  });
+  const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -63,10 +56,8 @@ export function ExplorationMap({
       lng: from.lng + (to.lng - from.lng) * ratio,
       lat: from.lat + (to.lat - from.lat) * ratio,
     }),
-    onFrame: ({ position, target }) => {
-      positionRef.current = position;
+    onFrame: ({ position }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
-      requestSmartSeoulMosaicForMovementRef.current(position, target);
     },
     speedPerSecond: CHARACTER_SPEED_METERS_PER_SECOND,
   });
@@ -80,48 +71,32 @@ export function ExplorationMap({
       return;
     }
 
-    const { isSmartSeoulMapTileEnabled, smartSeoulMapTileProxyPath } =
-      resolveExplorationMapTileSourceConfig({
-        VITE_SMART_SEOUL_MAP_KEY: import.meta.env.VITE_SMART_SEOUL_MAP_KEY,
-        VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH: import.meta.env.VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH,
-      });
+    const { smartSeoulMapTileUrlTemplate } = resolveExplorationMapTileSourceConfig({
+      VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH: import.meta.env.VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH,
+    });
 
     const map = new maplibregl.Map(
       createExplorationMapOptions({
         container,
-        isSmartSeoulMapTileEnabled,
+        tileUrlTemplate: smartSeoulMapTileUrlTemplate,
       })
     );
     mapRef.current = map;
 
-    lockMapZoomInteractions(map);
+    disableExplorationMapDragInteractions(map);
     map.addControl(
-      new maplibregl.NavigationControl({ showZoom: false, visualizePitch: true }),
+      new maplibregl.NavigationControl({ showZoom: true, visualizePitch: true }),
       "top-right"
     );
 
-    smartSeoulMosaicLayer.prepareSmartSeoulMosaicLayer();
-
-    const requestSmartSeoulMosaic = (center?: ExplorationSmartSeoulMosaicCenter) =>
-      smartSeoulMosaicLayer.requestSmartSeoulMosaic({
-        center,
-        isSmartSeoulMapTileEnabled,
-        map,
-        proxyBasePath: smartSeoulMapTileProxyPath,
-      });
-
-    requestSmartSeoulMosaicForMovementRef.current = (position, target) => {
-      smartSeoulMosaicLayer.requestSmartSeoulMosaicForMovement({
-        isSmartSeoulMapTileEnabled,
-        map,
-        position,
-        proxyBasePath: smartSeoulMapTileProxyPath,
-        target,
-      });
+    const updateZoomLevelLabel = () => {
+      setZoomLevelLabel(formatMapZoomLevel(map.getZoom()));
     };
 
+    updateZoomLevelLabel();
+    map.on("zoom", updateZoomLevelLabel);
+
     map.on("load", () => {
-      void requestSmartSeoulMosaic();
       addExplorationPlaceMarkersLayer(map);
     });
 
@@ -149,15 +124,9 @@ export function ExplorationMap({
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);
     });
-    map.on("moveend", () => {
-      if (!characterMovementRef.current.getIsMoving()) {
-        void requestSmartSeoulMosaic();
-      }
-    });
 
     return () => {
-      smartSeoulMosaicLayer.disposeSmartSeoulMosaicLayer();
-      requestSmartSeoulMosaicForMovementRef.current = () => {};
+      map.off("zoom", updateZoomLevelLabel);
       map.remove();
       mapRef.current = null;
     };
@@ -183,6 +152,11 @@ export function ExplorationMap({
   return (
     <div className="map-canvas-stack">
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
+      {zoomLevelLabel ? (
+        <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
+          zoom: {zoomLevelLabel}
+        </div>
+      ) : null}
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
         modelKey={characterMovement.modelKey}
