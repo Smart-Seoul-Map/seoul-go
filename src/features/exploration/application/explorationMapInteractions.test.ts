@@ -1,23 +1,19 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { lockMapZoomInteractions } from "./explorationMapInteractions";
+import { disableExplorationMapDragInteractions } from "./explorationMapInteractions";
 
 describe("탐색 지도 인터랙션", () => {
-  test("확대/축소 관련 MapLibre 인터랙션을 비활성화한다", () => {
+  test("지도 드래그 이동과 회전 인터랙션만 비활성화한다", () => {
     const map = {
-      scrollZoom: { disable: vi.fn() },
       boxZoom: { disable: vi.fn() },
-      doubleClickZoom: { disable: vi.fn() },
-      touchZoomRotate: { disable: vi.fn() },
-      keyboard: { disable: vi.fn() },
+      dragPan: { disable: vi.fn() },
+      dragRotate: { disable: vi.fn() },
     };
 
-    lockMapZoomInteractions(map);
+    disableExplorationMapDragInteractions(map);
 
-    expect(map.scrollZoom.disable).toHaveBeenCalledOnce();
     expect(map.boxZoom.disable).toHaveBeenCalledOnce();
-    expect(map.doubleClickZoom.disable).toHaveBeenCalledOnce();
-    expect(map.touchZoomRotate.disable).toHaveBeenCalledOnce();
-    expect(map.keyboard.disable).toHaveBeenCalledOnce();
+    expect(map.dragPan.disable).toHaveBeenCalledOnce();
+    expect(map.dragRotate.disable).toHaveBeenCalledOnce();
   });
 });

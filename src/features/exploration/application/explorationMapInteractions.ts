@@ -2,18 +2,14 @@ type DisableableInteraction = {
   disable: () => void;
 };
 
-type ZoomLockableMap = {
-  scrollZoom: DisableableInteraction;
+type DragLockableMap = {
   boxZoom: DisableableInteraction;
-  doubleClickZoom: DisableableInteraction;
-  touchZoomRotate: DisableableInteraction;
-  keyboard: DisableableInteraction;
+  dragPan: DisableableInteraction;
+  dragRotate: DisableableInteraction;
 };
 
-export function lockMapZoomInteractions(map: ZoomLockableMap): void {
-  map.scrollZoom.disable();
+export function disableExplorationMapDragInteractions(map: DragLockableMap): void {
   map.boxZoom.disable();
-  map.doubleClickZoom.disable();
-  map.touchZoomRotate.disable();
-  map.keyboard.disable();
+  map.dragPan.disable();
+  map.dragRotate.disable();
 }

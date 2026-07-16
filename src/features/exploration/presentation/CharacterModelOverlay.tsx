@@ -3,6 +3,8 @@ import type { ReactElement } from "react";
 import * as THREE from "three";
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+import { toCharacterModelRotationRadians } from "@shared/lib/character/characterModelRotation";
+
 import {
   CHARACTER_ANIMATION_TIME_SCALE,
   CHARACTER_MODEL_MANIFEST,
@@ -79,7 +81,7 @@ export function CharacterModelOverlay({
     headingRadiansRef.current = headingRadians;
 
     if (modelRef.current) {
-      modelRef.current.rotation.y = headingRadians;
+      modelRef.current.rotation.y = toCharacterModelRotationRadians(headingRadians);
     }
   }, [headingRadians]);
 
@@ -129,7 +131,7 @@ export function CharacterModelOverlay({
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
       model.scale.setScalar(0.86 / maxAxis);
       model.position.set(0, -0.2, 0);
-      model.rotation.y = headingRadiansRef.current;
+      model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
 
       modelRef.current = model;
       scene.add(model);

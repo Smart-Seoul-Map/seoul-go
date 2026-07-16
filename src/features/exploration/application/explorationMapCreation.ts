@@ -1,38 +1,36 @@
 import type { MapOptions } from "maplibre-gl";
 
 import {
-  buildEmptyMapStyle,
-  buildRasterMapStyle,
-  DEFAULT_TILE_URL_TEMPLATE,
-} from "@shared/lib/maplibre/maplibreStyle";
+  SMART_SEOUL_TMS_INITIAL_ZOOM,
+  SMART_SEOUL_TMS_MAX_ZOOM,
+  SMART_SEOUL_TMS_MIN_ZOOM,
+} from "@shared/constants/map";
+import { buildRasterMapStyle } from "@shared/lib/maplibre/maplibreStyle";
 
 import {
   EXPLORATION_MAP_BEARING,
   EXPLORATION_MAP_CENTER,
-  EXPLORATION_MAP_LOCKED_ZOOM,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
 
 type CreateExplorationMapOptionsParams = {
   container: MapOptions["container"];
-  isSmartSeoulMapTileEnabled: boolean;
+  tileUrlTemplate: string;
 };
 
 export function createExplorationMapOptions({
   container,
-  isSmartSeoulMapTileEnabled,
+  tileUrlTemplate,
 }: CreateExplorationMapOptionsParams): MapOptions {
   return {
     attributionControl: false,
     bearing: EXPLORATION_MAP_BEARING,
     center: EXPLORATION_MAP_CENTER,
     container,
-    maxZoom: EXPLORATION_MAP_LOCKED_ZOOM,
-    minZoom: EXPLORATION_MAP_LOCKED_ZOOM,
+    maxZoom: SMART_SEOUL_TMS_MAX_ZOOM,
+    minZoom: SMART_SEOUL_TMS_MIN_ZOOM,
     pitch: EXPLORATION_MAP_PITCH,
-    style: isSmartSeoulMapTileEnabled
-      ? buildEmptyMapStyle()
-      : buildRasterMapStyle(DEFAULT_TILE_URL_TEMPLATE),
-    zoom: EXPLORATION_MAP_LOCKED_ZOOM,
+    style: buildRasterMapStyle(tileUrlTemplate),
+    zoom: SMART_SEOUL_TMS_INITIAL_ZOOM,
   };
 }
