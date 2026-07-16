@@ -1,14 +1,16 @@
 import type { StyleSpecification } from "maplibre-gl";
 
-import { OPEN_STREET_MAP_TILE_URL_TEMPLATE } from "@shared/constants/api";
+import { SMART_SEOUL_TMS_TILE_URL_TEMPLATE } from "@shared/constants/api";
 import {
   MAP_STYLE_COLORS,
   MAP_STYLE_LAYER_IDS,
   MAP_STYLE_SOURCE_IDS,
   SMART_SEOUL_TILE_SIZE,
+  SMART_SEOUL_TMS_MAX_ZOOM,
+  SMART_SEOUL_TMS_MIN_ZOOM,
 } from "@shared/constants/map";
 
-export const DEFAULT_TILE_URL_TEMPLATE = OPEN_STREET_MAP_TILE_URL_TEMPLATE;
+export const DEFAULT_TILE_URL_TEMPLATE = SMART_SEOUL_TMS_TILE_URL_TEMPLATE;
 
 export function buildEmptyMapStyle(): StyleSpecification {
   return {
@@ -31,6 +33,8 @@ export function buildRasterMapStyle(tileUrlTemplate: string): StyleSpecification
     version: 8,
     sources: {
       [MAP_STYLE_SOURCE_IDS.SMART_SEOUL_RASTER]: {
+        maxzoom: SMART_SEOUL_TMS_MAX_ZOOM,
+        minzoom: SMART_SEOUL_TMS_MIN_ZOOM,
         type: "raster",
         tiles: [tileUrlTemplate],
         tileSize: SMART_SEOUL_TILE_SIZE,

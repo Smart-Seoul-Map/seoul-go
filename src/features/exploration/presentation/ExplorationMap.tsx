@@ -15,10 +15,6 @@ import {
   getExplorationPlaceMarkerName,
   updateExplorationPlaceMarkersSource,
 } from "../application/explorationPlaceMarkers";
-import {
-  type ExplorationSmartSeoulMosaicCenter,
-  useExplorationSmartSeoulMosaicLayer,
-} from "../application/useExplorationSmartSeoulMosaicLayer";
 import { useCharacterMovementController } from "../application/useCharacterMovementController";
 import {
   CHARACTER_ARRIVAL_RADIUS_METERS,
@@ -40,16 +36,6 @@ export function ExplorationMap({
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const positionRef = useRef<Coordinates>({
-    lng: EXPLORATION_MAP_CENTER[0],
-    lat: EXPLORATION_MAP_CENTER[1],
-  });
-  const requestSmartSeoulMosaicForMovementRef = useRef<
-    (position: Coordinates, target: Coordinates) => void
-  >(() => {});
-  const smartSeoulMosaicLayer = useExplorationSmartSeoulMosaicLayer({
-    beforeLayerId: EXPLORATION_PLACE_MARKERS_LAYER_ID,
-  });
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -63,10 +49,8 @@ export function ExplorationMap({
       lng: from.lng + (to.lng - from.lng) * ratio,
       lat: from.lat + (to.lat - from.lat) * ratio,
     }),
-    onFrame: ({ position, target }) => {
-      positionRef.current = position;
+    onFrame: ({ position }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
-      requestSmartSeoulMosaicForMovementRef.current(position, target);
     },
     speedPerSecond: CHARACTER_SPEED_METERS_PER_SECOND,
   });
@@ -80,16 +64,14 @@ export function ExplorationMap({
       return;
     }
 
-    const { isSmartSeoulMapTileEnabled, smartSeoulMapTileProxyPath } =
-      resolveExplorationMapTileSourceConfig({
-        VITE_SMART_SEOUL_MAP_KEY: import.meta.env.VITE_SMART_SEOUL_MAP_KEY,
-        VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH: import.meta.env.VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH,
-      });
+    const { smartSeoulMapTileUrlTemplate } = resolveExplorationMapTileSourceConfig({
+      VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH: import.meta.env.VITE_SMART_SEOUL_MAP_TILE_PROXY_PATH,
+    });
 
     const map = new maplibregl.Map(
       createExplorationMapOptions({
         container,
-        isSmartSeoulMapTileEnabled,
+        tileUrlTemplate: smartSeoulMapTileUrlTemplate,
       })
     );
     mapRef.current = map;
@@ -100,28 +82,7 @@ export function ExplorationMap({
       "top-right"
     );
 
-    smartSeoulMosaicLayer.prepareSmartSeoulMosaicLayer();
-
-    const requestSmartSeoulMosaic = (center?: ExplorationSmartSeoulMosaicCenter) =>
-      smartSeoulMosaicLayer.requestSmartSeoulMosaic({
-        center,
-        isSmartSeoulMapTileEnabled,
-        map,
-        proxyBasePath: smartSeoulMapTileProxyPath,
-      });
-
-    requestSmartSeoulMosaicForMovementRef.current = (position, target) => {
-      smartSeoulMosaicLayer.requestSmartSeoulMosaicForMovement({
-        isSmartSeoulMapTileEnabled,
-        map,
-        position,
-        proxyBasePath: smartSeoulMapTileProxyPath,
-        target,
-      });
-    };
-
     map.on("load", () => {
-      void requestSmartSeoulMosaic();
       addExplorationPlaceMarkersLayer(map);
     });
 
@@ -149,15 +110,8 @@ export function ExplorationMap({
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);
     });
-    map.on("moveend", () => {
-      if (!characterMovementRef.current.getIsMoving()) {
-        void requestSmartSeoulMosaic();
-      }
-    });
 
     return () => {
-      smartSeoulMosaicLayer.disposeSmartSeoulMosaicLayer();
-      requestSmartSeoulMosaicForMovementRef.current = () => {};
       map.remove();
       mapRef.current = null;
     };

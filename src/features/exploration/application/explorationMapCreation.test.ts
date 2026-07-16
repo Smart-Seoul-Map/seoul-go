@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { OPEN_STREET_MAP_TILE_URL_TEMPLATE } from "@shared/constants/api";
+import { SMART_SEOUL_TMS_TILE_URL_TEMPLATE } from "@shared/constants/api";
 import {
-  MAP_STYLE_COLORS,
   MAP_STYLE_LAYER_IDS,
   MAP_STYLE_SOURCE_IDS,
   SMART_SEOUL_TILE_SIZE,
+  SMART_SEOUL_TMS_INITIAL_ZOOM,
+  SMART_SEOUL_TMS_MAX_ZOOM,
+  SMART_SEOUL_TMS_MIN_ZOOM,
 } from "@shared/constants/map";
 
 import {
   EXPLORATION_MAP_BEARING,
   EXPLORATION_MAP_CENTER,
-  EXPLORATION_MAP_LOCKED_ZOOM,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
 import { createExplorationMapOptions } from "./explorationMapCreation";
@@ -22,7 +23,7 @@ describe("createExplorationMapOptions", () => {
 
     const options = createExplorationMapOptions({
       container,
-      isSmartSeoulMapTileEnabled: true,
+      tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
     });
 
     expect(options).toMatchObject({
@@ -30,38 +31,17 @@ describe("createExplorationMapOptions", () => {
       bearing: EXPLORATION_MAP_BEARING,
       center: EXPLORATION_MAP_CENTER,
       container,
-      maxZoom: EXPLORATION_MAP_LOCKED_ZOOM,
-      minZoom: EXPLORATION_MAP_LOCKED_ZOOM,
+      maxZoom: SMART_SEOUL_TMS_MAX_ZOOM,
+      minZoom: SMART_SEOUL_TMS_MIN_ZOOM,
       pitch: EXPLORATION_MAP_PITCH,
-      zoom: EXPLORATION_MAP_LOCKED_ZOOM,
+      zoom: SMART_SEOUL_TMS_INITIAL_ZOOM,
     });
   });
 
-  it("uses an empty base style when Smart Seoul mosaic tiles are enabled", () => {
+  it("uses Smart Seoul TMS raster style", () => {
     const options = createExplorationMapOptions({
       container: document.createElement("div"),
-      isSmartSeoulMapTileEnabled: true,
-    });
-
-    expect(options.style).toMatchObject({
-      layers: [
-        {
-          id: MAP_STYLE_LAYER_IDS.MAP_BACKGROUND,
-          paint: {
-            "background-color": MAP_STYLE_COLORS.EMPTY_BACKGROUND,
-          },
-          type: "background",
-        },
-      ],
-      sources: {},
-      version: 8,
-    });
-  });
-
-  it("uses fallback raster style when Smart Seoul mosaic tiles are disabled", () => {
-    const options = createExplorationMapOptions({
-      container: document.createElement("div"),
-      isSmartSeoulMapTileEnabled: false,
+      tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
     });
 
     expect(options.style).toMatchObject({
@@ -74,8 +54,10 @@ describe("createExplorationMapOptions", () => {
       ],
       sources: {
         [MAP_STYLE_SOURCE_IDS.SMART_SEOUL_RASTER]: {
+          maxzoom: SMART_SEOUL_TMS_MAX_ZOOM,
+          minzoom: SMART_SEOUL_TMS_MIN_ZOOM,
           tileSize: SMART_SEOUL_TILE_SIZE,
-          tiles: [OPEN_STREET_MAP_TILE_URL_TEMPLATE],
+          tiles: [SMART_SEOUL_TMS_TILE_URL_TEMPLATE],
           type: "raster",
         },
       },

@@ -13,6 +13,7 @@ export const SMART_SEOUL_TMS_MAP_IDS = {
 
 export const END_POINTS = {
   smartSeoulThemeContents: (language: string) => `/public/themes/contents/${language}`,
+  smartSeoulTmsTileTemplate: ({ mapId }: { mapId: string }) => `/tms/${mapId}/{z}/{y}/{x}.png`,
   smartSeoulTmsTile: ({ mapId, z, y, x }: { mapId: string; z: number; y: number; x: number }) =>
     `/tms/${mapId}/${z}/${y}/${x}.png`,
   smartSeoulRasterTile: ({
@@ -41,4 +42,4 @@ export const HTTP_HEADERS = {
 
 export const OPEN_STREET_MAP_TILE_URL_TEMPLATE = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-export const SMART_SEOUL_TMS_TILE_URL_TEMPLATE = `${API_PROXY_PATH.SMART_SEOUL_MAP}/tms/${SMART_SEOUL_TMS_MAP_IDS.KOREAN}/{z}/{y}/{x}.png`;
+export const SMART_SEOUL_TMS_TILE_URL_TEMPLATE = `${API_PROXY_PATH.SMART_SEOUL_MAP}${END_POINTS.smartSeoulTmsTileTemplate({ mapId: SMART_SEOUL_TMS_MAP_IDS.KOREAN })}`;
