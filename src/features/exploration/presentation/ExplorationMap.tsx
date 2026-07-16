@@ -1,13 +1,13 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import type { ReactElement } from "react";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
-import { lockMapZoomInteractions } from "../application/explorationMapInteractions";
+import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import {
@@ -31,11 +31,18 @@ type ExplorationMapProps = {
   placeMarkers?: MapMarkerFeatureCollection;
 };
 
+const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
+
+function formatMapZoomLevel(zoomLevel: number): string {
+  return zoomLevel.toFixed(ZOOM_LEVEL_DECIMAL_DIGITS).replace(/\.0$/, "");
+}
+
 export function ExplorationMap({
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -76,11 +83,18 @@ export function ExplorationMap({
     );
     mapRef.current = map;
 
-    lockMapZoomInteractions(map);
+    disableExplorationMapDragInteractions(map);
     map.addControl(
-      new maplibregl.NavigationControl({ showZoom: false, visualizePitch: true }),
+      new maplibregl.NavigationControl({ showZoom: true, visualizePitch: true }),
       "top-right"
     );
+
+    const updateZoomLevelLabel = () => {
+      setZoomLevelLabel(formatMapZoomLevel(map.getZoom()));
+    };
+
+    updateZoomLevelLabel();
+    map.on("zoom", updateZoomLevelLabel);
 
     map.on("load", () => {
       addExplorationPlaceMarkersLayer(map);
@@ -112,6 +126,7 @@ export function ExplorationMap({
     });
 
     return () => {
+      map.off("zoom", updateZoomLevelLabel);
       map.remove();
       mapRef.current = null;
     };
@@ -137,6 +152,11 @@ export function ExplorationMap({
   return (
     <div className="map-canvas-stack">
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
+      {zoomLevelLabel ? (
+        <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
+          zoom: {zoomLevelLabel}
+        </div>
+      ) : null}
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
         modelKey={characterMovement.modelKey}
