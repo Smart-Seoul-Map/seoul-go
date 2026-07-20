@@ -1,33 +1,30 @@
+import { PLACE_THEME_MARKERS } from "@shared/constants/placeThemeMarker";
+
 export const SMART_SEOUL_PLACE_THEMES = [
   {
     id: "100032",
     name: "서울 미래유산",
-    markerColor: "#c92a2a",
-    markerImage: "red_closed_box",
+    ...PLACE_THEME_MARKERS.RED,
   },
   {
     id: "1741228380725",
     name: "서울 야경명소",
-    markerColor: "#7b2cbf",
-    markerImage: "purple_closed_box",
+    ...PLACE_THEME_MARKERS.PURPLE,
   },
   {
     id: "1777251935025",
     name: "서울물빛나루",
-    markerColor: "#1971c2",
-    markerImage: "blue_closed_box",
+    ...PLACE_THEME_MARKERS.BLUE,
   },
   {
     id: "1725252918740",
     name: "소울스팟",
-    markerColor: "#212529",
-    markerImage: "black_closed_box",
+    ...PLACE_THEME_MARKERS.BLACK,
   },
   {
     id: "100575",
     name: "오래가게",
-    markerColor: "#e6a100",
-    markerImage: "yellow_closed_box",
+    ...PLACE_THEME_MARKERS.YELLOW,
   },
 ] as const;
 

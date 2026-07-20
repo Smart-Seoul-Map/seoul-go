@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  EXPLORATION_PLACE_MARKER_IMAGES,
   EXPLORATION_PLACE_MARKERS_LAYER_ID,
   EXPLORATION_PLACE_MARKERS_SOURCE_ID,
 } from "../config/explorationPlaceMarkerLayer";
@@ -18,13 +19,16 @@ describe("addExplorationPlaceMarkersLayer", () => {
       addSource: vi.fn(),
       getSource: vi.fn(() => undefined),
       hasImage: vi.fn(() => false),
-      loadImage: vi.fn(async () => ({ data: {} })),
+      loadImage: vi.fn(async (url: string) => ({ data: { url } })),
     };
 
     await addExplorationPlaceMarkersLayer(map as never);
 
     expect(map.loadImage).toHaveBeenCalledTimes(5);
     expect(map.addImage).toHaveBeenCalledTimes(5);
+    expect(map.loadImage.mock.calls.map(([url]) => url)).toEqual(
+      EXPLORATION_PLACE_MARKER_IMAGES.map(({ url }) => url)
+    );
     expect(map.addSource).toHaveBeenCalledWith(
       EXPLORATION_PLACE_MARKERS_SOURCE_ID,
       expect.objectContaining({ type: "geojson" })

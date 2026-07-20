@@ -15,12 +15,17 @@ describe("Smart Seoul 장소 테마 설정", () => {
       "1725252918740",
       "100575",
     ]);
-    expect(SMART_SEOUL_PLACE_THEMES.map((theme) => theme.markerColor)).toEqual([
-      "#c92a2a",
-      "#7b2cbf",
-      "#1971c2",
-      "#212529",
-      "#e6a100",
+    expect(
+      SMART_SEOUL_PLACE_THEMES.map(({ markerColor, markerImage }) => ({
+        markerColor,
+        markerImage,
+      }))
+    ).toEqual([
+      { markerColor: "#c92a2a", markerImage: "red_closed_box" },
+      { markerColor: "#7b2cbf", markerImage: "purple_closed_box" },
+      { markerColor: "#1971c2", markerImage: "blue_closed_box" },
+      { markerColor: "#212529", markerImage: "black_closed_box" },
+      { markerColor: "#e6a100", markerImage: "yellow_closed_box" },
     ]);
   });
 
