@@ -36,8 +36,32 @@ button {
 
 #app,
 .exploration-page,
+.entry-exploration-page,
+.entry-exploration-scene,
 .map-stage {
   min-height: 100vh;
+}
+
+.entry-exploration-page {
+  background: #f7f4ed;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.entry-exploration-scene {
+  height: 100vh;
+  min-height: 560px;
+  position: relative;
+}
+
+.entry-exploration-scene canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
 }
 
 .exploration-page {
