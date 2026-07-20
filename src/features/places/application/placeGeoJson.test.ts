@@ -32,7 +32,8 @@ describe("장소 GeoJSON 변환", () => {
         name: "서울도서관",
         themeId: "100032",
         themeName: "서울 미래유산",
-        markerColor: "#e03131",
+        markerColor: "#c92a2a",
+        markerImage: "red_closed_box",
       },
     });
   });

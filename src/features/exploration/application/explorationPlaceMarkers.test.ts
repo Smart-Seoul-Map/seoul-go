@@ -11,15 +11,20 @@ import {
 } from "./explorationPlaceMarkers";
 
 describe("addExplorationPlaceMarkersLayer", () => {
-  it("adds the place marker source and layer when they are missing", () => {
+  it("loads marker images and adds the place marker source and symbol layer", async () => {
     const map = {
+      addImage: vi.fn(),
       addLayer: vi.fn(),
       addSource: vi.fn(),
       getSource: vi.fn(() => undefined),
+      hasImage: vi.fn(() => false),
+      loadImage: vi.fn(async () => ({ data: {} })),
     };
 
-    addExplorationPlaceMarkersLayer(map as never);
+    await addExplorationPlaceMarkersLayer(map as never);
 
+    expect(map.loadImage).toHaveBeenCalledTimes(5);
+    expect(map.addImage).toHaveBeenCalledTimes(5);
     expect(map.addSource).toHaveBeenCalledWith(
       EXPLORATION_PLACE_MARKERS_SOURCE_ID,
       expect.objectContaining({ type: "geojson" })
@@ -28,20 +33,24 @@ describe("addExplorationPlaceMarkersLayer", () => {
       expect.objectContaining({
         id: EXPLORATION_PLACE_MARKERS_LAYER_ID,
         source: EXPLORATION_PLACE_MARKERS_SOURCE_ID,
-        type: "circle",
+        type: "symbol",
       })
     );
   });
 
-  it("does not add the source and layer when the source already exists", () => {
+  it("does not load images or add the layer when the source already exists", async () => {
     const map = {
+      addImage: vi.fn(),
       addLayer: vi.fn(),
       addSource: vi.fn(),
       getSource: vi.fn(() => ({ type: "geojson" })),
+      hasImage: vi.fn(),
+      loadImage: vi.fn(),
     };
 
-    addExplorationPlaceMarkersLayer(map as never);
+    await addExplorationPlaceMarkersLayer(map as never);
 
+    expect(map.loadImage).not.toHaveBeenCalled();
     expect(map.addSource).not.toHaveBeenCalled();
     expect(map.addLayer).not.toHaveBeenCalled();
   });

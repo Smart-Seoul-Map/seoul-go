@@ -24,6 +24,7 @@ export function createPlacesFeatureCollection(
         themeId: place.themeId,
         themeName: place.themeName,
         markerColor: getSmartSeoulPlaceTheme(place.themeId)?.markerColor ?? "#17201a",
+        markerImage: getSmartSeoulPlaceTheme(place.themeId)?.markerImage ?? "black_closed_box",
       },
     })),
   };

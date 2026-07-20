@@ -2,27 +2,32 @@ export const SMART_SEOUL_PLACE_THEMES = [
   {
     id: "100032",
     name: "서울 미래유산",
-    markerColor: "#e03131",
+    markerColor: "#c92a2a",
+    markerImage: "red_closed_box",
   },
   {
     id: "1741228380725",
     name: "서울 야경명소",
-    markerColor: "#f08c00",
+    markerColor: "#7b2cbf",
+    markerImage: "purple_closed_box",
   },
   {
     id: "1777251935025",
     name: "서울물빛나루",
-    markerColor: "#f2c94c",
+    markerColor: "#1971c2",
+    markerImage: "blue_closed_box",
   },
   {
     id: "1725252918740",
     name: "소울스팟",
-    markerColor: "#2f9e44",
+    markerColor: "#212529",
+    markerImage: "black_closed_box",
   },
   {
     id: "100575",
     name: "오래가게",
-    markerColor: "#1971c2",
+    markerColor: "#e6a100",
+    markerImage: "yellow_closed_box",
   },
 ] as const;
 

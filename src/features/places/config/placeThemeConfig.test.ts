@@ -16,11 +16,11 @@ describe("Smart Seoul 장소 테마 설정", () => {
       "100575",
     ]);
     expect(SMART_SEOUL_PLACE_THEMES.map((theme) => theme.markerColor)).toEqual([
-      "#e03131",
-      "#f08c00",
-      "#f2c94c",
-      "#2f9e44",
+      "#c92a2a",
+      "#7b2cbf",
       "#1971c2",
+      "#212529",
+      "#e6a100",
     ]);
   });
 
@@ -28,7 +28,8 @@ describe("Smart Seoul 장소 테마 설정", () => {
     expect(getSmartSeoulPlaceTheme("100575")).toEqual({
       id: "100575",
       name: "오래가게",
-      markerColor: "#1971c2",
+      markerColor: "#e6a100",
+      markerImage: "yellow_closed_box",
     });
   });
 });
