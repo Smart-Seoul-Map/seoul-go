@@ -180,6 +180,9 @@ export function addEntryExplorationLights(scene: THREE.Scene): void {
 }
 
 export function fitEntryExplorationCharacterModel(model: THREE.Object3D): void {
+  model.scale.setScalar(1);
+  model.position.set(0, 0, 0);
+
   const box = new THREE.Box3().setFromObject(model);
   const size = new THREE.Vector3();
   box.getSize(size);
