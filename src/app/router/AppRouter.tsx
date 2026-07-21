@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
 import { ExplorationPage } from "@features/exploration";
@@ -11,8 +11,30 @@ import {
   useSmartSeoulThemePlacesQuery,
 } from "@features/places";
 import { PATH } from "@shared/constants/path";
+import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-function ExplorationRoute(): ReactElement {
+type ExplorationRouteProps = {
+  initialCenter?: {
+    lat: number;
+    lng: number;
+  };
+};
+
+function parseDistrictIdParam(districtId: string | undefined): number | null {
+  if (!districtId) {
+    return null;
+  }
+
+  const parsedDistrictId = Number(districtId);
+
+  if (!Number.isInteger(parsedDistrictId)) {
+    return null;
+  }
+
+  return parsedDistrictId;
+}
+
+function ExplorationRoute({ initialCenter }: ExplorationRouteProps): ReactElement {
   const { data: places = [] } = useSmartSeoulThemePlacesQuery();
   const themeProgressItems = createPlaceThemeProgressItems({
     places,
@@ -21,10 +43,23 @@ function ExplorationRoute(): ReactElement {
 
   return (
     <ExplorationPage
+      initialCenter={initialCenter}
       placeMarkers={createPlacesFeatureCollection(places)}
       themeProgressItems={themeProgressItems}
     />
   );
+}
+
+function DistrictExplorationRoute(): ReactElement {
+  const { districtId } = useParams();
+  const parsedDistrictId = parseDistrictIdParam(districtId);
+  const district = parsedDistrictId ? getSeoulDistrictById(parsedDistrictId) : null;
+
+  if (!district) {
+    return <Navigate to={PATH.HOME} replace />;
+  }
+
+  return <ExplorationRoute key={district.id} initialCenter={district.officePosition} />;
 }
 
 const appRouter = createBrowserRouter([
@@ -35,6 +70,10 @@ const appRouter = createBrowserRouter([
       {
         index: true,
         element: <EntryExplorationPage />,
+      },
+      {
+        path: PATH.DISTRICT_EXPLORATION,
+        element: <DistrictExplorationRoute />,
       },
       {
         path: PATH.EXPLORATION,

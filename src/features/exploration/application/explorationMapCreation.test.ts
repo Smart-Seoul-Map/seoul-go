@@ -38,6 +38,18 @@ describe("createExplorationMapOptions", () => {
     });
   });
 
+  it("uses custom center when it is provided", () => {
+    const center = { lng: 126.990703, lat: 37.532326 };
+
+    const options = createExplorationMapOptions({
+      center,
+      container: document.createElement("div"),
+      tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
+    });
+
+    expect(options.center).toEqual([center.lng, center.lat]);
+  });
+
   it("uses Smart Seoul TMS raster style", () => {
     const options = createExplorationMapOptions({
       container: document.createElement("div"),

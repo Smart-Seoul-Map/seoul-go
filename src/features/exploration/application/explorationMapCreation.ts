@@ -12,20 +12,23 @@ import {
   EXPLORATION_MAP_CENTER,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
+import type { Coordinates } from "../domain/explorationGeo";
 
 type CreateExplorationMapOptionsParams = {
+  center?: Coordinates;
   container: MapOptions["container"];
   tileUrlTemplate: string;
 };
 
 export function createExplorationMapOptions({
+  center,
   container,
   tileUrlTemplate,
 }: CreateExplorationMapOptionsParams): MapOptions {
   return {
     attributionControl: false,
     bearing: EXPLORATION_MAP_BEARING,
-    center: EXPLORATION_MAP_CENTER,
+    center: center ? [center.lng, center.lat] : EXPLORATION_MAP_CENTER,
     container,
     maxZoom: SMART_SEOUL_TMS_MAX_ZOOM,
     minZoom: SMART_SEOUL_TMS_MIN_ZOOM,

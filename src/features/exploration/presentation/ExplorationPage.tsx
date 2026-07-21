@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
+import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationMap } from "./ExplorationMap";
 
 type ExplorationThemeProgressItem = {
@@ -14,18 +15,20 @@ type ExplorationThemeProgressItem = {
 };
 
 type ExplorationPageProps = {
+  initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
   themeProgressItems: readonly ExplorationThemeProgressItem[];
 };
 
 export function ExplorationPage({
+  initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
       <section className="map-stage" aria-label="서울 지도">
-        <ExplorationMap placeMarkers={placeMarkers} />
+        <ExplorationMap initialCenter={initialCenter} placeMarkers={placeMarkers} />
         <ul className="theme-progress-list" aria-label="장소 테마 현황">
           {themeProgressItems.map((item) => (
             <li key={item.id} className="theme-progress-chip">
