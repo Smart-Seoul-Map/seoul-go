@@ -28,7 +28,7 @@ const rewriteSmartSeoulTileProxyPath = (path) => {
 
 export default defineConfig(() => {
   return {
-    base: "./",
+    base: "/",
     plugins: [react()],
     resolve: {
       alias: {

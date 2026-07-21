@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { App } from "@app/App";
 import { AppQueryProvider } from "@app/providers/AppQueryProvider";
+import { AppRouter } from "@app/router/AppRouter";
 import "./style.css";
 
 const app = document.getElementById("app");
@@ -14,7 +14,7 @@ if (!app) {
 createRoot(app).render(
   <StrictMode>
     <AppQueryProvider>
-      <App />
+      <AppRouter />
     </AppQueryProvider>
   </StrictMode>
 );

@@ -1,6 +1,6 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import type { ReactElement } from "react";
 
@@ -28,30 +28,34 @@ import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 type ExplorationMapProps = {
+  initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
 };
 
 const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
+const DEFAULT_INITIAL_CENTER: Coordinates = {
+  lng: EXPLORATION_MAP_CENTER[0],
+  lat: EXPLORATION_MAP_CENTER[1],
+};
 
 function formatMapZoomLevel(zoomLevel: number): string {
   return zoomLevel.toFixed(ZOOM_LEVEL_DECIMAL_DIGITS).replace(/\.0$/, "");
 }
 
 export function ExplorationMap({
+  initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
+  const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
     getHeadingRadians: (from, to) =>
       calculateCharacterHeadingRadians(from, to, EXPLORATION_MAP_BEARING),
-    initialPosition: {
-      lng: EXPLORATION_MAP_CENTER[0],
-      lat: EXPLORATION_MAP_CENTER[1],
-    },
+    initialPosition,
     interpolate: (from, to, ratio) => ({
       lng: from.lng + (to.lng - from.lng) * ratio,
       lat: from.lat + (to.lat - from.lat) * ratio,
@@ -77,6 +81,7 @@ export function ExplorationMap({
 
     const map = new maplibregl.Map(
       createExplorationMapOptions({
+        center: initialPosition,
         container,
         tileUrlTemplate: smartSeoulMapTileUrlTemplate,
       })
@@ -130,7 +135,7 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [initialPosition]);
 
   useEffect(() => {
     const map = mapRef.current;
