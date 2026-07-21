@@ -16,16 +16,37 @@ describe("Smart Seoul 장소 테마 설정", () => {
       "100575",
     ]);
     expect(
-      SMART_SEOUL_PLACE_THEMES.map(({ markerColor, markerImage }) => ({
+      SMART_SEOUL_PLACE_THEMES.map(({ markerColor, closedBoxImage, openBoxImage }) => ({
         markerColor,
-        markerImage,
+        closedBoxImage,
+        openBoxImage,
       }))
     ).toEqual([
-      { markerColor: "#c92a2a", markerImage: "red_closed_box" },
-      { markerColor: "#7b2cbf", markerImage: "purple_closed_box" },
-      { markerColor: "#1971c2", markerImage: "blue_closed_box" },
-      { markerColor: "#212529", markerImage: "black_closed_box" },
-      { markerColor: "#e6a100", markerImage: "yellow_closed_box" },
+      {
+        markerColor: "#c92a2a",
+        closedBoxImage: "red_closed_box",
+        openBoxImage: "red_open_box",
+      },
+      {
+        markerColor: "#7b2cbf",
+        closedBoxImage: "purple_closed_box",
+        openBoxImage: "purple_open_box",
+      },
+      {
+        markerColor: "#1971c2",
+        closedBoxImage: "blue_closed_box",
+        openBoxImage: "blue_open_box",
+      },
+      {
+        markerColor: "#212529",
+        closedBoxImage: "black_closed_box",
+        openBoxImage: "black_open_box",
+      },
+      {
+        markerColor: "#e6a100",
+        closedBoxImage: "yellow_closed_box",
+        openBoxImage: "yellow_open_box",
+      },
     ]);
   });
 
@@ -34,7 +55,8 @@ describe("Smart Seoul 장소 테마 설정", () => {
       id: "100575",
       name: "오래가게",
       markerColor: "#e6a100",
-      markerImage: "yellow_closed_box",
+      closedBoxImage: "yellow_closed_box",
+      openBoxImage: "yellow_open_box",
     });
   });
 });
