@@ -10,6 +10,7 @@ import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapM
 import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
+import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
 import {
   addExplorationPlaceMarkersLayer,
   getExplorationPlaceMarkerName,
@@ -25,9 +26,11 @@ import {
 } from "../config/explorationMapConfig";
 import { EXPLORATION_PLACE_MARKERS_LAYER_ID } from "../config/explorationPlaceMarkerLayer";
 import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
+import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 type ExplorationMapProps = {
+  districtId?: number;
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
 };
@@ -43,6 +46,7 @@ function formatMapZoomLevel(zoomLevel: number): string {
 }
 
 export function ExplorationMap({
+  districtId,
   initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
 }: ExplorationMapProps): ReactElement {
@@ -50,6 +54,7 @@ export function ExplorationMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
+  const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -102,6 +107,7 @@ export function ExplorationMap({
     map.on("zoom", updateZoomLevelLabel);
 
     map.on("load", () => {
+      addExplorationDistrictBoundaryLayers(map, districtBoundary);
       addExplorationPlaceMarkersLayer(map);
     });
 
@@ -135,7 +141,7 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [initialPosition]);
+  }, [districtBoundary, initialPosition]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -40,6 +40,7 @@ function ExplorationRoute({ district }: ExplorationRouteProps): ReactElement {
 
   return (
     <ExplorationPage
+      districtId={district?.id}
       initialCenter={district?.officePosition}
       placeMarkers={createPlacesFeatureCollection(places)}
       themeProgressItems={themeProgressItems}
