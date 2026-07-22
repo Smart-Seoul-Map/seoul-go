@@ -29,6 +29,7 @@ export type RequestSmartSeoulThemeJson = (url: URL) => Promise<SmartSeoulThemeCo
 
 export type FetchSmartSeoulThemePlacesOptions = {
   apiKey: string;
+  districtName?: string;
   themeIds?: readonly string[];
   requestJson?: RequestSmartSeoulThemeJson;
   maxPages?: number;
@@ -92,12 +93,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
 }
 
+function hasDistrictName(row: unknown, districtName: string): boolean {
+  if (!isRecord(row)) {
+    return false;
+  }
+
+  const rowDistrictName = row.COT_GU_NAME;
+
+  return typeof rowDistrictName === "string" && rowDistrictName.trim() === districtName;
+}
+
 async function requestSmartSeoulThemeJson(url: URL): Promise<SmartSeoulThemeContentsResponse> {
   return kyClient.get(url).json<SmartSeoulThemeContentsResponse>();
 }
 
 export async function fetchSmartSeoulThemePlaces({
   apiKey,
+  districtName,
   themeIds = SMART_SEOUL_PLACE_THEME_IDS,
   requestJson = requestSmartSeoulThemeJson,
   maxPages = SMART_SEOUL_THEME_CONTENTS_DEFAULT_MAX_PAGES,
@@ -132,5 +144,9 @@ export async function fetchSmartSeoulThemePlaces({
     }
   }
 
-  return normalizeSmartSeoulThemeContentsResponse({ body: rows });
+  const districtRows = districtName
+    ? rows.filter((row) => hasDistrictName(row, districtName))
+    : rows;
+
+  return normalizeSmartSeoulThemeContentsResponse({ body: districtRows });
 }

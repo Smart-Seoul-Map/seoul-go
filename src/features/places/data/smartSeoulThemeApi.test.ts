@@ -50,4 +50,38 @@ describe("Smart Seoul 테마 API", () => {
     expect(places).toHaveLength(1);
     expect(places[0]?.name).toBe("서울도서관");
   });
+
+  test("자치구 이름이 일치하는 장소만 반환한다", async () => {
+    const places = await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      districtName: "강남구",
+      themeIds: ["100032"],
+      requestJson: async () => ({
+        header: {
+          resultCode: "200",
+          PAGE_COUNT: 1,
+        },
+        body: [
+          {
+            COT_THEME_ID: "100032",
+            COT_CONTS_ID: "gangnam-place",
+            COT_CONTS_NAME: "강남 장소",
+            COT_COORD_X: "127.047",
+            COT_COORD_Y: "37.517",
+            COT_GU_NAME: "강남구",
+          },
+          {
+            COT_THEME_ID: "100032",
+            COT_CONTS_ID: "seocho-place",
+            COT_CONTS_NAME: "서초 장소",
+            COT_COORD_X: "127.032",
+            COT_COORD_Y: "37.483",
+            COT_GU_NAME: "서초구",
+          },
+        ],
+      }),
+    });
+
+    expect(places.map((place) => place.sourceContentId)).toEqual(["gangnam-place"]);
+  });
 });

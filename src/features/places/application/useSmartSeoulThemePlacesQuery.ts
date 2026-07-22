@@ -5,12 +5,12 @@ import { SMART_SEOUL_THEME_PLACES_STALE_TIME_MS } from "../config/smartSeoulThem
 import { fetchSmartSeoulThemePlaces, getSmartSeoulThemeApiKey } from "../data/smartSeoulThemeApi";
 import { placesQueryKeys } from "./placesQueryKeys";
 
-export function useSmartSeoulThemePlacesQuery() {
+export function useSmartSeoulThemePlacesQuery(districtName?: string) {
   const apiKey = getSmartSeoulThemeApiKey();
 
   return useQuery({
-    queryKey: placesQueryKeys.smartSeoulThemePlaces(SMART_SEOUL_PLACE_THEME_IDS),
-    queryFn: () => fetchSmartSeoulThemePlaces({ apiKey }),
+    queryKey: placesQueryKeys.smartSeoulThemePlaces(SMART_SEOUL_PLACE_THEME_IDS, districtName),
+    queryFn: () => fetchSmartSeoulThemePlaces({ apiKey, districtName }),
     enabled: Boolean(apiKey),
     staleTime: SMART_SEOUL_THEME_PLACES_STALE_TIME_MS,
   });
