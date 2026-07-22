@@ -3,6 +3,8 @@ node_modules/
 .tmp/
 .cargo-home/
 dist/
+playwright-report/
+test-results/
 core/target/
 src/wasm/pkg/
 public/assets/generated/
