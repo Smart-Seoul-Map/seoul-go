@@ -11,13 +11,10 @@ import {
   useSmartSeoulThemePlacesQuery,
 } from "@features/places";
 import { PATH } from "@shared/constants/path";
-import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+import { getSeoulDistrictById, type SeoulDistrict } from "@shared/constants/seoulDistrict";
 
 type ExplorationRouteProps = {
-  initialCenter?: {
-    lat: number;
-    lng: number;
-  };
+  district?: SeoulDistrict;
 };
 
 function parseDistrictIdParam(districtId: string | undefined): number | null {
@@ -34,8 +31,8 @@ function parseDistrictIdParam(districtId: string | undefined): number | null {
   return parsedDistrictId;
 }
 
-function ExplorationRoute({ initialCenter }: ExplorationRouteProps): ReactElement {
-  const { data: places = [] } = useSmartSeoulThemePlacesQuery();
+function ExplorationRoute({ district }: ExplorationRouteProps): ReactElement {
+  const { data: places = [] } = useSmartSeoulThemePlacesQuery(district?.name);
   const themeProgressItems = createPlaceThemeProgressItems({
     places,
     themes: SMART_SEOUL_PLACE_THEMES,
@@ -43,7 +40,8 @@ function ExplorationRoute({ initialCenter }: ExplorationRouteProps): ReactElemen
 
   return (
     <ExplorationPage
-      initialCenter={initialCenter}
+      districtId={district?.id}
+      initialCenter={district?.officePosition}
       placeMarkers={createPlacesFeatureCollection(places)}
       themeProgressItems={themeProgressItems}
     />
@@ -59,7 +57,7 @@ function DistrictExplorationRoute(): ReactElement {
     return <Navigate to={PATH.HOME} replace />;
   }
 
-  return <ExplorationRoute key={district.id} initialCenter={district.officePosition} />;
+  return <ExplorationRoute key={district.id} district={district} />;
 }
 
 const appRouter = createBrowserRouter([

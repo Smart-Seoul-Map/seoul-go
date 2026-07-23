@@ -15,12 +15,14 @@ type ExplorationThemeProgressItem = {
 };
 
 type ExplorationPageProps = {
+  districtId?: number;
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
   themeProgressItems: readonly ExplorationThemeProgressItem[];
 };
 
 export function ExplorationPage({
+  districtId,
   initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   themeProgressItems,
@@ -28,7 +30,11 @@ export function ExplorationPage({
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
       <section className="map-stage" aria-label="서울 지도">
-        <ExplorationMap initialCenter={initialCenter} placeMarkers={placeMarkers} />
+        <ExplorationMap
+          districtId={districtId}
+          initialCenter={initialCenter}
+          placeMarkers={placeMarkers}
+        />
         <ul className="theme-progress-list" aria-label="장소 테마 현황">
           {themeProgressItems.map((item) => (
             <li key={item.id} className="theme-progress-chip">
