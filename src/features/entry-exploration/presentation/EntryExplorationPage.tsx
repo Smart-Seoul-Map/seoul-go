@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import * as THREE from "three";
 
+import {
+  playCharacterAnimationClips,
+  stopCharacterAnimationActions,
+} from "@shared/lib/character/characterAnimationPlayer";
 import { toCharacterModelRotationRadians } from "@shared/lib/character/characterModelRotation";
+import type { CharacterMovementModelKey } from "@shared/lib/character/useCharacterMovementController";
 import { useCharacterMovementController } from "@shared/lib/character/useCharacterMovementController";
 
 import { loadEntryExplorationGltf } from "../application/entryExplorationGltfLoader";
@@ -30,8 +35,6 @@ import {
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
 
-type EntryExplorationCharacterModelKey = "idlePrimary" | "run";
-
 type SceneHandles = {
   camera: THREE.OrthographicCamera;
   character: THREE.Object3D | null;
@@ -42,7 +45,7 @@ type SceneHandles = {
 export function EntryExplorationPage(): ReactElement {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const currentModelKeyRef = useRef<EntryExplorationCharacterModelKey>("idlePrimary");
+  const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
@@ -73,7 +76,7 @@ export function EntryExplorationPage(): ReactElement {
   const movementRef = useRef(movement);
   movementRef.current = movement;
 
-  const playAnimation = useCallback(async (nextModelKey: EntryExplorationCharacterModelKey) => {
+  const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
 
     if (!mixer) {
@@ -87,16 +90,12 @@ export function EntryExplorationPage(): ReactElement {
       return;
     }
 
-    activeActionsRef.current.forEach((action) => {
-      action.stop();
-    });
-    activeActionsRef.current = animationGltf.animations.map((clip) => {
-      const action = mixer.clipAction(clip).reset().play();
-
-      action.timeScale = ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE[nextModelKey];
-
-      return action;
-    });
+    stopCharacterAnimationActions(activeActionsRef.current);
+    activeActionsRef.current = playCharacterAnimationClips(
+      mixer,
+      animationGltf.animations,
+      ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE[nextModelKey]
+    );
   }, []);
 
   useEffect(() => {

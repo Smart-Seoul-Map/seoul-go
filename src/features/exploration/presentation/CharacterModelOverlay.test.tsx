@@ -2,6 +2,8 @@ import { render, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import { clearCharacterGltfCache } from "@shared/lib/character/gltfLoader";
+
 import {
   CHARACTER_MODEL_MANIFEST,
   type CharacterModelKey,
@@ -113,6 +115,7 @@ function renderCharacter(modelKey: CharacterModelKey, headingRadians = 0): React
 
 describe("CharacterModelOverlay", () => {
   beforeEach(() => {
+    clearCharacterGltfCache();
     vi.stubGlobal("WebGLRenderingContext", class {});
     vi.stubGlobal(
       "requestAnimationFrame",
@@ -185,7 +188,7 @@ describe("CharacterModelOverlay", () => {
     expect((threeMock.sourceScene as { rotation: { y: number } }).rotation.y).toBe(-Math.PI / 2);
     expect(
       threeMock.load.mock.calls.filter(([url]) => url === CHARACTER_MODEL_MANIFEST.mesh)
-    ).toHaveLength(0);
+    ).toHaveLength(1);
   });
 
   test("plays the run animation faster than idle without changing movement speed", async () => {

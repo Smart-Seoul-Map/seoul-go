@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import * as THREE from "three";
-import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+import {
+  playCharacterAnimationClips,
+  stopCharacterAnimationActions,
+} from "@shared/lib/character/characterAnimationPlayer";
 import { toCharacterModelRotationRadians } from "@shared/lib/character/characterModelRotation";
+import { loadCharacterGltf } from "@shared/lib/character/gltfLoader";
 
 import {
   CHARACTER_ANIMATION_TIME_SCALE,
@@ -14,25 +18,6 @@ import {
 interface CharacterModelOverlayProps {
   headingRadians: number;
   modelKey: CharacterModelKey;
-}
-
-const gltfLoader = new GLTFLoader();
-const gltfCache = new Map<string, Promise<GLTF>>();
-
-function loadGltf(path: string): Promise<GLTF> {
-  const cachedGltf = gltfCache.get(path);
-
-  if (cachedGltf) {
-    return cachedGltf;
-  }
-
-  const gltf = new Promise<GLTF>((resolve, reject) => {
-    gltfLoader.load(path, resolve, undefined, reject);
-  });
-
-  gltfCache.set(path, gltf);
-
-  return gltf;
 }
 
 export function CharacterModelOverlay({
@@ -54,22 +39,18 @@ export function CharacterModelOverlay({
     }
 
     const animationPath = CHARACTER_MODEL_MANIFEST.animations[nextModelKey];
-    const animationGltf = await loadGltf(animationPath);
+    const animationGltf = await loadCharacterGltf(animationPath);
 
     if (mixerRef.current !== mixer || currentModelKeyRef.current !== nextModelKey) {
       return;
     }
 
-    activeActionsRef.current.forEach((action) => {
-      action.stop();
-    });
-    activeActionsRef.current = animationGltf.animations.map((clip) => {
-      const action = mixer.clipAction(clip).reset().play();
-
-      action.timeScale = CHARACTER_ANIMATION_TIME_SCALE[nextModelKey];
-
-      return action;
-    });
+    stopCharacterAnimationActions(activeActionsRef.current);
+    activeActionsRef.current = playCharacterAnimationClips(
+      mixer,
+      animationGltf.animations,
+      CHARACTER_ANIMATION_TIME_SCALE[nextModelKey]
+    );
   }, []);
 
   useEffect(() => {
@@ -120,11 +101,13 @@ export function CharacterModelOverlay({
       renderer.setSize(width, height, false);
     };
 
-    void loadGltf(CHARACTER_MODEL_MANIFEST.mesh).then((gltf) => {
+    void loadCharacterGltf(CHARACTER_MODEL_MANIFEST.mesh).then((gltf) => {
       if (disposed) return;
 
       const model = gltf.scene;
 
+      model.scale.setScalar(1);
+      model.position.set(0, 0, 0);
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3();
       box.getSize(size);
