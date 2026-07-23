@@ -64,6 +64,105 @@ button {
   width: 100%;
 }
 
+.subway-selection-modal-backdrop {
+  align-items: center;
+  animation: subway-modal-backdrop-in 180ms ease-out;
+  background: rgba(14, 26, 19, 0.58);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 20;
+}
+
+.subway-selection-modal {
+  animation: subway-modal-content-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  background: #fffdf7;
+  border: 3px solid #17201a;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(7, 18, 11, 0.34);
+  max-width: 680px;
+  padding: 48px;
+  position: relative;
+  text-align: center;
+  width: min(100%, 680px);
+}
+
+.subway-selection-modal h2 {
+  font-size: clamp(24px, 4vw, 38px);
+  margin: 18px 0 12px;
+}
+
+.subway-selection-modal p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 auto;
+  max-width: 520px;
+}
+
+.subway-selection-modal-close {
+  align-items: center;
+  border-radius: 999px;
+  display: flex;
+  font-size: 30px;
+  height: 44px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 0 4px;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 44px;
+}
+
+.subway-selection-modal-badge {
+  background: #dff3e6;
+  border: 1px solid #8bc7a1;
+  border-radius: 999px;
+  color: #176336;
+  display: inline-block;
+  font-size: 13px;
+  padding: 7px 12px;
+}
+
+.subway-selection-modal-placeholder {
+  align-items: center;
+  background: #f4faf5;
+  border: 2px dashed #79b88f;
+  border-radius: 18px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 30px;
+  min-height: 150px;
+}
+
+.subway-selection-modal-placeholder span {
+  align-items: center;
+  background: #2e8b57;
+  border-radius: 999px;
+  color: #ffffff;
+  display: flex;
+  font-size: 24px;
+  height: 52px;
+  justify-content: center;
+  width: 52px;
+}
+
+@keyframes subway-modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes subway-modal-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+}
+
 .exploration-page {
   background: #ffffff;
   overflow: hidden;
@@ -151,6 +250,15 @@ button {
 }
 
 @media (max-width: 860px) {
+  .subway-selection-modal {
+    border-radius: 20px;
+    padding: 42px 20px 24px;
+  }
+
+  .subway-selection-modal-placeholder {
+    min-height: 120px;
+  }
+
   .map-canvas-stack {
     min-height: 100vh;
   }

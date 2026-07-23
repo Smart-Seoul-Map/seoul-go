@@ -4,9 +4,17 @@ export type EntryExplorationSceneAssetKey = EntryExplorationSceneObjectAssetKey;
 
 export type EntryExplorationSceneObjectType = "floorOverlay" | "standingProp";
 
+export type EntryExplorationInteractionType = "subwaySelection";
+
+export type EntryExplorationInteraction = {
+  triggerRadius: number;
+  type: EntryExplorationInteractionType;
+};
+
 type EntryExplorationSceneObjectBase = {
   assetKey: EntryExplorationSceneAssetKey;
   id: string;
+  interaction?: EntryExplorationInteraction;
   position: {
     x: number;
     z: number;
@@ -58,6 +66,19 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     size: { width: 5.6, depth: 7 },
     type: "floorOverlay",
     yOffset: 0.045,
+  },
+  {
+    assetKey: "subwayEventMarker",
+    id: "subway-selection-event-marker",
+    interaction: {
+      triggerRadius: 1.6,
+      type: "subwaySelection",
+    },
+    position: { x: 6, z: 4 },
+    rotationY: 0,
+    size: { width: 3.2, depth: 3.2 },
+    type: "floorOverlay",
+    yOffset: 0.05,
   },
   {
     assetKey: "namsanTower",

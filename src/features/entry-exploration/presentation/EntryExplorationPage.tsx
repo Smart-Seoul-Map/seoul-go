@@ -22,6 +22,7 @@ import {
   resizeEntryExplorationCamera,
   updateEntryExplorationCameraFocus,
 } from "../application/entryExplorationThreeScene";
+import { useEntryExplorationInteraction } from "../application/useEntryExplorationInteraction";
 import {
   ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE,
   ENTRY_EXPLORATION_CHARACTER_MODEL_MANIFEST,
@@ -34,6 +35,7 @@ import {
   interpolateEntryExplorationScenePoint,
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
+import { SubwaySelectionModal } from "./SubwaySelectionModal";
 
 type SceneHandles = {
   camera: THREE.OrthographicCamera;
@@ -49,6 +51,7 @@ export function EntryExplorationPage(): ReactElement {
   const headingRadiansRef = useRef(0);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
+  const interaction = useEntryExplorationInteraction();
 
   const applyScenePosition = useCallback((position: EntryExplorationScenePoint) => {
     const handles = sceneHandlesRef.current;
@@ -70,11 +73,20 @@ export function EntryExplorationPage(): ReactElement {
     maxFrameDeltaSeconds: ENTRY_EXPLORATION_SCENE_CONFIG.maxFrameDeltaSeconds,
     onFrame: ({ position }) => {
       applyScenePosition(position);
+      interaction.detectInteractionAtPoint(position);
     },
     speedPerSecond: ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond,
   });
   const movementRef = useRef(movement);
   movementRef.current = movement;
+
+  useEffect(() => {
+    if (!interaction.activeInteractionType) {
+      return;
+    }
+
+    movement.stop();
+  }, [interaction.activeInteractionType, movement.stop]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -156,6 +168,10 @@ export function EntryExplorationPage(): ReactElement {
     };
 
     const handlePointerDown = (event: PointerEvent) => {
+      if (interaction.getHasActiveInteraction()) {
+        return;
+      }
+
       const canvasRect = renderer.domElement.getBoundingClientRect();
 
       pointer.x = ((event.clientX - canvasRect.left) / canvasRect.width) * 2 - 1;
@@ -220,7 +236,7 @@ export function EntryExplorationPage(): ReactElement {
       renderer.forceContextLoss();
       renderer.domElement.remove();
     };
-  }, [applyScenePosition, playAnimation]);
+  }, [applyScenePosition, interaction.getHasActiveInteraction, playAnimation]);
 
   return (
     <main className="entry-exploration-page">
@@ -229,6 +245,9 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
+      {interaction.activeInteractionType === "subwaySelection" ? (
+        <SubwaySelectionModal onClose={interaction.closeInteraction} />
+      ) : null}
     </main>
   );
 }
