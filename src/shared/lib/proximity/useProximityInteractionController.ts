@@ -9,6 +9,10 @@ export type ActiveProximityInteraction<TInteractionId extends string> = {
 
 type ProximityInteractionControllerOptions<TPosition, TInteractionId extends string> = {
   getDistance: (from: TPosition, to: TPosition) => number;
+  isInsideZone?: (
+    point: TPosition,
+    zone: ProximityInteractionZone<TPosition, TInteractionId>
+  ) => boolean;
   zones: readonly ProximityInteractionZone<TPosition, TInteractionId>[];
 };
 
@@ -21,6 +25,7 @@ type ProximityInteractionController<TPosition, TInteractionId extends string> = 
 
 export function useProximityInteractionController<TPosition, TInteractionId extends string>({
   getDistance,
+  isInsideZone,
   zones,
 }: ProximityInteractionControllerOptions<
   TPosition,
@@ -33,11 +38,13 @@ export function useProximityInteractionController<TPosition, TInteractionId exte
 
   const detectInteractionAtPoint = useCallback(
     (point: TPosition) => {
-      const containingZones = getProximityZonesAtPoint({
-        getDistance,
-        point,
-        zones,
-      });
+      const containingZones = isInsideZone
+        ? zones.filter((zone) => isInsideZone(point, zone))
+        : getProximityZonesAtPoint({
+            getDistance,
+            point,
+            zones,
+          });
       const containingZoneIds = new Set(containingZones.map((zone) => zone.id));
 
       suppressedZoneIdsRef.current.forEach((zoneId) => {
@@ -67,7 +74,7 @@ export function useProximityInteractionController<TPosition, TInteractionId exte
       activeInteractionRef.current = nextInteraction;
       setActiveInteraction(nextInteraction);
     },
-    [getDistance, zones]
+    [getDistance, isInsideZone, zones]
   );
 
   const closeInteraction = useCallback(() => {
