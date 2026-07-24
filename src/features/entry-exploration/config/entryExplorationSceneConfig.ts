@@ -18,6 +18,7 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
     y: 13,
     z: 11,
   },
+  cameraTransitionDurationMs: 900,
   cameraViewSize: 19,
   characterHeight: 2.3,
   characterSpeedPerSecond: 7,

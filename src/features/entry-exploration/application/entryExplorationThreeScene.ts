@@ -11,6 +11,7 @@ import type {
   EntryExplorationStandingPropObject,
 } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
+import type { Line2RoutePoint } from "../domain/line2Station";
 
 const ENTRY_EXPLORATION_SCENE_CLEAR_COLOR = 0xf7f4ed;
 const ENTRY_EXPLORATION_AMBIENT_SKY_COLOR = 0xffffff;
@@ -26,9 +27,14 @@ const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET = {
   z: -0.22,
 } as const;
 const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE = 128;
+const ENTRY_EXPLORATION_SUBWAY_TRAIN_TEXTURE_SIZE = {
+  width: 128,
+  height: 96,
+} as const;
 
 const textureLoader = new THREE.TextureLoader();
 let standingPropShadowTexture: THREE.CanvasTexture | null = null;
+let subwayTrainTexture: THREE.CanvasTexture | null = null;
 
 export function createEntryExplorationCamera(
   width: number,
@@ -71,8 +77,19 @@ export function updateEntryExplorationCameraFocus(
 ): void {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
-  camera.position.set(point.x + cameraOffset.x, cameraOffset.y, point.z + cameraOffset.z);
-  camera.lookAt(point.x, 0, point.z);
+  updateEntryExplorationCameraView(camera, point, cameraOffset, 1);
+}
+
+export function updateEntryExplorationCameraView(
+  camera: THREE.OrthographicCamera,
+  focus: EntryExplorationScenePoint,
+  offset: EntryExplorationScenePoint & { y: number },
+  zoom: number
+): void {
+  camera.position.set(focus.x + offset.x, offset.y, focus.z + offset.z);
+  camera.lookAt(focus.x, 0, focus.z);
+  camera.zoom = zoom;
+  camera.updateProjectionMatrix();
 }
 
 export function createEntryExplorationRenderer(width: number, height: number): THREE.WebGLRenderer {
@@ -157,6 +174,34 @@ export function createEntryExplorationSceneObject(
   }
 
   return createEntryExplorationStandingPropGroup(object);
+}
+
+export function createEntryExplorationSubwayTrainMarker(): THREE.Mesh {
+  const geometry = new THREE.PlaneGeometry(0.88, 0.62);
+  const material = new THREE.MeshBasicMaterial({
+    depthWrite: false,
+    map: getSubwayTrainTexture(),
+    transparent: true,
+  });
+  const marker = new THREE.Mesh(geometry, material);
+
+  marker.position.z = 0.08;
+  marker.renderOrder = 4;
+  marker.visible = false;
+
+  return marker;
+}
+
+export function updateEntryExplorationSubwayTrainMarker(
+  marker: THREE.Mesh,
+  mapObject: EntryExplorationFloorOverlayObject,
+  point: Line2RoutePoint
+): void {
+  const localX = (point.x / 100 - 0.5) * mapObject.size.width;
+  const localY = (0.5 - point.y / 100) * mapObject.size.depth;
+
+  marker.position.set(localX, localY, 0.08);
+  marker.visible = true;
 }
 
 export function addEntryExplorationLights(scene: THREE.Scene): void {
@@ -309,4 +354,40 @@ function getStandingPropShadowTexture(): THREE.CanvasTexture {
   standingPropShadowTexture.colorSpace = THREE.SRGBColorSpace;
 
   return standingPropShadowTexture;
+}
+
+function getSubwayTrainTexture(): THREE.CanvasTexture {
+  if (subwayTrainTexture) {
+    return subwayTrainTexture;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = ENTRY_EXPLORATION_SUBWAY_TRAIN_TEXTURE_SIZE.width;
+  canvas.height = ENTRY_EXPLORATION_SUBWAY_TRAIN_TEXTURE_SIZE.height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Failed to create subway train texture.");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.strokeStyle = "#17201a";
+  context.lineWidth = 8;
+  context.fillRect(12, 10, 104, 64);
+  context.strokeRect(12, 10, 104, 64);
+  context.fillStyle = "#bfe1ed";
+  context.fillRect(27, 25, 28, 24);
+  context.fillRect(73, 25, 28, 24);
+  context.fillStyle = "#2e8b57";
+  context.fillRect(16, 57, 96, 10);
+  context.fillStyle = "#17201a";
+  context.beginPath();
+  context.arc(34, 80, 9, 0, Math.PI * 2);
+  context.arc(94, 80, 9, 0, Math.PI * 2);
+  context.fill();
+
+  subwayTrainTexture = new THREE.CanvasTexture(canvas);
+  subwayTrainTexture.colorSpace = THREE.SRGBColorSpace;
+
+  return subwayTrainTexture;
 }

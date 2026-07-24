@@ -48,6 +48,8 @@ export type EntryExplorationStandingPropObject = EntryExplorationSceneObjectBase
 export type EntryExplorationSceneObject =
   EntryExplorationFloorOverlayObject | EntryExplorationStandingPropObject;
 
+export const ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID = "subway-selection-route-map";
+
 export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
   {
     assetKey: "haechiAndFriends",
@@ -68,15 +70,15 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     yOffset: 0.045,
   },
   {
-    assetKey: "subwayEventMarker",
-    id: "subway-selection-event-marker",
+    assetKey: "line2RouteMap",
+    id: ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID,
     interaction: {
-      triggerRadius: 1.6,
+      triggerRadius: 5.2,
       type: "subwaySelection",
     },
-    position: { x: 6, z: 4 },
+    position: { x: 8, z: 6 },
     rotationY: 0,
-    size: { width: 3.2, depth: 3.2 },
+    size: { width: 14, depth: 9.55 },
     type: "floorOverlay",
     yOffset: 0.05,
   },

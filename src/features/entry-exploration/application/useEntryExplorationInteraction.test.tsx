@@ -6,8 +6,8 @@ import { useEntryExplorationInteraction } from "./useEntryExplorationInteraction
 
 const INTERACTIVE_OBJECTS: readonly EntryExplorationSceneObject[] = [
   {
-    assetKey: "subwayEventMarker",
-    id: "subway-selection-event-marker",
+    assetKey: "line2RouteMap",
+    id: "subway-selection-route-map",
     interaction: {
       triggerRadius: 1.5,
       type: "subwaySelection",

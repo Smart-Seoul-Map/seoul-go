@@ -64,102 +64,105 @@ button {
   width: 100%;
 }
 
-.subway-selection-modal-backdrop {
-  align-items: center;
-  animation: subway-modal-backdrop-in 180ms ease-out;
-  background: rgba(14, 26, 19, 0.58);
-  display: flex;
+.subway-selection-layer {
   inset: 0;
-  justify-content: center;
-  padding: 24px;
   position: fixed;
   z-index: 20;
 }
 
-.subway-selection-modal {
-  animation: subway-modal-content-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
-  background: #fffdf7;
-  border: 3px solid #17201a;
-  border-radius: 24px;
-  box-shadow: 0 24px 80px rgba(7, 18, 11, 0.34);
-  max-width: 680px;
-  padding: 48px;
-  position: relative;
-  text-align: center;
-  width: min(100%, 680px);
-}
-
-.subway-selection-modal h2 {
-  font-size: clamp(24px, 4vw, 38px);
-  margin: 18px 0 12px;
-}
-
-.subway-selection-modal p {
-  color: var(--muted);
-  line-height: 1.7;
-  margin: 0 auto;
-  max-width: 520px;
-}
-
-.subway-selection-modal-close {
-  align-items: center;
-  border-radius: 999px;
-  display: flex;
-  font-size: 30px;
-  height: 44px;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 0 4px;
-  position: absolute;
-  right: 18px;
-  top: 18px;
-  width: 44px;
-}
-
-.subway-selection-modal-badge {
-  background: #dff3e6;
-  border: 1px solid #8bc7a1;
-  border-radius: 999px;
-  color: #176336;
-  display: inline-block;
-  font-size: 13px;
-  padding: 7px 12px;
-}
-
-.subway-selection-modal-placeholder {
-  align-items: center;
-  background: #f4faf5;
-  border: 2px dashed #79b88f;
+.subway-selection-controls {
+  align-items: stretch;
+  animation: subway-controls-in 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 253, 247, 0.94);
+  border: 2px solid var(--ink);
   border-radius: 18px;
-  display: flex;
+  box-shadow: 0 16px 40px rgba(7, 18, 11, 0.25);
+  display: grid;
   gap: 14px;
-  justify-content: center;
-  margin-top: 30px;
-  min-height: 150px;
+  grid-template-columns: 1fr;
+  padding: 52px 20px 20px;
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(calc(100% - 32px), 320px);
+  z-index: 1;
 }
 
-.subway-selection-modal-placeholder span {
+.subway-selection-controls-copy span {
+  color: #176336;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.subway-selection-controls-copy h2 {
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.35;
+  margin: 4px 0 0;
+}
+
+.subway-selection-close {
   align-items: center;
-  background: #2e8b57;
+  background: #fffdf7;
+  border-color: var(--ink);
   border-radius: 999px;
-  color: #ffffff;
+  color: var(--muted);
   display: flex;
-  font-size: 24px;
-  height: 52px;
+  font-size: 25px;
+  height: 38px;
   justify-content: center;
-  width: 52px;
+  min-height: 38px;
+  padding: 0 0 3px;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 38px;
 }
 
-@keyframes subway-modal-backdrop-in {
-  from {
-    opacity: 0;
-  }
+.subway-selection-close:disabled {
+  cursor: wait;
+  opacity: 0.45;
 }
 
-@keyframes subway-modal-content-in {
+.subway-selection-result {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 44px;
+}
+
+.subway-selection-result strong {
+  color: #176336;
+  font-size: 17px;
+}
+
+.subway-selection-button {
+  background: #2e8b57;
+  border-color: #176336;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 13px 24px;
+  width: 100%;
+}
+
+.subway-selection-button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.subway-selection-explore-button {
+  background: #17201a;
+  border-color: #17201a;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 13px 24px;
+  width: 100%;
+}
+
+@keyframes subway-controls-in {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.96);
+    transform: translate(18px, -50%);
   }
 }
 
@@ -250,13 +253,23 @@ button {
 }
 
 @media (max-width: 860px) {
-  .subway-selection-modal {
-    border-radius: 20px;
-    padding: 42px 20px 24px;
+  .subway-selection-controls {
+    bottom: 12px;
+    gap: 10px;
+    grid-template-columns: 1fr;
+    left: 50%;
+    padding: 48px 14px 13px;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
   }
 
-  .subway-selection-modal-placeholder {
-    min-height: 120px;
+  @keyframes subway-controls-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 18px);
+    }
   }
 
   .map-canvas-stack {
