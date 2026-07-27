@@ -21,6 +21,7 @@ const ENTRY_EXPLORATION_KEY_LIGHT_POSITION = {
   y: 16,
   z: 8,
 } as const;
+const ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM = 1;
 const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET = {
   x: 0.28,
   z: -0.22,
@@ -71,8 +72,10 @@ export function updateEntryExplorationCameraFocus(
 ): void {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
+  camera.zoom = ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM;
   camera.position.set(point.x + cameraOffset.x, cameraOffset.y, point.z + cameraOffset.z);
   camera.lookAt(point.x, 0, point.z);
+  camera.updateProjectionMatrix();
 }
 
 export function createEntryExplorationRenderer(width: number, height: number): THREE.WebGLRenderer {
