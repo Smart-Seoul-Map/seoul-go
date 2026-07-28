@@ -1,15 +1,18 @@
 import { useRef } from "react";
 import type { ReactElement } from "react";
 
-import { createEntryExplorationSceneInteractionControllers } from "../application/createEntryExplorationSceneInteractionControllers";
+import { useEntryExplorationDistrictSelectionFlow } from "../application/useEntryExplorationDistrictSelectionFlow";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
+import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 
 export function EntryExplorationPage(): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const districtSelection = useEntryExplorationDistrictSelectionFlow();
 
   useEntryExplorationThreeScene({
     containerRef,
-    createSceneInteractionControllers: createEntryExplorationSceneInteractionControllers,
+    createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
+    onSceneControlsReady: districtSelection.handleSceneControlsReady,
   });
 
   return (
@@ -19,6 +22,7 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
+      <EntryExplorationDistrictSelectionDialog {...districtSelection.dialogProps} />
     </main>
   );
 }
