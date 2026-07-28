@@ -32,10 +32,12 @@ import {
   type Line2Station,
 } from "../domain/line2Station";
 import {
-  createEntryExplorationSceneObject,
   createEntryExplorationSubwayTrainMarker,
-  disposeEntryExplorationObject3D,
   updateEntryExplorationSubwayTrainMarker,
+} from "./entryExplorationSubwayTrainMarker";
+import {
+  createEntryExplorationSceneObject,
+  disposeEntryExplorationObject3D,
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 

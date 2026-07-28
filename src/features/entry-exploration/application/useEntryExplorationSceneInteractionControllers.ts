@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import {
+  createEntryExplorationSubwaySelectionInteractionController,
   createEntryExplorationSubwaySelectionInitialState,
   type EntryExplorationSubwaySelectionInteractionController,
   type EntryExplorationSubwaySelectionState,
@@ -27,16 +28,15 @@ export function useEntryExplorationSceneInteractionControllers(): EntryExplorati
     );
 
   const createSceneInteractionControllers = useCallback(() => {
-    const { controllers, subwaySelectionController } =
-      createEntryExplorationSceneInteractionControllers({
-        subwaySelection: {
-          onStateChange: setSubwaySelectionState,
-        },
-      });
+    const subwaySelectionController = createEntryExplorationSubwaySelectionInteractionController({
+      onStateChange: setSubwaySelectionState,
+    });
 
     subwaySelectionControllerRef.current = subwaySelectionController;
 
-    return controllers;
+    return createEntryExplorationSceneInteractionControllers({
+      extraControllers: [subwaySelectionController],
+    });
   }, []);
 
   const handleClose = useCallback(() => {

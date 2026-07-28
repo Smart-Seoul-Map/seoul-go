@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
+import { createEntryExplorationDistrictJumpSelectionInteractionController } from "./entryExplorationDistrictJumpSelectionInteraction";
 
 describe("createEntryExplorationSceneInteractionControllers", () => {
   beforeEach(() => {
@@ -19,13 +20,25 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   });
 
   test("creates the registered entry exploration interaction controllers", () => {
-    const { controllers, subwaySelectionController } =
-      createEntryExplorationSceneInteractionControllers();
+    const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(2);
-    expect(controllers).toContain(subwaySelectionController);
+    expect(controllers).toHaveLength(1);
     expect(controllers.every((controller) => (controller.priority ?? 0) > 0)).toBe(true);
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
+
+    controllers.forEach((controller) => {
+      controller.dispose();
+    });
+  });
+
+  test("appends extra interaction controllers", () => {
+    const extraController = createEntryExplorationDistrictJumpSelectionInteractionController();
+    const controllers = createEntryExplorationSceneInteractionControllers({
+      extraControllers: [extraController],
+    });
+
+    expect(controllers).toHaveLength(2);
+    expect(controllers[1]).toBe(extraController);
 
     controllers.forEach((controller) => {
       controller.dispose();
