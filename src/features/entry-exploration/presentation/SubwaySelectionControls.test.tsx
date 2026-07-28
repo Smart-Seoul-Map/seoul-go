@@ -1,21 +1,41 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
+import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSceneInteractionControllers";
 import { SubwaySelectionControls } from "./SubwaySelectionControls";
+
+function createSubwaySelectionViewModel(
+  overrides: Partial<EntryExplorationSubwaySelectionViewModel> = {}
+): EntryExplorationSubwaySelectionViewModel {
+  return {
+    handleClose: vi.fn(),
+    handleStationSelection: vi.fn(),
+    isActive: true,
+    isCameraReady: true,
+    selectedStation: null,
+    status: "idle",
+    trainPosition: { x: 46.73, y: 15.28 },
+    ...overrides,
+  };
+}
 
 describe("SubwaySelectionControls", () => {
   afterEach(cleanup);
 
+  test("renders nothing while the interaction is inactive", () => {
+    const { container } = render(
+      <SubwaySelectionControls
+        subwaySelection={createSubwaySelectionViewModel({ isActive: false })}
+      />
+    );
+
+    expect(container.childElementCount).toBe(0);
+  });
+
   test("closes from the outside or close button while the train is stopped", () => {
     const handleClose = vi.fn();
     const { container } = render(
-      <SubwaySelectionControls
-        isInteractionLocked={false}
-        onClose={handleClose}
-        onStationSelection={vi.fn()}
-        selectedStation={null}
-        status="idle"
-      />
+      <SubwaySelectionControls subwaySelection={createSubwaySelectionViewModel({ handleClose })} />
     );
     const layer = container.querySelector(".subway-selection-layer");
 
@@ -31,11 +51,11 @@ describe("SubwaySelectionControls", () => {
     const handleStationSelection = vi.fn();
     const { container } = render(
       <SubwaySelectionControls
-        isInteractionLocked
-        onClose={handleClose}
-        onStationSelection={handleStationSelection}
-        selectedStation={null}
-        status="idle"
+        subwaySelection={createSubwaySelectionViewModel({
+          handleClose,
+          handleStationSelection,
+          isCameraReady: false,
+        })}
       />
     );
     const layer = container.querySelector(".subway-selection-layer");
@@ -53,11 +73,10 @@ describe("SubwaySelectionControls", () => {
     const handleStationSelection = vi.fn();
     const { container, rerender } = render(
       <SubwaySelectionControls
-        isInteractionLocked={false}
-        onClose={handleClose}
-        onStationSelection={handleStationSelection}
-        selectedStation={null}
-        status="idle"
+        subwaySelection={createSubwaySelectionViewModel({
+          handleClose,
+          handleStationSelection,
+        })}
       />
     );
 
@@ -67,11 +86,11 @@ describe("SubwaySelectionControls", () => {
 
     rerender(
       <SubwaySelectionControls
-        isInteractionLocked={false}
-        onClose={handleClose}
-        onStationSelection={handleStationSelection}
-        selectedStation={null}
-        status="selecting"
+        subwaySelection={createSubwaySelectionViewModel({
+          handleClose,
+          handleStationSelection,
+          status: "selecting",
+        })}
       />
     );
     fireEvent.pointerDown(container.querySelector(".subway-selection-layer")!);
@@ -83,15 +102,14 @@ describe("SubwaySelectionControls", () => {
   test("shows the selected station result", () => {
     render(
       <SubwaySelectionControls
-        isInteractionLocked={false}
-        onClose={vi.fn()}
-        onStationSelection={vi.fn()}
-        selectedStation={{
-          id: "201",
-          name: "시청",
-          position: { x: 46.73, y: 15.28 },
-        }}
-        status="selected"
+        subwaySelection={createSubwaySelectionViewModel({
+          selectedStation: {
+            id: "201",
+            name: "시청",
+            position: { x: 46.73, y: 15.28 },
+          },
+          status: "selected",
+        })}
       />
     );
 

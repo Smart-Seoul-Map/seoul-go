@@ -22,15 +22,7 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {subwaySelection.isActive ? (
-        <SubwaySelectionControls
-          isInteractionLocked={!subwaySelection.isCameraReady}
-          onClose={subwaySelection.handleClose}
-          onStationSelection={subwaySelection.handleStationSelection}
-          selectedStation={subwaySelection.selectedStation}
-          status={subwaySelection.status}
-        />
-      ) : null}
+      <SubwaySelectionControls subwaySelection={subwaySelection} />
     </main>
   );
 }
