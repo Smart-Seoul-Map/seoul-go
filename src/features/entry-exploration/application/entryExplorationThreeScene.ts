@@ -22,6 +22,7 @@ const ENTRY_EXPLORATION_KEY_LIGHT_POSITION = {
   y: 16,
   z: 8,
 } as const;
+const ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM = 1;
 const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET = {
   x: 0.28,
   z: -0.22,
@@ -77,7 +78,12 @@ export function updateEntryExplorationCameraFocus(
 ): void {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
-  updateEntryExplorationCameraView(camera, point, cameraOffset, 1);
+  updateEntryExplorationCameraView(
+    camera,
+    point,
+    cameraOffset,
+    ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM
+  );
 }
 
 export function updateEntryExplorationCameraView(

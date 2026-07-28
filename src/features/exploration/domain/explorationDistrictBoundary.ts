@@ -1,6 +1,5 @@
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
-
-import seoulDistrictBoundariesJson from "../data/seoulDistrictBoundaries.json";
+import seoulDistrictBoundariesJson from "@shared/data/seoulDistrictBoundaries.json";
 
 type Position = [number, number];
 type LinearRing = Position[];

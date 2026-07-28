@@ -1,31 +1,10 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
-import { LINE2_SELECTION_ANIMATION_DURATION_MS } from "../config/line2SelectionConfig";
 import { SubwaySelectionControls } from "./SubwaySelectionControls";
 
 describe("SubwaySelectionControls", () => {
-  const frameCallbacks: FrameRequestCallback[] = [];
-
-  beforeEach(() => {
-    frameCallbacks.length = 0;
-    vi.spyOn(Math, "random").mockReturnValue(0);
-    vi.stubGlobal(
-      "requestAnimationFrame",
-      vi.fn((callback: FrameRequestCallback) => {
-        frameCallbacks.push(callback);
-
-        return frameCallbacks.length;
-      })
-    );
-    vi.stubGlobal("cancelAnimationFrame", vi.fn());
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
+  afterEach(cleanup);
 
   test("closes from the outside or close button while the train is stopped", () => {
     const handleClose = vi.fn();
@@ -33,7 +12,9 @@ describe("SubwaySelectionControls", () => {
       <SubwaySelectionControls
         isInteractionLocked={false}
         onClose={handleClose}
-        onTrainPositionChange={vi.fn()}
+        onStationSelection={vi.fn()}
+        selectedStation={null}
+        status="idle"
       />
     );
     const layer = container.querySelector(".subway-selection-layer");
@@ -45,64 +26,76 @@ describe("SubwaySelectionControls", () => {
     expect(handleClose).toHaveBeenCalledTimes(2);
   });
 
-  test("blocks repeated input until the camera transition is complete", () => {
+  test("blocks input until the camera transition is complete", () => {
     const handleClose = vi.fn();
-    const handleTrainPositionChange = vi.fn();
-    const { container, rerender } = render(
+    const handleStationSelection = vi.fn();
+    const { container } = render(
       <SubwaySelectionControls
         isInteractionLocked
         onClose={handleClose}
-        onTrainPositionChange={handleTrainPositionChange}
+        onStationSelection={handleStationSelection}
+        selectedStation={null}
+        status="idle"
       />
     );
     const layer = container.querySelector(".subway-selection-layer");
 
     fireEvent.pointerDown(layer!);
     fireEvent.click(screen.getByRole("button", { name: "탐색 화면으로 돌아가기" }));
+    fireEvent.click(screen.getByRole("button", { name: "랜덤 역 선정하기" }));
 
-    expect(screen.getByRole("button", { name: "랜덤 역 선정하기" }).hasAttribute("disabled")).toBe(
-      true
-    );
     expect(handleClose).not.toHaveBeenCalled();
+    expect(handleStationSelection).not.toHaveBeenCalled();
+  });
+
+  test("delegates selection and blocks closing while the train is moving", () => {
+    const handleClose = vi.fn();
+    const handleStationSelection = vi.fn();
+    const { container, rerender } = render(
+      <SubwaySelectionControls
+        isInteractionLocked={false}
+        onClose={handleClose}
+        onStationSelection={handleStationSelection}
+        selectedStation={null}
+        status="idle"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "랜덤 역 선정하기" }));
+
+    expect(handleStationSelection).toHaveBeenCalledOnce();
 
     rerender(
       <SubwaySelectionControls
         isInteractionLocked={false}
         onClose={handleClose}
-        onTrainPositionChange={handleTrainPositionChange}
+        onStationSelection={handleStationSelection}
+        selectedStation={null}
+        status="selecting"
       />
     );
-    fireEvent.pointerDown(layer!);
-
-    expect(handleClose).toHaveBeenCalledOnce();
-  });
-
-  test("blocks closing while selecting and shows an inert exploration button afterward", () => {
-    const handleClose = vi.fn();
-    const { container } = render(
-      <SubwaySelectionControls
-        isInteractionLocked={false}
-        onClose={handleClose}
-        onTrainPositionChange={vi.fn()}
-      />
-    );
-    const layer = container.querySelector(".subway-selection-layer");
-
-    fireEvent.click(screen.getByRole("button", { name: "랜덤 역 선정하기" }));
-    fireEvent.pointerDown(layer!);
+    fireEvent.pointerDown(container.querySelector(".subway-selection-layer")!);
     fireEvent.click(screen.getByRole("button", { name: "탐색 화면으로 돌아가기" }));
 
     expect(handleClose).not.toHaveBeenCalled();
+  });
 
-    act(() => {
-      frameCallbacks.shift()?.(0);
-      frameCallbacks.shift()?.(LINE2_SELECTION_ANIMATION_DURATION_MS);
-    });
+  test("shows the selected station result", () => {
+    render(
+      <SubwaySelectionControls
+        isInteractionLocked={false}
+        onClose={vi.fn()}
+        onStationSelection={vi.fn()}
+        selectedStation={{
+          id: "201",
+          name: "시청",
+          position: { x: 46.73, y: 15.28 },
+        }}
+        status="selected"
+      />
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: "시청역 탐험하기" }));
-    expect(handleClose).not.toHaveBeenCalled();
-
-    fireEvent.pointerDown(layer!);
-    expect(handleClose).toHaveBeenCalledOnce();
+    expect(screen.getByText("시청역이 선정되었습니다.")).toBeDefined();
+    expect(screen.getByRole("button", { name: "시청역 탐험하기" })).toBeDefined();
   });
 });
