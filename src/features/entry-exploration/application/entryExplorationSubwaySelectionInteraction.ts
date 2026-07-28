@@ -39,14 +39,13 @@ import {
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
-export type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
+type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
 
 export type EntryExplorationSubwaySelectionState = {
   isActive: boolean;
   isCameraReady: boolean;
   selectedStation: Line2Station | null;
   status: EntryExplorationSubwaySelectionStatus;
-  trainPosition: Line2RoutePoint;
 };
 
 export type EntryExplorationSubwaySelectionInteractionOptions = {
@@ -81,7 +80,6 @@ export function createEntryExplorationSubwaySelectionInitialState(): EntryExplor
     isCameraReady: false,
     selectedStation: null,
     status: "idle",
-    trainPosition: initialStation.position,
   };
 }
 
@@ -99,7 +97,6 @@ export function createEntryExplorationSubwaySelectionInteractionController({
   let isCameraReady = false;
   let isCharacterInTrigger = false;
   let isViewActive = false;
-  let lastCharacterPosition: EntryExplorationScenePoint = { x: 0, z: 0 };
   let waitsForTriggerExit = false;
   let selectionAnimation: SelectionAnimation | null = null;
   let selectedStation: Line2Station | null = null;
@@ -114,7 +111,6 @@ export function createEntryExplorationSubwaySelectionInteractionController({
     isCameraReady,
     selectedStation,
     status,
-    trainPosition,
   });
 
   const emitState = (): void => {
@@ -213,13 +209,17 @@ export function createEntryExplorationSubwaySelectionInteractionController({
     emitState();
   };
 
-  const updateCamera = (camera: THREE.OrthographicCamera, time: number): void => {
+  const updateCamera = (
+    camera: THREE.OrthographicCamera,
+    time: number,
+    characterPosition: EntryExplorationScenePoint
+  ): void => {
     if (!isEngaged || cameraTransitionPhase === null || cameraTransitionStartedAt === null) {
       return;
     }
 
     const isActivating = cameraTransitionPhase === "activating";
-    const cameraFocus = new THREE.Vector3(lastCharacterPosition.x, 0, lastCharacterPosition.z);
+    const cameraFocus = new THREE.Vector3(characterPosition.x, 0, characterPosition.z);
     const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
     cameraTransition ??= createSceneCameraTransition(
@@ -238,9 +238,9 @@ export function createEntryExplorationSubwaySelectionInteractionController({
             now: cameraTransitionStartedAt,
             toLookAt: cameraFocus,
             toPosition: new THREE.Vector3(
-              lastCharacterPosition.x + cameraOffset.x,
+              characterPosition.x + cameraOffset.x,
               cameraOffset.y,
-              lastCharacterPosition.z + cameraOffset.z
+              characterPosition.z + cameraOffset.z
             ),
             toZoom: 1,
           }
@@ -267,7 +267,6 @@ export function createEntryExplorationSubwaySelectionInteractionController({
   };
 
   const updateTriggerState = (position: EntryExplorationScenePoint): void => {
-    lastCharacterPosition = position;
     isCharacterInTrigger = isInsideSceneTriggerRadius({
       position,
       radius: subwayMapObject.interaction.triggerRadius,
@@ -298,7 +297,6 @@ export function createEntryExplorationSubwaySelectionInteractionController({
     object: mapObject,
     priority: SUBWAY_SELECTION_PRIORITY,
     selectStation,
-    setCharacter: () => {},
     update: updateSelection,
     updateCamera,
     updateTriggerState,

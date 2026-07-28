@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
 import type { Line2RoutePoint, Line2Station } from "../domain/line2Station";
-import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "./entryExplorationAssets";
 import subwayStationData from "./subwayStationData.json";
 
 type SubwayStationLineData = {
@@ -28,7 +27,6 @@ const LINE2_KEY = "2";
 const subwayStationsByKey: Record<string, SubwayStationData> = subwayStationData.stations;
 const line2Data: SubwayLineData = subwayStationData.lines[LINE2_KEY];
 
-export const LINE2_ROUTE_MAP_URL = ENTRY_EXPLORATION_TEXTURE_ASSETS.line2RouteMap.src;
 export const LINE2_SELECTION_ANIMATION_DURATION_MS = 4200;
 export const LINE2_INITIAL_STATION_ID = "201";
 export const LINE2_SELECTION_CHARACTER_DESTINATION_OFFSET = {

@@ -14,7 +14,6 @@ function createSubwaySelectionViewModel(
     isCameraReady: true,
     selectedStation: null,
     status: "idle",
-    trainPosition: { x: 46.73, y: 15.28 },
     ...overrides,
   };
 }

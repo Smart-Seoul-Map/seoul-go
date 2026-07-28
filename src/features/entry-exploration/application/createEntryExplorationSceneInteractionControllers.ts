@@ -6,11 +6,11 @@ import {
 } from "./entryExplorationSubwaySelectionInteraction";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
-export type CreateEntryExplorationSceneInteractionControllersOptions = {
+type CreateEntryExplorationSceneInteractionControllersOptions = {
   subwaySelection?: EntryExplorationSubwaySelectionInteractionOptions;
 };
 
-export type EntryExplorationSceneInteractionControllerCollection = {
+type EntryExplorationSceneInteractionControllerCollection = {
   controllers: EntryExplorationSceneInteractionController[];
   subwaySelectionController: EntryExplorationSubwaySelectionInteractionController;
 };

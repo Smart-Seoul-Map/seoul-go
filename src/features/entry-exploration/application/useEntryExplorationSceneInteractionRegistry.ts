@@ -14,9 +14,13 @@ export type EntryExplorationSceneInteractionController = {
   isActive: () => boolean;
   object: THREE.Object3D;
   priority?: number;
-  setCharacter: (character: THREE.Object3D | null) => void;
+  setCharacter?: (character: THREE.Object3D | null) => void;
   update: (time: number) => void;
-  updateCamera: (camera: THREE.OrthographicCamera, time: number) => void;
+  updateCamera: (
+    camera: THREE.OrthographicCamera,
+    time: number,
+    characterPosition: EntryExplorationScenePoint
+  ) => void;
   updateTriggerState: (position: EntryExplorationScenePoint) => void;
 };
 
@@ -55,7 +59,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
 
   const setSceneInteractionCharacter = useCallback((character: THREE.Object3D | null) => {
     sceneInteractionControllersRef.current.forEach((controller) => {
-      controller.setCharacter(character);
+      controller.setCharacter?.(character);
     });
   }, []);
 
@@ -138,8 +142,12 @@ export function useEntryExplorationSceneInteractionRegistry() {
   }, []);
 
   const updateActiveSceneInteractionCamera = useCallback(
-    (camera: THREE.OrthographicCamera, time: number) => {
-      activeSceneInteractionRef.current?.updateCamera(camera, time);
+    (
+      camera: THREE.OrthographicCamera,
+      time: number,
+      characterPosition: EntryExplorationScenePoint
+    ) => {
+      activeSceneInteractionRef.current?.updateCamera(camera, time, characterPosition);
     },
     []
   );

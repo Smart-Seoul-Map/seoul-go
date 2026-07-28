@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import * as THREE from "three";
 
+import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { LINE2_SELECTION_ANIMATION_DURATION_MS } from "../config/line2SelectionConfig";
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
@@ -69,7 +70,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
 
     controller.updateTriggerState(subwayMapObject.position);
     controller.activate(100);
-    controller.updateCamera(camera, 1000);
+    controller.updateCamera(camera, 1000, subwayMapObject.position);
 
     expect(controller.getState().isCameraReady).toBe(true);
     expect(camera.zoom).toBe(1.45);
@@ -86,7 +87,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
 
     controller.updateTriggerState(subwayMapObject.position);
     controller.activate(0);
-    controller.updateCamera(camera, 900);
+    controller.updateCamera(camera, 900, subwayMapObject.position);
     controller.selectStation(1000);
 
     expect(controller.getState().status).toBe("selecting");
@@ -111,12 +112,39 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     expect(controller.isActive()).toBe(true);
     expect(controller.canActivate()).toBe(false);
 
-    controller.updateCamera(camera, 1000);
+    controller.updateCamera(camera, 1000, subwayMapObject.position);
     controller.updateTriggerState({ x: 20, z: 20 });
     controller.updateTriggerState(subwayMapObject.position);
 
     expect(controller.isActive()).toBe(false);
     expect(controller.canActivate()).toBe(true);
+
+    controller.dispose();
+  });
+
+  test("returns the camera to the current character position", () => {
+    const controller = createEntryExplorationSubwaySelectionInteractionController();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
+    const characterPosition = controller.getActivationCharacterDestination?.();
+
+    if (!characterPosition) {
+      throw new Error("Subway selection character destination is required.");
+    }
+
+    controller.updateTriggerState(subwayMapObject.position);
+    controller.activate(0);
+    controller.updateCamera(camera, 900, characterPosition);
+    controller.deactivate(1000);
+    controller.updateCamera(camera, 1900, characterPosition);
+
+    expect(camera.position.x).toBeCloseTo(
+      characterPosition.x + ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset.x
+    );
+    expect(camera.position.y).toBeCloseTo(ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset.y);
+    expect(camera.position.z).toBeCloseTo(
+      characterPosition.z + ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset.z
+    );
+    expect(camera.zoom).toBe(1);
 
     controller.dispose();
   });

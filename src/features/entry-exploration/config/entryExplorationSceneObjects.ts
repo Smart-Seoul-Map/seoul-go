@@ -1,18 +1,11 @@
 import type { EntryExplorationSceneObjectAssetKey } from "./entryExplorationAssets";
 
-export type EntryExplorationSceneAssetKey = EntryExplorationSceneObjectAssetKey;
-
-export type EntryExplorationSceneObjectType = "floorOverlay" | "standingProp";
-
-export type EntryExplorationInteractionType = "subwaySelection";
-
 export type EntryExplorationInteraction = {
   triggerRadius: number;
-  type: EntryExplorationInteractionType;
 };
 
 type EntryExplorationSceneObjectBase = {
-  assetKey: EntryExplorationSceneAssetKey;
+  assetKey: EntryExplorationSceneObjectAssetKey;
   id: string;
   interaction?: EntryExplorationInteraction;
   position: {
@@ -74,7 +67,6 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     id: ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID,
     interaction: {
       triggerRadius: 5.2,
-      type: "subwaySelection",
     },
     position: { x: 18, z: 6 },
     rotationY: 0,

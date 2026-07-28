@@ -252,13 +252,12 @@ export function useEntryExplorationThreeScene({
 
     const render = (time: number) => {
       const deltaSeconds = (time - lastTime) / 1000;
+      const characterPosition = movementRef.current.getCurrentPosition();
 
       lastTime = time;
       mixerRef.current?.update(deltaSeconds);
 
       if (!hasActiveSceneInteraction()) {
-        const characterPosition = movementRef.current.getCurrentPosition();
-
         updateSceneInteractionTriggers(characterPosition);
         activateReadySceneInteraction(time, (controller) => {
           const characterDestination = controller.getActivationCharacterDestination?.();
@@ -278,7 +277,7 @@ export function useEntryExplorationThreeScene({
         updateEntryExplorationCameraFocus(camera, movementRef.current.getCurrentPosition());
       }
 
-      updateActiveSceneInteractionCamera(camera, time);
+      updateActiveSceneInteractionCamera(camera, time, characterPosition);
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(render);
     };

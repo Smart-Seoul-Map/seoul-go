@@ -111,6 +111,7 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     const character = new THREE.Group();
     const camera = new THREE.OrthographicCamera();
     const raycaster = new THREE.Raycaster();
+    const characterPosition = { x: 3, z: 4 };
     const controller = createSceneInteractionController({
       canActivate: vi.fn(() => true),
       handlePointerDown: vi.fn(() => true),
@@ -138,12 +139,12 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
 
     act(() => {
       result.current.activateReadySceneInteraction(40);
-      result.current.updateActiveSceneInteractionCamera(camera, 50);
+      result.current.updateActiveSceneInteractionCamera(camera, 50, characterPosition);
       result.current.disposeSceneInteractionControllers();
       result.current.clearSceneInteractionControllers();
     });
 
-    expect(controller.updateCamera).toHaveBeenCalledWith(camera, 50);
+    expect(controller.updateCamera).toHaveBeenCalledWith(camera, 50, characterPosition);
     expect(controller.dispose).toHaveBeenCalled();
     expect(result.current.hasActiveSceneInteraction()).toBe(false);
   });
