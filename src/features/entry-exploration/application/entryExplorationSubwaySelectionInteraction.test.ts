@@ -2,7 +2,19 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import * as THREE from "three";
 
 import { LINE2_SELECTION_ANIMATION_DURATION_MS } from "../config/line2SelectionConfig";
+import {
+  ENTRY_EXPLORATION_SCENE_OBJECTS,
+  ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID,
+} from "../config/entryExplorationSceneObjects";
 import { createEntryExplorationSubwaySelectionInteractionController } from "./entryExplorationSubwaySelectionInteraction";
+
+const subwayMapObject = ENTRY_EXPLORATION_SCENE_OBJECTS.find(
+  (object) => object.id === ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID
+);
+
+if (!subwayMapObject) {
+  throw new Error("Subway route map scene object is required.");
+}
 
 describe("createEntryExplorationSubwaySelectionInteractionController", () => {
   beforeEach(() => {
@@ -25,7 +37,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
 
     expect(controller.canActivate()).toBe(false);
 
-    controller.updateTriggerState({ x: 8, z: 6 });
+    controller.updateTriggerState(subwayMapObject.position);
 
     expect(controller.canActivate()).toBe(true);
 
@@ -37,6 +49,17 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     controller.dispose();
   });
 
+  test("provides a destination slightly left of the route map center", () => {
+    const controller = createEntryExplorationSubwaySelectionInteractionController();
+
+    expect(controller.getActivationCharacterDestination?.()).toEqual({
+      x: subwayMapObject.position.x - 0.85,
+      z: subwayMapObject.position.z + 0.85,
+    });
+
+    controller.dispose();
+  });
+
   test("moves the camera to the subway selection preset", () => {
     const onStateChange = vi.fn();
     const controller = createEntryExplorationSubwaySelectionInteractionController({
@@ -44,7 +67,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     });
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
 
-    controller.updateTriggerState({ x: 8, z: 6 });
+    controller.updateTriggerState(subwayMapObject.position);
     controller.activate(100);
     controller.updateCamera(camera, 1000);
 
@@ -61,7 +84,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     });
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
 
-    controller.updateTriggerState({ x: 8, z: 6 });
+    controller.updateTriggerState(subwayMapObject.position);
     controller.activate(0);
     controller.updateCamera(camera, 900);
     controller.selectStation(1000);
@@ -80,7 +103,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     const controller = createEntryExplorationSubwaySelectionInteractionController();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
 
-    controller.updateTriggerState({ x: 8, z: 6 });
+    controller.updateTriggerState(subwayMapObject.position);
     controller.activate(0);
     controller.deactivate(100);
 
@@ -90,7 +113,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
 
     controller.updateCamera(camera, 1000);
     controller.updateTriggerState({ x: 20, z: 20 });
-    controller.updateTriggerState({ x: 8, z: 6 });
+    controller.updateTriggerState(subwayMapObject.position);
 
     expect(controller.isActive()).toBe(false);
     expect(controller.canActivate()).toBe(true);

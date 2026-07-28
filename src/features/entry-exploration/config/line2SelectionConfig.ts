@@ -31,10 +31,14 @@ const line2Data: SubwayLineData = subwayStationData.lines[LINE2_KEY];
 export const LINE2_ROUTE_MAP_URL = ENTRY_EXPLORATION_TEXTURE_ASSETS.line2RouteMap.src;
 export const LINE2_SELECTION_ANIMATION_DURATION_MS = 4200;
 export const LINE2_INITIAL_STATION_ID = "201";
+export const LINE2_SELECTION_CHARACTER_DESTINATION_OFFSET = {
+  x: -0.85,
+  z: 0.85,
+} as const;
 export const LINE2_SELECTION_CAMERA_PRESET = {
   durationMs: 900,
-  toLookAt: new THREE.Vector3(10, 0, 4),
-  toPosition: new THREE.Vector3(14, 18, 8),
+  toLookAt: new THREE.Vector3(20, 0, 4),
+  toPosition: new THREE.Vector3(24, 18, 8),
   toZoom: 1.45,
 } as const;
 

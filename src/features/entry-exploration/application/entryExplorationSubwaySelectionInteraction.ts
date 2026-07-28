@@ -20,6 +20,7 @@ import {
   LINE2_MAIN_LOOP_STATION_IDS,
   LINE2_SELECTION_ANIMATION_DURATION_MS,
   LINE2_SELECTION_CAMERA_PRESET,
+  LINE2_SELECTION_CHARACTER_DESTINATION_OFFSET,
   LINE2_STATIONS,
 } from "../config/line2SelectionConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
@@ -285,6 +286,10 @@ export function createEntryExplorationSubwaySelectionInteractionController({
     dispose: () => {
       disposeEntryExplorationObject3D(mapObject);
     },
+    getActivationCharacterDestination: () => ({
+      x: subwayMapObject.position.x + LINE2_SELECTION_CHARACTER_DESTINATION_OFFSET.x,
+      z: subwayMapObject.position.z + LINE2_SELECTION_CHARACTER_DESTINATION_OFFSET.z,
+    }),
     getState,
     handlePointerDown: () => isEngaged,
     handlePointerMove: () => isEngaged,

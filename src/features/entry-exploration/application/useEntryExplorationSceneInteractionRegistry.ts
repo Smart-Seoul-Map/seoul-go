@@ -7,6 +7,7 @@ export type EntryExplorationSceneInteractionController = {
   activate: (time: number) => void;
   canActivate: () => boolean;
   dispose: () => void;
+  getActivationCharacterDestination?: () => EntryExplorationScenePoint;
   handlePointerDown: (raycaster: THREE.Raycaster, time: number) => boolean;
   handlePointerMove: (raycaster: THREE.Raycaster) => boolean;
   handlePointerUp: (raycaster: THREE.Raycaster, time: number) => boolean;

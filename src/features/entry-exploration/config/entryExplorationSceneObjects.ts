@@ -76,7 +76,7 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
       triggerRadius: 5.2,
       type: "subwaySelection",
     },
-    position: { x: 8, z: 6 },
+    position: { x: 18, z: 6 },
     rotationY: 0,
     size: { width: 14, depth: 9.55 },
     type: "floorOverlay",

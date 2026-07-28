@@ -260,7 +260,14 @@ export function useEntryExplorationThreeScene({
         const characterPosition = movementRef.current.getCurrentPosition();
 
         updateSceneInteractionTriggers(characterPosition);
-        activateReadySceneInteraction(time, () => {
+        activateReadySceneInteraction(time, (controller) => {
+          const characterDestination = controller.getActivationCharacterDestination?.();
+
+          if (characterDestination) {
+            movementRef.current.moveTo(characterDestination);
+            return;
+          }
+
           movementRef.current.stop();
         });
       }
