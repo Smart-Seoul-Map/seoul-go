@@ -1,0 +1,112 @@
+.AppStack,
+.AppInline,
+.AppDialogActions {
+  display: flex;
+}
+
+.AppStack[data-direction="vertical"] {
+  flex-direction: column;
+}
+
+.AppStack[data-direction="horizontal"],
+.AppInline,
+.AppDialogActions {
+  flex-direction: row;
+}
+
+.AppInline {
+  min-width: 0;
+}
+
+.AppDialogActions {
+  width: 100%;
+}
+
+.AppStack[data-gap="none"],
+.AppInline[data-gap="none"],
+.AppDialogActions[data-gap="none"] {
+  gap: 0;
+}
+
+.AppStack[data-gap="xs"],
+.AppInline[data-gap="xs"],
+.AppDialogActions[data-gap="xs"] {
+  gap: var(--sg-spacing-1);
+}
+
+.AppStack[data-gap="sm"],
+.AppInline[data-gap="sm"],
+.AppDialogActions[data-gap="sm"] {
+  gap: var(--sg-spacing-2);
+}
+
+.AppStack[data-gap="md"],
+.AppInline[data-gap="md"],
+.AppDialogActions[data-gap="md"] {
+  gap: var(--sg-spacing-3);
+}
+
+.AppStack[data-gap="lg"],
+.AppInline[data-gap="lg"],
+.AppDialogActions[data-gap="lg"] {
+  gap: var(--sg-spacing-4);
+}
+
+.AppStack[data-gap="xl"],
+.AppInline[data-gap="xl"],
+.AppDialogActions[data-gap="xl"] {
+  gap: var(--sg-spacing-6);
+}
+
+.AppStack[data-align="start"],
+.AppInline[data-align="start"],
+.AppDialogActions[data-align="start"] {
+  align-items: flex-start;
+}
+
+.AppStack[data-align="center"],
+.AppInline[data-align="center"],
+.AppDialogActions[data-align="center"] {
+  align-items: center;
+}
+
+.AppStack[data-align="end"],
+.AppInline[data-align="end"],
+.AppDialogActions[data-align="end"] {
+  align-items: flex-end;
+}
+
+.AppStack[data-align="stretch"],
+.AppInline[data-align="stretch"],
+.AppDialogActions[data-align="stretch"] {
+  align-items: stretch;
+}
+
+.AppStack[data-justify="start"],
+.AppInline[data-justify="start"] {
+  justify-content: flex-start;
+}
+
+.AppStack[data-justify="center"],
+.AppInline[data-justify="center"] {
+  justify-content: center;
+}
+
+.AppStack[data-justify="end"],
+.AppInline[data-justify="end"],
+.AppDialogActions[data-align="end"] {
+  justify-content: flex-end;
+}
+
+.AppStack[data-justify="between"],
+.AppInline[data-justify="between"] {
+  justify-content: space-between;
+}
+
+.AppInline[data-wrap="true"] {
+  flex-wrap: wrap;
+}
+
+.AppInline[data-wrap="false"] {
+  flex-wrap: nowrap;
+}

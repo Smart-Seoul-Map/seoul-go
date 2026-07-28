@@ -1,0 +1,257 @@
+/*
+ * 서울고 디자인 토큰
+ */
+
+:root {
+  /* Color - text */
+  --sg-color-text-default: #1a1c20;
+  --sg-color-text-muted: #555d6d;
+  --sg-color-text-subtle: #868b94;
+  --sg-color-text-inverted: #ffffff;
+  --sg-color-text-disabled: #d1d3d8;
+  --sg-color-text-placeholder: #b0b3ba;
+  --sg-color-text-brand: #ff6600;
+  --sg-color-text-danger: #fa342c;
+  --sg-color-text-info: #217cf9;
+  --sg-color-text-positive: #079171;
+  --sg-color-text-warning: #9b7821;
+
+  /* Color - background */
+  --sg-color-bg-page: #f3f4f5;
+  --sg-color-bg-surface: #ffffff;
+  --sg-color-bg-surface-pressed: #f7f8f9;
+  --sg-color-bg-floating: #ffffff;
+  --sg-color-bg-floating-pressed: #f7f8f9;
+  --sg-color-bg-brand: #ff6600;
+  --sg-color-bg-brand-pressed: #e14d00;
+  --sg-color-bg-brand-weak: #fff2ec;
+  --sg-color-bg-neutral-strong: #1a1c20;
+  --sg-color-bg-neutral-weak: #f3f4f5;
+  --sg-color-bg-neutral-weak-pressed: #eeeff1;
+  --sg-color-bg-disabled: #f3f4f5;
+  --sg-color-bg-overlay: #00000074;
+  --sg-color-bg-overlay-muted: #0000002c;
+  --sg-color-bg-danger: #fa342c;
+  --sg-color-bg-danger-pressed: #ca1d13;
+  --sg-color-bg-transparent: #00000000;
+  --sg-color-bg-transparent-pressed: #00000007;
+
+  /* Color - stroke */
+  --sg-color-stroke-default: #00000010;
+  --sg-color-stroke-subtle: #0000000c;
+  --sg-color-stroke-weak: #dcdee3;
+  --sg-color-stroke-strong: #555d6d;
+  --sg-color-stroke-brand: #e14d00;
+  --sg-color-stroke-brand-weak: #ffd5c0;
+  --sg-color-stroke-danger: #fa342c;
+  --sg-color-stroke-danger-weak: #fed4d2;
+  --sg-color-stroke-focus: #5e98fe;
+
+  /* Color - state */
+  --sg-state-focus-ring: var(--sg-color-stroke-focus);
+  --sg-state-disabled-fg: var(--sg-color-text-disabled);
+  --sg-state-disabled-bg: var(--sg-color-bg-disabled);
+  --sg-state-danger-fg: var(--sg-color-text-danger);
+  --sg-state-danger-bg: var(--sg-color-bg-danger);
+  --sg-state-danger-weak-bg: #fdf0f0;
+  --sg-state-info-fg: var(--sg-color-text-info);
+  --sg-state-info-weak-bg: #eff6ff;
+  --sg-state-positive-fg: var(--sg-color-text-positive);
+  --sg-state-warning-fg: var(--sg-color-text-warning);
+
+  /* Spacing */
+  --sg-spacing-0_5: 2px;
+  --sg-spacing-1: 4px;
+  --sg-spacing-1_5: 6px;
+  --sg-spacing-2: 8px;
+  --sg-spacing-2_5: 10px;
+  --sg-spacing-3: 12px;
+  --sg-spacing-3_5: 14px;
+  --sg-spacing-4: 16px;
+  --sg-spacing-4_5: 18px;
+  --sg-spacing-5: 20px;
+  --sg-spacing-6: 24px;
+  --sg-spacing-7: 28px;
+  --sg-spacing-8: 32px;
+  --sg-spacing-9: 36px;
+  --sg-spacing-10: 40px;
+  --sg-spacing-12: 48px;
+  --sg-spacing-13: 52px;
+  --sg-spacing-14: 56px;
+  --sg-spacing-16: 64px;
+  --sg-spacing-semantic-chip-gap-x: var(--sg-spacing-2);
+  --sg-spacing-semantic-screen-gutter-x: var(--sg-spacing-4);
+  --sg-spacing-semantic-component-gap-y: var(--sg-spacing-3);
+  --sg-spacing-semantic-nav-to-title-y: var(--sg-spacing-5);
+  --sg-spacing-semantic-screen-bottom-y: var(--sg-spacing-14);
+  --sg-spacing-semantic-text-gap-y: var(--sg-spacing-1_5);
+
+  /* Radius */
+  --sg-radius-0_5: 2px;
+  --sg-radius-1: 4px;
+  --sg-radius-1_5: 6px;
+  --sg-radius-2: 8px;
+  --sg-radius-2_5: 10px;
+  --sg-radius-3: 12px;
+  --sg-radius-3_5: 14px;
+  --sg-radius-4: 16px;
+  --sg-radius-5: 20px;
+  --sg-radius-6: 24px;
+  --sg-radius-full: 9999px;
+  --sg-surface-radius-sm: var(--sg-radius-2);
+  --sg-floating-control-radius: var(--sg-radius-3_5);
+  --sg-pill-radius: var(--sg-radius-full);
+
+  /* Shadow */
+  --sg-shadow-1: 0 1px 4px #00000014;
+  --sg-shadow-2: 0 2px 10px #0000001a;
+  --sg-shadow-3: 0 4px 16px #0000001f;
+  --sg-floating-control-shadow: var(--sg-shadow-1);
+  --sg-panel-shadow: var(--sg-shadow-2);
+
+  /* Motion */
+  --sg-motion-duration-1: 50ms;
+  --sg-motion-duration-2: 100ms;
+  --sg-motion-duration-3: 150ms;
+  --sg-motion-duration-4: 200ms;
+  --sg-motion-duration-5: 250ms;
+  --sg-motion-duration-6: 300ms;
+  --sg-motion-duration-color-transition: var(--sg-motion-duration-3);
+  --sg-motion-duration-pressed-scale: var(--sg-motion-duration-3);
+  --sg-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+  --sg-motion-easing-standard: cubic-bezier(0.35, 0, 0.35, 1);
+  --sg-motion-easing-enter: cubic-bezier(0, 0, 0.15, 1);
+  --sg-motion-easing-exit: cubic-bezier(0.35, 0, 1, 1);
+  --sg-motion-easing-enter-expressive: cubic-bezier(0.03, 0.4, 0.1, 1);
+  --sg-motion-easing-exit-expressive: cubic-bezier(0.35, 0, 0.95, 0.55);
+  --sg-motion-easing-pressed-scale: cubic-bezier(0, 0, 0.15, 1);
+
+  /* Typography - font size */
+  --sg-font-size-1: 0.6875rem;
+  --sg-font-size-2: 0.75rem;
+  --sg-font-size-3: 0.8125rem;
+  --sg-font-size-4: 0.875rem;
+  --sg-font-size-5: 1rem;
+  --sg-font-size-6: 1.125rem;
+  --sg-font-size-7: 1.25rem;
+  --sg-font-size-8: 1.375rem;
+  --sg-font-size-9: 1.5rem;
+  --sg-font-size-10: 1.625rem;
+  --sg-font-size-11: 1.75rem;
+  --sg-font-size-12: 2rem;
+  --sg-font-size-13: 2.5rem;
+  --sg-font-size-14: 3rem;
+
+  /* Typography - line height */
+  --sg-line-height-1: 0.9375rem;
+  --sg-line-height-2: 1rem;
+  --sg-line-height-3: 1.125rem;
+  --sg-line-height-4: 1.1875rem;
+  --sg-line-height-5: 1.375rem;
+  --sg-line-height-6: 1.5rem;
+  --sg-line-height-7: 1.6875rem;
+  --sg-line-height-8: 1.875rem;
+  --sg-line-height-9: 2rem;
+  --sg-line-height-10: 2.1875rem;
+  --sg-line-height-11: 2.375rem;
+  --sg-line-height-12: 2.625rem;
+  --sg-line-height-13: 3.25rem;
+  --sg-line-height-14: 3.75rem;
+
+  /* Typography - font weight */
+  --sg-font-weight-regular: 400;
+  --sg-font-weight-medium: 500;
+  --sg-font-weight-bold: 700;
+
+  /* Typography - semantic roles */
+  --sg-typography-body-font-size: var(--sg-font-size-5);
+  --sg-typography-body-line-height: var(--sg-line-height-5);
+  --sg-typography-body-font-weight: var(--sg-font-weight-regular);
+  --sg-typography-supporting-font-size: var(--sg-font-size-4);
+  --sg-typography-supporting-line-height: var(--sg-line-height-4);
+  --sg-typography-supporting-font-weight: var(--sg-font-weight-regular);
+  --sg-typography-caption-font-size: var(--sg-font-size-3);
+  --sg-typography-caption-line-height: var(--sg-line-height-3);
+  --sg-typography-caption-font-weight: var(--sg-font-weight-regular);
+  --sg-typography-button-label-font-size: var(--sg-font-size-4);
+  --sg-typography-button-label-line-height: var(--sg-line-height-4);
+  --sg-typography-button-label-font-weight: var(--sg-font-weight-bold);
+  --sg-typography-dialog-title-font-size: var(--sg-font-size-7);
+  --sg-typography-dialog-title-line-height: var(--sg-line-height-7);
+  --sg-typography-dialog-title-font-weight: var(--sg-font-weight-bold);
+  --sg-typography-dialog-body-font-size: var(--sg-font-size-5);
+  --sg-typography-dialog-body-line-height: var(--sg-line-height-5);
+  --sg-typography-dialog-body-font-weight: var(--sg-font-weight-regular);
+  --sg-typography-result-title-font-size: var(--sg-font-size-8);
+  --sg-typography-result-title-line-height: var(--sg-line-height-8);
+  --sg-typography-result-title-font-weight: var(--sg-font-weight-bold);
+
+  /* Button component tokens */
+  --sg-button-primary-bg: var(--sg-color-bg-brand);
+  --sg-button-primary-bg-pressed: var(--sg-color-bg-brand-pressed);
+  --sg-button-primary-fg: var(--sg-color-text-inverted);
+  --sg-button-strong-bg: #2a3038;
+  --sg-button-strong-fg: var(--sg-color-text-inverted);
+  --sg-button-secondary-bg: var(--sg-color-bg-neutral-weak);
+  --sg-button-secondary-bg-pressed: var(--sg-color-bg-neutral-weak-pressed);
+  --sg-button-secondary-fg: var(--sg-color-text-default);
+  --sg-button-danger-bg: var(--sg-color-bg-danger);
+  --sg-button-danger-bg-pressed: var(--sg-color-bg-danger-pressed);
+  --sg-button-danger-fg: var(--sg-color-text-inverted);
+  --sg-button-outline-stroke: var(--sg-color-stroke-weak);
+  --sg-button-outline-fg: var(--sg-color-text-default);
+  --sg-button-ghost-bg: var(--sg-color-bg-transparent);
+  --sg-button-ghost-bg-pressed: var(--sg-color-bg-transparent-pressed);
+  --sg-button-ghost-fg: var(--sg-color-text-default);
+  --sg-button-disabled-bg: var(--sg-color-bg-disabled);
+  --sg-button-disabled-fg: var(--sg-color-text-disabled);
+  --sg-button-radius: var(--sg-radius-2);
+  --sg-button-height-xs: var(--sg-spacing-8);
+  --sg-button-height-sm: var(--sg-spacing-9);
+  --sg-button-height-md: var(--sg-spacing-10);
+  --sg-button-height-lg: var(--sg-spacing-13);
+  --sg-button-padding-x: var(--sg-spacing-3_5);
+  --sg-button-gap: var(--sg-spacing-1);
+
+  /* Text button component tokens */
+  --sg-text-button-height-default: var(--sg-spacing-9);
+  --sg-text-button-padding-x-default: var(--sg-spacing-3_5);
+  --sg-text-button-padding-y-default: var(--sg-spacing-2);
+  --sg-text-button-radius-default: var(--sg-radius-2);
+  --sg-text-button-color-default: var(--sg-color-text-muted);
+  --sg-text-button-state-pressed: var(--sg-color-bg-surface-pressed);
+
+  /* Icon button component tokens */
+  --sg-icon-button-size-nav: 44px;
+  --sg-icon-button-icon-size-nav: 24px;
+  --sg-icon-button-tone-layer: var(--sg-color-text-default);
+  --sg-icon-button-tone-on-image: var(--sg-color-text-inverted);
+  --sg-icon-button-state-disabled: var(--sg-color-text-disabled);
+
+  /* Dialog component tokens */
+  --sg-dialog-backdrop-bg: var(--sg-color-bg-overlay);
+  --sg-dialog-surface-bg: var(--sg-color-bg-floating);
+  --sg-dialog-surface-bg-pressed: var(--sg-color-bg-floating-pressed);
+  --sg-dialog-surface-radius: var(--sg-radius-5);
+  --sg-dialog-surface-shadow: var(--sg-shadow-3);
+  --sg-dialog-surface-margin-x: var(--sg-spacing-8);
+  --sg-dialog-surface-margin-y: var(--sg-spacing-16);
+  --sg-dialog-title-fg: var(--sg-color-text-default);
+  --sg-dialog-description-fg: var(--sg-color-text-default);
+  --sg-dialog-description-muted-fg: var(--sg-color-text-muted);
+  --sg-dialog-stroke: var(--sg-color-stroke-default);
+  --sg-dialog-header-gap: var(--sg-spacing-1_5);
+  --sg-dialog-header-padding-x: var(--sg-spacing-5);
+  --sg-dialog-header-padding-top: var(--sg-spacing-5);
+  --sg-dialog-footer-gap: var(--sg-spacing-2);
+  --sg-dialog-footer-padding-x: var(--sg-spacing-5);
+  --sg-dialog-footer-padding-top: var(--sg-spacing-4);
+  --sg-dialog-footer-padding-bottom: var(--sg-spacing-5);
+  --sg-dialog-backdrop-enter-duration: var(--sg-motion-duration-2);
+  --sg-dialog-backdrop-exit-duration: var(--sg-motion-duration-2);
+  --sg-dialog-content-enter-duration: var(--sg-motion-duration-4);
+  --sg-dialog-content-exit-duration: var(--sg-motion-duration-2);
+  --sg-dialog-motion-enter-easing: var(--sg-motion-easing-enter-expressive);
+  --sg-dialog-motion-exit-easing: var(--sg-motion-easing-exit);
+  --sg-dialog-motion-enter-scale: 1.3;
+}
