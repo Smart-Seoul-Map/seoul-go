@@ -1,0 +1,71 @@
+.AppDialogBackdrop {
+  align-items: center;
+  background: var(--sg-dialog-backdrop-bg);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: var(--sg-dialog-surface-margin-y) var(--sg-dialog-surface-margin-x);
+  position: fixed;
+  z-index: 1000;
+}
+
+.AppDialog {
+  background: var(--sg-dialog-surface-bg);
+  border-radius: var(--sg-dialog-surface-radius);
+  box-shadow: var(--sg-dialog-surface-shadow);
+  color: var(--sg-color-text-default);
+  display: flex;
+  flex-direction: column;
+  max-height: min(680px, calc(100vh - var(--sg-dialog-surface-margin-y) * 2));
+  max-width: min(420px, 100%);
+  overflow: hidden;
+  width: 100%;
+}
+
+.AppDialogHeader {
+  align-items: flex-start;
+  display: grid;
+  gap: var(--sg-dialog-header-gap);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: var(--sg-dialog-header-padding-top) var(--sg-dialog-header-padding-x) 0
+    var(--sg-dialog-header-padding-x);
+}
+
+.AppDialogHeader > .AppStack {
+  min-width: 0;
+}
+
+.AppDialogHeaderActionSlot {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: var(--sg-button-height-xs);
+  min-width: var(--sg-button-height-xs);
+}
+
+.AppDialogBody {
+  color: var(--sg-dialog-description-fg);
+  font-size: var(--sg-typography-dialog-body-font-size);
+  font-weight: var(--sg-typography-dialog-body-font-weight);
+  line-height: var(--sg-typography-dialog-body-line-height);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sg-spacing-4) var(--sg-dialog-header-padding-x);
+}
+
+.AppDialogFooter {
+  border-top: 1px solid var(--sg-dialog-stroke);
+  padding: var(--sg-dialog-footer-padding-top) var(--sg-dialog-footer-padding-x)
+    var(--sg-dialog-footer-padding-bottom);
+}
+
+@media (max-width: 520px) {
+  .AppDialogBackdrop {
+    align-items: flex-end;
+    padding: var(--sg-spacing-4);
+  }
+
+  .AppDialog {
+    max-height: calc(100vh - var(--sg-spacing-8));
+  }
+}

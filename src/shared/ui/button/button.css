@@ -1,0 +1,194 @@
+.AppButton,
+.AppTextButton,
+.AppIconButton {
+  align-items: center;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  font: inherit;
+  justify-content: center;
+  min-width: 0;
+  outline: none;
+  position: relative;
+  text-decoration: none;
+  transition:
+    background-color var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard),
+    border-color var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard),
+    color var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard),
+    transform var(--sg-motion-duration-pressed-scale) var(--sg-motion-easing-pressed-scale);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.AppButton:focus-visible,
+.AppTextButton:focus-visible,
+.AppIconButton:focus-visible {
+  box-shadow: 0 0 0 3px var(--sg-state-focus-ring);
+}
+
+.AppButton:active,
+.AppTextButton:active,
+.AppIconButton:active {
+  transform: scale(0.98);
+}
+
+.AppButton:disabled,
+.AppTextButton:disabled,
+.AppIconButton:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.AppButton {
+  border-radius: var(--sg-button-radius);
+  font-size: var(--sg-typography-button-label-font-size);
+  font-weight: var(--sg-typography-button-label-font-weight);
+  gap: var(--sg-button-gap);
+  line-height: var(--sg-typography-button-label-line-height);
+  padding-inline: var(--sg-button-padding-x);
+  white-space: nowrap;
+}
+
+.AppButton[data-size="xs"] {
+  min-height: var(--sg-button-height-xs);
+}
+
+.AppButton[data-size="sm"] {
+  min-height: var(--sg-button-height-sm);
+}
+
+.AppButton[data-size="md"] {
+  min-height: var(--sg-button-height-md);
+}
+
+.AppButton[data-size="lg"] {
+  min-height: var(--sg-button-height-lg);
+}
+
+.AppButton[data-variant="primary"] {
+  background: var(--sg-button-primary-bg);
+  color: var(--sg-button-primary-fg);
+}
+
+.AppButton[data-variant="primary"]:active {
+  background: var(--sg-button-primary-bg-pressed);
+}
+
+.AppButton[data-variant="secondary"] {
+  background: var(--sg-button-secondary-bg);
+  color: var(--sg-button-secondary-fg);
+}
+
+.AppButton[data-variant="secondary"]:active {
+  background: var(--sg-button-secondary-bg-pressed);
+}
+
+.AppButton[data-variant="strong"] {
+  background: var(--sg-button-strong-bg);
+  color: var(--sg-button-strong-fg);
+}
+
+.AppButton[data-variant="danger"] {
+  background: var(--sg-button-danger-bg);
+  color: var(--sg-button-danger-fg);
+}
+
+.AppButton[data-variant="danger"]:active {
+  background: var(--sg-button-danger-bg-pressed);
+}
+
+.AppButton[data-variant="outline"] {
+  background: var(--sg-color-bg-transparent);
+  border: 1px solid var(--sg-button-outline-stroke);
+  color: var(--sg-button-outline-fg);
+}
+
+.AppButton[data-variant="ghost"] {
+  background: var(--sg-button-ghost-bg);
+  color: var(--sg-button-ghost-fg);
+}
+
+.AppButton[data-variant="ghost"]:active {
+  background: var(--sg-button-ghost-bg-pressed);
+}
+
+.AppButton:disabled {
+  background: var(--sg-button-disabled-bg);
+  color: var(--sg-button-disabled-fg);
+}
+
+.AppTextButton {
+  border-radius: var(--sg-text-button-radius-default);
+  font-size: var(--sg-typography-button-label-font-size);
+  font-weight: var(--sg-typography-button-label-font-weight);
+  line-height: var(--sg-typography-button-label-line-height);
+  padding: var(--sg-text-button-padding-y-default) var(--sg-text-button-padding-x-default);
+}
+
+.AppTextButton[data-size="sm"] {
+  min-height: var(--sg-button-height-xs);
+}
+
+.AppTextButton[data-size="md"] {
+  min-height: var(--sg-text-button-height-default);
+}
+
+.AppTextButton[data-variant="neutral"] {
+  background: transparent;
+  color: var(--sg-text-button-color-default);
+}
+
+.AppTextButton[data-variant="brand"] {
+  background: transparent;
+  color: var(--sg-color-text-brand);
+}
+
+.AppTextButton[data-variant="danger"] {
+  background: transparent;
+  color: var(--sg-color-text-danger);
+}
+
+.AppTextButton:active {
+  background: var(--sg-text-button-state-pressed);
+}
+
+.AppTextButton:disabled {
+  background: transparent;
+  color: var(--sg-button-disabled-fg);
+}
+
+.AppIconButton {
+  border-radius: var(--sg-radius-full);
+  padding: 0;
+}
+
+.AppIconButton[data-size="nav"] {
+  height: var(--sg-icon-button-size-nav);
+  width: var(--sg-icon-button-size-nav);
+}
+
+.AppIconButton[data-size="sm"] {
+  height: var(--sg-button-height-xs);
+  width: var(--sg-button-height-xs);
+}
+
+.AppIconButton[data-size="md"] {
+  height: var(--sg-button-height-md);
+  width: var(--sg-button-height-md);
+}
+
+.AppIconButton[data-variant="layer"] {
+  background: transparent;
+  color: var(--sg-icon-button-tone-layer);
+}
+
+.AppIconButton[data-variant="onImage"] {
+  background: var(--sg-color-bg-overlay-muted);
+  color: var(--sg-icon-button-tone-on-image);
+}
+
+.AppIconButton:disabled {
+  background: transparent;
+  color: var(--sg-icon-button-state-disabled);
+}

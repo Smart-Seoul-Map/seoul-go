@@ -1,0 +1,127 @@
+.AppText,
+.AppHeading,
+.AppCaption {
+  margin: 0;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.AppText[data-align="start"],
+.AppHeading[data-align="start"],
+.AppCaption[data-align="start"] {
+  text-align: start;
+}
+
+.AppText[data-align="center"],
+.AppHeading[data-align="center"],
+.AppCaption[data-align="center"] {
+  text-align: center;
+}
+
+.AppText[data-align="end"],
+.AppHeading[data-align="end"],
+.AppCaption[data-align="end"] {
+  text-align: end;
+}
+
+.AppText[data-tone="default"],
+.AppHeading[data-tone="default"] {
+  color: var(--sg-color-text-default);
+}
+
+.AppText[data-tone="muted"],
+.AppHeading[data-tone="muted"],
+.AppCaption[data-tone="muted"] {
+  color: var(--sg-color-text-muted);
+}
+
+.AppText[data-tone="subtle"],
+.AppCaption[data-tone="subtle"] {
+  color: var(--sg-color-text-subtle);
+}
+
+.AppText[data-tone="disabled"] {
+  color: var(--sg-color-text-disabled);
+}
+
+.AppText[data-tone="brand"],
+.AppHeading[data-tone="brand"] {
+  color: var(--sg-color-text-brand);
+}
+
+.AppText[data-tone="danger"],
+.AppHeading[data-tone="danger"],
+.AppCaption[data-tone="danger"] {
+  color: var(--sg-color-text-danger);
+}
+
+.AppText[data-role="body"] {
+  font-size: var(--sg-typography-body-font-size);
+  font-weight: var(--sg-typography-body-font-weight);
+  line-height: var(--sg-typography-body-line-height);
+}
+
+.AppText[data-role="supporting"] {
+  font-size: var(--sg-typography-supporting-font-size);
+  font-weight: var(--sg-typography-supporting-font-weight);
+  line-height: var(--sg-typography-supporting-line-height);
+}
+
+.AppText[data-role="dialogBody"] {
+  font-size: var(--sg-typography-dialog-body-font-size);
+  font-weight: var(--sg-typography-dialog-body-font-weight);
+  line-height: var(--sg-typography-dialog-body-line-height);
+}
+
+.AppHeading {
+  font-weight: var(--sg-font-weight-bold);
+}
+
+.AppHeading[data-size="sm"] {
+  font-size: var(--sg-font-size-6);
+  line-height: var(--sg-line-height-6);
+}
+
+.AppHeading[data-size="md"] {
+  font-size: var(--sg-typography-dialog-title-font-size);
+  line-height: var(--sg-typography-dialog-title-line-height);
+}
+
+.AppHeading[data-size="lg"] {
+  font-size: var(--sg-typography-result-title-font-size);
+  line-height: var(--sg-typography-result-title-line-height);
+}
+
+.AppCaption {
+  font-size: var(--sg-typography-caption-font-size);
+  font-weight: var(--sg-typography-caption-font-weight);
+  line-height: var(--sg-typography-caption-line-height);
+}
+
+.AppText[data-max-lines],
+.AppHeading[data-max-lines],
+.AppCaption[data-max-lines] {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.AppText[data-max-lines="1"],
+.AppHeading[data-max-lines="1"],
+.AppCaption[data-max-lines="1"] {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.AppText[data-max-lines="2"],
+.AppHeading[data-max-lines="2"],
+.AppCaption[data-max-lines="2"] {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.AppText[data-max-lines="3"],
+.AppCaption[data-max-lines="3"] {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
