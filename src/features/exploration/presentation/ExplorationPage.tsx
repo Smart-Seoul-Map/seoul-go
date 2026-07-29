@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 
+import "./ExplorationPage.css";
+
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
@@ -9,6 +11,7 @@ import { ExplorationMap } from "./ExplorationMap";
 type ExplorationThemeProgressItem = {
   id: string;
   markerColor: string | null;
+  markerColorToken: string | null;
   name: string;
   totalCount: number;
   visitedCount: number;
@@ -42,7 +45,11 @@ export function ExplorationPage({
                 <span
                   aria-hidden="true"
                   className="theme-progress-dot"
-                  style={{ backgroundColor: item.markerColor }}
+                  style={{
+                    backgroundColor: item.markerColorToken
+                      ? `var(${item.markerColorToken})`
+                      : item.markerColor,
+                  }}
                 />
               ) : null}
               <span>{item.name}</span>

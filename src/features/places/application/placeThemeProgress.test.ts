@@ -3,8 +3,18 @@ import { describe, expect, test } from "vitest";
 import { createPlaceThemeProgressItems } from "./placeThemeProgress";
 
 const themes = [
-  { id: "night", name: "Night", markerColor: "#1971c2" },
-  { id: "art", name: "Art", markerColor: "#8b5cf6" },
+  {
+    id: "night",
+    name: "Night",
+    markerColor: "#1971c2",
+    markerColorToken: "--sg-place-theme-blue",
+  },
+  {
+    id: "art",
+    name: "Art",
+    markerColor: "#8b5cf6",
+    markerColorToken: "--sg-place-theme-purple",
+  },
 ] as const;
 
 const places = [
@@ -21,12 +31,14 @@ describe("createPlaceThemeProgressItems", () => {
       expect.objectContaining({
         id: "all",
         markerColor: null,
+        markerColorToken: null,
         totalCount: 3,
         visitedCount: 0,
       }),
       {
         id: "night",
         markerColor: "#1971c2",
+        markerColorToken: "--sg-place-theme-blue",
         name: "Night",
         totalCount: 2,
         visitedCount: 0,
@@ -34,6 +46,7 @@ describe("createPlaceThemeProgressItems", () => {
       {
         id: "art",
         markerColor: "#8b5cf6",
+        markerColorToken: "--sg-place-theme-purple",
         name: "Art",
         totalCount: 1,
         visitedCount: 0,
