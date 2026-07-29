@@ -106,7 +106,9 @@ describe("SubwaySelectionDialog", () => {
       <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({
           selectedStation: {
+            address: "서울특별시 중구 서소문로 지하 127",
             id: "201",
+            location: { lat: 37.564718, lng: 126.977108 },
             name: "시청",
             position: { x: 46.73, y: 15.28 },
           },

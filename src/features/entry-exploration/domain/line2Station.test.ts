@@ -8,10 +8,34 @@ import {
 } from "./line2Station";
 
 const STATIONS: readonly Line2Station[] = [
-  { id: "201", name: "시청", position: { x: 0, y: 0 } },
-  { id: "202", name: "을지로입구", position: { x: 10, y: 0 } },
-  { id: "203", name: "을지로3가", position: { x: 10, y: 10 } },
-  { id: "203-1", name: "지선역", position: { x: 20, y: 10 } },
+  {
+    address: "시청역 주소",
+    id: "201",
+    location: { lat: 37.564718, lng: 126.977108 },
+    name: "시청",
+    position: { x: 0, y: 0 },
+  },
+  {
+    address: "을지로입구역 주소",
+    id: "202",
+    location: { lat: 37.566014, lng: 126.982618 },
+    name: "을지로입구",
+    position: { x: 10, y: 0 },
+  },
+  {
+    address: "을지로3가역 주소",
+    id: "203",
+    location: { lat: 37.566295, lng: 126.99191 },
+    name: "을지로3가",
+    position: { x: 10, y: 10 },
+  },
+  {
+    address: "지선역 주소",
+    id: "203-1",
+    location: { lat: 37.57, lng: 127 },
+    name: "지선역",
+    position: { x: 20, y: 10 },
+  },
 ];
 const MAIN_LOOP_STATION_IDS = ["201", "202", "203"];
 const BRANCH_STATION_IDS = [["203", "203-1"]];

@@ -3,8 +3,15 @@ export type Line2RoutePoint = {
   y: number;
 };
 
+export type Line2GeoPoint = {
+  lat: number;
+  lng: number;
+};
+
 export type Line2Station = {
+  address: string;
   id: string;
+  location: Line2GeoPoint;
   name: string;
   position: Line2RoutePoint;
 };

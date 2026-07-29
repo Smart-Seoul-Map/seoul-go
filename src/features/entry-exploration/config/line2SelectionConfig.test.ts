@@ -11,7 +11,9 @@ describe("line 2 selection config", () => {
     expect(LINE2_MAIN_LOOP_STATIONS).toHaveLength(43);
     expect(LINE2_STATIONS).toHaveLength(51);
     expect(LINE2_STATIONS[0]).toEqual({
+      address: "서울특별시 중구 서소문로 지하 127",
       id: "201",
+      location: { lat: 37.564718, lng: 126.977108 },
       name: "시청",
       position: { x: 46.73, y: 15.28 },
     });
@@ -19,8 +21,8 @@ describe("line 2 selection config", () => {
 
   test("keeps each branch connected to its junction station", () => {
     expect(LINE2_BRANCH_STATION_IDS).toEqual([
-      ["211", "211-1", "211-2", "211-3", "211-4"],
-      ["234", "234-1", "234-2", "234-3", "234-4"],
+      ["211", "244", "245", "246", "247"],
+      ["234", "248", "249", "250", "251"],
     ]);
   });
 });
