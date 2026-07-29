@@ -7,7 +7,7 @@ import { getSmartSeoulPlaceTheme } from "../config/placeThemeConfig";
 import type { SmartSeoulThemePlace } from "../domain/place";
 
 export function createPlacesFeatureCollection(
-  places: SmartSeoulThemePlace[]
+  places: readonly SmartSeoulThemePlace[]
 ): MapMarkerFeatureCollection {
   return {
     type: "FeatureCollection",

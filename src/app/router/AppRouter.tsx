@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
@@ -8,6 +8,7 @@ import {
   SMART_SEOUL_PLACE_THEMES,
   createPlacesFeatureCollection,
   createPlaceThemeProgressItems,
+  filterSmartSeoulPlacesByDistrict,
   useSmartSeoulThemePlacesQuery,
 } from "@features/places";
 import { PATH } from "@shared/constants/path";
@@ -32,17 +33,26 @@ function parseDistrictIdParam(districtId: string | undefined): number | null {
 }
 
 function ExplorationRoute({ district }: ExplorationRouteProps): ReactElement {
-  const { data: places = [] } = useSmartSeoulThemePlacesQuery(district?.name);
-  const themeProgressItems = createPlaceThemeProgressItems({
-    places,
-    themes: SMART_SEOUL_PLACE_THEMES,
-  });
+  const { data: allPlaces = [] } = useSmartSeoulThemePlacesQuery();
+  const places = useMemo(
+    () => filterSmartSeoulPlacesByDistrict(allPlaces, district?.name),
+    [allPlaces, district?.name]
+  );
+  const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
+  const themeProgressItems = useMemo(
+    () =>
+      createPlaceThemeProgressItems({
+        places,
+        themes: SMART_SEOUL_PLACE_THEMES,
+      }),
+    [places]
+  );
 
   return (
     <ExplorationPage
       districtId={district?.id}
       initialCenter={district?.officePosition}
-      placeMarkers={createPlacesFeatureCollection(places)}
+      placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}
     />
   );

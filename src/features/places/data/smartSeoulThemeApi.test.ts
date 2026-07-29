@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import { buildSmartSeoulThemeContentsUrl, fetchSmartSeoulThemePlaces } from "./smartSeoulThemeApi";
 
-describe("Smart Seoul 테마 API", () => {
-  test("테마 콘텐츠 요청 URL을 상수화된 파라미터로 만든다", () => {
+describe("Smart Seoul theme API", () => {
+  test("builds theme contents request URL with required params", () => {
     const url = buildSmartSeoulThemeContentsUrl({
       apiKey: "KEY 123",
       pageNo: 2,
@@ -21,7 +21,7 @@ describe("Smart Seoul 테마 API", () => {
     expect(url.searchParams.get("theme_id")).toBe("100032,100575");
   });
 
-  test("페이지 응답을 요청해 정규화된 장소만 반환한다", async () => {
+  test("requests pages and returns normalized places", async () => {
     const requestedUrls: string[] = [];
     const places = await fetchSmartSeoulThemePlaces({
       apiKey: "KEY",
@@ -30,16 +30,17 @@ describe("Smart Seoul 테마 API", () => {
         requestedUrls.push(url.toString());
         return {
           header: {
-            resultCode: "200",
             PAGE_COUNT: 1,
+            resultCode: "200",
           },
           body: [
             {
-              COT_THEME_ID: "100032",
               COT_CONTS_ID: "heritage-1",
-              COT_CONTS_NAME: "서울도서관",
+              COT_CONTS_NAME: "Library",
               COT_COORD_X: "126.97842",
               COT_COORD_Y: "37.56668",
+              COT_GU_NAME: "district-a",
+              COT_THEME_ID: "100032",
             },
           ],
         };
@@ -48,40 +49,76 @@ describe("Smart Seoul 테마 API", () => {
 
     expect(requestedUrls).toHaveLength(1);
     expect(places).toHaveLength(1);
-    expect(places[0]?.name).toBe("서울도서관");
+    expect(places[0]?.name).toBe("Library");
+    expect(places[0]?.districtName).toBe("district-a");
   });
 
-  test("자치구 이름이 일치하는 장소만 반환한다", async () => {
+  test("requests every page until the API page count", async () => {
+    const requestedPageNumbers: string[] = [];
     const places = await fetchSmartSeoulThemePlaces({
       apiKey: "KEY",
-      districtName: "강남구",
+      themeIds: ["100032"],
+      requestJson: async (url) => {
+        const pageNo = url.searchParams.get("page_no") ?? "1";
+
+        requestedPageNumbers.push(pageNo);
+
+        return {
+          header: {
+            PAGE_COUNT: 3,
+            resultCode: "200",
+          },
+          body: [
+            {
+              COT_CONTS_ID: `page-${pageNo}`,
+              COT_CONTS_NAME: `Place ${pageNo}`,
+              COT_COORD_X: "126.97842",
+              COT_COORD_Y: "37.56668",
+              COT_GU_NAME: "district-a",
+              COT_THEME_ID: "100032",
+            },
+          ],
+        };
+      },
+    });
+
+    expect(requestedPageNumbers).toEqual(["1", "2", "3"]);
+    expect(places.map((place) => place.sourceContentId)).toEqual(["page-1", "page-2", "page-3"]);
+  });
+
+  test("does not filter rows by district while fetching source data", async () => {
+    const places = await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
       themeIds: ["100032"],
       requestJson: async () => ({
         header: {
-          resultCode: "200",
           PAGE_COUNT: 1,
+          resultCode: "200",
         },
         body: [
           {
-            COT_THEME_ID: "100032",
-            COT_CONTS_ID: "gangnam-place",
-            COT_CONTS_NAME: "강남 장소",
+            COT_CONTS_ID: "district-a-place",
+            COT_CONTS_NAME: "District A place",
             COT_COORD_X: "127.047",
             COT_COORD_Y: "37.517",
-            COT_GU_NAME: "강남구",
+            COT_GU_NAME: "district-a",
+            COT_THEME_ID: "100032",
           },
           {
-            COT_THEME_ID: "100032",
-            COT_CONTS_ID: "seocho-place",
-            COT_CONTS_NAME: "서초 장소",
+            COT_CONTS_ID: "district-b-place",
+            COT_CONTS_NAME: "District B place",
             COT_COORD_X: "127.032",
             COT_COORD_Y: "37.483",
-            COT_GU_NAME: "서초구",
+            COT_GU_NAME: "district-b",
+            COT_THEME_ID: "100032",
           },
         ],
       }),
     });
 
-    expect(places.map((place) => place.sourceContentId)).toEqual(["gangnam-place"]);
+    expect(places.map((place) => place.sourceContentId)).toEqual([
+      "district-a-place",
+      "district-b-place",
+    ]);
   });
 });

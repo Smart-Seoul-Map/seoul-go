@@ -7,6 +7,7 @@ export type SmartSeoulThemePlace = {
   id: string;
   sourceContentId: string;
   name: string;
+  districtName: string;
   themeId: string;
   themeName: string;
   address: string;

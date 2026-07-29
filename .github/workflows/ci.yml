@@ -84,3 +84,5 @@ jobs:
 
       - name: Run E2E tests
         run: pnpm run test:e2e
+        env:
+          VITE_SMART_SEOUL_THEME_KEY: E2E_KEY
