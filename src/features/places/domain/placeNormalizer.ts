@@ -71,6 +71,7 @@ export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePl
     id: `smart-seoul:${themeId}:${sourceContentId}`,
     sourceContentId,
     name,
+    districtName: field(source, ["COT_GU_NAME", "GU_NAME"]),
     themeId,
     themeName: theme.name,
     address: field(source, ["COT_ADDR_FULL_NEW", "ADDR_NEW", "COT_ADDR_FULL_OLD", "ADDR_OLD"]),
