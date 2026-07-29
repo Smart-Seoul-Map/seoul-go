@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSceneInteractionControllers";
+import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
 import { SubwaySelectionControls } from "./SubwaySelectionControls";
 
 function createSubwaySelectionViewModel(

@@ -49,11 +49,18 @@ type SceneHandles = {
 export type UseEntryExplorationThreeSceneOptions = {
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
+  onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
+};
+
+export type EntryExplorationThreeSceneControls = {
+  deactivateActiveInteraction: () => void;
+  retryActiveInteraction: () => void;
 };
 
 export function useEntryExplorationThreeScene({
   containerRef,
   createSceneInteractionControllers,
+  onSceneControlsReady,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
@@ -64,6 +71,7 @@ export function useEntryExplorationThreeScene({
     activateReadySceneInteraction,
     addSceneInteractionObjects,
     clearSceneInteractionControllers,
+    deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
@@ -71,6 +79,7 @@ export function useEntryExplorationThreeScene({
     hasActiveSceneInteraction,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
+    retryActiveSceneInteraction,
     setSceneInteractionCharacter,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
@@ -108,6 +117,37 @@ export function useEntryExplorationThreeScene({
   });
   const movementRef = useRef(movement);
   movementRef.current = movement;
+
+  const restoreCameraToCurrentPosition = useCallback(() => {
+    const handles = sceneHandlesRef.current;
+
+    if (!handles) {
+      return;
+    }
+
+    updateEntryExplorationCameraFocus(handles.camera, movementRef.current.getCurrentPosition());
+  }, []);
+
+  const deactivateActiveInteraction = useCallback(() => {
+    if (deactivateActiveSceneInteraction()) {
+      restoreCameraToCurrentPosition();
+    }
+  }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
+
+  const retryActiveInteraction = useCallback(() => {
+    retryActiveSceneInteraction();
+  }, [retryActiveSceneInteraction]);
+
+  useEffect(() => {
+    onSceneControlsReady?.({
+      deactivateActiveInteraction,
+      retryActiveInteraction,
+    });
+
+    return () => {
+      onSceneControlsReady?.(null);
+    };
+  }, [deactivateActiveInteraction, onSceneControlsReady, retryActiveInteraction]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -205,6 +245,11 @@ export function useEntryExplorationThreeScene({
       const handledByInteraction = handleSceneInteractionPointerDown(raycaster, performance.now());
 
       if (handledByInteraction) {
+        return;
+      }
+
+      if (hasActiveSceneInteraction()) {
+        deactivateActiveInteraction();
         return;
       }
 
@@ -313,6 +358,7 @@ export function useEntryExplorationThreeScene({
     clearSceneInteractionControllers,
     containerRef,
     createSceneInteractionControllers,
+    deactivateActiveInteraction,
     disposeSceneInteractionControllers,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,

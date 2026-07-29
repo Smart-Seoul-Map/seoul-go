@@ -6,6 +6,7 @@ import type { EntryExplorationScenePoint } from "../domain/entryExplorationScene
 export type EntryExplorationSceneInteractionController = {
   activate: (time: number) => void;
   canActivate: () => boolean;
+  deactivate?: () => void;
   dispose: () => void;
   getActivationCharacterDestination?: () => EntryExplorationScenePoint;
   handlePointerDown: (raycaster: THREE.Raycaster, time: number) => boolean;
@@ -14,6 +15,7 @@ export type EntryExplorationSceneInteractionController = {
   isActive: () => boolean;
   object: THREE.Object3D;
   priority?: number;
+  retrySelection?: () => void;
   setCharacter?: (character: THREE.Object3D | null) => void;
   update: (time: number) => void;
   updateCamera: (
@@ -50,6 +52,31 @@ export function useEntryExplorationSceneInteractionRegistry() {
     () => activeSceneInteractionRef.current !== null,
     []
   );
+
+  const deactivateActiveSceneInteraction = useCallback(() => {
+    const activeController = activeSceneInteractionRef.current;
+
+    if (!activeController) {
+      return false;
+    }
+
+    activeController.deactivate?.();
+    activeSceneInteractionRef.current = null;
+
+    return true;
+  }, []);
+
+  const retryActiveSceneInteraction = useCallback(() => {
+    const activeController = activeSceneInteractionRef.current;
+
+    if (!activeController?.retrySelection) {
+      return false;
+    }
+
+    activeController.retrySelection();
+
+    return true;
+  }, []);
 
   const addSceneInteractionObjects = useCallback((scene: THREE.Scene) => {
     sceneInteractionControllersRef.current.forEach((controller) => {
@@ -162,6 +189,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     activateReadySceneInteraction,
     addSceneInteractionObjects,
     clearSceneInteractionControllers,
+    deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
@@ -169,6 +197,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     hasActiveSceneInteraction,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
+    retryActiveSceneInteraction,
     setSceneInteractionCharacter,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,

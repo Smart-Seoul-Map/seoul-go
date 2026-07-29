@@ -1,19 +1,33 @@
 import { useRef } from "react";
 import type { ReactElement } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useEntryExplorationSceneInteractionControllers } from "../application/useEntryExplorationSceneInteractionControllers";
+import { createDistrictExplorationPath } from "@shared/constants/path";
+
+import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
+import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
+import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionControls } from "./SubwaySelectionControls";
 
 export function EntryExplorationPage(): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { createSceneInteractionControllers, subwaySelection } =
-    useEntryExplorationSceneInteractionControllers();
+  const navigate = useNavigate();
+  const { createSubwayInteractionControllers, subwaySelection } =
+    useEntryExplorationSubwaySelection();
+  const districtSelection = useEntryExplorationDistrictSelection({
+    createExtraSceneInteractionControllers: createSubwayInteractionControllers,
+  });
 
   useEntryExplorationThreeScene({
     containerRef,
-    createSceneInteractionControllers,
+    createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
+    onSceneControlsReady: districtSelection.handleSceneControlsReady,
   });
+
+  const handleExploreDistrict = (districtId: number): void => {
+    navigate(createDistrictExplorationPath(districtId));
+  };
 
   return (
     <main className="entry-exploration-page">
@@ -23,6 +37,12 @@ export function EntryExplorationPage(): ReactElement {
         className="entry-exploration-scene"
       />
       <SubwaySelectionControls subwaySelection={subwaySelection} />
+      <EntryExplorationDistrictSelectionDialog
+        onBack={districtSelection.deactivateSelection}
+        onExplore={handleExploreDistrict}
+        onRetry={districtSelection.retrySelection}
+        selectionResult={districtSelection.selectionResult}
+      />
     </main>
   );
 }

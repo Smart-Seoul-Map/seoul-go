@@ -1,6 +1,6 @@
 import type { PointerEvent as ReactPointerEvent, ReactElement } from "react";
 
-import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSceneInteractionControllers";
+import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
 
 type SubwaySelectionControlsProps = {
   subwaySelection: EntryExplorationSubwaySelectionViewModel;

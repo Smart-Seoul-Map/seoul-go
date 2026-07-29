@@ -148,4 +148,46 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     expect(controller.dispose).toHaveBeenCalled();
     expect(result.current.hasActiveSceneInteraction()).toBe(false);
   });
+
+  test("deactivates the active controller and clears the active interaction", () => {
+    const controller = createSceneInteractionController({
+      canActivate: vi.fn(() => true),
+      deactivate: vi.fn(),
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+
+    act(() => {
+      result.current.registerSceneInteractionControllers([controller]);
+      result.current.activateReadySceneInteraction(10);
+    });
+
+    expect(result.current.hasActiveSceneInteraction()).toBe(true);
+
+    act(() => {
+      expect(result.current.deactivateActiveSceneInteraction()).toBe(true);
+    });
+
+    expect(controller.deactivate).toHaveBeenCalledTimes(1);
+    expect(result.current.hasActiveSceneInteraction()).toBe(false);
+  });
+
+  test("retries the active controller selection without clearing the active interaction", () => {
+    const controller = createSceneInteractionController({
+      canActivate: vi.fn(() => true),
+      retrySelection: vi.fn(),
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+
+    act(() => {
+      result.current.registerSceneInteractionControllers([controller]);
+      result.current.activateReadySceneInteraction(10);
+    });
+
+    act(() => {
+      expect(result.current.retryActiveSceneInteraction()).toBe(true);
+    });
+
+    expect(controller.retrySelection).toHaveBeenCalledTimes(1);
+    expect(result.current.hasActiveSceneInteraction()).toBe(true);
+  });
 });

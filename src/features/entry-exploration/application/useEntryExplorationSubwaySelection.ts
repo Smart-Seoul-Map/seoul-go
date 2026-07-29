@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import {
   createEntryExplorationSubwaySelectionInteractionController,
   createEntryExplorationSubwaySelectionInitialState,
@@ -14,12 +13,12 @@ export type EntryExplorationSubwaySelectionViewModel = EntryExplorationSubwaySel
   handleStationSelection: () => void;
 };
 
-type EntryExplorationSceneInteractionControllersViewModel = {
-  createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
+type EntryExplorationSubwaySelectionHookResult = {
+  createSubwayInteractionControllers: () => readonly EntryExplorationSceneInteractionController[];
   subwaySelection: EntryExplorationSubwaySelectionViewModel;
 };
 
-export function useEntryExplorationSceneInteractionControllers(): EntryExplorationSceneInteractionControllersViewModel {
+export function useEntryExplorationSubwaySelection(): EntryExplorationSubwaySelectionHookResult {
   const subwaySelectionControllerRef =
     useRef<EntryExplorationSubwaySelectionInteractionController | null>(null);
   const [subwaySelectionState, setSubwaySelectionState] =
@@ -27,16 +26,14 @@ export function useEntryExplorationSceneInteractionControllers(): EntryExplorati
       createEntryExplorationSubwaySelectionInitialState
     );
 
-  const createSceneInteractionControllers = useCallback(() => {
+  const createSubwayInteractionControllers = useCallback(() => {
     const subwaySelectionController = createEntryExplorationSubwaySelectionInteractionController({
       onStateChange: setSubwaySelectionState,
     });
 
     subwaySelectionControllerRef.current = subwaySelectionController;
 
-    return createEntryExplorationSceneInteractionControllers({
-      extraControllers: [subwaySelectionController],
-    });
+    return [subwaySelectionController];
   }, []);
 
   const handleClose = useCallback(() => {
@@ -55,7 +52,7 @@ export function useEntryExplorationSceneInteractionControllers(): EntryExplorati
   );
 
   return {
-    createSceneInteractionControllers,
+    createSubwayInteractionControllers,
     subwaySelection: {
       ...subwaySelectionState,
       handleClose,
