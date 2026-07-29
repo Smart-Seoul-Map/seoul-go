@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { EntryExplorationDistrictSelectionResult } from "../application/entryExplorationDistrictJumpSelectionInteraction";
 import type {
@@ -36,6 +36,21 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
 }));
 
 describe("EntryExplorationPage", () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      arc: vi.fn(),
+      beginPath: vi.fn(),
+      fill: vi.fn(),
+      fillRect: vi.fn(),
+      lineWidth: 0,
+      strokeRect: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test("shows selected district result and restores normal exploration when back action is clicked", () => {
     renderEntryExplorationPage();
 

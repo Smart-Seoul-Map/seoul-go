@@ -1,0 +1,369 @@
+{
+  "stations": {
+    "cityHall": {
+      "name": "시청",
+      "lines": {
+        "2": { "stationId": "201", "position": { "x": 46.73, "y": 15.28 } }
+      }
+    },
+    "euljiro1Ga": {
+      "name": "을지로입구",
+      "lines": {
+        "2": { "stationId": "202", "position": { "x": 50.44, "y": 15.28 } }
+      }
+    },
+    "euljiro3Ga": {
+      "name": "을지로3가",
+      "lines": {
+        "2": { "stationId": "203", "position": { "x": 54.08, "y": 15.28 } }
+      }
+    },
+    "euljiro4Ga": {
+      "name": "을지로4가",
+      "lines": {
+        "2": { "stationId": "204", "position": { "x": 58.61, "y": 15.28 } }
+      }
+    },
+    "dongdaemunHistoryCulturePark": {
+      "name": "동대문역사문화공원",
+      "lines": {
+        "2": { "stationId": "205", "position": { "x": 63.06, "y": 15.28 } }
+      }
+    },
+    "sindang": {
+      "name": "신당",
+      "lines": {
+        "2": { "stationId": "206", "position": { "x": 70.49, "y": 15.28 } }
+      }
+    },
+    "sangwangsimni": {
+      "name": "상왕십리",
+      "lines": {
+        "2": { "stationId": "207", "position": { "x": 77.2, "y": 15.28 } }
+      }
+    },
+    "wangsimni": {
+      "name": "왕십리",
+      "lines": {
+        "2": { "stationId": "208", "position": { "x": 82.3, "y": 15.28 } }
+      }
+    },
+    "hanyangUniversity": {
+      "name": "한양대",
+      "lines": {
+        "2": { "stationId": "209", "position": { "x": 87.87, "y": 20.73 } }
+      }
+    },
+    "ttukseom": {
+      "name": "뚝섬",
+      "lines": {
+        "2": { "stationId": "210", "position": { "x": 91.67, "y": 25.95 } }
+      }
+    },
+    "seongsu": {
+      "name": "성수",
+      "lines": {
+        "2": { "stationId": "211", "position": { "x": 92.4, "y": 31.99 } }
+      }
+    },
+    "konkukUniversity": {
+      "name": "건대입구",
+      "lines": {
+        "2": { "stationId": "212", "position": { "x": 92.32, "y": 40.64 } }
+      }
+    },
+    "guui": {
+      "name": "구의",
+      "lines": {
+        "2": { "stationId": "213", "position": { "x": 92, "y": 46.56 } }
+      }
+    },
+    "gangbyeon": {
+      "name": "강변",
+      "lines": {
+        "2": { "stationId": "214", "position": { "x": 92, "y": 54.98 } }
+      }
+    },
+    "jamsillaru": {
+      "name": "잠실나루",
+      "lines": {
+        "2": { "stationId": "215", "position": { "x": 92, "y": 62.44 } }
+      }
+    },
+    "jamsil": {
+      "name": "잠실",
+      "lines": {
+        "2": { "stationId": "216", "position": { "x": 92.32, "y": 70.73 } }
+      }
+    },
+    "jamsilsaenae": {
+      "name": "잠실새내",
+      "lines": {
+        "2": { "stationId": "217", "position": { "x": 92, "y": 77.96 } }
+      }
+    },
+    "sportsComplex": {
+      "name": "종합운동장",
+      "lines": {
+        "2": { "stationId": "218", "position": { "x": 92.24, "y": 84.72 } }
+      }
+    },
+    "samseong": {
+      "name": "삼성",
+      "lines": {
+        "2": { "stationId": "219", "position": { "x": 88.44, "y": 93.25 } }
+      }
+    },
+    "seolleung": {
+      "name": "선릉",
+      "lines": {
+        "2": { "stationId": "220", "position": { "x": 83.27, "y": 97.04 } }
+      }
+    },
+    "yeoksam": {
+      "name": "역삼",
+      "lines": {
+        "2": { "stationId": "221", "position": { "x": 79.39, "y": 97.04 } }
+      }
+    },
+    "gangnam": {
+      "name": "강남",
+      "lines": {
+        "2": { "stationId": "222", "position": { "x": 77.04, "y": 97.04 } }
+      }
+    },
+    "seoulNationalUniversityOfEducation": {
+      "name": "교대",
+      "lines": {
+        "2": { "stationId": "223", "position": { "x": 69.85, "y": 97.04 } }
+      }
+    },
+    "seocho": {
+      "name": "서초",
+      "lines": {
+        "2": { "stationId": "224", "position": { "x": 66.37, "y": 97.04 } }
+      }
+    },
+    "bangbae": {
+      "name": "방배",
+      "lines": {
+        "2": { "stationId": "225", "position": { "x": 62.33, "y": 97.04 } }
+      }
+    },
+    "sadang": {
+      "name": "사당",
+      "lines": {
+        "2": { "stationId": "226", "position": { "x": 58.61, "y": 97.04 } }
+      }
+    },
+    "nagseongdae": {
+      "name": "낙성대",
+      "lines": {
+        "2": { "stationId": "227", "position": { "x": 52.06, "y": 97.04 } }
+      }
+    },
+    "seoulNationalUniversity": {
+      "name": "서울대입구",
+      "lines": {
+        "2": { "stationId": "228", "position": { "x": 45.19, "y": 97.04 } }
+      }
+    },
+    "bongcheon": {
+      "name": "봉천",
+      "lines": {
+        "2": { "stationId": "229", "position": { "x": 38.8, "y": 97.04 } }
+      }
+    },
+    "sillim": {
+      "name": "신림",
+      "lines": {
+        "2": { "stationId": "230", "position": { "x": 32.26, "y": 97.04 } }
+      }
+    },
+    "sindaebang": {
+      "name": "신대방",
+      "lines": {
+        "2": { "stationId": "231", "position": { "x": 27.49, "y": 94.08 } }
+      }
+    },
+    "guroDigitalComplex": {
+      "name": "구로디지털단지",
+      "lines": {
+        "2": { "stationId": "232", "position": { "x": 24.58, "y": 89.57 } }
+      }
+    },
+    "daerim": {
+      "name": "대림",
+      "lines": {
+        "2": { "stationId": "233", "position": { "x": 23.2, "y": 80.33 } }
+      }
+    },
+    "sindorim": {
+      "name": "신도림",
+      "lines": {
+        "2": { "stationId": "234", "position": { "x": 23.2, "y": 67.42 } }
+      }
+    },
+    "mullae": {
+      "name": "문래",
+      "lines": {
+        "2": { "stationId": "235", "position": { "x": 23.2, "y": 62.8 } }
+      }
+    },
+    "yeongdeungpoGuOffice": {
+      "name": "영등포구청",
+      "lines": {
+        "2": { "stationId": "236", "position": { "x": 23.2, "y": 59 } }
+      }
+    },
+    "dangsan": {
+      "name": "당산",
+      "lines": {
+        "2": { "stationId": "237", "position": { "x": 23.2, "y": 50 } }
+      }
+    },
+    "hapjeong": {
+      "name": "합정",
+      "lines": {
+        "2": { "stationId": "238", "position": { "x": 23.2, "y": 40.4 } }
+      }
+    },
+    "hongikUniversity": {
+      "name": "홍대입구",
+      "lines": {
+        "2": { "stationId": "239", "position": { "x": 23.2, "y": 31.04 } }
+      }
+    },
+    "sinchon": {
+      "name": "신촌",
+      "lines": {
+        "2": { "stationId": "240", "position": { "x": 25, "y": 22.16 } }
+      }
+    },
+    "ewhaWomansUniversity": {
+      "name": "이대",
+      "lines": {
+        "2": { "stationId": "241", "position": { "x": 29, "y": 16.8 } }
+      }
+    },
+    "ahyeon": {
+      "name": "아현",
+      "lines": {
+        "2": { "stationId": "242", "position": { "x": 34.2, "y": 15.28 } }
+      }
+    },
+    "chungjeongno": {
+      "name": "충정로",
+      "lines": {
+        "2": { "stationId": "243", "position": { "x": 38.64, "y": 15.28 } }
+      }
+    },
+    "yongdap": {
+      "name": "용답",
+      "lines": {
+        "2": { "stationId": "211-1", "position": { "x": 92.72, "y": 25.95 } }
+      }
+    },
+    "sindap": {
+      "name": "신답",
+      "lines": {
+        "2": { "stationId": "211-2", "position": { "x": 92.72, "y": 13.5 } }
+      }
+    },
+    "yongdu": {
+      "name": "용두",
+      "lines": {
+        "2": { "stationId": "211-3", "position": { "x": 81.5, "y": 5 } }
+      }
+    },
+    "sinseolDong": {
+      "name": "신설동",
+      "lines": {
+        "2": { "stationId": "211-4", "position": { "x": 77.2, "y": 4.15 } }
+      }
+    },
+    "dorimcheon": {
+      "name": "도림천",
+      "lines": {
+        "2": { "stationId": "234-1", "position": { "x": 17.38, "y": 66.47 } }
+      }
+    },
+    "yangcheonGuOffice": {
+      "name": "양천구청",
+      "lines": {
+        "2": { "stationId": "234-2", "position": { "x": 11.64, "y": 66.47 } }
+      }
+    },
+    "sinjeongnegeori": {
+      "name": "신정네거리",
+      "lines": {
+        "2": { "stationId": "234-3", "position": { "x": 5.82, "y": 66.47 } }
+      }
+    },
+    "kkachisan": {
+      "name": "까치산",
+      "lines": {
+        "2": { "stationId": "234-4", "position": { "x": 1.86, "y": 60.07 } }
+      }
+    }
+  },
+  "lines": {
+    "2": {
+      "mainLoopStationKeys": [
+        "cityHall",
+        "euljiro1Ga",
+        "euljiro3Ga",
+        "euljiro4Ga",
+        "dongdaemunHistoryCulturePark",
+        "sindang",
+        "sangwangsimni",
+        "wangsimni",
+        "hanyangUniversity",
+        "ttukseom",
+        "seongsu",
+        "konkukUniversity",
+        "guui",
+        "gangbyeon",
+        "jamsillaru",
+        "jamsil",
+        "jamsilsaenae",
+        "sportsComplex",
+        "samseong",
+        "seolleung",
+        "yeoksam",
+        "gangnam",
+        "seoulNationalUniversityOfEducation",
+        "seocho",
+        "bangbae",
+        "sadang",
+        "nagseongdae",
+        "seoulNationalUniversity",
+        "bongcheon",
+        "sillim",
+        "sindaebang",
+        "guroDigitalComplex",
+        "daerim",
+        "sindorim",
+        "mullae",
+        "yeongdeungpoGuOffice",
+        "dangsan",
+        "hapjeong",
+        "hongikUniversity",
+        "sinchon",
+        "ewhaWomansUniversity",
+        "ahyeon",
+        "chungjeongno"
+      ],
+      "branches": [
+        {
+          "junctionStationKey": "seongsu",
+          "stationKeys": ["yongdap", "sindap", "yongdu", "sinseolDong"]
+        },
+        {
+          "junctionStationKey": "sindorim",
+          "stationKeys": ["dorimcheon", "yangcheonGuOffice", "sinjeongnegeori", "kkachisan"]
+        }
+      ]
+    }
+  }
+}

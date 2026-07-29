@@ -17,6 +17,7 @@ function createSceneInteractionController(
     handlePointerDown: vi.fn(() => false),
     handlePointerMove: vi.fn(() => false),
     handlePointerUp: vi.fn(() => false),
+    isActive: vi.fn(() => true),
     object: new THREE.Group(),
     setCharacter: vi.fn(),
     update: vi.fn(),
@@ -83,11 +84,34 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     expect(higherPriorityController.activate).toHaveBeenCalledWith(120);
   });
 
+  test("releases a controller after it becomes inactive", () => {
+    let isActive = true;
+    const controller = createSceneInteractionController({
+      canActivate: vi.fn(() => true),
+      isActive: vi.fn(() => isActive),
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+
+    act(() => {
+      result.current.registerSceneInteractionControllers([controller]);
+      result.current.activateReadySceneInteraction(120);
+    });
+
+    isActive = false;
+
+    act(() => {
+      expect(result.current.releaseInactiveSceneInteraction()).toBe(true);
+    });
+
+    expect(result.current.hasActiveSceneInteraction()).toBe(false);
+  });
+
   test("routes pointer events, camera updates, and cleanup to registered controllers", () => {
     const scene = new THREE.Scene();
     const character = new THREE.Group();
     const camera = new THREE.OrthographicCamera();
     const raycaster = new THREE.Raycaster();
+    const characterPosition = { x: 3, z: 4 };
     const controller = createSceneInteractionController({
       canActivate: vi.fn(() => true),
       handlePointerDown: vi.fn(() => true),
@@ -115,12 +139,12 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
 
     act(() => {
       result.current.activateReadySceneInteraction(40);
-      result.current.updateActiveSceneInteractionCamera(camera, 50);
+      result.current.updateActiveSceneInteractionCamera(camera, 50, characterPosition);
       result.current.disposeSceneInteractionControllers();
       result.current.clearSceneInteractionControllers();
     });
 
-    expect(controller.updateCamera).toHaveBeenCalledWith(camera, 50);
+    expect(controller.updateCamera).toHaveBeenCalledWith(camera, 50, characterPosition);
     expect(controller.dispose).toHaveBeenCalled();
     expect(result.current.hasActiveSceneInteraction()).toBe(false);
   });

@@ -1,16 +1,53 @@
 import * as THREE from "three";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG } from "../config/entryExplorationDistrictSelectionEvent";
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
 describe("createEntryExplorationSceneInteractionControllers", () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      arc: vi.fn(),
+      beginPath: vi.fn(),
+      fill: vi.fn(),
+      fillRect: vi.fn(),
+      lineWidth: 0,
+      strokeRect: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
     expect(controllers).toHaveLength(1);
-    expect(controllers[0]?.priority).toBeGreaterThan(0);
-    expect(controllers[0]?.object).toBeDefined();
+    expect(controllers.every((controller) => (controller.priority ?? 0) > 0)).toBe(true);
+    expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
+
+    controllers.forEach((controller) => {
+      controller.dispose();
+    });
+  });
+
+  test("appends extra interaction controllers", () => {
+    const extraController = {
+      dispose: vi.fn(),
+      object: new THREE.Group(),
+    } as unknown as EntryExplorationSceneInteractionController;
+    const controllers = createEntryExplorationSceneInteractionControllers({
+      extraControllers: [extraController],
+    });
+
+    expect(controllers).toHaveLength(2);
+    expect(controllers[1]).toBe(extraController);
+
+    controllers.forEach((controller) => {
+      controller.dispose();
+    });
   });
 
   test("connects district selection result handler to registered controllers", () => {
@@ -33,6 +70,10 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
     );
 
     expect(handleDistrictSelectionResult).toHaveBeenCalledTimes(1);
+
+    controllers.forEach((controller) => {
+      controller.dispose();
+    });
   });
 });
 

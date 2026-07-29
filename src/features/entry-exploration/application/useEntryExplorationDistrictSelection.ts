@@ -2,9 +2,19 @@ import { useCallback, useRef, useState } from "react";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
-export function useEntryExplorationDistrictSelection() {
+export type UseEntryExplorationDistrictSelectionOptions = {
+  createExtraSceneInteractionControllers?: () => readonly EntryExplorationSceneInteractionController[];
+};
+
+const createNoExtraSceneInteractionControllers =
+  (): readonly EntryExplorationSceneInteractionController[] => [];
+
+export function useEntryExplorationDistrictSelection({
+  createExtraSceneInteractionControllers = createNoExtraSceneInteractionControllers,
+}: UseEntryExplorationDistrictSelectionOptions = {}) {
   const sceneControlsRef = useRef<EntryExplorationThreeSceneControls | null>(null);
   const [selectionResult, setSelectionResult] =
     useState<EntryExplorationDistrictSelectionResult | null>(null);
@@ -12,9 +22,10 @@ export function useEntryExplorationDistrictSelection() {
   const createSceneInteractionControllers = useCallback(
     () =>
       createEntryExplorationSceneInteractionControllers({
+        extraControllers: createExtraSceneInteractionControllers(),
         onDistrictSelectionResult: setSelectionResult,
       }),
-    []
+    [createExtraSceneInteractionControllers]
   );
 
   const handleSceneControlsReady = useCallback(

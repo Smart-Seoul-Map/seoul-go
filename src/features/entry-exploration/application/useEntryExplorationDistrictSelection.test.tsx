@@ -3,20 +3,42 @@ import { describe, expect, test, vi } from "vitest";
 
 import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
 import { useEntryExplorationDistrictSelection } from "./useEntryExplorationDistrictSelection";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
 let districtSelectionResultHandler:
   ((result: EntryExplorationDistrictSelectionResult) => void) | null = null;
+let registeredExtraControllers: readonly EntryExplorationSceneInteractionController[] = [];
 
 vi.mock("./createEntryExplorationSceneInteractionControllers", () => ({
-  createEntryExplorationSceneInteractionControllers: vi.fn(({ onDistrictSelectionResult }) => {
-    districtSelectionResultHandler = onDistrictSelectionResult;
+  createEntryExplorationSceneInteractionControllers: vi.fn(
+    ({ extraControllers = [], onDistrictSelectionResult }) => {
+      districtSelectionResultHandler = onDistrictSelectionResult;
+      registeredExtraControllers = extraControllers;
 
-    return [];
-  }),
+      return [];
+    }
+  ),
 }));
 
 describe("useEntryExplorationDistrictSelection", () => {
+  test("composes extra scene interactions through the common controller factory", () => {
+    const extraController = {} as EntryExplorationSceneInteractionController;
+    const createExtraSceneInteractionControllers = vi.fn(() => [extraController]);
+    const { result } = renderHook(() =>
+      useEntryExplorationDistrictSelection({
+        createExtraSceneInteractionControllers,
+      })
+    );
+
+    act(() => {
+      result.current.createSceneInteractionControllers();
+    });
+
+    expect(createExtraSceneInteractionControllers).toHaveBeenCalledTimes(1);
+    expect(registeredExtraControllers).toEqual([extraController]);
+  });
+
   test("stores the district selected by the scene interaction", () => {
     const { result } = renderHook(() => useEntryExplorationDistrictSelection());
 

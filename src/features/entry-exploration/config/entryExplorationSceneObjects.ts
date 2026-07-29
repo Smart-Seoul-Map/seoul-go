@@ -1,12 +1,13 @@
 import type { EntryExplorationSceneObjectAssetKey } from "./entryExplorationAssets";
 
-export type EntryExplorationSceneAssetKey = EntryExplorationSceneObjectAssetKey;
-
-export type EntryExplorationSceneObjectType = "floorOverlay" | "standingProp";
+export type EntryExplorationInteraction = {
+  triggerRadius: number;
+};
 
 type EntryExplorationSceneObjectBase = {
-  assetKey: EntryExplorationSceneAssetKey;
+  assetKey: EntryExplorationSceneObjectAssetKey;
   id: string;
+  interaction?: EntryExplorationInteraction;
   position: {
     x: number;
     z: number;
@@ -40,6 +41,8 @@ export type EntryExplorationStandingPropObject = EntryExplorationSceneObjectBase
 export type EntryExplorationSceneObject =
   EntryExplorationFloorOverlayObject | EntryExplorationStandingPropObject;
 
+export const ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID = "subway-selection-route-map";
+
 export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
   {
     assetKey: "haechiAndFriends",
@@ -58,6 +61,18 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     size: { width: 5.6, depth: 7 },
     type: "floorOverlay",
     yOffset: 0.045,
+  },
+  {
+    assetKey: "line2RouteMap",
+    id: ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID,
+    interaction: {
+      triggerRadius: 5.2,
+    },
+    position: { x: 18, z: 6 },
+    rotationY: 0,
+    size: { width: 14, depth: 9.55 },
+    type: "floorOverlay",
+    yOffset: 0.05,
   },
   {
     assetKey: "namsanTower",

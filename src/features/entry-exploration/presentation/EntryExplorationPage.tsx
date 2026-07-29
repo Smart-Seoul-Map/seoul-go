@@ -5,13 +5,19 @@ import { useNavigate } from "react-router-dom";
 import { createDistrictExplorationPath } from "@shared/constants/path";
 
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
+import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
+import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
 export function EntryExplorationPage(): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-  const districtSelection = useEntryExplorationDistrictSelection();
+  const { createSubwayInteractionControllers, subwaySelection } =
+    useEntryExplorationSubwaySelection();
+  const districtSelection = useEntryExplorationDistrictSelection({
+    createExtraSceneInteractionControllers: createSubwayInteractionControllers,
+  });
 
   useEntryExplorationThreeScene({
     containerRef,
@@ -30,6 +36,7 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
+      <SubwaySelectionDialog subwaySelection={subwaySelection} />
       <EntryExplorationDistrictSelectionDialog
         onBack={districtSelection.deactivateSelection}
         onExplore={handleExploreDistrict}

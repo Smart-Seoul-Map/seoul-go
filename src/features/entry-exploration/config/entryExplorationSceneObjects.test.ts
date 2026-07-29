@@ -17,7 +17,9 @@ describe("entry exploration scene objects", () => {
 
   test("references configured assets", () => {
     ENTRY_EXPLORATION_SCENE_OBJECTS.forEach((object) => {
-      expect(ENTRY_EXPLORATION_TEXTURE_ASSETS[object.assetKey].src).toMatch(/\.(png|jpe?g|webp)$/);
+      expect(ENTRY_EXPLORATION_TEXTURE_ASSETS[object.assetKey].src).toMatch(
+        /\.(png|jpe?g|svg|webp)$/
+      );
     });
   });
 
@@ -49,6 +51,18 @@ describe("entry exploration scene objects", () => {
       expect(object.shadow.opacity).toBeGreaterThan(0);
       expect(object.shadow.opacity).toBeLessThan(1);
       expect(object.size.height).toBeGreaterThan(0);
+    });
+  });
+
+  test("keeps interaction trigger radiuses valid", () => {
+    const sceneObjects: readonly EntryExplorationSceneObject[] = ENTRY_EXPLORATION_SCENE_OBJECTS;
+
+    sceneObjects.forEach((object) => {
+      if (!object.interaction) {
+        return;
+      }
+
+      expect(object.interaction.triggerRadius).toBeGreaterThan(0);
     });
   });
 });

@@ -23,17 +23,6 @@ body {
   font-family: "Galmuri11", "Galmuri9", "DotGothic16", monospace;
 }
 
-button {
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-  background: var(--panel);
-  color: var(--ink);
-  cursor: pointer;
-  font: inherit;
-  min-height: 44px;
-  padding: 10px 14px;
-}
-
 #app,
 .exploration-page,
 .entry-exploration-page,

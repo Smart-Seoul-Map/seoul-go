@@ -77,6 +77,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
+    releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     retryActiveSceneInteraction,
     setSceneInteractionCharacter,
@@ -199,9 +200,9 @@ export function useEntryExplorationThreeScene({
     const camera = createEntryExplorationCamera(width, height);
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
-    const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.map(
-      createEntryExplorationSceneObject
-    );
+    const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
+      (object) => !("interaction" in object)
+    ).map(createEntryExplorationSceneObject);
     let frameId = 0;
     let lastTime = performance.now();
     let disposed = false;
@@ -296,21 +297,32 @@ export function useEntryExplorationThreeScene({
 
     const render = (time: number) => {
       const deltaSeconds = (time - lastTime) / 1000;
+      const characterPosition = movementRef.current.getCurrentPosition();
 
       lastTime = time;
       mixerRef.current?.update(deltaSeconds);
 
       if (!hasActiveSceneInteraction()) {
-        const characterPosition = movementRef.current.getCurrentPosition();
-
         updateSceneInteractionTriggers(characterPosition);
-        activateReadySceneInteraction(time, () => {
+        activateReadySceneInteraction(time, (controller) => {
+          const characterDestination = controller.getActivationCharacterDestination?.();
+
+          if (characterDestination) {
+            movementRef.current.moveTo(characterDestination);
+            return;
+          }
+
           movementRef.current.stop();
         });
       }
 
       updateSceneInteractions(time);
-      updateActiveSceneInteractionCamera(camera, time);
+
+      if (releaseInactiveSceneInteraction()) {
+        updateEntryExplorationCameraFocus(camera, movementRef.current.getCurrentPosition());
+      }
+
+      updateActiveSceneInteractionCamera(camera, time, characterPosition);
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(render);
     };
@@ -353,6 +365,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
+    releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     updateActiveSceneInteractionCamera,

@@ -72,9 +72,23 @@ export function updateEntryExplorationCameraFocus(
 ): void {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
-  camera.zoom = ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM;
-  camera.position.set(point.x + cameraOffset.x, cameraOffset.y, point.z + cameraOffset.z);
-  camera.lookAt(point.x, 0, point.z);
+  updateEntryExplorationCameraView(
+    camera,
+    point,
+    cameraOffset,
+    ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM
+  );
+}
+
+export function updateEntryExplorationCameraView(
+  camera: THREE.OrthographicCamera,
+  focus: EntryExplorationScenePoint,
+  offset: EntryExplorationScenePoint & { y: number },
+  zoom: number
+): void {
+  camera.position.set(focus.x + offset.x, offset.y, focus.z + offset.z);
+  camera.lookAt(focus.x, 0, focus.z);
+  camera.zoom = zoom;
   camera.updateProjectionMatrix();
 }
 
