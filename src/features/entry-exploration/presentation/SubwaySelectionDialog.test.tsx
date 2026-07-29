@@ -116,6 +116,6 @@ describe("SubwaySelectionDialog", () => {
     );
 
     expect(screen.getByText("시청역이 선정되었습니다.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "다시 선정하기" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "다시 선택하기" })).toBeTruthy();
   });
 });

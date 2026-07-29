@@ -30,16 +30,37 @@ function getSelectionResultMessage({
   return "본선과 지선 51개 역 중 한 곳을 선정해요.";
 }
 
+function getSelectionButtonLabel({
+  hasSelectedStation,
+  isSelectionInProgress,
+}: {
+  hasSelectedStation: boolean;
+  isSelectionInProgress: boolean;
+}): string {
+  if (isSelectionInProgress) {
+    return "선정 중...";
+  }
+
+  if (hasSelectedStation) {
+    return "다시 선택하기";
+  }
+
+  return "랜덤 역 선정하기";
+}
+
 export function SubwaySelectionDialog({
   subwaySelection,
 }: SubwaySelectionDialogProps): ReactElement {
   const isSelectionInProgress = subwaySelection.status === "selecting";
   const isInputLocked = !subwaySelection.isCameraReady || isSelectionInProgress;
-  const selectionButtonLabel =
-    subwaySelection.status === "selected" ? "다시 선정하기" : "랜덤 역 선정하기";
+  const hasSelectedStation = subwaySelection.selectedStation !== null;
   const resultMessage = getSelectionResultMessage({
     isSelectionInProgress,
     selectedStationName: subwaySelection.selectedStation?.name ?? null,
+  });
+  const selectionButtonLabel = getSelectionButtonLabel({
+    hasSelectedStation,
+    isSelectionInProgress,
   });
 
   const handleOpenChange = (isOpen: boolean): void => {
@@ -48,16 +69,27 @@ export function SubwaySelectionDialog({
     }
   };
 
+  const selectionAction = (
+    <AppButton
+      disabled={isInputLocked}
+      onClick={subwaySelection.handleStationSelection}
+      variant={hasSelectedStation ? "outline" : "primary"}
+    >
+      {selectionButtonLabel}
+    </AppButton>
+  );
+
   return (
     <AppDialog
       actions={
-        <AppButton
-          disabled={isInputLocked}
-          onClick={subwaySelection.handleStationSelection}
-          variant="primary"
-        >
-          {isSelectionInProgress ? "선정 중..." : selectionButtonLabel}
-        </AppButton>
+        <>
+          {selectionAction}
+          {hasSelectedStation ? (
+            <AppButton disabled={isInputLocked} variant="primary">
+              탐방하기
+            </AppButton>
+          ) : null}
+        </>
       }
       closeAction={
         isInputLocked
