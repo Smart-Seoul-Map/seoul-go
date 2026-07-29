@@ -4,10 +4,10 @@
   color: var(--sg-badge-fg);
   display: inline-flex;
   flex: none;
-  font-size: var(--sg-typography-button-label-font-size);
-  font-weight: var(--sg-typography-button-label-font-weight);
+  font-size: var(--sg-badge-font-size);
+  font-weight: var(--sg-badge-font-weight);
   gap: var(--sg-badge-gap);
-  line-height: var(--sg-typography-button-label-line-height);
+  line-height: var(--sg-badge-line-height);
   max-width: 100%;
   min-width: 0;
   white-space: nowrap;

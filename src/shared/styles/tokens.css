@@ -246,10 +246,13 @@
   --sg-badge-info-fg: var(--sg-color-text-info);
   --sg-badge-warning-fg: var(--sg-color-text-warning);
   --sg-badge-positive-fg: var(--sg-color-text-positive);
+  --sg-badge-font-size: var(--sg-font-size-4);
+  --sg-badge-line-height: var(--sg-line-height-4);
+  --sg-badge-font-weight: var(--sg-font-weight-medium);
   --sg-badge-radius: var(--sg-pill-radius);
   --sg-badge-shadow: var(--sg-panel-shadow);
-  --sg-badge-height-md: var(--sg-icon-button-size-nav);
-  --sg-badge-height-lg: var(--sg-spacing-13);
+  --sg-badge-height-md: var(--sg-spacing-9);
+  --sg-badge-height-lg: var(--sg-spacing-10);
   --sg-badge-padding-x-md: var(--sg-spacing-5);
   --sg-badge-padding-x-lg: var(--sg-spacing-6);
   --sg-badge-gap: var(--sg-spacing-2);

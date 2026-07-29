@@ -7,8 +7,9 @@ import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapM
 
 import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationMap } from "./ExplorationMap";
+import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
 
-type ExplorationThemeProgressItem = {
+type ExplorationThemePlaceCountItem = {
   id: string;
   markerColor: string | null;
   markerColorToken: string | null;
@@ -21,7 +22,7 @@ type ExplorationPageProps = {
   districtId?: number;
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
-  themeProgressItems: readonly ExplorationThemeProgressItem[];
+  themeProgressItems: readonly ExplorationThemePlaceCountItem[];
 };
 
 export function ExplorationPage({
@@ -38,24 +39,16 @@ export function ExplorationPage({
           initialCenter={initialCenter}
           placeMarkers={placeMarkers}
         />
-        <ul className="theme-progress-list" aria-label="장소 테마 현황">
+        <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {themeProgressItems.map((item) => (
-            <li key={item.id} className="theme-progress-chip">
-              {item.markerColor ? (
-                <span
-                  aria-hidden="true"
-                  className="theme-progress-dot"
-                  style={{
-                    backgroundColor: item.markerColorToken
-                      ? `var(${item.markerColorToken})`
-                      : item.markerColor,
-                  }}
-                />
-              ) : null}
-              <span>{item.name}</span>
-              <span>
-                {item.visitedCount}/{item.totalCount}
-              </span>
+            <li key={item.id} className="exploration-theme-place-count-item">
+              <ExplorationThemePlaceCountBadge
+                markerColor={item.markerColor}
+                markerColorToken={item.markerColorToken}
+                name={item.name}
+                totalCount={item.totalCount}
+                visitedCount={item.visitedCount}
+              />
             </li>
           ))}
         </ul>
