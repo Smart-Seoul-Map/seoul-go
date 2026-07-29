@@ -1,0 +1,63 @@
+.exploration-page {
+  background: var(--sg-color-bg-surface);
+  color: var(--sg-color-text-default);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.map-stage {
+  min-height: 100vh;
+  min-width: 0;
+  position: relative;
+}
+
+.theme-progress-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sg-spacing-3_5);
+  left: var(--sg-spacing-7);
+  list-style: none;
+  margin: 0;
+  max-width: calc(100% - var(--sg-spacing-14));
+  padding: 0;
+  position: absolute;
+  top: 92px;
+  z-index: 4;
+}
+
+.theme-progress-chip {
+  align-items: center;
+  background: color-mix(in srgb, var(--sg-color-bg-floating) 92%, transparent);
+  border: 1px solid var(--sg-color-stroke-weak);
+  border-radius: var(--sg-pill-radius);
+  box-shadow: var(--sg-panel-shadow);
+  color: var(--sg-color-text-default);
+  display: flex;
+  gap: var(--sg-spacing-semantic-chip-gap-x);
+  min-height: var(--sg-icon-button-size-nav);
+  padding: var(--sg-spacing-2_5) 22px;
+  white-space: nowrap;
+}
+
+.theme-progress-dot {
+  border-radius: var(--sg-pill-radius);
+  flex: none;
+  height: var(--sg-spacing-4);
+  width: var(--sg-spacing-4);
+}
+
+@media (max-width: 860px) {
+  .theme-progress-list {
+    flex-wrap: nowrap;
+    gap: var(--sg-spacing-2);
+    left: var(--sg-spacing-3);
+    max-width: calc(100% - var(--sg-spacing-6));
+    overflow-x: auto;
+    padding-bottom: var(--sg-spacing-2);
+    top: 72px;
+  }
+
+  .theme-progress-chip {
+    padding: 9px var(--sg-spacing-4);
+  }
+}

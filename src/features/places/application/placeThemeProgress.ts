@@ -6,12 +6,14 @@ const ALL_PLACES_PROGRESS_ITEM_NAME = "방문지";
 type PlaceThemeProgressTheme = {
   id: string;
   markerColor: string;
+  markerColorToken: string;
   name: string;
 };
 
 export type PlaceThemeProgressItem = {
   id: string;
   markerColor: string | null;
+  markerColorToken: string | null;
   name: string;
   totalCount: number;
   visitedCount: number;
@@ -32,6 +34,7 @@ export function createPlaceThemeProgressItems({
     {
       id: ALL_PLACES_PROGRESS_ITEM_ID,
       markerColor: null,
+      markerColorToken: null,
       name: ALL_PLACES_PROGRESS_ITEM_NAME,
       totalCount: places.length,
       visitedCount: 0,
@@ -39,6 +42,7 @@ export function createPlaceThemeProgressItems({
     ...themes.map((theme) => ({
       id: theme.id,
       markerColor: theme.markerColor,
+      markerColorToken: theme.markerColorToken,
       name: theme.name,
       totalCount: placeCountByThemeId.get(theme.id) ?? 0,
       visitedCount: 0,

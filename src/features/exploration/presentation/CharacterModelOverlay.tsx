@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import * as THREE from "three";
 
+import "./CharacterModelOverlay.css";
+
 import {
   playCharacterAnimationClips,
   stopCharacterAnimationActions,

@@ -9,6 +9,7 @@ const themeProgressItems = [
   {
     id: "all",
     markerColor: null,
+    markerColorToken: null,
     name: "방문지",
     totalCount: 3,
     visitedCount: 0,
@@ -16,6 +17,7 @@ const themeProgressItems = [
   {
     id: "night",
     markerColor: "#1971c2",
+    markerColorToken: "--sg-place-theme-blue",
     name: "서울 야경명소",
     totalCount: 2,
     visitedCount: 0,
