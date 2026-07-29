@@ -1,4 +1,8 @@
-import type { PointerEvent as ReactPointerEvent, ReactElement } from "react";
+import type { ReactElement } from "react";
+
+import { AppButton } from "@shared/ui/button";
+import { AppDialog } from "@shared/ui/dialog";
+import { AppText } from "@shared/ui/typography";
 
 import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
 
@@ -6,73 +10,79 @@ type SubwaySelectionControlsProps = {
   subwaySelection: EntryExplorationSubwaySelectionViewModel;
 };
 
-export function SubwaySelectionControls({
-  subwaySelection,
-}: SubwaySelectionControlsProps): ReactElement | null {
-  if (!subwaySelection.isActive) {
-    return null;
+const CLOSE_ICON_LABEL = "×";
+
+function getSelectionResultMessage({
+  isSelectionInProgress,
+  selectedStationName,
+}: {
+  isSelectionInProgress: boolean;
+  selectedStationName: string | null;
+}): string {
+  if (isSelectionInProgress) {
+    return "열차가 2호선을 달리고 있어요...";
   }
 
+  if (selectedStationName) {
+    return `${selectedStationName}역이 선정되었습니다.`;
+  }
+
+  return "본선과 지선 51개 역 중 한 곳을 선정해요.";
+}
+
+export function SubwaySelectionControls({
+  subwaySelection,
+}: SubwaySelectionControlsProps): ReactElement {
   const isSelectionInProgress = subwaySelection.status === "selecting";
   const isInputLocked = !subwaySelection.isCameraReady || isSelectionInProgress;
   const selectionButtonLabel =
     subwaySelection.status === "selected" ? "다시 선정하기" : "랜덤 역 선정하기";
+  const resultMessage = getSelectionResultMessage({
+    isSelectionInProgress,
+    selectedStationName: subwaySelection.selectedStation?.name ?? null,
+  });
 
-  const handleLayerPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget || isInputLocked) {
-      return;
+  const handleOpenChange = (isOpen: boolean): void => {
+    if (!isOpen && !isInputLocked) {
+      subwaySelection.handleClose();
     }
-
-    subwaySelection.handleClose();
   };
 
   return (
-    <div className="subway-selection-layer" onPointerDown={handleLayerPointerDown}>
-      <section
-        aria-busy={isInputLocked}
-        aria-labelledby="subway-selection-title"
-        className="subway-selection-controls"
-      >
-        <button
-          aria-label="탐색 화면으로 돌아가기"
-          className="subway-selection-close"
-          disabled={isInputLocked}
-          onClick={subwaySelection.handleClose}
-          type="button"
-        >
-          ×
-        </button>
-        <div className="subway-selection-controls-copy">
-          <span>서울 지하철 2호선</span>
-          <h2 id="subway-selection-title">오늘은 어느 역으로 떠날까요?</h2>
-        </div>
-        <div aria-live="polite" className="subway-selection-result">
-          {subwaySelection.status === "idle" ? (
-            <span>본선과 지선 51개 역 중 한 곳을 선정해요.</span>
-          ) : null}
-          {isSelectionInProgress ? <span>열차가 2호선을 달리고 있어요...</span> : null}
-          {subwaySelection.selectedStation ? (
-            <strong>{subwaySelection.selectedStation.name}역이 선정되었습니다.</strong>
-          ) : null}
-        </div>
-        <button
-          className="subway-selection-button"
+    <AppDialog
+      actions={
+        <AppButton
           disabled={isInputLocked}
           onClick={subwaySelection.handleStationSelection}
-          type="button"
+          variant="primary"
         >
           {isSelectionInProgress ? "선정 중..." : selectionButtonLabel}
-        </button>
-        {subwaySelection.selectedStation ? (
-          <button
-            className="subway-selection-explore-button"
-            disabled={isInputLocked}
-            type="button"
-          >
-            {subwaySelection.selectedStation.name}역 탐험하기
-          </button>
-        ) : null}
-      </section>
-    </div>
+        </AppButton>
+      }
+      closeAction={
+        isInputLocked
+          ? undefined
+          : {
+              ariaLabel: "탐색 화면으로 돌아가기",
+              children: CLOSE_ICON_LABEL,
+              onClick: subwaySelection.handleClose,
+            }
+      }
+      closeOnEscape={!isInputLocked}
+      closeOnInteractOutside={!isInputLocked}
+      description="서울 지하철 2호선"
+      onOpenChange={handleOpenChange}
+      open={subwaySelection.isActive}
+      title="오늘은 어느 역으로 떠날까요?"
+    >
+      <div aria-live="polite">
+        <AppText
+          role="dialogBody"
+          tone={subwaySelection.selectedStation && !isSelectionInProgress ? "brand" : "muted"}
+        >
+          {resultMessage}
+        </AppText>
+      </div>
+    </AppDialog>
   );
 }

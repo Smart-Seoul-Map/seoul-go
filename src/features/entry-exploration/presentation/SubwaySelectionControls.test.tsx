@@ -22,33 +22,33 @@ describe("SubwaySelectionControls", () => {
   afterEach(cleanup);
 
   test("renders nothing while the interaction is inactive", () => {
-    const { container } = render(
+    render(
       <SubwaySelectionControls
         subwaySelection={createSubwaySelectionViewModel({ isActive: false })}
       />
     );
 
-    expect(container.childElementCount).toBe(0);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  test("closes from the outside or close button while the train is stopped", () => {
+  test("uses the shared dialog close interactions while input is available", () => {
     const handleClose = vi.fn();
-    const { container } = render(
+
+    render(
       <SubwaySelectionControls subwaySelection={createSubwaySelectionViewModel({ handleClose })} />
     );
-    const layer = container.querySelector(".subway-selection-layer");
 
-    expect(layer).not.toBeNull();
-    fireEvent.pointerDown(layer!);
+    fireEvent.click(screen.getByTestId("app-dialog-backdrop"));
     fireEvent.click(screen.getByRole("button", { name: "탐색 화면으로 돌아가기" }));
 
     expect(handleClose).toHaveBeenCalledTimes(2);
   });
 
-  test("blocks input until the camera transition is complete", () => {
+  test("blocks dialog and selection actions until the camera transition is complete", () => {
     const handleClose = vi.fn();
     const handleStationSelection = vi.fn();
-    const { container } = render(
+
+    render(
       <SubwaySelectionControls
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
@@ -57,20 +57,20 @@ describe("SubwaySelectionControls", () => {
         })}
       />
     );
-    const layer = container.querySelector(".subway-selection-layer");
 
-    fireEvent.pointerDown(layer!);
-    fireEvent.click(screen.getByRole("button", { name: "탐색 화면으로 돌아가기" }));
+    fireEvent.click(screen.getByTestId("app-dialog-backdrop"));
     fireEvent.click(screen.getByRole("button", { name: "랜덤 역 선정하기" }));
+    fireEvent.keyDown(document, { key: "Escape" });
 
+    expect(screen.queryByRole("button", { name: "탐색 화면으로 돌아가기" })).toBeNull();
     expect(handleClose).not.toHaveBeenCalled();
     expect(handleStationSelection).not.toHaveBeenCalled();
   });
 
-  test("delegates selection and blocks closing while the train is moving", () => {
+  test("delegates station selection and keeps the dialog locked while selecting", () => {
     const handleClose = vi.fn();
     const handleStationSelection = vi.fn();
-    const { container, rerender } = render(
+    const { rerender } = render(
       <SubwaySelectionControls
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
@@ -92,13 +92,16 @@ describe("SubwaySelectionControls", () => {
         })}
       />
     );
-    fireEvent.pointerDown(container.querySelector(".subway-selection-layer")!);
-    fireEvent.click(screen.getByRole("button", { name: "탐색 화면으로 돌아가기" }));
+    fireEvent.click(screen.getByTestId("app-dialog-backdrop"));
+    fireEvent.keyDown(document, { key: "Escape" });
 
+    expect((screen.getByRole("button", { name: "선정 중..." }) as HTMLButtonElement).disabled).toBe(
+      true
+    );
     expect(handleClose).not.toHaveBeenCalled();
   });
 
-  test("shows the selected station result", () => {
+  test("shows the selected station result through shared typography", () => {
     render(
       <SubwaySelectionControls
         subwaySelection={createSubwaySelectionViewModel({
@@ -112,7 +115,7 @@ describe("SubwaySelectionControls", () => {
       />
     );
 
-    expect(screen.getByText("시청역이 선정되었습니다.")).toBeDefined();
-    expect(screen.getByRole("button", { name: "시청역 탐험하기" })).toBeDefined();
+    expect(screen.getByText("시청역이 선정되었습니다.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "다시 선정하기" })).toBeTruthy();
   });
 });

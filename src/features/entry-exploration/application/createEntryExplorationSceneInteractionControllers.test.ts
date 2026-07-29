@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG } from "../config/entryExplorationDistrictSelectionEvent";
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
-import { createEntryExplorationDistrictJumpSelectionInteractionController } from "./entryExplorationDistrictJumpSelectionInteraction";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
 describe("createEntryExplorationSceneInteractionControllers", () => {
   beforeEach(() => {
@@ -34,7 +34,10 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   });
 
   test("appends extra interaction controllers", () => {
-    const extraController = createEntryExplorationDistrictJumpSelectionInteractionController();
+    const extraController = {
+      dispose: vi.fn(),
+      object: new THREE.Group(),
+    } as unknown as EntryExplorationSceneInteractionController;
     const controllers = createEntryExplorationSceneInteractionControllers({
       extraControllers: [extraController],
     });
