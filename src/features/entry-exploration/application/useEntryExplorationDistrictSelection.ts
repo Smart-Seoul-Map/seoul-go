@@ -1,14 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import { createDistrictExplorationPath } from "@shared/constants/path";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
-export function useEntryExplorationDistrictSelectionFlow() {
-  const navigate = useNavigate();
+export function useEntryExplorationDistrictSelection() {
   const sceneControlsRef = useRef<EntryExplorationThreeSceneControls | null>(null);
   const [selectionResult, setSelectionResult] =
     useState<EntryExplorationDistrictSelectionResult | null>(null);
@@ -28,34 +24,21 @@ export function useEntryExplorationDistrictSelectionFlow() {
     []
   );
 
-  const handleBackToExploration = useCallback(() => {
+  const deactivateSelection = useCallback(() => {
     setSelectionResult(null);
     sceneControlsRef.current?.deactivateActiveInteraction();
   }, []);
 
-  const handleRetrySelection = useCallback(() => {
+  const retrySelection = useCallback(() => {
     setSelectionResult(null);
     sceneControlsRef.current?.retryActiveInteraction();
   }, []);
 
-  const handleExploreDistrict = useCallback(() => {
-    if (selectionResult?.districtId === null || selectionResult?.districtId === undefined) {
-      return;
-    }
-
-    navigate(createDistrictExplorationPath(selectionResult.districtId));
-  }, [navigate, selectionResult?.districtId]);
-
   return {
     createSceneInteractionControllers,
-    dialogProps: {
-      districtId: selectionResult?.districtId ?? null,
-      districtName: selectionResult?.districtName ?? null,
-      onBack: handleBackToExploration,
-      onExplore: handleExploreDistrict,
-      onRetry: handleRetrySelection,
-      open: selectionResult !== null,
-    },
+    deactivateSelection,
     handleSceneControlsReady,
+    retrySelection,
+    selectionResult,
   };
 }
