@@ -235,6 +235,26 @@
   --sg-icon-button-tone-on-image: var(--sg-color-text-inverted);
   --sg-icon-button-state-disabled: var(--sg-color-text-disabled);
 
+  /* Badge component tokens */
+  --sg-badge-solid-bg: color-mix(in srgb, var(--sg-color-bg-floating) 92%, transparent);
+  --sg-badge-weak-bg: var(--sg-color-bg-neutral-weak);
+  --sg-badge-outline-bg: var(--sg-color-bg-transparent);
+  --sg-badge-stroke: var(--sg-color-stroke-weak);
+  --sg-badge-fg: var(--sg-color-text-default);
+  --sg-badge-muted-fg: var(--sg-color-text-muted);
+  --sg-badge-brand-fg: var(--sg-color-text-brand);
+  --sg-badge-info-fg: var(--sg-color-text-info);
+  --sg-badge-warning-fg: var(--sg-color-text-warning);
+  --sg-badge-positive-fg: var(--sg-color-text-positive);
+  --sg-badge-radius: var(--sg-pill-radius);
+  --sg-badge-shadow: var(--sg-panel-shadow);
+  --sg-badge-height-md: var(--sg-icon-button-size-nav);
+  --sg-badge-height-lg: var(--sg-spacing-13);
+  --sg-badge-padding-x-md: var(--sg-spacing-5);
+  --sg-badge-padding-x-lg: var(--sg-spacing-6);
+  --sg-badge-gap: var(--sg-spacing-2);
+  --sg-badge-dot-size: var(--sg-spacing-3_5);
+
   /* Dialog component tokens */
   --sg-dialog-backdrop-bg: var(--sg-color-bg-overlay);
   --sg-dialog-surface-bg: var(--sg-color-bg-floating);
