@@ -1,4 +1,5 @@
 export { createPlacesFeatureCollection } from "./application/placeGeoJson";
+export { filterSmartSeoulPlacesByDistrict } from "./application/placeDistrictFilter";
 export { createPlaceThemeProgressItems } from "./application/placeThemeProgress";
 export { placesQueryKeys } from "./application/placesQueryKeys";
 export { useSmartSeoulThemePlacesQuery } from "./application/useSmartSeoulThemePlacesQuery";

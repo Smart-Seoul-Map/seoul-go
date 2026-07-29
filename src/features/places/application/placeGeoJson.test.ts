@@ -2,20 +2,21 @@ import { describe, expect, test } from "vitest";
 
 import { createPlacesFeatureCollection } from "./placeGeoJson";
 
-describe("장소 GeoJSON 변환", () => {
-  test("장소 목록을 MapLibre circle layer에서 쓰는 GeoJSON으로 바꾼다", () => {
+describe("createPlacesFeatureCollection", () => {
+  test("converts places to MapLibre marker GeoJSON", () => {
     const collection = createPlacesFeatureCollection([
       {
+        address: "Seoul",
+        districtName: "district-a",
         id: "smart-seoul:100032:place-1",
-        sourceContentId: "place-1",
-        name: "서울도서관",
-        themeId: "100032",
-        themeName: "서울 미래유산",
-        address: "서울 중구",
+        name: "Library",
         position: {
-          lng: 126.97842,
           lat: 37.56668,
+          lng: 126.97842,
         },
+        sourceContentId: "place-1",
+        themeId: "100032",
+        themeName: "Theme",
       },
     ]);
 
@@ -29,11 +30,11 @@ describe("장소 GeoJSON 변환", () => {
       },
       properties: {
         id: "smart-seoul:100032:place-1",
-        name: "서울도서관",
-        themeId: "100032",
-        themeName: "서울 미래유산",
         markerColor: "#c92a2a",
         markerImage: "red_closed_box",
+        name: "Library",
+        themeId: "100032",
+        themeName: "Theme",
       },
     });
   });
