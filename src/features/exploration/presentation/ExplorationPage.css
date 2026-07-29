@@ -11,6 +11,23 @@
   position: relative;
 }
 
+.exploration-district-status {
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: var(--sg-spacing-7);
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+.exploration-district-status-badge-dot {
+  background: var(--sg-place-theme-yellow);
+  border-radius: var(--sg-radius-full);
+  display: block;
+  height: var(--sg-badge-dot-size);
+  width: var(--sg-badge-dot-size);
+}
+
 .exploration-theme-place-count-list {
   display: flex;
   flex-wrap: wrap;
@@ -38,6 +55,11 @@
 }
 
 @media (max-width: 860px) {
+  .exploration-district-status {
+    max-width: calc(100% - var(--sg-spacing-6));
+    top: var(--sg-spacing-4);
+  }
+
   .exploration-theme-place-count-list {
     flex-wrap: nowrap;
     gap: var(--sg-spacing-2);

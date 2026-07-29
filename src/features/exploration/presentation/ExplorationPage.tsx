@@ -6,6 +6,7 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
 import type { Coordinates } from "../domain/explorationGeo";
+import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge";
 import { ExplorationMap } from "./ExplorationMap";
 import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
 
@@ -20,6 +21,7 @@ type ExplorationThemePlaceCountItem = {
 
 type ExplorationPageProps = {
   districtId?: number;
+  districtName?: string;
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
   themeProgressItems: readonly ExplorationThemePlaceCountItem[];
@@ -27,6 +29,7 @@ type ExplorationPageProps = {
 
 export function ExplorationPage({
   districtId,
+  districtName,
   initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   themeProgressItems,
@@ -39,6 +42,11 @@ export function ExplorationPage({
           initialCenter={initialCenter}
           placeMarkers={placeMarkers}
         />
+        {districtName ? (
+          <div className="exploration-district-status">
+            <ExplorationDistrictStatusBadge districtName={districtName} />
+          </div>
+        ) : null}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {themeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">

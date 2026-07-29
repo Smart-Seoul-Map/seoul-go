@@ -51,6 +51,7 @@ function ExplorationRoute({ district }: ExplorationRouteProps): ReactElement {
   return (
     <ExplorationPage
       districtId={district?.id}
+      districtName={district?.name}
       initialCenter={district?.officePosition}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}

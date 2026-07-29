@@ -38,4 +38,15 @@ describe("ExplorationPage", () => {
     expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
+
+  test("자치구 이름이 있을 때만 현재 탐방 상태 배지를 표시한다", () => {
+    const { rerender } = render(<ExplorationPage themeProgressItems={themeProgressItems} />);
+
+    expect(screen.queryByLabelText("현재 용산구 탐방중")).not.toBeInTheDocument();
+
+    rerender(<ExplorationPage districtName="용산구" themeProgressItems={themeProgressItems} />);
+
+    expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
+    expect(screen.getByText("용산구 탐방중")).toBeInTheDocument();
+  });
 });
