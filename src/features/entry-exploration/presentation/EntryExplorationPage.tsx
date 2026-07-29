@@ -8,7 +8,7 @@ import { useEntryExplorationDistrictSelection } from "../application/useEntryExp
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
-import { SubwaySelectionControls } from "./SubwaySelectionControls";
+import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
 export function EntryExplorationPage(): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +36,7 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      <SubwaySelectionControls subwaySelection={subwaySelection} />
+      <SubwaySelectionDialog subwaySelection={subwaySelection} />
       <EntryExplorationDistrictSelectionDialog
         onBack={districtSelection.deactivateSelection}
         onExplore={handleExploreDistrict}

@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
-import { SubwaySelectionControls } from "./SubwaySelectionControls";
+import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
 function createSubwaySelectionViewModel(
   overrides: Partial<EntryExplorationSubwaySelectionViewModel> = {}
@@ -18,12 +18,12 @@ function createSubwaySelectionViewModel(
   };
 }
 
-describe("SubwaySelectionControls", () => {
+describe("SubwaySelectionDialog", () => {
   afterEach(cleanup);
 
   test("renders nothing while the interaction is inactive", () => {
     render(
-      <SubwaySelectionControls
+      <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({ isActive: false })}
       />
     );
@@ -35,7 +35,7 @@ describe("SubwaySelectionControls", () => {
     const handleClose = vi.fn();
 
     render(
-      <SubwaySelectionControls subwaySelection={createSubwaySelectionViewModel({ handleClose })} />
+      <SubwaySelectionDialog subwaySelection={createSubwaySelectionViewModel({ handleClose })} />
     );
 
     fireEvent.click(screen.getByTestId("app-dialog-backdrop"));
@@ -49,7 +49,7 @@ describe("SubwaySelectionControls", () => {
     const handleStationSelection = vi.fn();
 
     render(
-      <SubwaySelectionControls
+      <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -71,7 +71,7 @@ describe("SubwaySelectionControls", () => {
     const handleClose = vi.fn();
     const handleStationSelection = vi.fn();
     const { rerender } = render(
-      <SubwaySelectionControls
+      <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -84,7 +84,7 @@ describe("SubwaySelectionControls", () => {
     expect(handleStationSelection).toHaveBeenCalledOnce();
 
     rerender(
-      <SubwaySelectionControls
+      <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -103,7 +103,7 @@ describe("SubwaySelectionControls", () => {
 
   test("shows the selected station result through shared typography", () => {
     render(
-      <SubwaySelectionControls
+      <SubwaySelectionDialog
         subwaySelection={createSubwaySelectionViewModel({
           selectedStation: {
             id: "201",
