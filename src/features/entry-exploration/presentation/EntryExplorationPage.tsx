@@ -10,7 +10,6 @@ import {
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
-import type { Line2Station } from "../domain/line2Station";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
@@ -33,8 +32,8 @@ export function EntryExplorationPage(): ReactElement {
     navigate(createDistrictExplorationPath(districtId));
   };
 
-  const handleExploreSubwayStation = (station: Line2Station): void => {
-    navigate(createSubwayStationExplorationPath(station.id));
+  const handleExploreSubwayStation = (stationId: string): void => {
+    navigate(createSubwayStationExplorationPath(stationId));
   };
 
   return (

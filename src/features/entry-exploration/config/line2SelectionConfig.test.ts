@@ -13,11 +13,29 @@ describe("line 2 selection config", () => {
     expect(LINE2_STATIONS).toHaveLength(51);
     expect(LINE2_STATIONS[0]).toEqual({
       address: "서울특별시 중구 서소문로 지하 127",
+      diagramPosition: { x: 46.73, y: 15.28 },
       id: "201",
-      location: { lat: 37.564718, lng: 126.977108 },
       name: "시청",
-      position: { x: 46.73, y: 15.28 },
+      stationGeoPosition: { lat: 37.564718, lng: 126.977108 },
     });
+
+    const stationIds = LINE2_STATIONS.map((station) => station.id);
+
+    expect(new Set(stationIds).size).toBe(stationIds.length);
+
+    for (const station of LINE2_STATIONS) {
+      expect(station.address).not.toBe("");
+      expect(station.id).not.toBe("");
+      expect(station.name).not.toBe("");
+      expect(Number.isFinite(station.diagramPosition.x)).toBe(true);
+      expect(Number.isFinite(station.diagramPosition.y)).toBe(true);
+      expect(Number.isFinite(station.stationGeoPosition.lat)).toBe(true);
+      expect(Number.isFinite(station.stationGeoPosition.lng)).toBe(true);
+      expect(station.stationGeoPosition.lat).toBeGreaterThanOrEqual(-90);
+      expect(station.stationGeoPosition.lat).toBeLessThanOrEqual(90);
+      expect(station.stationGeoPosition.lng).toBeGreaterThanOrEqual(-180);
+      expect(station.stationGeoPosition.lng).toBeLessThanOrEqual(180);
+    }
   });
 
   test("keeps each branch connected to its junction station", () => {

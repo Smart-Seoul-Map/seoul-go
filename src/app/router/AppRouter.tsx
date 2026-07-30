@@ -81,7 +81,7 @@ function SubwayStationExplorationRoute(): ReactElement {
     return <Navigate to={PATH.HOME} replace />;
   }
 
-  return <ExplorationRoute key={station.id} initialCenter={station.location} />;
+  return <ExplorationRoute key={station.id} initialCenter={station.stationGeoPosition} />;
 }
 
 const appRouter = createBrowserRouter([

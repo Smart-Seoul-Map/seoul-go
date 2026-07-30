@@ -10,10 +10,10 @@ export type Line2GeoPoint = {
 
 export type Line2Station = {
   address: string;
+  diagramPosition: Line2RoutePoint;
   id: string;
-  location: Line2GeoPoint;
   name: string;
-  position: Line2RoutePoint;
+  stationGeoPosition: Line2GeoPoint;
 };
 
 type CreateLine2SelectionRouteOptions = {
@@ -85,13 +85,13 @@ export function getLine2RoutePointAtProgress(
   }
 
   if (route.length === 1) {
-    return firstStation.position;
+    return firstStation.diagramPosition;
   }
 
   const segmentLengths = route.slice(1).map((station, index) => {
     const previousStation = route[index];
 
-    return getPointDistance(previousStation.position, station.position);
+    return getPointDistance(previousStation.diagramPosition, station.diagramPosition);
   });
   const totalLength = segmentLengths.reduce((total, length) => total + length, 0);
   const targetDistance = clampProgress(progress) * totalLength;
@@ -102,8 +102,8 @@ export function getLine2RoutePointAtProgress(
     const nextTraversedDistance = traversedDistance + segmentLength;
 
     if (targetDistance <= nextTraversedDistance || segmentIndex === segmentLengths.length - 1) {
-      const from = route[segmentIndex].position;
-      const to = route[segmentIndex + 1].position;
+      const from = route[segmentIndex].diagramPosition;
+      const to = route[segmentIndex + 1].diagramPosition;
       const segmentProgress =
         segmentLength === 0 ? 0 : (targetDistance - traversedDistance) / segmentLength;
 
@@ -116,7 +116,7 @@ export function getLine2RoutePointAtProgress(
     traversedDistance = nextTraversedDistance;
   }
 
-  return route[route.length - 1].position;
+  return route[route.length - 1].diagramPosition;
 }
 
 function clampProgress(progress: number): number {

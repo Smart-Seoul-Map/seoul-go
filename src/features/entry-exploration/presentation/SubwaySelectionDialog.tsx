@@ -5,10 +5,9 @@ import { AppDialog } from "@shared/ui/dialog";
 import { AppText } from "@shared/ui/typography";
 
 import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
-import type { Line2Station } from "../domain/line2Station";
 
 export type SubwaySelectionDialogProps = {
-  onExplore: (station: Line2Station) => void;
+  onExplore: (stationId: string) => void;
   subwaySelection: EntryExplorationSubwaySelectionViewModel;
 };
 
@@ -77,7 +76,7 @@ export function SubwaySelectionDialog({
       return;
     }
 
-    onExplore(subwaySelection.selectedStation);
+    onExplore(subwaySelection.selectedStation.id);
   };
 
   const selectionAction = (

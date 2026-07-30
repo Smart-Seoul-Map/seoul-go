@@ -15,28 +15,15 @@ type SubwayStationData = {
   name: string;
 };
 
-type SubwayLineBranchRouteData = {
-  id: string;
-  junctionStationKey: string;
-  stationKeys: readonly string[];
-  type: "branch";
-};
-
-type SubwayLineLoopRouteData = {
-  id: string;
-  stationKeys: readonly string[];
-  type: "loop";
-};
-
-type SubwayLineData = {
-  name: string;
-  routes: readonly (SubwayLineBranchRouteData | SubwayLineLoopRouteData)[];
-  stationKeys: readonly string[];
-};
-
 const LINE2_KEY = "2";
 const subwayStationsByKey: Record<string, SubwayStationData> = subwayStationData.stations;
-const line2Data = subwayStationData.lines[LINE2_KEY] as SubwayLineData;
+const line2Data = subwayStationData.lines[LINE2_KEY];
+
+type SubwayLineRouteData = (typeof line2Data.routes)[number];
+type SubwayLineBranchRouteData = SubwayLineRouteData & {
+  junctionStationKey: string;
+};
+
 const line2MainLoopRoute = getLine2MainLoopRoute(line2Data.routes);
 const line2BranchRoutes = line2Data.routes.filter(isSubwayLineBranchRoute);
 
@@ -85,17 +72,15 @@ function createLine2Station(stationKey: string): Line2Station {
 
   return {
     address: lineData.address,
+    diagramPosition: lineData.diagramPosition,
     id: lineData.stationId,
-    location: lineData.location,
     name: station.name,
-    position: lineData.diagramPosition,
+    stationGeoPosition: lineData.location,
   };
 }
 
-function getLine2MainLoopRoute(routes: SubwayLineData["routes"]): SubwayLineLoopRouteData {
-  const mainLoopRoute = routes.find(
-    (route): route is SubwayLineLoopRouteData => route.type === "loop"
-  );
+function getLine2MainLoopRoute(routes: readonly SubwayLineRouteData[]): SubwayLineRouteData {
+  const mainLoopRoute = routes.find((route) => route.type === "loop");
 
   if (!mainLoopRoute) {
     throw new Error("Line 2 main loop route is missing.");
@@ -104,8 +89,6 @@ function getLine2MainLoopRoute(routes: SubwayLineData["routes"]): SubwayLineLoop
   return mainLoopRoute;
 }
 
-function isSubwayLineBranchRoute(
-  route: SubwayLineBranchRouteData | SubwayLineLoopRouteData
-): route is SubwayLineBranchRouteData {
-  return route.type === "branch";
+function isSubwayLineBranchRoute(route: SubwayLineRouteData): route is SubwayLineBranchRouteData {
+  return route.type === "branch" && "junctionStationKey" in route;
 }
