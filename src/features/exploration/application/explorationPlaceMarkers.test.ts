@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+
 import {
   EXPLORATION_PLACE_MARKER_IMAGES,
   EXPLORATION_PLACE_MARKERS_LAYER_ID,
@@ -39,6 +41,57 @@ describe("addExplorationPlaceMarkersLayer", () => {
         source: EXPLORATION_PLACE_MARKERS_SOURCE_ID,
         type: "symbol",
       })
+    );
+  });
+
+  it("uses the latest marker data when the marker source is added after image loading", async () => {
+    const resolveImageLoads: Array<(value: { data: { url: string } }) => void> = [];
+    let placeMarkers: MapMarkerFeatureCollection = { features: [], type: "FeatureCollection" };
+    const nextPlaceMarkers: MapMarkerFeatureCollection = {
+      features: [
+        {
+          geometry: { coordinates: [126.990703, 37.532326], type: "Point" },
+          id: "place-1",
+          properties: {
+            id: "place-1",
+            markerColor: "#20252b",
+            markerImage: "black_closed_box",
+            name: "테스트 장소",
+            themeId: "theme-1",
+            themeName: "테스트 테마",
+          },
+          type: "Feature",
+        },
+      ],
+      type: "FeatureCollection",
+    };
+    const map = {
+      addImage: vi.fn(),
+      addLayer: vi.fn(),
+      addSource: vi.fn(),
+      getSource: vi.fn(() => undefined),
+      hasImage: vi.fn(() => false),
+      loadImage: vi.fn(
+        () =>
+          new Promise<{ data: { url: string } }>((resolve) => {
+            resolveImageLoads.push(resolve);
+          })
+      ),
+    };
+
+    const addLayerPromise = addExplorationPlaceMarkersLayer(map as never, {
+      getPlaceMarkers: () => placeMarkers as never,
+    });
+    placeMarkers = nextPlaceMarkers;
+    resolveImageLoads.forEach((resolve, index) => {
+      resolve({ data: { url: EXPLORATION_PLACE_MARKER_IMAGES[index].url } });
+    });
+
+    await addLayerPromise;
+
+    expect(map.addSource).toHaveBeenCalledWith(
+      EXPLORATION_PLACE_MARKERS_SOURCE_ID,
+      expect.objectContaining({ data: nextPlaceMarkers })
     );
   });
 

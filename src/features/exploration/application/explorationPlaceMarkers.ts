@@ -15,6 +15,9 @@ type PlaceMarkersLayerMap = Pick<
   "addImage" | "addLayer" | "addSource" | "getSource" | "hasImage" | "loadImage"
 >;
 type PlaceMarkersSourceMap = Pick<MapLibreMap, "getSource">;
+type AddExplorationPlaceMarkersLayerOptions = {
+  getPlaceMarkers?: () => MapMarkerFeatureCollection;
+};
 type FeatureWithPlaceName = {
   properties?: {
     name?: unknown;
@@ -36,7 +39,10 @@ function createExplorationPlaceMarkersLayer(): SymbolLayerSpecification {
   };
 }
 
-export async function addExplorationPlaceMarkersLayer(map: PlaceMarkersLayerMap): Promise<void> {
+export async function addExplorationPlaceMarkersLayer(
+  map: PlaceMarkersLayerMap,
+  { getPlaceMarkers }: AddExplorationPlaceMarkersLayerOptions = {}
+): Promise<void> {
   if (map.getSource(EXPLORATION_PLACE_MARKERS_SOURCE_ID)) {
     return;
   }
@@ -57,7 +63,7 @@ export async function addExplorationPlaceMarkersLayer(map: PlaceMarkersLayerMap)
 
   map.addSource(EXPLORATION_PLACE_MARKERS_SOURCE_ID, {
     type: "geojson",
-    data: createEmptyMapMarkerFeatureCollection(),
+    data: getPlaceMarkers?.() ?? createEmptyMapMarkerFeatureCollection(),
   });
   map.addLayer(createExplorationPlaceMarkersLayer());
 }
