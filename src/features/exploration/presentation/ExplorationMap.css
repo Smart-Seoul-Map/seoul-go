@@ -1,0 +1,36 @@
+.map-canvas-stack {
+  height: 100vh;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.map-view {
+  background:
+    linear-gradient(rgba(36, 95, 147, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 95, 147, 0.12) 1px, transparent 1px), #dfeadf;
+  background-size: 32px 32px;
+  inset: 0;
+  min-height: 100%;
+  overflow: hidden;
+  position: absolute;
+}
+
+.map-zoom-debug-label {
+  background: color-mix(in srgb, var(--sg-color-bg-neutral-strong) 62%, transparent);
+  bottom: var(--sg-spacing-3);
+  color: var(--sg-color-text-inverted);
+  font-size: var(--sg-font-size-2);
+  line-height: 1;
+  padding: 5px var(--sg-spacing-1_5);
+  pointer-events: none;
+  position: absolute;
+  right: var(--sg-spacing-3);
+  z-index: 4;
+}
+
+@media (max-width: 860px) {
+  .map-canvas-stack {
+    min-height: 100vh;
+  }
+}

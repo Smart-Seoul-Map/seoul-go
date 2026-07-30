@@ -59,6 +59,13 @@
   --sg-state-positive-fg: var(--sg-color-text-positive);
   --sg-state-warning-fg: var(--sg-color-text-warning);
 
+  /* Product semantic - Smart Seoul place themes */
+  --sg-place-theme-red: #c92a2a;
+  --sg-place-theme-purple: #7b2cbf;
+  --sg-place-theme-blue: #1971c2;
+  --sg-place-theme-black: #212529;
+  --sg-place-theme-yellow: #e6a100;
+
   /* Spacing */
   --sg-spacing-0_5: 2px;
   --sg-spacing-1: 4px;
