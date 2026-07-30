@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { EntryExplorationDistrictSelectionResult } from "../application/entryExplorationDistrictJumpSelectionInteraction";
+import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
 import type {
   EntryExplorationThreeSceneControls,
   UseEntryExplorationThreeSceneOptions,
@@ -16,6 +17,14 @@ const sceneControls = {
 
 let districtSelectionResultHandler:
   ((result: EntryExplorationDistrictSelectionResult) => void) | null = null;
+const subwaySelectionViewModel: EntryExplorationSubwaySelectionViewModel = {
+  handleClose: vi.fn(),
+  handleStationSelection: vi.fn(),
+  isActive: false,
+  isCameraReady: true,
+  selectedStation: null,
+  status: "idle",
+};
 
 vi.mock("../application/createEntryExplorationSceneInteractionControllers", () => ({
   createEntryExplorationSceneInteractionControllers: vi.fn(({ onDistrictSelectionResult }) => {
@@ -33,6 +42,13 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     createSceneInteractionControllers();
     onSceneControlsReady?.(sceneControls);
   },
+}));
+
+vi.mock("../application/useEntryExplorationSubwaySelection", () => ({
+  useEntryExplorationSubwaySelection: () => ({
+    createSubwayInteractionControllers: () => [],
+    subwaySelection: subwaySelectionViewModel,
+  }),
 }));
 
 describe("EntryExplorationPage", () => {
@@ -99,12 +115,48 @@ describe("EntryExplorationPage", () => {
 
     expect(await screen.findByText("district exploration route")).toBeTruthy();
   });
+
+  test("navigates to the main exploration map at the selected subway station", async () => {
+    const selectedStation = {
+      address: "서울특별시 중구 세종대로 지하 101",
+      id: "201",
+      location: { lat: 37.564718, lng: 126.977108 },
+      name: "시청",
+      position: { x: 46.73, y: 15.28 },
+    };
+    const { router } = renderEntryExplorationPage({
+      subwaySelectionOverrides: {
+        isActive: true,
+        selectedStation,
+        status: "selected",
+      },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "탐방하기" }));
+
+    expect(await screen.findByText("subway station exploration route")).toBeTruthy();
+    expect(router.state.location.pathname).toBe("/exploration/stations/201");
+    expect(router.state.location.search).toBe("");
+  });
 });
 
-function renderEntryExplorationPage() {
+function renderEntryExplorationPage({
+  subwaySelectionOverrides = {},
+}: {
+  subwaySelectionOverrides?: Partial<EntryExplorationSubwaySelectionViewModel>;
+} = {}) {
   districtSelectionResultHandler = null;
   sceneControls.deactivateActiveInteraction.mockClear();
   sceneControls.retryActiveInteraction.mockClear();
+  Object.assign(subwaySelectionViewModel, {
+    handleClose: vi.fn(),
+    handleStationSelection: vi.fn(),
+    isActive: false,
+    isCameraReady: true,
+    selectedStation: null,
+    status: "idle",
+    ...subwaySelectionOverrides,
+  });
 
   const router = createMemoryRouter([
     {
@@ -115,7 +167,14 @@ function renderEntryExplorationPage() {
       element: <div>district exploration route</div>,
       path: "/exploration/districts/:districtId",
     },
+    {
+      element: <div>subway station exploration route</div>,
+      path: "/exploration/stations/:stationId",
+    },
   ]);
 
-  return render(<RouterProvider router={router} />);
+  return {
+    ...render(<RouterProvider router={router} />),
+    router,
+  };
 }

@@ -24,6 +24,7 @@ describe("SubwaySelectionDialog", () => {
   test("renders nothing while the interaction is inactive", () => {
     render(
       <SubwaySelectionDialog
+        onExplore={vi.fn()}
         subwaySelection={createSubwaySelectionViewModel({ isActive: false })}
       />
     );
@@ -35,7 +36,10 @@ describe("SubwaySelectionDialog", () => {
     const handleClose = vi.fn();
 
     render(
-      <SubwaySelectionDialog subwaySelection={createSubwaySelectionViewModel({ handleClose })} />
+      <SubwaySelectionDialog
+        onExplore={vi.fn()}
+        subwaySelection={createSubwaySelectionViewModel({ handleClose })}
+      />
     );
 
     fireEvent.click(screen.getByTestId("app-dialog-backdrop"));
@@ -50,6 +54,7 @@ describe("SubwaySelectionDialog", () => {
 
     render(
       <SubwaySelectionDialog
+        onExplore={vi.fn()}
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -72,6 +77,7 @@ describe("SubwaySelectionDialog", () => {
     const handleStationSelection = vi.fn();
     const { rerender } = render(
       <SubwaySelectionDialog
+        onExplore={vi.fn()}
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -85,6 +91,7 @@ describe("SubwaySelectionDialog", () => {
 
     rerender(
       <SubwaySelectionDialog
+        onExplore={vi.fn()}
         subwaySelection={createSubwaySelectionViewModel({
           handleClose,
           handleStationSelection,
@@ -102,16 +109,20 @@ describe("SubwaySelectionDialog", () => {
   });
 
   test("shows the selected station result through shared typography", () => {
+    const handleExplore = vi.fn();
+    const selectedStation = {
+      address: "서울특별시 중구 세종대로 지하 101",
+      id: "201",
+      location: { lat: 37.564718, lng: 126.977108 },
+      name: "시청",
+      position: { x: 46.73, y: 15.28 },
+    };
+
     render(
       <SubwaySelectionDialog
+        onExplore={handleExplore}
         subwaySelection={createSubwaySelectionViewModel({
-          selectedStation: {
-            address: "서울특별시 중구 서소문로 지하 127",
-            id: "201",
-            location: { lat: 37.564718, lng: 126.977108 },
-            name: "시청",
-            position: { x: 46.73, y: 15.28 },
-          },
+          selectedStation,
           status: "selected",
         })}
       />
@@ -119,5 +130,9 @@ describe("SubwaySelectionDialog", () => {
 
     expect(screen.getByText("시청역이 선정되었습니다.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "다시 선택하기" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "탐방하기" }));
+
+    expect(handleExplore).toHaveBeenCalledWith(selectedStation);
   });
 });

@@ -71,6 +71,10 @@ export const LINE2_BRANCH_STATION_IDS = line2BranchRoutes.map((route) => [
 export const LINE2_STATIONS: readonly Line2Station[] =
   line2Data.stationKeys.map(createLine2Station);
 
+export function getLine2StationById(stationId: string): Line2Station | null {
+  return LINE2_STATIONS.find((station) => station.id === stationId) ?? null;
+}
+
 function createLine2Station(stationKey: string): Line2Station {
   const station = subwayStationsByKey[stationKey];
   const lineData = station?.lines[LINE2_KEY];

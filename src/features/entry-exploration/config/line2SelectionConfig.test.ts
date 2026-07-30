@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  getLine2StationById,
   LINE2_BRANCH_STATION_IDS,
   LINE2_MAIN_LOOP_STATIONS,
   LINE2_STATIONS,
@@ -24,5 +25,10 @@ describe("line 2 selection config", () => {
       ["211", "244", "245", "246", "247"],
       ["234", "248", "249", "250", "251"],
     ]);
+  });
+
+  test("finds a station by its station number", () => {
+    expect(getLine2StationById("201")?.name).toBe("시청");
+    expect(getLine2StationById("unknown")).toBeNull();
   });
 });

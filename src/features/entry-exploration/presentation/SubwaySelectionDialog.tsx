@@ -5,8 +5,10 @@ import { AppDialog } from "@shared/ui/dialog";
 import { AppText } from "@shared/ui/typography";
 
 import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
+import type { Line2Station } from "../domain/line2Station";
 
-type SubwaySelectionDialogProps = {
+export type SubwaySelectionDialogProps = {
+  onExplore: (station: Line2Station) => void;
   subwaySelection: EntryExplorationSubwaySelectionViewModel;
 };
 
@@ -49,6 +51,7 @@ function getSelectionButtonLabel({
 }
 
 export function SubwaySelectionDialog({
+  onExplore,
   subwaySelection,
 }: SubwaySelectionDialogProps): ReactElement {
   const isSelectionInProgress = subwaySelection.status === "selecting";
@@ -69,6 +72,14 @@ export function SubwaySelectionDialog({
     }
   };
 
+  const handleExplore = (): void => {
+    if (!subwaySelection.selectedStation || isInputLocked) {
+      return;
+    }
+
+    onExplore(subwaySelection.selectedStation);
+  };
+
   const selectionAction = (
     <AppButton
       disabled={isInputLocked}
@@ -85,7 +96,7 @@ export function SubwaySelectionDialog({
         <>
           {selectionAction}
           {hasSelectedStation ? (
-            <AppButton disabled={isInputLocked} variant="primary">
+            <AppButton disabled={isInputLocked} onClick={handleExplore} variant="primary">
               탐방하기
             </AppButton>
           ) : null}

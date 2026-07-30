@@ -2,11 +2,15 @@ import { useRef } from "react";
 import type { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createDistrictExplorationPath } from "@shared/constants/path";
+import {
+  createDistrictExplorationPath,
+  createSubwayStationExplorationPath,
+} from "@shared/constants/path";
 
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
+import type { Line2Station } from "../domain/line2Station";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
@@ -29,6 +33,10 @@ export function EntryExplorationPage(): ReactElement {
     navigate(createDistrictExplorationPath(districtId));
   };
 
+  const handleExploreSubwayStation = (station: Line2Station): void => {
+    navigate(createSubwayStationExplorationPath(station.id));
+  };
+
   return (
     <main className="entry-exploration-page">
       <div
@@ -36,7 +44,10 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      <SubwaySelectionDialog subwaySelection={subwaySelection} />
+      <SubwaySelectionDialog
+        onExplore={handleExploreSubwayStation}
+        subwaySelection={subwaySelection}
+      />
       <EntryExplorationDistrictSelectionDialog
         onBack={districtSelection.deactivateSelection}
         onExplore={handleExploreDistrict}
