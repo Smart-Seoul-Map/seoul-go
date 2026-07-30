@@ -56,6 +56,8 @@ export function ExplorationMap({
   const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
+  const placeMarkersRef = useRef(placeMarkers);
+  placeMarkersRef.current = placeMarkers;
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -109,7 +111,9 @@ export function ExplorationMap({
 
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
-      addExplorationPlaceMarkersLayer(map);
+      void addExplorationPlaceMarkersLayer(map, {
+        getPlaceMarkers: () => placeMarkersRef.current,
+      });
     });
 
     map.on("click", EXPLORATION_PLACE_MARKERS_LAYER_ID, (event) => {
