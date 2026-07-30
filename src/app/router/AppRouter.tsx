@@ -53,6 +53,7 @@ function ExplorationRoute({ district, initialCenter }: ExplorationRouteProps): R
   return (
     <ExplorationPage
       districtId={district?.id}
+      districtName={district?.name}
       initialCenter={explorationInitialCenter}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}

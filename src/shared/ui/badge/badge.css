@@ -1,0 +1,69 @@
+.AppBadge {
+  align-items: center;
+  border-radius: var(--sg-badge-radius);
+  color: var(--sg-badge-fg);
+  display: inline-flex;
+  flex: none;
+  font-size: var(--sg-badge-font-size);
+  font-weight: var(--sg-badge-font-weight);
+  gap: var(--sg-badge-gap);
+  line-height: var(--sg-badge-line-height);
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.AppBadge[data-size="md"] {
+  min-height: var(--sg-badge-height-md);
+  padding-inline: var(--sg-badge-padding-x-md);
+}
+
+.AppBadge[data-size="lg"] {
+  min-height: var(--sg-badge-height-lg);
+  padding-inline: var(--sg-badge-padding-x-lg);
+}
+
+.AppBadge[data-variant="solid"] {
+  background: var(--sg-badge-solid-bg);
+  border: 1px solid var(--sg-badge-stroke);
+  box-shadow: var(--sg-badge-shadow);
+}
+
+.AppBadge[data-variant="weak"] {
+  background: var(--sg-badge-weak-bg);
+  border: 1px solid transparent;
+}
+
+.AppBadge[data-variant="outline"] {
+  background: var(--sg-badge-outline-bg);
+  border: 1px solid var(--sg-badge-stroke);
+}
+
+.AppBadge[data-tone="brand"] {
+  color: var(--sg-badge-brand-fg);
+}
+
+.AppBadge[data-tone="info"] {
+  color: var(--sg-badge-info-fg);
+}
+
+.AppBadge[data-tone="warning"] {
+  color: var(--sg-badge-warning-fg);
+}
+
+.AppBadge[data-tone="positive"] {
+  color: var(--sg-badge-positive-fg);
+}
+
+.AppBadge-leading {
+  align-items: center;
+  display: inline-flex;
+  flex: none;
+  justify-content: center;
+}
+
+.AppBadge-content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
