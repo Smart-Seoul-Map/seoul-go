@@ -22,13 +22,23 @@ export type BuildSmartSeoulThemeContentsUrlOptions = {
   apiKey: string;
   pageNo?: number;
   pageSize?: number;
+  searchArea?: SmartSeoulThemeContentsSearchArea;
   themeIds?: readonly string[];
+};
+
+export type SmartSeoulThemeContentsSearchArea = {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  distanceMeters: number;
 };
 
 export type RequestSmartSeoulThemeJson = (url: URL) => Promise<SmartSeoulThemeContentsResponse>;
 
 export type FetchSmartSeoulThemePlacesOptions = {
   apiKey: string;
+  searchArea?: SmartSeoulThemeContentsSearchArea;
   themeIds?: readonly string[];
   requestJson?: RequestSmartSeoulThemeJson;
   maxPages?: number;
@@ -42,8 +52,12 @@ export function buildSmartSeoulThemeContentsUrl({
   apiKey,
   pageNo = 1,
   pageSize = SMART_SEOUL_THEME_CONTENTS_PAGE_SIZE,
+  searchArea,
   themeIds = SMART_SEOUL_PLACE_THEME_IDS,
 }: BuildSmartSeoulThemeContentsUrlOptions): URL {
+  const searchCenter = searchArea?.center ?? SMART_SEOUL_THEME_CONTENTS_SEARCH_CENTER;
+  const searchDistanceMeters =
+    searchArea?.distanceMeters ?? SMART_SEOUL_THEME_CONTENTS_SEARCH_DISTANCE_METERS;
   const url = new URL(
     `${API_BASE_URL.SMART_SEOUL}/${encodeURIComponent(
       apiKey
@@ -52,9 +66,9 @@ export function buildSmartSeoulThemeContentsUrl({
 
   url.searchParams.set("page_size", String(pageSize));
   url.searchParams.set("page_no", String(pageNo));
-  url.searchParams.set("coord_x", String(SMART_SEOUL_THEME_CONTENTS_SEARCH_CENTER.lng));
-  url.searchParams.set("coord_y", String(SMART_SEOUL_THEME_CONTENTS_SEARCH_CENTER.lat));
-  url.searchParams.set("distance", String(SMART_SEOUL_THEME_CONTENTS_SEARCH_DISTANCE_METERS));
+  url.searchParams.set("coord_x", String(searchCenter.lng));
+  url.searchParams.set("coord_y", String(searchCenter.lat));
+  url.searchParams.set("distance", String(searchDistanceMeters));
   url.searchParams.set("search_type", SMART_SEOUL_THEME_CONTENTS_SEARCH_TYPE);
   url.searchParams.set("search_name", SMART_SEOUL_THEME_CONTENTS_EMPTY_SEARCH_VALUE);
   url.searchParams.set("theme_id", themeIds.join(","));
@@ -98,6 +112,7 @@ async function requestSmartSeoulThemeJson(url: URL): Promise<SmartSeoulThemeCont
 
 export async function fetchSmartSeoulThemePlaces({
   apiKey,
+  searchArea,
   themeIds = SMART_SEOUL_PLACE_THEME_IDS,
   requestJson = requestSmartSeoulThemeJson,
   maxPages = SMART_SEOUL_THEME_CONTENTS_DEFAULT_MAX_PAGES,
@@ -111,6 +126,7 @@ export async function fetchSmartSeoulThemePlaces({
       const url = buildSmartSeoulThemeContentsUrl({
         apiKey,
         pageNo,
+        searchArea,
         themeIds: [themeId],
       });
       const response = await requestJson(url);

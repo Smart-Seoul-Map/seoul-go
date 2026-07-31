@@ -1,60 +1,35 @@
-import { useMemo, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
-import { ExplorationPage, type Coordinates } from "@features/exploration";
-import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
 import {
-  SMART_SEOUL_PLACE_THEMES,
-  createPlacesFeatureCollection,
-  createPlaceThemeProgressItems,
-  filterSmartSeoulPlacesByDistrict,
-  useSmartSeoulThemePlacesQuery,
-} from "@features/places";
+  ExplorationPage,
+  createDistrictExplorationTarget,
+  createStationExplorationTarget,
+  isDistrictExplorationTarget,
+  parseDistrictExplorationTargetIdParam,
+  STATION_EXPLORATION_RADIUS_STEPS,
+  type ExplorationTarget,
+} from "@features/exploration";
+import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
 import { PATH } from "@shared/constants/path";
-import { getSeoulDistrictById, type SeoulDistrict } from "@shared/constants/seoulDistrict";
+import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+
+import { useDistrictExplorationRoutePlaces } from "./useExplorationRoutePlaces";
 
 type ExplorationRouteProps = {
-  district?: SeoulDistrict;
-  initialCenter?: Coordinates;
+  target?: ExplorationTarget | null;
 };
 
-function parseDistrictIdParam(districtId: string | undefined): number | null {
-  if (!districtId) {
-    return null;
-  }
-
-  const parsedDistrictId = Number(districtId);
-
-  if (!Number.isInteger(parsedDistrictId)) {
-    return null;
-  }
-
-  return parsedDistrictId;
-}
-
-function ExplorationRoute({ district, initialCenter }: ExplorationRouteProps): ReactElement {
-  const { data: allPlaces = [] } = useSmartSeoulThemePlacesQuery();
-  const explorationInitialCenter = district?.officePosition ?? initialCenter;
-  const places = useMemo(
-    () => filterSmartSeoulPlacesByDistrict(allPlaces, district?.name),
-    [allPlaces, district?.name]
-  );
-  const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
-  const themeProgressItems = useMemo(
-    () =>
-      createPlaceThemeProgressItems({
-        places,
-        themes: SMART_SEOUL_PLACE_THEMES,
-      }),
-    [places]
-  );
+function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
+  const districtTarget = isDistrictExplorationTarget(target) ? target : null;
+  const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(districtTarget);
 
   return (
     <ExplorationPage
-      districtId={district?.id}
-      districtName={district?.name}
-      initialCenter={explorationInitialCenter}
+      districtId={districtTarget?.districtId}
+      districtName={districtTarget?.districtName}
+      initialCenter={target?.center}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}
     />
@@ -63,14 +38,14 @@ function ExplorationRoute({ district, initialCenter }: ExplorationRouteProps): R
 
 function DistrictExplorationRoute(): ReactElement {
   const { districtId } = useParams();
-  const parsedDistrictId = parseDistrictIdParam(districtId);
+  const parsedDistrictId = parseDistrictExplorationTargetIdParam(districtId);
   const district = parsedDistrictId ? getSeoulDistrictById(parsedDistrictId) : null;
 
   if (!district) {
     return <Navigate to={PATH.HOME} replace />;
   }
 
-  return <ExplorationRoute key={district.id} district={district} />;
+  return <ExplorationRoute key={district.id} target={createDistrictExplorationTarget(district)} />;
 }
 
 function SubwayStationExplorationRoute(): ReactElement {
@@ -81,7 +56,17 @@ function SubwayStationExplorationRoute(): ReactElement {
     return <Navigate to={PATH.HOME} replace />;
   }
 
-  return <ExplorationRoute key={station.id} initialCenter={station.stationGeoPosition} />;
+  return (
+    <ExplorationRoute
+      key={station.id}
+      target={createStationExplorationTarget({
+        center: station.stationGeoPosition,
+        radiusMeters: STATION_EXPLORATION_RADIUS_STEPS[0].radiusMeters,
+        stationId: station.id,
+        stationName: station.name,
+      })}
+    />
+  );
 }
 
 const appRouter = createBrowserRouter([
