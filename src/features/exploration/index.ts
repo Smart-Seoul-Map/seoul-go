@@ -15,6 +15,15 @@ export {
   type Coordinates,
 } from "./domain/explorationGeo";
 export {
+  createDistrictExplorationTarget,
+  createStationExplorationTarget,
+  isDistrictExplorationTarget,
+  parseDistrictExplorationTargetIdParam,
+  type DistrictExplorationTarget,
+  type ExplorationTarget,
+  type StationExplorationTarget,
+} from "./domain/explorationTarget";
+export {
   advanceMovement,
   createMovement,
   type CharacterMovement,

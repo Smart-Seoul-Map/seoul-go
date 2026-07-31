@@ -21,6 +21,21 @@ describe("Smart Seoul theme API", () => {
     expect(url.searchParams.get("theme_id")).toBe("100032,100575");
   });
 
+  test("builds theme contents request URL with a custom search area", () => {
+    const url = buildSmartSeoulThemeContentsUrl({
+      apiKey: "KEY",
+      searchArea: {
+        center: { lat: 37.5657, lng: 126.9769 },
+        distanceMeters: 500,
+      },
+      themeIds: ["100032"],
+    });
+
+    expect(url.searchParams.get("coord_x")).toBe("126.9769");
+    expect(url.searchParams.get("coord_y")).toBe("37.5657");
+    expect(url.searchParams.get("distance")).toBe("500");
+  });
+
   test("requests pages and returns normalized places", async () => {
     const requestedUrls: string[] = [];
     const places = await fetchSmartSeoulThemePlaces({
@@ -84,6 +99,34 @@ describe("Smart Seoul theme API", () => {
 
     expect(requestedPageNumbers).toEqual(["1", "2", "3"]);
     expect(places.map((place) => place.sourceContentId)).toEqual(["page-1", "page-2", "page-3"]);
+  });
+
+  test("requests places with a custom search area", async () => {
+    const requestedUrls: URL[] = [];
+
+    await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      searchArea: {
+        center: { lat: 37.5657, lng: 126.9769 },
+        distanceMeters: 500,
+      },
+      themeIds: ["100032"],
+      requestJson: async (url) => {
+        requestedUrls.push(url);
+
+        return {
+          header: {
+            PAGE_COUNT: 1,
+            resultCode: "200",
+          },
+          body: [],
+        };
+      },
+    });
+
+    expect(requestedUrls[0]?.searchParams.get("coord_x")).toBe("126.9769");
+    expect(requestedUrls[0]?.searchParams.get("coord_y")).toBe("37.5657");
+    expect(requestedUrls[0]?.searchParams.get("distance")).toBe("500");
   });
 
   test("does not filter rows by district while fetching source data", async () => {
