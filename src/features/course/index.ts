@@ -26,6 +26,12 @@ export {
   type StampCourseSharePlace,
 } from "./domain/stampCourseSharePayload";
 export {
+  createStampCourseSlots,
+  type EmptyStampCourseSlot,
+  type FilledStampCourseSlot,
+  type StampCourseSlot,
+} from "./domain/stampCourseSlots";
+export {
   STAMP_COURSE_STORAGE_KEY,
   STAMP_COURSE_STORAGE_VERSION,
   clearStampCoursePlaces,
