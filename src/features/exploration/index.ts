@@ -24,6 +24,11 @@ export {
   type StationExplorationTarget,
 } from "./domain/explorationTarget";
 export {
+  getUnlockedStationExplorationRadius,
+  STATION_EXPLORATION_RADIUS_STEPS,
+  type StationExplorationRadiusStep,
+} from "./domain/explorationStationRadius";
+export {
   advanceMovement,
   createMovement,
   type CharacterMovement,
