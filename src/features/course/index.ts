@@ -14,6 +14,11 @@ export {
   type StampCoursePlacePosition,
 } from "./domain/stampCourse";
 export {
+  createKakaoWalkRouteUrl,
+  type CreateKakaoWalkRouteUrlResult,
+  type KakaoWalkRoutePlace,
+} from "./domain/stampCourseKakaoWalkUrl";
+export {
   STAMP_COURSE_STORAGE_KEY,
   STAMP_COURSE_STORAGE_VERSION,
   clearStampCoursePlaces,
