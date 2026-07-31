@@ -19,6 +19,12 @@ export {
   type KakaoWalkRoutePlace,
 } from "./domain/stampCourseKakaoWalkUrl";
 export {
+  createEditableStampCourse,
+  hasEditableStampCourseChanges,
+  resetEditableStampCourse,
+  type EditableStampCourse,
+} from "./domain/editableStampCourse";
+export {
   decodeStampCourseSharePayload,
   encodeStampCourseSharePayload,
   type DecodeStampCourseSharePayloadResult,
