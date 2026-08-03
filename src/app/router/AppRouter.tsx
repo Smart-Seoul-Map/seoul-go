@@ -8,29 +8,68 @@ import {
   createStationExplorationTarget,
   isDistrictExplorationTarget,
   parseDistrictExplorationTargetIdParam,
-  STATION_EXPLORATION_RADIUS_STEPS,
+  type DistrictExplorationTarget,
   type ExplorationTarget,
+  type StationExplorationTarget,
 } from "@features/exploration";
 import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
 import { PATH } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+import { STATION_EXPLORATION_RADIUS_METERS } from "@shared/constants/stationExploration";
 
-import { useDistrictExplorationRoutePlaces } from "./useExplorationRoutePlaces";
+import {
+  useDistrictExplorationRoutePlaces,
+  useStationExplorationRoutePlaces,
+} from "./useExplorationRoutePlaces";
 
 type ExplorationRouteProps = {
   target?: ExplorationTarget | null;
 };
 
 function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
+  if (target?.type === "station") {
+    return <StationExplorationRouteContent target={target} />;
+  }
+
   const districtTarget = isDistrictExplorationTarget(target) ? target : null;
-  const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(districtTarget);
+
+  return <DistrictExplorationRouteContent target={districtTarget} />;
+}
+
+type DistrictExplorationRouteContentProps = {
+  target: DistrictExplorationTarget | null;
+};
+
+function DistrictExplorationRouteContent({
+  target,
+}: DistrictExplorationRouteContentProps): ReactElement {
+  const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
 
   return (
     <ExplorationPage
-      districtId={districtTarget?.districtId}
-      districtName={districtTarget?.districtName}
+      districtId={target?.districtId}
+      districtName={target?.districtName}
       initialCenter={target?.center}
       placeMarkers={placeMarkers}
+      themeProgressItems={themeProgressItems}
+    />
+  );
+}
+
+type StationExplorationRouteContentProps = {
+  target: StationExplorationTarget;
+};
+
+function StationExplorationRouteContent({
+  target,
+}: StationExplorationRouteContentProps): ReactElement {
+  const { placeMarkers, themeProgressItems } = useStationExplorationRoutePlaces(target);
+
+  return (
+    <ExplorationPage
+      initialCenter={target.center}
+      placeMarkers={placeMarkers}
+      stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />
   );
@@ -61,7 +100,7 @@ function SubwayStationExplorationRoute(): ReactElement {
       key={station.id}
       target={createStationExplorationTarget({
         center: station.stationGeoPosition,
-        radiusMeters: STATION_EXPLORATION_RADIUS_STEPS[0].radiusMeters,
+        radiusMeters: STATION_EXPLORATION_RADIUS_METERS,
         stationId: station.id,
         stationName: station.name,
       })}

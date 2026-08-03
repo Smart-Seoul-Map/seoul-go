@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 
-import type { DistrictExplorationTarget } from "@features/exploration";
+import type { DistrictExplorationTarget, StationExplorationTarget } from "@features/exploration";
 import {
   SMART_SEOUL_PLACE_THEMES,
   createPlaceThemeProgressItems,
   createPlacesFeatureCollection,
   filterSmartSeoulPlacesByDistrict,
+  useNearbySmartSeoulThemePlacesQuery,
   useSmartSeoulThemePlacesQuery,
   type PlaceThemeProgressItem,
   type SmartSeoulThemePlace,
@@ -32,6 +33,33 @@ export function useDistrictExplorationRoutePlaces(
         : [...sourcePlaces],
     [sourcePlaces, target]
   );
+  const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
+  const themeProgressItems = useMemo(
+    () =>
+      createPlaceThemeProgressItems({
+        places,
+        themes: SMART_SEOUL_PLACE_THEMES,
+      }),
+    [places]
+  );
+
+  return {
+    isError: placesQuery.isError,
+    isLoading: placesQuery.isLoading,
+    placeMarkers,
+    places,
+    themeProgressItems,
+  };
+}
+
+export function useStationExplorationRoutePlaces(
+  target: StationExplorationTarget
+): ExplorationRoutePlacesResult {
+  const placesQuery = useNearbySmartSeoulThemePlacesQuery({
+    center: target.center,
+    distanceMeters: target.radiusMeters,
+  });
+  const places = placesQuery.data ?? [];
   const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
   const themeProgressItems = useMemo(
     () =>

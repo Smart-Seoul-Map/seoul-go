@@ -4,14 +4,12 @@ import type {
   Map as MapLibreMap,
 } from "maplibre-gl";
 
+import { MAP_AREA_FILL_STYLE, MAP_AREA_LINE_STYLE } from "@shared/styles/mapAreaLayerStyle";
+
 import {
-  EXPLORATION_DISTRICT_BOUNDARY_COLOR,
   EXPLORATION_DISTRICT_BOUNDARY_LAYER_ID,
   EXPLORATION_DISTRICT_BOUNDARY_SOURCE_ID,
-  EXPLORATION_DISTRICT_BOUNDARY_WIDTH,
-  EXPLORATION_DISTRICT_MASK_COLOR,
   EXPLORATION_DISTRICT_MASK_LAYER_ID,
-  EXPLORATION_DISTRICT_MASK_OPACITY,
   EXPLORATION_DISTRICT_MASK_SOURCE_ID,
 } from "../config/explorationDistrictBoundaryLayer";
 import {
@@ -27,8 +25,8 @@ function createExplorationDistrictMaskLayer(): FillLayerSpecification {
     source: EXPLORATION_DISTRICT_MASK_SOURCE_ID,
     type: "fill",
     paint: {
-      "fill-color": EXPLORATION_DISTRICT_MASK_COLOR,
-      "fill-opacity": EXPLORATION_DISTRICT_MASK_OPACITY,
+      "fill-color": MAP_AREA_FILL_STYLE.color,
+      "fill-opacity": MAP_AREA_FILL_STYLE.opacity,
     },
   };
 }
@@ -39,8 +37,9 @@ function createExplorationDistrictBoundaryLayer(): LineLayerSpecification {
     source: EXPLORATION_DISTRICT_BOUNDARY_SOURCE_ID,
     type: "line",
     paint: {
-      "line-color": EXPLORATION_DISTRICT_BOUNDARY_COLOR,
-      "line-width": EXPLORATION_DISTRICT_BOUNDARY_WIDTH,
+      "line-color": MAP_AREA_LINE_STYLE.color,
+      "line-opacity": MAP_AREA_LINE_STYLE.opacity,
+      "line-width": MAP_AREA_LINE_STYLE.width,
     },
   };
 }
