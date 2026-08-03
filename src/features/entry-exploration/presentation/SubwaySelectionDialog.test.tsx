@@ -120,6 +120,7 @@ describe("SubwaySelectionDialog", () => {
 
     render(
       <SubwaySelectionDialog
+        availabilityStatus="available"
         onExplore={handleExplore}
         subwaySelection={createSubwaySelectionViewModel({
           selectedStation,
@@ -134,5 +135,37 @@ describe("SubwaySelectionDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "탐방하기" }));
 
     expect(handleExplore).toHaveBeenCalledWith("201");
+  });
+
+  test("shows retry guidance instead of exploration when the selected station has no places", () => {
+    const handleStationSelection = vi.fn();
+    const selectedStation = {
+      address: "서울특별시 관악구 남부순환로 지하1822",
+      diagramPosition: { x: 0, y: 0 },
+      id: "228",
+      name: "서울대입구",
+      stationGeoPosition: { lat: 37.481247, lng: 126.952739 },
+    };
+
+    render(
+      <SubwaySelectionDialog
+        availabilityStatus="empty"
+        onExplore={vi.fn()}
+        subwaySelection={createSubwaySelectionViewModel({
+          handleStationSelection,
+          selectedStation,
+          status: "selected",
+        })}
+      />
+    );
+
+    expect(
+      screen.getByText("서울대입구역 반경 1km에는 현재 탐방할 곳이 없어요. 다시 선정해 주세요.")
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "탐방하기" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "다시 선택하기" }));
+
+    expect(handleStationSelection).toHaveBeenCalledOnce();
   });
 });

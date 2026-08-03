@@ -41,7 +41,7 @@ import {
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
-type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
+export type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
 
 export type EntryExplorationSubwaySelectionState = {
   isActive: boolean;
@@ -174,7 +174,7 @@ export function createEntryExplorationSubwaySelectionInteractionController({
       targetStationId: targetStation.id,
     });
 
-    selectedStation = null;
+    selectedStation = targetStation;
     status = "selecting";
     selectionAnimation = {
       route,

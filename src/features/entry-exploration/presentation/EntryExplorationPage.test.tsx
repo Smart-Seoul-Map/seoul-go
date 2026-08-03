@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { EntryExplorationDistrictSelectionResult } from "../application/entryExplorationDistrictJumpSelectionInteraction";
+import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
 import type { EntryExplorationSubwaySelectionViewModel } from "../application/useEntryExplorationSubwaySelection";
 import type {
   EntryExplorationThreeSceneControls,
@@ -125,6 +126,7 @@ describe("EntryExplorationPage", () => {
       stationGeoPosition: { lat: 37.564718, lng: 126.977108 },
     };
     const { router } = renderEntryExplorationPage({
+      subwayStationAvailabilityStatus: "available",
       subwaySelectionOverrides: {
         isActive: true,
         selectedStation,
@@ -138,11 +140,40 @@ describe("EntryExplorationPage", () => {
     expect(router.state.location.pathname).toBe("/exploration/stations/201");
     expect(router.state.location.search).toBe("");
   });
+
+  test("reports the selected subway station to the app assembly layer", () => {
+    const handleSubwayStationSelectionChange = vi.fn();
+    const selectedStation = {
+      address: "?쒖슱?밸퀎??以묎뎄 ?몄쥌?濡?吏??101",
+      diagramPosition: { x: 46.73, y: 15.28 },
+      id: "201",
+      name: "?쒖껌",
+      stationGeoPosition: { lat: 37.564718, lng: 126.977108 },
+    };
+
+    renderEntryExplorationPage({
+      onSubwayStationSelectionChange: handleSubwayStationSelectionChange,
+      subwaySelectionOverrides: {
+        isActive: true,
+        selectedStation,
+        status: "selected",
+      },
+    });
+
+    expect(handleSubwayStationSelectionChange).toHaveBeenCalledWith(selectedStation, "selected");
+  });
 });
 
 function renderEntryExplorationPage({
+  onSubwayStationSelectionChange,
+  subwayStationAvailabilityStatus = "idle",
   subwaySelectionOverrides = {},
 }: {
+  onSubwayStationSelectionChange?: (
+    station: EntryExplorationSubwaySelectionViewModel["selectedStation"],
+    status: EntryExplorationSubwaySelectionViewModel["status"]
+  ) => void;
+  subwayStationAvailabilityStatus?: SubwayStationAvailabilityStatus;
   subwaySelectionOverrides?: Partial<EntryExplorationSubwaySelectionViewModel>;
 } = {}) {
   districtSelectionResultHandler = null;
@@ -160,7 +191,12 @@ function renderEntryExplorationPage({
 
   const router = createMemoryRouter([
     {
-      element: <EntryExplorationPage />,
+      element: (
+        <EntryExplorationPage
+          onSubwayStationSelectionChange={onSubwayStationSelectionChange}
+          subwayStationAvailabilityStatus={subwayStationAvailabilityStatus}
+        />
+      ),
       path: "/",
     },
     {
