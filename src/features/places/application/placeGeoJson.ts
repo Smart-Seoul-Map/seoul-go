@@ -20,6 +20,7 @@ export function createPlacesFeatureCollection(
       },
       properties: {
         id: place.id,
+        imageUrl: place.imageUrl,
         name: place.name,
         themeId: place.themeId,
         themeName: place.themeName,

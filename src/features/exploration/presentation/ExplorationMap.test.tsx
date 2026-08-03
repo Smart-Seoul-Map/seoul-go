@@ -16,6 +16,7 @@ const maplibreMock = vi.hoisted(() => ({
 
 const placeMarkerLayerMock = vi.hoisted(() => ({
   addExplorationPlaceMarkersLayer: vi.fn(),
+  getExplorationPlaceMarkerSelection: vi.fn(),
   getExplorationPlaceMarkerName: vi.fn(),
   updateExplorationPlaceMarkersSource: vi.fn(),
 }));
@@ -90,7 +91,15 @@ function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
     features: [
       {
         geometry: { coordinates: [126.990703, 37.532326], type: "Point" },
-        properties: { markerImage: "black_closed_box", name },
+        properties: {
+          id: "place-1",
+          imageUrl: "",
+          markerColor: "#212529",
+          markerImage: "black_closed_box",
+          name,
+          themeId: "theme-1",
+          themeName: "Theme",
+        },
         type: "Feature",
       },
     ],

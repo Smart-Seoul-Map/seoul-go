@@ -11,5 +11,6 @@ export type SmartSeoulThemePlace = {
   themeId: string;
   themeName: string;
   address: string;
+  imageUrl: string;
   position: PlaceCoordinates;
 };
