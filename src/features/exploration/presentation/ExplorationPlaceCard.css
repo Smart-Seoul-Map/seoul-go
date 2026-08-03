@@ -1,0 +1,199 @@
+.exploration-place-card {
+  --exploration-place-card-theme-color: var(--sg-place-theme-red);
+  --exploration-place-card-accent: #c33f2e;
+  --exploration-place-card-header-bg: #ffb68f;
+  --exploration-place-card-header-ink: #2a1812;
+  --exploration-place-card-title-ink: #2a1812;
+  --exploration-place-card-panel-bg: #ffe4b0;
+  --exploration-place-card-panel-bg-weak: #fff0c8;
+  --exploration-place-card-panel-line: #c33f2e;
+  --exploration-place-card-ink: #151716;
+  --exploration-place-card-footer-bg: #ff8a68;
+  --exploration-place-card-footer-ink: #1f1510;
+
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--exploration-place-card-theme-color) 88%, #ffffff),
+    var(--exploration-place-card-theme-color)
+  );
+  border: 3px solid var(--exploration-place-card-ink);
+  border-radius: 2px;
+  box-shadow:
+    0 6px 0 color-mix(in srgb, var(--exploration-place-card-theme-color) 70%, #000000),
+    0 18px 32px #00000030;
+  color: var(--exploration-place-card-ink);
+  padding: var(--sg-spacing-1);
+  position: relative;
+  width: min(184px, calc(100vw - var(--sg-spacing-8)));
+}
+
+.exploration-place-card::before {
+  border: 2px solid var(--exploration-place-card-accent);
+  content: "";
+  inset: var(--sg-spacing-1);
+  pointer-events: none;
+  position: absolute;
+}
+
+.exploration-place-card::after {
+  border: 1px solid color-mix(in srgb, var(--exploration-place-card-accent) 62%, #ffffff);
+  content: "";
+  inset: var(--sg-spacing-2);
+  pointer-events: none;
+  position: absolute;
+}
+
+.exploration-place-card-header {
+  align-items: center;
+  background: var(--exploration-place-card-header-bg);
+  border: 2px solid var(--exploration-place-card-ink);
+  border-radius: 2px;
+  clip-path: polygon(
+    0 4px,
+    4px 4px,
+    4px 0,
+    calc(100% - 4px) 0,
+    calc(100% - 4px) 4px,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    4px calc(100% - 4px),
+    0 calc(100% - 4px)
+  );
+  color: var(--exploration-place-card-header-ink);
+  display: flex;
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-bold);
+  justify-content: center;
+  line-height: var(--sg-line-height-2);
+  margin: var(--sg-spacing-1) var(--sg-spacing-1_5) var(--sg-spacing-1_5);
+  min-height: var(--sg-spacing-7);
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.exploration-place-card-panel {
+  background: linear-gradient(
+    180deg,
+    var(--exploration-place-card-panel-bg) 0%,
+    var(--exploration-place-card-panel-bg-weak) 100%
+  );
+  border: 2px solid var(--exploration-place-card-ink);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--exploration-place-card-panel-bg) 45%, #ffffff),
+    inset 0 0 0 4px var(--exploration-place-card-panel-line);
+  clip-path: polygon(
+    0 8px,
+    8px 8px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 8px),
+    0 calc(100% - 8px)
+  );
+  margin: 0 var(--sg-spacing-1);
+  min-height: 250px;
+  padding: var(--sg-spacing-4) var(--sg-spacing-3) var(--sg-spacing-3);
+  position: relative;
+  z-index: 1;
+}
+
+.exploration-place-card-panel-line {
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--exploration-place-card-panel-line) 74%,
+      var(--exploration-place-card-ink)
+    );
+  inset: var(--sg-spacing-2) var(--sg-spacing-2) var(--sg-spacing-2);
+  pointer-events: none;
+  position: absolute;
+}
+
+.exploration-place-card-message {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: var(--sg-spacing-2) 0 var(--sg-spacing-7);
+  min-height: var(--sg-spacing-14);
+  padding: 0 var(--sg-spacing-2);
+  position: relative;
+  z-index: 1;
+}
+
+.exploration-place-card-message .AppText {
+  color: var(--exploration-place-card-title-ink);
+  font-size: var(--sg-font-size-5);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-5);
+}
+
+.exploration-place-card-image-frame {
+  background: color-mix(in srgb, var(--exploration-place-card-panel-bg) 72%, #ffffff);
+  border: 3px solid color-mix(in srgb, var(--exploration-place-card-theme-color) 78%, #27171a);
+  box-shadow:
+    0 0 0 2px var(--exploration-place-card-ink),
+    0 6px 0 color-mix(in srgb, var(--exploration-place-card-theme-color) 42%, #000000);
+  height: 88px;
+  overflow: hidden;
+  position: relative;
+  width: 88px;
+  z-index: 1;
+}
+
+.exploration-place-card-image {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.exploration-place-card-image-placeholder {
+  background:
+    linear-gradient(135deg, transparent 0 38%, #00000018 38% 44%, transparent 44%),
+    color-mix(in srgb, var(--exploration-place-card-theme-color) 24%, #ffffff);
+  height: 100%;
+  width: 100%;
+}
+
+.exploration-place-card-sparkles {
+  display: grid;
+  gap: var(--sg-spacing-1_5);
+  grid-template-columns: repeat(5, var(--sg-spacing-2));
+  justify-content: center;
+  margin-top: var(--sg-spacing-2);
+  position: relative;
+  z-index: 1;
+}
+
+.exploration-place-card-sparkles span {
+  background: var(--exploration-place-card-theme-color);
+  border: 1px solid var(--exploration-place-card-ink);
+  height: var(--sg-spacing-2);
+  transform: rotate(45deg);
+  width: var(--sg-spacing-2);
+}
+
+.exploration-place-card-footer {
+  align-items: center;
+  background: var(--exploration-place-card-footer-bg);
+  color: var(--exploration-place-card-footer-ink);
+  display: flex;
+  font-size: var(--sg-font-size-1);
+  font-weight: var(--sg-font-weight-bold);
+  justify-content: center;
+  line-height: var(--sg-line-height-1);
+  margin: var(--sg-spacing-1_5) var(--sg-spacing-1_5) var(--sg-spacing-0_5);
+  min-height: var(--sg-spacing-5);
+  position: relative;
+  z-index: 1;
+}
