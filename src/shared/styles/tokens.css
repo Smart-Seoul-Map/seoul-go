@@ -258,6 +258,30 @@
   --sg-badge-gap: var(--sg-spacing-2);
   --sg-badge-dot-size: var(--sg-spacing-3_5);
 
+  /* Toast component tokens */
+  --sg-toast-bg: var(--sg-color-bg-neutral-strong);
+  --sg-toast-fg: var(--sg-color-text-inverted);
+  --sg-toast-success-accent: var(--sg-state-positive-fg);
+  --sg-toast-error-accent: var(--sg-state-danger-fg);
+  --sg-toast-radius: var(--sg-radius-2);
+  --sg-toast-shadow: var(--sg-panel-shadow);
+  --sg-toast-min-height: 44px;
+  --sg-toast-max-width: 560px;
+  --sg-toast-padding-x: var(--sg-spacing-2_5);
+  --sg-toast-padding-y: var(--sg-spacing-2_5);
+  --sg-toast-content-gap: var(--sg-spacing-2_5);
+  --sg-toast-viewport-bottom: var(--sg-spacing-4);
+  --sg-toast-viewport-padding-x: var(--sg-spacing-2);
+  --sg-toast-z-index: 1100;
+  --sg-toast-accent-width: var(--sg-spacing-1);
+  --sg-toast-message-font-size: var(--sg-font-size-4);
+  --sg-toast-message-line-height: var(--sg-line-height-4);
+  --sg-toast-message-font-weight: var(--sg-font-weight-regular);
+  --sg-toast-enter-duration: var(--sg-motion-duration-3);
+  --sg-toast-enter-easing: var(--sg-motion-easing-enter);
+  --sg-toast-enter-scale: 0.8;
+  --sg-toast-enter-offset-y: var(--sg-spacing-2);
+
   /* Dialog component tokens */
   --sg-dialog-backdrop-bg: var(--sg-color-bg-overlay);
   --sg-dialog-surface-bg: var(--sg-color-bg-floating);
