@@ -129,6 +129,46 @@ describe("Smart Seoul theme API", () => {
     expect(requestedUrls[0]?.searchParams.get("distance")).toBe("500");
   });
 
+  test("returns an empty list when the API returns no nearby places", async () => {
+    const places = await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      searchArea: {
+        center: { lat: 37.5657, lng: 126.9769 },
+        distanceMeters: 1,
+      },
+      themeIds: ["100032"],
+      requestJson: async () => ({
+        head: {
+          DATA_COUNT: "0",
+          PAGE_COUNT: "0",
+          RETCODE: "100",
+          TOTAL_COUNT: "0",
+        },
+        header: {
+          DATA_COUNT: "0",
+          PAGE_COUNT: "0",
+          resultCode: "100",
+          TOTAL_COUNT: "0",
+        },
+        body: [],
+      }),
+    });
+
+    expect(places).toEqual([]);
+  });
+
+  test("throws when the API response has no result code", async () => {
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        requestJson: async () => ({
+          body: [],
+        }),
+      })
+    ).rejects.toThrow("Smart Seoul theme 100032 contents returned unknown");
+  });
+
   test("does not filter rows by district while fetching source data", async () => {
     const places = await fetchSmartSeoulThemePlaces({
       apiKey: "KEY",
