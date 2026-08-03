@@ -78,19 +78,19 @@ export function buildSmartSeoulThemeContentsUrl({
   return url;
 }
 
-function readResultCode(response: SmartSeoulThemeContentsResponse): string {
+function readResultCode(response: SmartSeoulThemeContentsResponse): string | null {
   const header = response.header;
   const head = response.head;
 
   if (isRecord(header)) {
-    return String(header.resultCode ?? "");
+    return header.resultCode === undefined ? null : String(header.resultCode);
   }
 
   if (isRecord(head)) {
-    return String(head.RETCODE ?? "");
+    return head.RETCODE === undefined ? null : String(head.RETCODE);
   }
 
-  return "";
+  return null;
 }
 
 function readPageCount(response: SmartSeoulThemeContentsResponse): number {
@@ -100,6 +100,37 @@ function readPageCount(response: SmartSeoulThemeContentsResponse): number {
   const parsedPageCount = Number(pageCount);
 
   return Number.isFinite(parsedPageCount) && parsedPageCount > 0 ? parsedPageCount : 1;
+}
+
+function readTotalCount(response: SmartSeoulThemeContentsResponse): number {
+  const header = response.header;
+  const head = response.head;
+  const totalCount = isRecord(header)
+    ? header.TOTAL_COUNT
+    : isRecord(head)
+      ? head.TOTAL_COUNT
+      : undefined;
+  const parsedTotalCount = Number(totalCount);
+
+  return Number.isFinite(parsedTotalCount) && parsedTotalCount >= 0 ? parsedTotalCount : -1;
+}
+
+function isEmptySearchResultResponse(
+  response: SmartSeoulThemeContentsResponse,
+  resultCode: string | null
+): boolean {
+  return resultCode === "100" && readTotalCount(response) === 0 && Array.isArray(response.body);
+}
+
+function isSuccessfulResponse(
+  response: SmartSeoulThemeContentsResponse,
+  resultCode: string | null
+): boolean {
+  return (
+    resultCode !== null &&
+    (SMART_SEOUL_THEME_CONTENTS_SUCCESS_CODES.has(resultCode) ||
+      isEmptySearchResultResponse(response, resultCode))
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -132,8 +163,10 @@ export async function fetchSmartSeoulThemePlaces({
       const response = await requestJson(url);
       const resultCode = readResultCode(response);
 
-      if (!SMART_SEOUL_THEME_CONTENTS_SUCCESS_CODES.has(resultCode)) {
-        throw new Error(`Smart Seoul theme ${themeId} contents returned ${resultCode}`);
+      if (!isSuccessfulResponse(response, resultCode)) {
+        throw new Error(
+          `Smart Seoul theme ${themeId} contents returned ${resultCode ?? "unknown"}`
+        );
       }
 
       if (Array.isArray(response.body)) {
