@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { STATION_EXPLORATION_RADIUS_METERS } from "./stationExploration";
+import { STATION_EXPLORATION_RADIUS_METERS } from "./stationExplorationConfig";
 
 describe("station exploration constants", () => {
   test("uses a fixed 1km exploration radius", () => {

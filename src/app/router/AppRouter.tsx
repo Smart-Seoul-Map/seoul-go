@@ -4,14 +4,13 @@ import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-
 import { App } from "@app/App";
 import { PATH } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
-import { STATION_EXPLORATION_RADIUS_METERS } from "@shared/constants/stationExploration";
 
 import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
 import {
   ExplorationPage,
+  STATION_EXPLORATION_RADIUS_METERS,
   createDistrictExplorationTarget,
   createStationExplorationTarget,
-  isDistrictExplorationTarget,
   parseDistrictExplorationTargetIdParam,
   type DistrictExplorationTarget,
   type ExplorationTarget,
@@ -40,13 +39,23 @@ function EntryExplorationRoute(): ReactElement {
 }
 
 function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
-  if (target?.type === "station") {
+  if (!target) {
+    return <DefaultExplorationRouteContent />;
+  }
+
+  if (target.type === "district") {
+    return <DistrictExplorationRouteContent target={target} />;
+  }
+
+  if (target.type === "station") {
     return <StationExplorationRouteContent target={target} />;
   }
 
-  const districtTarget = isDistrictExplorationTarget(target) ? target : null;
+  return <Navigate to={PATH.HOME} replace />;
+}
 
-  return <DistrictExplorationRouteContent target={districtTarget} />;
+function DefaultExplorationRouteContent(): ReactElement {
+  return <DistrictExplorationRouteContent target={null} />;
 }
 
 type DistrictExplorationRouteContentProps = {

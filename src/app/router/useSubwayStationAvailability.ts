@@ -2,14 +2,13 @@ import { useCallback, useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { STATION_EXPLORATION_RADIUS_METERS } from "@shared/constants/stationExploration";
-
 import {
   getSubwayStationAvailabilityStatus,
   type EntryExplorationSubwaySelectionStatus,
   type Line2Station,
   type SubwayStationAvailabilityStatus,
 } from "@features/entry-exploration";
+import { STATION_EXPLORATION_RADIUS_METERS } from "@features/exploration";
 import {
   SMART_SEOUL_PLACE_THEME_IDS,
   placesQueryKeys,
