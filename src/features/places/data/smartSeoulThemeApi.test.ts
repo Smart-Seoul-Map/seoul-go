@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { SMART_SEOUL_PLACE_THEME_IDS } from "../config/placeThemeConfig";
 import { buildSmartSeoulThemeContentsUrl, fetchSmartSeoulThemePlaces } from "./smartSeoulThemeApi";
 
 describe("Smart Seoul theme API", () => {
@@ -127,6 +128,35 @@ describe("Smart Seoul theme API", () => {
     expect(requestedUrls[0]?.searchParams.get("coord_x")).toBe("126.9769");
     expect(requestedUrls[0]?.searchParams.get("coord_y")).toBe("37.5657");
     expect(requestedUrls[0]?.searchParams.get("distance")).toBe("500");
+  });
+
+  test("requests all five themes for a selected station search area", async () => {
+    const requestedUrls: URL[] = [];
+
+    await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      searchArea: {
+        center: { lat: 37.564718, lng: 126.977108 },
+        distanceMeters: 1000,
+      },
+      requestJson: async (url) => {
+        requestedUrls.push(url);
+
+        return {
+          header: {
+            PAGE_COUNT: 1,
+            resultCode: "200",
+          },
+          body: [],
+        };
+      },
+    });
+
+    expect(requestedUrls).toHaveLength(5);
+    expect(requestedUrls.map((url) => url.searchParams.get("theme_id"))).toEqual(
+      SMART_SEOUL_PLACE_THEME_IDS
+    );
+    expect(requestedUrls.every((url) => url.searchParams.get("distance") === "1000")).toBe(true);
   });
 
   test("returns an empty list when the API returns no nearby places", async () => {

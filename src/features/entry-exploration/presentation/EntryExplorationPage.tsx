@@ -1,16 +1,33 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createDistrictExplorationPath } from "@shared/constants/path";
+import {
+  createDistrictExplorationPath,
+  createSubwayStationExplorationPath,
+} from "@shared/constants/path";
 
+import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
+import type { EntryExplorationSubwaySelectionStatus } from "../application/entryExplorationSubwaySelectionInteraction";
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
+import type { Line2Station } from "../domain/line2Station";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
-export function EntryExplorationPage(): ReactElement {
+export type EntryExplorationPageProps = {
+  onSubwayStationSelectionChange?: (
+    station: Line2Station | null,
+    status: EntryExplorationSubwaySelectionStatus
+  ) => void;
+  subwayStationAvailabilityStatus: SubwayStationAvailabilityStatus;
+};
+
+export function EntryExplorationPage({
+  onSubwayStationSelectionChange,
+  subwayStationAvailabilityStatus,
+}: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { createSubwayInteractionControllers, subwaySelection } =
@@ -25,8 +42,16 @@ export function EntryExplorationPage(): ReactElement {
     onSceneControlsReady: districtSelection.handleSceneControlsReady,
   });
 
+  useEffect(() => {
+    onSubwayStationSelectionChange?.(subwaySelection.selectedStation, subwaySelection.status);
+  }, [onSubwayStationSelectionChange, subwaySelection.selectedStation, subwaySelection.status]);
+
   const handleExploreDistrict = (districtId: number): void => {
     navigate(createDistrictExplorationPath(districtId));
+  };
+
+  const handleExploreSubwayStation = (stationId: string): void => {
+    navigate(createSubwayStationExplorationPath(stationId));
   };
 
   return (
@@ -36,7 +61,11 @@ export function EntryExplorationPage(): ReactElement {
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      <SubwaySelectionDialog subwaySelection={subwaySelection} />
+      <SubwaySelectionDialog
+        availabilityStatus={subwayStationAvailabilityStatus}
+        onExplore={handleExploreSubwayStation}
+        subwaySelection={subwaySelection}
+      />
       <EntryExplorationDistrictSelectionDialog
         onBack={districtSelection.deactivateSelection}
         onExplore={handleExploreDistrict}

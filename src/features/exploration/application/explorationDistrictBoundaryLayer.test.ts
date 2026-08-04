@@ -1,5 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
+import { MAP_AREA_FILL_STYLE, MAP_AREA_LINE_STYLE } from "@shared/styles/mapAreaLayerStyle";
+
 import {
   EXPLORATION_DISTRICT_BOUNDARY_LAYER_ID,
   EXPLORATION_DISTRICT_BOUNDARY_SOURCE_ID,
@@ -30,10 +32,25 @@ describe("탐색 자치구 경계 레이어", () => {
       expect.objectContaining({ type: "geojson" })
     );
     expect(addLayer).toHaveBeenCalledWith(
-      expect.objectContaining({ id: EXPLORATION_DISTRICT_MASK_LAYER_ID, type: "fill" })
+      expect.objectContaining({
+        id: EXPLORATION_DISTRICT_MASK_LAYER_ID,
+        paint: {
+          "fill-color": MAP_AREA_FILL_STYLE.color,
+          "fill-opacity": MAP_AREA_FILL_STYLE.opacity,
+        },
+        type: "fill",
+      })
     );
     expect(addLayer).toHaveBeenCalledWith(
-      expect.objectContaining({ id: EXPLORATION_DISTRICT_BOUNDARY_LAYER_ID, type: "line" })
+      expect.objectContaining({
+        id: EXPLORATION_DISTRICT_BOUNDARY_LAYER_ID,
+        paint: {
+          "line-color": MAP_AREA_LINE_STYLE.color,
+          "line-opacity": MAP_AREA_LINE_STYLE.opacity,
+          "line-width": MAP_AREA_LINE_STYLE.width,
+        },
+        type: "line",
+      })
     );
   });
 

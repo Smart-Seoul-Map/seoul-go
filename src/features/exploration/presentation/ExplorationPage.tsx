@@ -24,6 +24,7 @@ type ExplorationPageProps = {
   districtName?: string;
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
+  stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceCountItem[];
 };
 
@@ -32,6 +33,7 @@ export function ExplorationPage({
   districtName,
   initialCenter,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   return (
@@ -41,6 +43,7 @@ export function ExplorationPage({
           districtId={districtId}
           initialCenter={initialCenter}
           placeMarkers={placeMarkers}
+          stationRadiusMeters={stationRadiusMeters}
         />
         {districtName ? (
           <div className="exploration-district-status">

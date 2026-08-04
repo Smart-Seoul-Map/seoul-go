@@ -41,7 +41,7 @@ import {
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
-type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
+export type EntryExplorationSubwaySelectionStatus = "idle" | "selecting" | "selected";
 
 export type EntryExplorationSubwaySelectionState = {
   isActive: boolean;
@@ -103,7 +103,7 @@ export function createEntryExplorationSubwaySelectionInteractionController({
   let selectionAnimation: SelectionAnimation | null = null;
   let selectedStation: Line2Station | null = null;
   let status: EntryExplorationSubwaySelectionStatus = "idle";
-  let trainPosition = initialStation.position;
+  let trainPosition = initialStation.diagramPosition;
 
   mapObject.add(trainMarker);
   trainMarker.visible = false;
@@ -155,7 +155,7 @@ export function createEntryExplorationSubwaySelectionInteractionController({
     selectionAnimation = null;
     selectedStation = null;
     status = "idle";
-    trainPosition = initialStation.position;
+    trainPosition = initialStation.diagramPosition;
     trainMarker.visible = false;
     emitState();
   };
@@ -174,7 +174,7 @@ export function createEntryExplorationSubwaySelectionInteractionController({
       targetStationId: targetStation.id,
     });
 
-    selectedStation = null;
+    selectedStation = targetStation;
     status = "selecting";
     selectionAnimation = {
       route,
