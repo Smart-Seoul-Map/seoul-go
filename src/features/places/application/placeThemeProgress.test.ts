@@ -68,6 +68,7 @@ function createPlace({
     address: "Seoul",
     districtName: "district-a",
     id,
+    imageUrl: "/images/test.jpg",
     name: id,
     position: { lat: 37.5, lng: 126.9 },
     sourceContentId: id,
