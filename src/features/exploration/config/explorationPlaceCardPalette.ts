@@ -26,14 +26,15 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
       "--exploration-place-card-header-bg": "#ffb68f",
       "--exploration-place-card-header-ink": "#2a1812",
       "--exploration-place-card-title-ink": "#2a1812",
-      "--exploration-place-card-body-frame-bg": "#FBDAC1",
+      "--exploration-place-card-body-frame-bg": "#F6D8BE",
       "--exploration-place-card-panel-bg": "#F36851",
       "--exploration-place-card-panel-bg-weak": "#FFB095",
       "--exploration-place-card-panel-frame-bg": "#b34c3c",
       "--exploration-place-card-panel-line": "#c33f2e",
       "--exploration-place-card-ink": "#2a1812",
-      "--exploration-place-card-footer-bg": "#ff7b63",
+      "--exploration-place-card-footer-bg": "#FD6737",
       "--exploration-place-card-footer-ink": "#1f1510",
+      "--exploration-place-card-card-bg-weak": "#FD6737",
     } as ExplorationPlaceCardPalette;
   }
 

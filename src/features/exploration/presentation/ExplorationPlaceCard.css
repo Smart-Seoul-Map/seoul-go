@@ -4,6 +4,7 @@
   --exploration-place-card-header-bg: #ffb68f;
   --exploration-place-card-header-ink: #2a1812;
   --exploration-place-card-title-ink: #2a1812;
+  --exploration-place-card-card-bg-weak: #fff0c8;
   --exploration-place-card-body-frame-bg: #fff0c8;
   --exploration-place-card-panel-bg: #2a1812;
   --exploration-place-card-panel-bg-weak: #fff0c8;
@@ -17,7 +18,7 @@
     var(--exploration-place-card-accent) 78%,
     var(--exploration-place-card-ink)
   );
-  --exploration-place-card-frame-layer-2: var(--exploration-place-card-footer-bg);
+  --exploration-place-card-frame-layer-2: var(--exploration-place-card-card-bg-weak);
   --exploration-place-card-frame-layer-3: color-mix(
     in srgb,
     var(--exploration-place-card-footer-bg) 76%,
@@ -69,7 +70,7 @@
     8px 2px
   );
 
-  background: var(--exploration-place-card-footer-bg);
+  background: var(--exploration-place-card-card-bg-weak);
   border: 1px solid var(--exploration-place-card-ink);
   border-radius: 0;
   box-sizing: border-box;
@@ -86,16 +87,12 @@
   clip-path: var(--exploration-place-card-pixel-corners);
   height: 302px;
   margin: 2px 2px 0;
-  padding: 6px 11px 8px;
+  padding: 6px;
   position: relative;
 }
 
 .exploration-place-card-body::before {
   background: var(--exploration-place-card-frame-layer-4);
-  box-shadow:
-    inset 0 0 0 1px var(--exploration-place-card-frame-layer-1),
-    inset 0 0 0 2px var(--exploration-place-card-frame-layer-2),
-    inset 0 0 0 3px var(--exploration-place-card-frame-layer-3);
   clip-path: var(--exploration-place-card-pixel-corners);
   content: "";
   inset: 1px;
