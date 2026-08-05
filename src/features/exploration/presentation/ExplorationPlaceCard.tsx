@@ -30,34 +30,44 @@ export function ExplorationPlaceCard({ place }: ExplorationPlaceCardProps): Reac
             <span className="exploration-place-card-header-label">SEOUL'S PLACE</span>
           </span>
         </div>
-        <div className="exploration-place-card-panel">
-          <div className="exploration-place-card-panel-inner">
-            <div className="exploration-place-card-panel-surface">
-              <div className="exploration-place-card-message">
-                <AppText as="span" align="center" maxLines={2} role="body">
-                  {place.name}
-                </AppText>
+        <div className="exploration-place-card-panel-frame">
+          <div className="exploration-place-card-panel">
+            <div className="exploration-place-card-panel-inner">
+              <div className="exploration-place-card-panel-surface">
+                <div className="exploration-place-card-message">
+                  <AppText as="span" align="center" maxLines={2} role="body">
+                    {place.name}
+                  </AppText>
+                </div>
+                <AppVStack align="center" gap="sm">
+                  <div className="exploration-place-card-image-frame">
+                    {place.imageUrl ? (
+                      <img
+                        alt={`${place.name} 대표 이미지`}
+                        className="exploration-place-card-image"
+                        src={place.imageUrl}
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="exploration-place-card-image-placeholder"
+                      />
+                    )}
+                  </div>
+                  <div aria-hidden="true" className="exploration-place-card-sparkles">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                </AppVStack>
               </div>
-              <AppVStack align="center" gap="sm">
-                <div className="exploration-place-card-image-frame">
-                  {place.imageUrl ? (
-                    <img
-                      alt={`${place.name} 대표 이미지`}
-                      className="exploration-place-card-image"
-                      src={place.imageUrl}
-                    />
-                  ) : (
-                    <div aria-hidden="true" className="exploration-place-card-image-placeholder" />
-                  )}
-                </div>
-                <div aria-hidden="true" className="exploration-place-card-sparkles">
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                </div>
-              </AppVStack>
             </div>
           </div>
         </div>
