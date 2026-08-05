@@ -40,6 +40,7 @@ export function ExplorationPlaceCard({ place }: ExplorationPlaceCardProps): Reac
                   </AppText>
                 </div>
                 <AppVStack align="center" gap="sm">
+                  <div aria-hidden="true" className="exploration-place-card-character" />
                   <div className="exploration-place-card-image-frame">
                     {place.imageUrl ? (
                       <img
