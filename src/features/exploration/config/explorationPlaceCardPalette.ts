@@ -11,19 +11,22 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
       "--exploration-place-card-header-bg": "#1d1712",
       "--exploration-place-card-header-ink": "#ffd66a",
       "--exploration-place-card-title-ink": "#fff1b8",
+      "--exploration-place-card-body-frame-bg": "#050403",
       "--exploration-place-card-panel-bg": "#0c0a08",
       "--exploration-place-card-panel-bg-weak": "#15110d",
+      "--exploration-place-card-panel-frame-bg": "#d79d27",
       "--exploration-place-card-panel-line": "#d79d27",
       "--exploration-place-card-ink": "#ffe6a3",
       "--exploration-place-card-footer-bg": "#d79d27",
       "--exploration-place-card-footer-ink": "#111111",
+      "--exploration-place-card-card-bg-weak": "#d79d27",
     } as ExplorationPlaceCardPalette;
   }
 
   if (normalizedMarkerColor === "#c92a2a") {
     return {
       "--exploration-place-card-accent": "#c33f2e",
-      "--exploration-place-card-header-bg": "#ffb68f",
+      "--exploration-place-card-header-bg": "#F36851",
       "--exploration-place-card-header-ink": "#2a1812",
       "--exploration-place-card-title-ink": "#2a1812",
       "--exploration-place-card-body-frame-bg": "#F6D8BE",
@@ -40,50 +43,53 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
 
   if (normalizedMarkerColor === "#7b2cbf") {
     return {
-      "--exploration-place-card-accent": "#f4c743",
-      "--exploration-place-card-header-bg": "#f5cf66",
+      "--exploration-place-card-accent": "#8c38d8",
+      "--exploration-place-card-header-bg": "#d9b2ff",
       "--exploration-place-card-header-ink": "#1d1427",
       "--exploration-place-card-title-ink": "#1d1427",
-      "--exploration-place-card-body-frame-bg": "#ffe5bf",
-      "--exploration-place-card-panel-bg": "#f7d3a5",
-      "--exploration-place-card-panel-bg-weak": "#ffe5bf",
-      "--exploration-place-card-panel-frame-bg": "#ffe5bf",
-      "--exploration-place-card-panel-line": "#f4c743",
-      "--exploration-place-card-ink": "#ffdf7d",
-      "--exploration-place-card-footer-bg": "#7b2cbf",
-      "--exploration-place-card-footer-ink": "#f7d761",
+      "--exploration-place-card-body-frame-bg": "#ead6ff",
+      "--exploration-place-card-panel-bg": "#b86be8",
+      "--exploration-place-card-panel-bg-weak": "#d9b2ff",
+      "--exploration-place-card-panel-frame-bg": "#7b2cbf",
+      "--exploration-place-card-panel-line": "#8c38d8",
+      "--exploration-place-card-ink": "#1d1427",
+      "--exploration-place-card-footer-bg": "#9b38d8",
+      "--exploration-place-card-footer-ink": "#fff0c8",
+      "--exploration-place-card-card-bg-weak": "#9b38d8",
     } as ExplorationPlaceCardPalette;
   }
 
   if (normalizedMarkerColor === "#1971c2") {
     return {
-      "--exploration-place-card-accent": "#195c9e",
-      "--exploration-place-card-header-bg": "#bfe1ff",
-      "--exploration-place-card-header-ink": "#13283c",
-      "--exploration-place-card-title-ink": "#13283c",
-      "--exploration-place-card-body-frame-bg": "#fff1c7",
-      "--exploration-place-card-panel-bg": "#e2f2ff",
-      "--exploration-place-card-panel-bg-weak": "#fff1c7",
-      "--exploration-place-card-panel-frame-bg": "#fff1c7",
-      "--exploration-place-card-panel-line": "#195c9e",
-      "--exploration-place-card-ink": "#13283c",
-      "--exploration-place-card-footer-bg": "#8ac7ff",
-      "--exploration-place-card-footer-ink": "#13283c",
+      "--exploration-place-card-accent": "#147ddc",
+      "--exploration-place-card-header-bg": "#147ddc",
+      "--exploration-place-card-header-ink": "#eaf6ff",
+      "--exploration-place-card-title-ink": "#eaf6ff",
+      "--exploration-place-card-body-frame-bg": "#012446",
+      "--exploration-place-card-panel-bg": "#012446",
+      "--exploration-place-card-panel-bg-weak": "#063463",
+      "--exploration-place-card-panel-frame-bg": "#147ddc",
+      "--exploration-place-card-panel-line": "#147ddc",
+      "--exploration-place-card-ink": "#eaf6ff",
+      "--exploration-place-card-footer-bg": "#147ddc",
+      "--exploration-place-card-footer-ink": "#eaf6ff",
+      "--exploration-place-card-card-bg-weak": "#147ddc",
     } as ExplorationPlaceCardPalette;
   }
 
   return {
-    "--exploration-place-card-accent": "#d09418",
-    "--exploration-place-card-header-bg": "#ffe1a6",
+    "--exploration-place-card-accent": "#d58a42",
+    "--exploration-place-card-header-bg": "#ffb978",
     "--exploration-place-card-header-ink": "#2b1c0d",
     "--exploration-place-card-title-ink": "#2b1c0d",
-    "--exploration-place-card-body-frame-bg": "#fff2d4",
-    "--exploration-place-card-panel-bg": "#ffe7c0",
-    "--exploration-place-card-panel-bg-weak": "#fff2d4",
-    "--exploration-place-card-panel-frame-bg": "#fff2d4",
-    "--exploration-place-card-panel-line": "#d09418",
+    "--exploration-place-card-body-frame-bg": "#fff0c8",
+    "--exploration-place-card-panel-bg": "#ffd6a3",
+    "--exploration-place-card-panel-bg-weak": "#fff0c8",
+    "--exploration-place-card-panel-frame-bg": "#d58a42",
+    "--exploration-place-card-panel-line": "#b97146",
     "--exploration-place-card-ink": "#2b1c0d",
-    "--exploration-place-card-footer-bg": "#f4a66f",
+    "--exploration-place-card-footer-bg": "#ff8f68",
     "--exploration-place-card-footer-ink": "#2b1c0d",
+    "--exploration-place-card-card-bg-weak": "#FFE684",
   } as ExplorationPlaceCardPalette;
 }
