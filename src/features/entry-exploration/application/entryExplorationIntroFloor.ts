@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
-import { ENTRY_EXPLORATION_INTRO_CONFIG } from "../config/entryExplorationIntroConfig";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 
@@ -12,6 +11,29 @@ const INTRO_COPY_CANVAS_SIZE = {
 const INTRO_BUTTON_CANVAS_SIZE = {
   height: 240,
   width: 640,
+} as const;
+const INTRO_DESCRIPTION = [
+  "서울 지도를 직접 걸으며 새로운 장소를 발견해 보세요.",
+  "가고 싶은 곳을 클릭하면 캐릭터가 이동해요.",
+] as const;
+const INTRO_FLOOR_CONFIG = {
+  button: {
+    depth: 1.25,
+    width: 3.6,
+    yOffset: 0.07,
+  },
+  copy: {
+    depth: 2.2,
+    position: { x: -0.9, z: -0.9 },
+    width: 9.6,
+    yOffset: 0.06,
+  },
+  logo: {
+    depth: 3.4,
+    position: { x: -2.8, z: -2.8 },
+    width: 6.8,
+    yOffset: 0.05,
+  },
 } as const;
 const textureLoader = new THREE.TextureLoader();
 
@@ -50,7 +72,7 @@ function createLogoMesh(): THREE.Mesh {
   texture.colorSpace = THREE.SRGBColorSpace;
 
   return createFloorPlaneMesh({
-    depth: ENTRY_EXPLORATION_INTRO_CONFIG.logo.depth,
+    depth: INTRO_FLOOR_CONFIG.logo.depth,
     material: new THREE.MeshBasicMaterial({
       alphaTest: 0.02,
       depthWrite: false,
@@ -58,9 +80,9 @@ function createLogoMesh(): THREE.Mesh {
       side: THREE.DoubleSide,
       transparent: true,
     }),
-    position: ENTRY_EXPLORATION_INTRO_CONFIG.logo.position,
-    width: ENTRY_EXPLORATION_INTRO_CONFIG.logo.width,
-    yOffset: ENTRY_EXPLORATION_INTRO_CONFIG.logo.yOffset,
+    position: INTRO_FLOOR_CONFIG.logo.position,
+    width: INTRO_FLOOR_CONFIG.logo.width,
+    yOffset: INTRO_FLOOR_CONFIG.logo.yOffset,
   });
 }
 
@@ -72,16 +94,16 @@ function createCopyMesh(): { draw: () => void; mesh: THREE.Mesh } {
   const context = getCanvasContext(canvas);
   const texture = createCanvasTexture(canvas);
   const mesh = createFloorPlaneMesh({
-    depth: ENTRY_EXPLORATION_INTRO_CONFIG.copy.depth,
+    depth: INTRO_FLOOR_CONFIG.copy.depth,
     material: new THREE.MeshBasicMaterial({
       depthWrite: false,
       map: texture,
       side: THREE.DoubleSide,
       transparent: true,
     }),
-    position: ENTRY_EXPLORATION_INTRO_CONFIG.copy.position,
-    width: ENTRY_EXPLORATION_INTRO_CONFIG.copy.width,
-    yOffset: ENTRY_EXPLORATION_INTRO_CONFIG.copy.yOffset,
+    position: INTRO_FLOOR_CONFIG.copy.position,
+    width: INTRO_FLOOR_CONFIG.copy.width,
+    yOffset: INTRO_FLOOR_CONFIG.copy.yOffset,
   });
 
   const draw = () => {
@@ -92,18 +114,10 @@ function createCopyMesh(): { draw: () => void; mesh: THREE.Mesh } {
     context.textBaseline = "middle";
     context.font = `${theme.copy.titleFontWeight} ${theme.copy.titleFontSize}px ${theme.fontFamily}`;
     context.fillStyle = theme.copy.titleColor;
-    context.fillText(
-      ENTRY_EXPLORATION_INTRO_CONFIG.description[0],
-      INTRO_COPY_CANVAS_SIZE.width / 2,
-      112
-    );
+    context.fillText(INTRO_DESCRIPTION[0], INTRO_COPY_CANVAS_SIZE.width / 2, 112);
     context.font = `${theme.copy.bodyFontWeight} ${theme.copy.bodyFontSize}px ${theme.fontFamily}`;
     context.fillStyle = theme.copy.bodyColor;
-    context.fillText(
-      ENTRY_EXPLORATION_INTRO_CONFIG.description[1],
-      INTRO_COPY_CANVAS_SIZE.width / 2,
-      214
-    );
+    context.fillText(INTRO_DESCRIPTION[1], INTRO_COPY_CANVAS_SIZE.width / 2, 214);
     texture.needsUpdate = true;
   };
 
@@ -124,16 +138,16 @@ function createButtonMesh(): {
   const context = getCanvasContext(canvas);
   const texture = createCanvasTexture(canvas);
   const mesh = createFloorPlaneMesh({
-    depth: ENTRY_EXPLORATION_INTRO_CONFIG.button.depth,
+    depth: INTRO_FLOOR_CONFIG.button.depth,
     material: new THREE.MeshBasicMaterial({
       depthWrite: false,
       map: texture,
       side: THREE.DoubleSide,
       transparent: true,
     }),
-    position: ENTRY_EXPLORATION_INTRO_CONFIG.button.position,
-    width: ENTRY_EXPLORATION_INTRO_CONFIG.button.width,
-    yOffset: ENTRY_EXPLORATION_INTRO_CONFIG.button.yOffset,
+    position: ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
+    width: INTRO_FLOOR_CONFIG.button.width,
+    yOffset: INTRO_FLOOR_CONFIG.button.yOffset,
   });
 
   let isPressed = false;

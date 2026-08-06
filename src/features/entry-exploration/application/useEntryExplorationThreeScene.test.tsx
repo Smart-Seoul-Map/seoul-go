@@ -3,7 +3,7 @@ import type { RefObject } from "react";
 import * as THREE from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { ENTRY_EXPLORATION_INTRO_CONFIG } from "../config/entryExplorationIntroConfig";
+import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -207,7 +207,7 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.domElement.getAttribute("aria-disabled")).toBe("true");
     expect(mocks.movement.moveTo).toHaveBeenCalledTimes(1);
     expect(mocks.movement.moveTo).toHaveBeenCalledWith(
-      ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition
+      ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
     );
     expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
 
@@ -240,8 +240,8 @@ describe("useEntryExplorationThreeScene", () => {
 
     act(() => {
       mocks.movementOptions?.onArrive?.({
-        position: ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition,
-        target: ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition,
+        position: ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
+        target: ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
       });
     });
 

@@ -20,7 +20,6 @@ import {
   ENTRY_EXPLORATION_CHARACTER_MODEL_MANIFEST,
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
-import { ENTRY_EXPLORATION_INTRO_CONFIG } from "../config/entryExplorationIntroConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
 import {
   getEntryExplorationSceneDistance,
@@ -119,7 +118,7 @@ export function useEntryExplorationThreeScene({
     arrivalRadius: ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius,
     getDistance: getEntryExplorationSceneDistance,
     getHeadingRadians: getEntryExplorationSceneHeadingRadians,
-    initialPosition: ENTRY_EXPLORATION_INTRO_CONFIG.characterSpawnPosition,
+    initialPosition: ENTRY_EXPLORATION_SCENE_CONFIG.intro.characterSpawnPosition,
     interpolate: interpolateEntryExplorationScenePoint,
     maxFrameDeltaSeconds: ENTRY_EXPLORATION_SCENE_CONFIG.maxFrameDeltaSeconds,
     onFrame: ({ position }) => {
@@ -130,7 +129,7 @@ export function useEntryExplorationThreeScene({
         introStatusRef.current !== "entering" ||
         getEntryExplorationSceneDistance(
           target,
-          ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition
+          ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
         ) > ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
       ) {
         return;
@@ -151,7 +150,7 @@ export function useEntryExplorationThreeScene({
       handles.renderer.domElement.tabIndex = -1;
       updateEntryExplorationCameraView(
         handles.camera,
-        ENTRY_EXPLORATION_INTRO_CONFIG.camera.finalFocusPosition,
+        ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
       );
@@ -270,9 +269,9 @@ export function useEntryExplorationThreeScene({
     addSceneInteractionObjects(scene);
     updateEntryExplorationCameraView(
       camera,
-      ENTRY_EXPLORATION_INTRO_CONFIG.camera.focusPosition,
-      ENTRY_EXPLORATION_INTRO_CONFIG.camera.offset,
-      ENTRY_EXPLORATION_INTRO_CONFIG.camera.zoom
+      ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
+      ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset,
+      ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.zoom
     );
     sceneHandlesRef.current = { camera, character: null, renderer, scene };
 
@@ -298,8 +297,8 @@ export function useEntryExplorationThreeScene({
         return false;
       }
 
-      const characterTarget = ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition;
-      const cameraTarget = ENTRY_EXPLORATION_INTRO_CONFIG.camera.finalFocusPosition;
+      const characterTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      const cameraTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
       introStatusRef.current = "entering";
@@ -310,11 +309,11 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.setAttribute("aria-disabled", "true");
       introCameraTransitionRef.current = createSceneCameraTransition({
         camera,
-        durationMs: ENTRY_EXPLORATION_INTRO_CONFIG.camera.transitionDurationMs,
+        durationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
         fromLookAt: new THREE.Vector3(
-          ENTRY_EXPLORATION_INTRO_CONFIG.camera.focusPosition.x,
+          ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition.x,
           0,
-          ENTRY_EXPLORATION_INTRO_CONFIG.camera.focusPosition.z
+          ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition.z
         ),
         now: time,
         toLookAt: new THREE.Vector3(cameraTarget.x, 0, cameraTarget.z),

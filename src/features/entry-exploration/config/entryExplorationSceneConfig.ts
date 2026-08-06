@@ -24,6 +24,29 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
   characterSpeedPerSecond: 7,
   floorSize: 1000,
   floorTextureRepeat: 150,
+  intro: {
+    camera: {
+      focusPosition: {
+        x: -0.9,
+        z: -0.9,
+      },
+      offset: {
+        x: 2.2,
+        y: 24,
+        z: 2.2,
+      },
+      transitionDurationMs: 1_600,
+      zoom: 2.3,
+    },
+    characterSpawnPosition: {
+      x: -14,
+      z: -14,
+    },
+    targetPosition: {
+      x: 0.7,
+      z: 0.7,
+    },
+  },
   maxFrameDeltaSeconds: 0.04,
   shadowCameraSize: 1000,
 } as const;
