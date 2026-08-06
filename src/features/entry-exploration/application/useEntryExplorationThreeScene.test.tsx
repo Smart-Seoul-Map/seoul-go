@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import * as THREE from "three";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import { ENTRY_EXPLORATION_INTRO_CONFIG } from "../config/entryExplorationIntroConfig";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -14,6 +15,8 @@ const mocks = vi.hoisted(() => {
     moveTo: vi.fn(),
     stop: vi.fn(),
   };
+  const cancelPendingIntroRefresh = vi.fn();
+  const setIntroButtonPressed = vi.fn();
   const registry = {
     activateReadySceneInteraction: vi.fn(() => false),
     addSceneInteractionObjects: vi.fn(),
@@ -37,14 +40,28 @@ const mocks = vi.hoisted(() => {
     camera: null as THREE.OrthographicCamera | null,
     domElement,
     floor: null as THREE.Mesh | null,
+    introButtonMesh: null as THREE.Mesh | null,
+    introFloorObject: null as THREE.Group | null,
     movement,
+    movementOptions: null as {
+      onArrive?: (arrival: {
+        position: { x: number; z: number };
+        target: { x: number; z: number };
+      }) => void;
+    } | null,
     registry,
+    cancelPendingIntroRefresh,
+    setIntroButtonPressed,
     updateEntryExplorationCameraFocus,
   };
 });
 
 vi.mock("@shared/lib/character/useCharacterMovementController", () => ({
-  useCharacterMovementController: () => mocks.movement,
+  useCharacterMovementController: (options: typeof mocks.movementOptions) => {
+    mocks.movementOptions = options;
+
+    return mocks.movement;
+  },
 }));
 
 vi.mock("@shared/lib/character/characterAnimationPlayer", () => ({
@@ -60,6 +77,25 @@ vi.mock("./entryExplorationGltfLoader", () => ({
     })
   ),
 }));
+
+vi.mock("./entryExplorationIntroFloor", async () => {
+  const three = await vi.importActual<typeof import("three")>("three");
+
+  mocks.introButtonMesh = new three.Mesh(
+    new three.PlaneGeometry(1, 1),
+    new three.MeshBasicMaterial()
+  );
+  mocks.introFloorObject = new three.Group();
+
+  return {
+    createEntryExplorationIntroFloor: () => ({
+      buttonMesh: mocks.introButtonMesh,
+      cancelPendingRefresh: mocks.cancelPendingIntroRefresh,
+      object: mocks.introFloorObject,
+      setButtonPressed: mocks.setIntroButtonPressed,
+    }),
+  };
+});
 
 vi.mock("./entryExplorationThreeScene", async () => {
   const three = await vi.importActual<typeof import("three")>("three");
@@ -83,6 +119,7 @@ vi.mock("./entryExplorationThreeScene", async () => {
     fitEntryExplorationCharacterModel: vi.fn(),
     resizeEntryExplorationCamera: vi.fn(),
     updateEntryExplorationCameraFocus: mocks.updateEntryExplorationCameraFocus,
+    updateEntryExplorationCameraView: vi.fn(),
   };
 });
 
@@ -141,7 +178,45 @@ describe("useEntryExplorationThreeScene", () => {
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
   });
 
-  test("deactivates the active interaction instead of moving when the user clicks the floor outside the interaction", () => {
+  test("starts once from the floor button and keeps the camera locked while the character enters", async () => {
+    const containerRef = createContainerRef();
+    const intersectObject = vi
+      .spyOn(THREE.Raycaster.prototype, "intersectObject")
+      .mockImplementation((object) =>
+        object === mocks.introButtonMesh ? ([{}] as THREE.Intersection[]) : []
+      );
+
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef,
+        createSceneInteractionControllers: () => [],
+      })
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      mocks.domElement.dispatchEvent(new PointerEvent("pointerdown"));
+      mocks.domElement.dispatchEvent(new PointerEvent("pointerdown"));
+    });
+
+    expect(mocks.setIntroButtonPressed).toHaveBeenCalledTimes(1);
+    expect(mocks.domElement.getAttribute("aria-busy")).toBe("true");
+    expect(mocks.domElement.getAttribute("aria-disabled")).toBe("true");
+    expect(mocks.movement.moveTo).toHaveBeenCalledTimes(1);
+    expect(mocks.movement.moveTo).toHaveBeenCalledWith(
+      ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition
+    );
+    expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
+
+    intersectObject.mockRestore();
+    unmount();
+    expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  test("deactivates the active interaction instead of moving when the user clicks the floor outside the interaction", async () => {
     const containerRef = createContainerRef();
     const floorHitPoint = new THREE.Vector3(8, 0, 9);
     const intersectObject = vi
@@ -155,7 +230,28 @@ describe("useEntryExplorationThreeScene", () => {
       })
     );
 
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      mocks.domElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    });
+
+    act(() => {
+      mocks.movementOptions?.onArrive?.({
+        position: ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition,
+        target: ENTRY_EXPLORATION_INTRO_CONFIG.characterTargetPosition,
+      });
+    });
+
+    expect(mocks.domElement.getAttribute("aria-busy")).toBeNull();
+    expect(mocks.domElement.getAttribute("aria-disabled")).toBeNull();
+    expect(mocks.domElement.getAttribute("role")).toBeNull();
+    expect(mocks.domElement.tabIndex).toBe(-1);
+
     mocks.updateEntryExplorationCameraFocus.mockClear();
+    mocks.movement.moveTo.mockClear();
 
     act(() => {
       mocks.domElement.dispatchEvent(
