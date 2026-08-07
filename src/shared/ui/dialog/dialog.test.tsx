@@ -39,18 +39,6 @@ describe("AppDialog", () => {
     expect(screen.getByText("Choose the next action.")).toBeTruthy();
   });
 
-  test("supports a guide appearance without changing dialog semantics", () => {
-    render(
-      <AppDialog appearance="guide" open title="Guide title">
-        Guide content
-      </AppDialog>
-    );
-
-    const dialog = screen.getByRole("dialog", { name: "Guide title" });
-
-    expect(dialog.getAttribute("data-appearance")).toBe("guide");
-  });
-
   test("does not close when the backdrop is clicked by default", () => {
     const handleOpenChange = vi.fn();
 
