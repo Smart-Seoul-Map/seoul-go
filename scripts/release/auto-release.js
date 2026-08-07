@@ -1,6 +1,6 @@
 /* eslint-disable */
-const { Octokit } = require("@octokit/rest");
-const { Client } = require("@notionhq/client");
+import { Octokit } from "@octokit/rest";
+import { Client } from "@notionhq/client";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
