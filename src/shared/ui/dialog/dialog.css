@@ -59,10 +59,58 @@
     var(--sg-dialog-footer-padding-bottom);
 }
 
+.AppDialog[data-appearance="guide"] {
+  align-items: center;
+  background: var(--sg-color-bg-transparent);
+  box-shadow: none;
+  color: var(--sg-color-text-inverted);
+  text-align: center;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogHeader {
+  display: block;
+  padding: 0;
+  width: 100%;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogHeaderActionSlot {
+  display: none;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogHeader .AppHeading,
+.AppDialog[data-appearance="guide"] .AppDialogBody > .AppText {
+  color: var(--sg-color-text-inverted);
+  text-align: center;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogHeader .AppText {
+  text-align: center;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogBody {
+  color: var(--sg-color-text-inverted);
+  overflow: visible;
+  text-align: center;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogFooter {
+  border-top: 0;
+  padding-top: 0;
+  width: 100%;
+}
+
+.AppDialog[data-appearance="guide"] .AppDialogActions {
+  justify-content: center;
+}
+
 @media (max-width: 520px) {
   .AppDialogBackdrop {
     align-items: flex-end;
     padding: var(--sg-spacing-4);
+  }
+
+  .AppDialogBackdrop[data-appearance="guide"] {
+    align-items: center;
   }
 
   .AppDialog {

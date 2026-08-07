@@ -3,11 +3,12 @@ import { createPortal } from "react-dom";
 
 import { AppIconButton } from "../button";
 import { AppDialogActions, AppVStack } from "../layout";
-import { AppHeading, AppText } from "../typography";
+import { AppHeading, AppText, type AppHeadingSize, type AppTextTone } from "../typography";
 
 import "./dialog.css";
 
 export type AppDialogRole = "dialog" | "alertdialog";
+export type AppDialogAppearance = "surface" | "guide";
 
 export type AppDialogIconAction = {
   ariaLabel: string;
@@ -17,16 +18,19 @@ export type AppDialogIconAction = {
 
 export type AppDialogProps = {
   actions?: ReactNode;
+  appearance?: AppDialogAppearance;
   backAction?: AppDialogIconAction;
   children: ReactNode;
   closeAction?: AppDialogIconAction;
   closeOnEscape?: boolean;
   closeOnInteractOutside?: boolean;
   description?: ReactNode;
+  descriptionTone?: AppTextTone;
   onOpenChange?: (open: boolean) => void;
   open: boolean;
   role?: AppDialogRole;
   title: ReactNode;
+  titleSize?: AppHeadingSize;
 };
 
 function getDialogPortalRoot(): HTMLElement {
@@ -35,16 +39,19 @@ function getDialogPortalRoot(): HTMLElement {
 
 export function AppDialog({
   actions,
+  appearance = "surface",
   backAction,
   children,
   closeAction,
   closeOnEscape = true,
   closeOnInteractOutside = false,
   description,
+  descriptionTone = "muted",
   onOpenChange,
   open,
   role = "dialog",
   title,
+  titleSize = "md",
 }: AppDialogProps): ReactElement | null {
   const actionsRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
@@ -90,6 +97,7 @@ export function AppDialog({
   return createPortal(
     <div
       className="AppDialogBackdrop"
+      data-appearance={appearance}
       data-testid="app-dialog-backdrop"
       onClick={handleBackdropClick}
       role="presentation"
@@ -99,6 +107,7 @@ export function AppDialog({
         aria-labelledby={titleId}
         aria-modal="true"
         className="AppDialog"
+        data-appearance={appearance}
         onClick={(event) => event.stopPropagation()}
         role={role}
       >
@@ -116,11 +125,11 @@ export function AppDialog({
             )}
           </div>
           <AppVStack align="stretch" gap="xs">
-            <AppHeading as="h2" id={titleId} size="md">
+            <AppHeading as="h2" id={titleId} size={titleSize}>
               {title}
             </AppHeading>
             {description && (
-              <AppText id={descriptionId} role="supporting" tone="muted">
+              <AppText id={descriptionId} role="supporting" tone={descriptionTone}>
                 {description}
               </AppText>
             )}
