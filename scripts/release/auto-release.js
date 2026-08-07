@@ -11,7 +11,7 @@ async function run() {
   const targetBranch = process.env.TARGET_BRANCH || "main";
   const baseBranch = process.env.BASE_BRANCH || "dev";
 
-  // 1. targetBranch의 가장 최근 커밋 조회 (이전 main 배포 시점 확인용)
+  // 1. targetBranch의 가장 최근 커밋 조회
   const mainCommits = await octokit.rest.repos.listCommits({
     owner: repoOwner,
     repo: repoName,
@@ -41,12 +41,32 @@ async function run() {
     return;
   }
 
-  const prTextList = newMergedPRs
-    .map(
-      (pr) =>
-        `- PR #${pr.number}: ${pr.title} (작성자: ${pr.user.login})\n  내용: ${pr.body ? pr.body.slice(0, 500) : "설명 없음"}`
-    )
-    .join("\n\n");
+  // 속성(Properties)용 요약 텍스트 (2000자 제한 적용)
+  const summaryText = newMergedPRs.map((pr) => `- PR #${pr.number}: ${pr.title}`).join("\n");
+
+  // 페이지 본문(Children)용: PR별 개별 블록 생성 (누락 방지)
+  const prBlocks = newMergedPRs.map((pr) => {
+    const prContent = `### PR #${pr.number}: ${pr.title}\n- 작성자: ${pr.user.login}\n- 내용:\n${pr.body ? pr.body : "설명 없음"}`;
+
+    return {
+      object: "block",
+      type: "paragraph",
+      paragraph: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              // 개별 PR 본문이 2000자를 넘을 경우에만 안전하게 잘라냄
+              content:
+                prContent.length > 2000
+                  ? prContent.slice(0, 1950) + "\n...(해당 PR 설명 길어서 생략)"
+                  : prContent,
+            },
+          },
+        ],
+      },
+    };
+  });
 
   const today = new Date().toISOString().split("T")[0];
   const releaseId = `v0.2.0-${today}`;
@@ -59,7 +79,7 @@ async function run() {
       deployed_at: { date: { start: today } },
       status: { select: { name: "draft" } },
       pr_count: { number: newMergedPRs.length },
-      pr_list_text: { rich_text: [{ text: { content: prTextList.slice(0, 2000) } }] },
+      pr_list_text: { rich_text: [{ text: { content: summaryText.slice(0, 2000) } }] },
       validation_status: { select: { name: "unchecked" } },
     },
     children: [
@@ -72,14 +92,7 @@ async function run() {
           ],
         },
       },
-      {
-        object: "block",
-        type: "code",
-        code: {
-          rich_text: [{ type: "text", text: { content: prTextList } }],
-          language: "markdown",
-        },
-      },
+      ...prBlocks, // 모든 PR 개별 블록을 본문에 추가
     ],
   });
 
