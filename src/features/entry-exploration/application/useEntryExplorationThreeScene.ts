@@ -124,11 +124,11 @@ export function useEntryExplorationThreeScene({
     onFrame: ({ position }) => {
       applyScenePosition(position);
     },
-    onArrive: ({ target }) => {
+    onArrive: ({ position }) => {
       if (
         introStatusRef.current !== "entering" ||
         getEntryExplorationSceneDistance(
-          target,
+          position,
           ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
         ) > ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
       ) {
@@ -297,8 +297,16 @@ export function useEntryExplorationThreeScene({
         return false;
       }
 
-      const characterTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      const characterStart = movementRef.current.getCurrentPosition();
       const cameraTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      const characterDistance = getEntryExplorationSceneDistance(characterStart, cameraTarget);
+      const characterTarget = interpolateEntryExplorationScenePoint(
+        characterStart,
+        cameraTarget,
+        characterDistance === 0
+          ? 1
+          : 1 + ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius / characterDistance
+      );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
       introStatusRef.current = "entering";

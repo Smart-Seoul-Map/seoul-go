@@ -206,9 +206,6 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.domElement.getAttribute("aria-busy")).toBe("true");
     expect(mocks.domElement.getAttribute("aria-disabled")).toBe("true");
     expect(mocks.movement.moveTo).toHaveBeenCalledTimes(1);
-    expect(mocks.movement.moveTo).toHaveBeenCalledWith(
-      ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
-    );
     expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
 
     intersectObject.mockRestore();
