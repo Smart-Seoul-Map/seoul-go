@@ -1,9 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 
+import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+import { AppToastProvider } from "@shared/ui/toast";
 
 import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
 import { ExplorationPage } from "./ExplorationPage";
@@ -33,7 +35,7 @@ describe("ExplorationPage", () => {
   });
 
   test("지도 위에 테마별 장소 개수 배지를 표시한다", () => {
-    render(<ExplorationPage themeProgressItems={themeProgressItems} />);
+    renderExplorationPage(<ExplorationPage themeProgressItems={themeProgressItems} />);
 
     expect(screen.getByLabelText("서울 지도 탐색")).toBeInTheDocument();
     expect(screen.getByLabelText("테마별 장소 개수")).toBeInTheDocument();
@@ -47,11 +49,17 @@ describe("ExplorationPage", () => {
   });
 
   test("자치구 이름이 있을 때만 현재 탐방 상태 배지를 표시한다", () => {
-    const { rerender } = render(<ExplorationPage themeProgressItems={themeProgressItems} />);
+    const { rerender } = renderExplorationPage(
+      <ExplorationPage themeProgressItems={themeProgressItems} />
+    );
 
     expect(screen.queryByLabelText("현재 용산구 탐방중")).not.toBeInTheDocument();
 
-    rerender(<ExplorationPage districtName="용산구" themeProgressItems={themeProgressItems} />);
+    rerender(
+      <AppToastProvider>
+        <ExplorationPage districtName="용산구" themeProgressItems={themeProgressItems} />
+      </AppToastProvider>
+    );
 
     expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
     expect(screen.getByText("용산구 탐방중")).toBeInTheDocument();
@@ -60,7 +68,7 @@ describe("ExplorationPage", () => {
   test("저장된 방문 장소 수를 방문지와 테마별 배지에 반영한다", () => {
     visitedPlaceStore.setState({ placeIds: ["place-1"] });
 
-    render(
+    renderExplorationPage(
       <ExplorationPage
         placeMarkers={createPlaceMarkers()}
         themeProgressItems={themeProgressItems}
@@ -71,6 +79,10 @@ describe("ExplorationPage", () => {
     expect(screen.getByText("1/2")).toBeInTheDocument();
   });
 });
+
+function renderExplorationPage(ui: ReactElement) {
+  return render(<AppToastProvider>{ui}</AppToastProvider>);
+}
 
 function createPlaceMarkers(): MapMarkerFeatureCollection {
   return {

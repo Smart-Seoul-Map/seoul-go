@@ -44,6 +44,12 @@ export {
 } from "./application/visitedPlaceStore";
 export { useVisitedPlaceStore, visitedPlaceStore } from "./application/useVisitedPlaceStore";
 export {
+  createStampCoursePlaceInputFromSelection,
+  type AddExplorationPlaceToCourseResultStatus,
+  type ExplorationStampCoursePlaceInput,
+} from "./application/explorationStampCourse";
+export type { ExplorationPlaceMarkerSelection } from "./application/explorationPlaceMarkers";
+export {
   advanceMovement,
   createMovement,
   type CharacterMovement,

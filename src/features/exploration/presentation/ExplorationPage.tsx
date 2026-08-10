@@ -4,9 +4,14 @@ import "./ExplorationPage.css";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+import { useAppToast } from "@shared/ui/toast";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
+import {
+  createStampCourseToastMessage,
+  type AddExplorationPlaceToCourseResultStatus,
+} from "../application/explorationStampCourse";
 import {
   applyVisitedPlaceCountsToThemeProgressItems,
   type ExplorationThemePlaceVisitProgressItem,
@@ -22,6 +27,9 @@ type ExplorationPageProps = {
   districtId?: number;
   districtName?: string;
   initialCenter?: Coordinates;
+  onAddPlaceToCourse?: (
+    place: ExplorationPlaceMarkerSelection
+  ) => AddExplorationPlaceToCourseResultStatus;
   placeMarkers?: MapMarkerFeatureCollection;
   stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
@@ -31,10 +39,12 @@ export function ExplorationPage({
   districtId,
   districtName,
   initialCenter,
+  onAddPlaceToCourse,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
+  const { showToast } = useAppToast();
   const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
   const visitedPlaceIds = useVisitedPlaceStore((state) => state.placeIds);
   const visitPlace = useVisitedPlaceStore((state) => state.visitPlace);
@@ -70,6 +80,17 @@ export function ExplorationPage({
       }),
     [placeMarkers, revealedPlaceIds, themeProgressItems]
   );
+  const handleAddPlaceToCourse = useCallback(
+    (place: ExplorationPlaceMarkerSelection) => {
+      if (!onAddPlaceToCourse) {
+        return;
+      }
+
+      const resultStatus = onAddPlaceToCourse(place);
+      showToast(createStampCourseToastMessage(resultStatus));
+    },
+    [onAddPlaceToCourse, showToast]
+  );
 
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
@@ -104,7 +125,7 @@ export function ExplorationPage({
         </ul>
         {selectedPlace ? (
           <div className="exploration-place-card-layer">
-            <ExplorationPlaceCard place={selectedPlace} />
+            <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
           </div>
         ) : null}
       </section>

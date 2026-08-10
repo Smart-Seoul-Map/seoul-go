@@ -429,15 +429,9 @@
 
 .exploration-place-card-footer {
   align-items: center;
-  background: var(--exploration-place-card-footer-bg);
   box-sizing: border-box;
-  color: var(--exploration-place-card-footer-ink);
   display: flex;
-  font-size: var(--sg-font-size-1);
-  font-weight: var(--sg-font-weight-bold);
-  height: 20px;
   justify-content: center;
-  line-height: var(--sg-line-height-1);
   margin: 0 2px 2px;
   position: relative;
   z-index: 1;
