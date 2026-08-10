@@ -1,8 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 
+import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+
+import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
 import { ExplorationPage } from "./ExplorationPage";
 
 const themeProgressItems = [
@@ -25,6 +28,10 @@ const themeProgressItems = [
 ] as const;
 
 describe("ExplorationPage", () => {
+  afterEach(() => {
+    visitedPlaceStore.setState({ placeIds: [] });
+  });
+
   test("지도 위에 테마별 장소 개수 배지를 표시한다", () => {
     render(<ExplorationPage themeProgressItems={themeProgressItems} />);
 
@@ -49,4 +56,42 @@ describe("ExplorationPage", () => {
     expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
     expect(screen.getByText("용산구 탐방중")).toBeInTheDocument();
   });
+
+  test("저장된 방문 장소 수를 방문지와 테마별 배지에 반영한다", () => {
+    visitedPlaceStore.setState({ placeIds: ["place-1"] });
+
+    render(
+      <ExplorationPage
+        placeMarkers={createPlaceMarkers()}
+        themeProgressItems={themeProgressItems}
+      />
+    );
+
+    expect(screen.getByText("1/3")).toBeInTheDocument();
+    expect(screen.getByText("1/2")).toBeInTheDocument();
+  });
 });
+
+function createPlaceMarkers(): MapMarkerFeatureCollection {
+  return {
+    features: [
+      {
+        geometry: { coordinates: [126.9, 37.5], type: "Point" },
+        id: "place-1",
+        properties: {
+          closedMarkerImage: "blue_closed_box",
+          id: "place-1",
+          imageUrl: "",
+          markerColor: "#1971c2",
+          markerImage: "blue_closed_box",
+          name: "place-1",
+          openMarkerImage: "blue_open_box",
+          themeId: "night",
+          themeName: "Night",
+        },
+        type: "Feature",
+      },
+    ],
+    type: "FeatureCollection",
+  };
+}

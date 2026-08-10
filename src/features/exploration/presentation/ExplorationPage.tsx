@@ -7,20 +7,16 @@ import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapM
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
+import {
+  applyVisitedPlaceCountsToThemeProgressItems,
+  type ExplorationThemePlaceVisitProgressItem,
+} from "../application/explorationThemePlaceVisitProgress";
+import { useVisitedPlaceStore } from "../application/useVisitedPlaceStore";
 import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge";
 import { ExplorationMap } from "./ExplorationMap";
 import { ExplorationPlaceCard } from "./ExplorationPlaceCard";
 import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
-
-type ExplorationThemePlaceCountItem = {
-  id: string;
-  markerColor: string | null;
-  markerColorToken: string | null;
-  name: string;
-  totalCount: number;
-  visitedCount: number;
-};
 
 type ExplorationPageProps = {
   districtId?: number;
@@ -28,7 +24,7 @@ type ExplorationPageProps = {
   initialCenter?: Coordinates;
   placeMarkers?: MapMarkerFeatureCollection;
   stationRadiusMeters?: number;
-  themeProgressItems: readonly ExplorationThemePlaceCountItem[];
+  themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
 };
 
 export function ExplorationPage({
@@ -40,8 +36,10 @@ export function ExplorationPage({
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
-  const [revealedPlaceIds, setRevealedPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
+  const visitedPlaceIds = useVisitedPlaceStore((state) => state.placeIds);
+  const visitPlace = useVisitedPlaceStore((state) => state.visitPlace);
   const selectedPlaceRef = useRef<ExplorationPlaceMarkerSelection | null>(null);
+  const revealedPlaceIds = useMemo(() => new Set(visitedPlaceIds), [visitedPlaceIds]);
 
   const selectPlace = useCallback((place: ExplorationPlaceMarkerSelection) => {
     selectedPlaceRef.current = place;
@@ -51,23 +49,26 @@ export function ExplorationPage({
   const clearSelectedPlace = useCallback(() => {
     const currentPlace = selectedPlaceRef.current;
 
-    setRevealedPlaceIds((currentPlaceIds) => {
-      if (!currentPlace || currentPlaceIds.has(currentPlace.id)) {
-        return currentPlaceIds;
-      }
+    if (currentPlace) {
+      visitPlace(currentPlace.id);
+    }
 
-      const nextPlaceIds = new Set(currentPlaceIds);
-      nextPlaceIds.add(currentPlace.id);
-
-      return nextPlaceIds;
-    });
     selectedPlaceRef.current = null;
     setSelectedPlace(null);
-  }, []);
+  }, [visitPlace]);
 
   const displayedPlaceMarkers = useMemo(
     () => createRevealedPlaceMarkers({ placeMarkers, revealedPlaceIds }),
     [placeMarkers, revealedPlaceIds]
+  );
+  const displayedThemeProgressItems = useMemo(
+    () =>
+      applyVisitedPlaceCountsToThemeProgressItems({
+        placeMarkers,
+        themeProgressItems,
+        visitedPlaceIds: revealedPlaceIds,
+      }),
+    [placeMarkers, revealedPlaceIds, themeProgressItems]
   );
 
   return (
@@ -89,7 +90,7 @@ export function ExplorationPage({
           </div>
         ) : null}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
-          {themeProgressItems.map((item) => (
+          {displayedThemeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge
                 markerColor={item.markerColor}
