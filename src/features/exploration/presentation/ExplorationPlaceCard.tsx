@@ -10,6 +10,7 @@ export type ExplorationPlaceCardPlace = {
   imageUrl: string;
   markerColor: string;
   name: string;
+  themeId: string;
 };
 
 type ExplorationPlaceCardProps = {
@@ -19,7 +20,7 @@ type ExplorationPlaceCardProps = {
 export function ExplorationPlaceCard({ place }: ExplorationPlaceCardProps): ReactElement {
   const cardStyle = {
     "--exploration-place-card-theme-color": place.markerColor,
-    ...getExplorationPlaceCardPalette(place.markerColor),
+    ...getExplorationPlaceCardPalette(place.themeId),
   } as CSSProperties;
 
   return (

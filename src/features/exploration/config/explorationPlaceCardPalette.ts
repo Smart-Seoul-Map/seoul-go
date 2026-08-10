@@ -2,10 +2,8 @@ import type { CSSProperties } from "react";
 
 type ExplorationPlaceCardPalette = CSSProperties;
 
-export function getExplorationPlaceCardPalette(markerColor: string): ExplorationPlaceCardPalette {
-  const normalizedMarkerColor = markerColor.toLowerCase();
-
-  if (normalizedMarkerColor === "#212529") {
+export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlaceCardPalette {
+  if (themeId === "1725252918740") {
     return {
       "--exploration-place-card-accent": "#d79d27",
       "--exploration-place-card-header-bg": "#1d1712",
@@ -26,7 +24,7 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
     } as ExplorationPlaceCardPalette;
   }
 
-  if (normalizedMarkerColor === "#c92a2a") {
+  if (themeId === "100032") {
     return {
       "--exploration-place-card-accent": "#c33f2e",
       "--exploration-place-card-header-bg": "#F36851",
@@ -47,7 +45,7 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
     } as ExplorationPlaceCardPalette;
   }
 
-  if (normalizedMarkerColor === "#7b2cbf") {
+  if (themeId === "1741228380725") {
     return {
       "--exploration-place-card-accent": "#8c38d8",
       "--exploration-place-card-header-bg": "#ae56e4",
@@ -68,7 +66,7 @@ export function getExplorationPlaceCardPalette(markerColor: string): Exploration
     } as ExplorationPlaceCardPalette;
   }
 
-  if (normalizedMarkerColor === "#1971c2") {
+  if (themeId === "1777251935025") {
     return {
       "--exploration-place-card-accent": "#147ddc",
       "--exploration-place-card-header-bg": "#147ddc",

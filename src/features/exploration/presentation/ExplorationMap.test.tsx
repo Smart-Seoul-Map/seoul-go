@@ -17,7 +17,6 @@ const maplibreMock = vi.hoisted(() => ({
 const placeMarkerLayerMock = vi.hoisted(() => ({
   addExplorationPlaceMarkersLayer: vi.fn(),
   getExplorationPlaceMarkerSelection: vi.fn(),
-  getExplorationPlaceMarkerName: vi.fn(),
   updateExplorationPlaceMarkersSource: vi.fn(),
 }));
 

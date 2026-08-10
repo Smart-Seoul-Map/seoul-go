@@ -18,11 +18,6 @@ type PlaceMarkersSourceMap = Pick<MapLibreMap, "getSource">;
 type AddExplorationPlaceMarkersLayerOptions = {
   getPlaceMarkers?: () => MapMarkerFeatureCollection;
 };
-type FeatureWithPlaceName = {
-  properties?: {
-    name?: unknown;
-  } | null;
-};
 type FeatureWithPlaceMarkerSelection = {
   geometry?: {
     coordinates?: unknown;
@@ -107,16 +102,6 @@ export function updateExplorationPlaceMarkersSource(
   const geoJsonSource = source as GeoJSONSource;
 
   geoJsonSource.setData(placeMarkers as Parameters<GeoJSONSource["setData"]>[0]);
-}
-
-export function getExplorationPlaceMarkerName(feature?: FeatureWithPlaceName): string | null {
-  const name = feature?.properties?.name;
-
-  if (typeof name !== "string" || !name) {
-    return null;
-  }
-
-  return name;
 }
 
 export function getExplorationPlaceMarkerSelection(

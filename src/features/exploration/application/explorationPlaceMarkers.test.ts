@@ -10,7 +10,6 @@ import {
 import {
   addExplorationPlaceMarkersLayer,
   getExplorationPlaceMarkerSelection,
-  getExplorationPlaceMarkerName,
   updateExplorationPlaceMarkersSource,
 } from "./explorationPlaceMarkers";
 
@@ -126,15 +125,6 @@ describe("updateExplorationPlaceMarkersSource", () => {
     updateExplorationPlaceMarkersSource(map as never, placeMarkers as never);
 
     expect(setData).toHaveBeenCalledWith(placeMarkers);
-  });
-});
-
-describe("getExplorationPlaceMarkerName", () => {
-  it("returns marker name only when feature has a non-empty string name", () => {
-    expect(getExplorationPlaceMarkerName({ properties: { name: "장소" } } as never)).toBe("장소");
-    expect(getExplorationPlaceMarkerName({ properties: { name: "" } } as never)).toBeNull();
-    expect(getExplorationPlaceMarkerName({ properties: { name: 1 } } as never)).toBeNull();
-    expect(getExplorationPlaceMarkerName(undefined)).toBeNull();
   });
 });
 

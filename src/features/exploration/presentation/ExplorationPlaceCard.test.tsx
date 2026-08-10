@@ -9,6 +9,7 @@ const place = {
   imageUrl: "https://example.com/place.jpg",
   markerColor: "#c92a2a",
   name: "Namsan Tower",
+  themeId: "100032",
 };
 
 describe("ExplorationPlaceCard", () => {
