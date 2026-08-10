@@ -35,3 +35,4 @@ export {
   type MovementStatus,
 } from "./domain/explorationMovement";
 export { CHARACTER_MODEL_MANIFEST } from "./config/explorationCharacterModels";
+export { STATION_EXPLORATION_RADIUS_METERS } from "./config/stationExplorationConfig";

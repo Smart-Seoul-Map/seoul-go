@@ -1,0 +1,58 @@
+.AppToastViewport {
+  bottom: calc(var(--sg-toast-viewport-bottom) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: 0 var(--sg-toast-viewport-padding-x);
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  z-index: var(--sg-toast-z-index);
+}
+
+.AppToast {
+  align-items: center;
+  animation: AppToastEnter var(--sg-toast-enter-duration) var(--sg-toast-enter-easing);
+  background: var(--sg-toast-bg);
+  border-radius: var(--sg-toast-radius);
+  box-shadow: var(--sg-toast-shadow);
+  box-sizing: border-box;
+  color: var(--sg-toast-fg);
+  display: flex;
+  gap: var(--sg-toast-content-gap);
+  justify-content: space-between;
+  max-width: var(--sg-toast-max-width);
+  min-height: var(--sg-toast-min-height);
+  padding: var(--sg-toast-padding-y) var(--sg-toast-padding-x);
+  pointer-events: auto;
+  width: min(100%, var(--sg-toast-max-width));
+}
+
+.AppToast[data-status="success"] {
+  border-left: var(--sg-toast-accent-width) solid var(--sg-toast-success-accent);
+}
+
+.AppToast[data-status="error"] {
+  border-left: var(--sg-toast-accent-width) solid var(--sg-toast-error-accent);
+}
+
+.AppToastMessage {
+  flex: 1;
+  font-size: var(--sg-toast-message-font-size);
+  font-weight: var(--sg-toast-message-font-weight);
+  line-height: var(--sg-toast-message-line-height);
+  min-width: 0;
+}
+
+@keyframes AppToastEnter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sg-toast-enter-offset-y)) scale(var(--sg-toast-enter-scale));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

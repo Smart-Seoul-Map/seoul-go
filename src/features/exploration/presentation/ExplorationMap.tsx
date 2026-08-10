@@ -12,6 +12,7 @@ import { disableExplorationMapDragInteractions } from "../application/exploratio
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
+import { addExplorationStationRadiusLayers } from "../application/explorationStationRadiusLayer";
 import {
   addExplorationPlaceMarkersLayer,
   getExplorationPlaceMarkerSelection,
@@ -37,6 +38,7 @@ type ExplorationMapProps = {
   onPlaceMarkerClear?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
+  stationRadiusMeters?: number;
 };
 
 const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
@@ -55,6 +57,7 @@ export function ExplorationMap({
   onPlaceMarkerClear,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -116,6 +119,7 @@ export function ExplorationMap({
 
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
+      addExplorationStationRadiusLayers(map, initialPosition, stationRadiusMeters);
       void addExplorationPlaceMarkersLayer(map, {
         getPlaceMarkers: () => placeMarkersRef.current,
       });
@@ -152,7 +156,7 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [districtBoundary, initialPosition, onPlaceMarkerClear, onPlaceMarkerSelect]);
+  }, [districtBoundary, initialPosition, onPlaceMarkerClear, onPlaceMarkerSelect, stationRadiusMeters]);
 
   useEffect(() => {
     const map = mapRef.current;

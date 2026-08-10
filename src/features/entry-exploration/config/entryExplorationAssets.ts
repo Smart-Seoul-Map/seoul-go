@@ -2,6 +2,7 @@ import haechiAndFriendsUrl from "../../../assets/entry-exploration/haechi-and-fr
 import jangjiCheonPostcardUrl from "../../../assets/entry-exploration/jangji-cheon-postcard.png";
 import line2RouteMapUrl from "../../../assets/entry-exploration/line2-route-map.png";
 import namsanTowerUrl from "../../../assets/entry-exploration/namsan-tower.png";
+import seoulExplorationGoUrl from "../../../assets/entry-exploration/seoul-exploration-go.png";
 import floorTextureUrl from "../../../assets/textures/tile.jpeg";
 
 type EntryExplorationTextureAsset = {
@@ -23,6 +24,9 @@ export const ENTRY_EXPLORATION_TEXTURE_ASSETS = {
   },
   namsanTower: {
     src: namsanTowerUrl,
+  },
+  seoulExplorationGo: {
+    src: seoulExplorationGoUrl,
   },
 } as const satisfies Record<string, EntryExplorationTextureAsset>;
 

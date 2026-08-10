@@ -91,6 +91,7 @@ describe("createEntryExplorationSubwaySelectionInteractionController", () => {
     controller.selectStation(1000);
 
     expect(controller.getState().status).toBe("selecting");
+    expect(controller.getState().selectedStation?.id).toBe("201");
 
     controller.update(1000 + LINE2_SELECTION_ANIMATION_DURATION_MS);
 

@@ -1,315 +1,878 @@
 {
+  "schemaVersion": 1,
   "stations": {
     "cityHall": {
       "name": "시청",
       "lines": {
-        "2": { "stationId": "201", "position": { "x": 46.73, "y": 15.28 } }
+        "2": {
+          "stationId": "201",
+          "address": "서울특별시 중구 서소문로 지하 127",
+          "location": {
+            "lat": 37.564718,
+            "lng": 126.977108
+          },
+          "diagramPosition": {
+            "x": 46.73,
+            "y": 15.28
+          }
+        }
       }
     },
     "euljiro1Ga": {
       "name": "을지로입구",
       "lines": {
-        "2": { "stationId": "202", "position": { "x": 50.44, "y": 15.28 } }
+        "2": {
+          "stationId": "202",
+          "address": "서울특별시 중구 을지로 지하 42",
+          "location": {
+            "lat": 37.566014,
+            "lng": 126.982618
+          },
+          "diagramPosition": {
+            "x": 50.44,
+            "y": 15.28
+          }
+        }
       }
     },
     "euljiro3Ga": {
       "name": "을지로3가",
       "lines": {
-        "2": { "stationId": "203", "position": { "x": 54.08, "y": 15.28 } }
+        "2": {
+          "stationId": "203",
+          "address": "서울특별시 중구 을지로 지하 106",
+          "location": {
+            "lat": 37.566295,
+            "lng": 126.99191
+          },
+          "diagramPosition": {
+            "x": 54.08,
+            "y": 15.28
+          }
+        }
       }
     },
     "euljiro4Ga": {
       "name": "을지로4가",
       "lines": {
-        "2": { "stationId": "204", "position": { "x": 58.61, "y": 15.28 } }
+        "2": {
+          "stationId": "204",
+          "address": "서울특별시 중구 을지로 지하 178",
+          "location": {
+            "lat": 37.566941,
+            "lng": 126.998079
+          },
+          "diagramPosition": {
+            "x": 58.61,
+            "y": 15.28
+          }
+        }
       }
     },
     "dongdaemunHistoryCulturePark": {
       "name": "동대문역사문화공원",
       "lines": {
-        "2": { "stationId": "205", "position": { "x": 63.06, "y": 15.28 } }
+        "2": {
+          "stationId": "205",
+          "address": "서울특별시 중구 을지로 지하 279",
+          "location": {
+            "lat": 37.565138,
+            "lng": 127.007896
+          },
+          "diagramPosition": {
+            "x": 63.06,
+            "y": 15.28
+          }
+        }
       }
     },
     "sindang": {
       "name": "신당",
       "lines": {
-        "2": { "stationId": "206", "position": { "x": 70.49, "y": 15.28 } }
+        "2": {
+          "stationId": "206",
+          "address": "서울특별시 중구 퇴계로 지하 431-1",
+          "location": {
+            "lat": 37.565972,
+            "lng": 127.01782
+          },
+          "diagramPosition": {
+            "x": 70.49,
+            "y": 15.28
+          }
+        }
       }
     },
     "sangwangsimni": {
       "name": "상왕십리",
       "lines": {
-        "2": { "stationId": "207", "position": { "x": 77.2, "y": 15.28 } }
+        "2": {
+          "stationId": "207",
+          "address": "서울특별시 성동구 왕십리로 지하 374",
+          "location": {
+            "lat": 37.564354,
+            "lng": 127.029354
+          },
+          "diagramPosition": {
+            "x": 77.2,
+            "y": 15.28
+          }
+        }
       }
     },
     "wangsimni": {
       "name": "왕십리",
       "lines": {
-        "2": { "stationId": "208", "position": { "x": 82.3, "y": 15.28 } }
+        "2": {
+          "stationId": "208",
+          "address": "서울특별시 성동구 왕십리로 지하 300",
+          "location": {
+            "lat": 37.561533,
+            "lng": 127.037732
+          },
+          "diagramPosition": {
+            "x": 82.3,
+            "y": 15.28
+          }
+        }
       }
     },
     "hanyangUniversity": {
       "name": "한양대",
       "lines": {
-        "2": { "stationId": "209", "position": { "x": 87.87, "y": 20.73 } }
+        "2": {
+          "stationId": "209",
+          "address": "서울특별시 성동구 왕십리로 206",
+          "location": {
+            "lat": 37.555273,
+            "lng": 127.043655
+          },
+          "diagramPosition": {
+            "x": 87.87,
+            "y": 20.73
+          }
+        }
       }
     },
     "ttukseom": {
       "name": "뚝섬",
       "lines": {
-        "2": { "stationId": "210", "position": { "x": 91.67, "y": 25.95 } }
+        "2": {
+          "stationId": "210",
+          "address": "서울특별시 성동구 아차산로 18",
+          "location": {
+            "lat": 37.547184,
+            "lng": 127.047367
+          },
+          "diagramPosition": {
+            "x": 91.67,
+            "y": 25.95
+          }
+        }
       }
     },
     "seongsu": {
       "name": "성수",
       "lines": {
-        "2": { "stationId": "211", "position": { "x": 92.4, "y": 31.99 } }
+        "2": {
+          "stationId": "211",
+          "address": "서울특별시 성동구 아차산로 100",
+          "location": {
+            "lat": 37.544581,
+            "lng": 127.055961
+          },
+          "diagramPosition": {
+            "x": 92.4,
+            "y": 31.99
+          }
+        }
       }
     },
     "konkukUniversity": {
       "name": "건대입구",
       "lines": {
-        "2": { "stationId": "212", "position": { "x": 92.32, "y": 40.64 } }
+        "2": {
+          "stationId": "212",
+          "address": "서울특별시 광진구 아차산로 243",
+          "location": {
+            "lat": 37.540693,
+            "lng": 127.07023
+          },
+          "diagramPosition": {
+            "x": 92.32,
+            "y": 40.64
+          }
+        }
       }
     },
     "guui": {
       "name": "구의",
       "lines": {
-        "2": { "stationId": "213", "position": { "x": 92, "y": 46.56 } }
+        "2": {
+          "stationId": "213",
+          "address": "서울특별시 광진구 아차산로 384-1",
+          "location": {
+            "lat": 37.537077,
+            "lng": 127.085916
+          },
+          "diagramPosition": {
+            "x": 92,
+            "y": 46.56
+          }
+        }
       }
     },
     "gangbyeon": {
       "name": "강변",
       "lines": {
-        "2": { "stationId": "214", "position": { "x": 92, "y": 54.98 } }
+        "2": {
+          "stationId": "214",
+          "address": "서울특별시 광진구 강변역로 53",
+          "location": {
+            "lat": 37.535095,
+            "lng": 127.094681
+          },
+          "diagramPosition": {
+            "x": 92,
+            "y": 54.98
+          }
+        }
       }
     },
     "jamsillaru": {
       "name": "잠실나루",
       "lines": {
-        "2": { "stationId": "215", "position": { "x": 92, "y": 62.44 } }
+        "2": {
+          "stationId": "215",
+          "address": "서울특별시 송파구 오금로 20",
+          "location": {
+            "lat": 37.520733,
+            "lng": 127.10379
+          },
+          "diagramPosition": {
+            "x": 92,
+            "y": 62.44
+          }
+        }
       }
     },
     "jamsil": {
       "name": "잠실",
       "lines": {
-        "2": { "stationId": "216", "position": { "x": 92.32, "y": 70.73 } }
+        "2": {
+          "stationId": "216",
+          "address": "서울특별시 송파구 올림픽로 지하 265",
+          "location": {
+            "lat": 37.51395,
+            "lng": 127.102234
+          },
+          "diagramPosition": {
+            "x": 92.32,
+            "y": 70.73
+          }
+        }
       }
     },
     "jamsilsaenae": {
       "name": "잠실새내",
       "lines": {
-        "2": { "stationId": "217", "position": { "x": 92, "y": 77.96 } }
+        "2": {
+          "stationId": "217",
+          "address": "서울특별시 송파구 올림픽로 지하 140",
+          "location": {
+            "lat": 37.511687,
+            "lng": 127.086162
+          },
+          "diagramPosition": {
+            "x": 92,
+            "y": 77.96
+          }
+        }
       }
     },
     "sportsComplex": {
       "name": "종합운동장",
       "lines": {
-        "2": { "stationId": "218", "position": { "x": 92.24, "y": 84.72 } }
+        "2": {
+          "stationId": "218",
+          "address": "서울특별시 송파구 올림픽로 지하 23",
+          "location": {
+            "lat": 37.510997,
+            "lng": 127.073642
+          },
+          "diagramPosition": {
+            "x": 92.24,
+            "y": 84.72
+          }
+        }
       }
     },
     "samseong": {
       "name": "삼성",
       "lines": {
-        "2": { "stationId": "219", "position": { "x": 88.44, "y": 93.25 } }
+        "2": {
+          "stationId": "219",
+          "address": "서울특별시 강남구 테헤란로 지하 538",
+          "location": {
+            "lat": 37.508844,
+            "lng": 127.06316
+          },
+          "diagramPosition": {
+            "x": 88.44,
+            "y": 93.25
+          }
+        }
       }
     },
     "seolleung": {
       "name": "선릉",
       "lines": {
-        "2": { "stationId": "220", "position": { "x": 83.27, "y": 97.04 } }
+        "2": {
+          "stationId": "220",
+          "address": "서울특별시 강남구 테헤란로 지하 340",
+          "location": {
+            "lat": 37.504503,
+            "lng": 127.049008
+          },
+          "diagramPosition": {
+            "x": 83.27,
+            "y": 97.04
+          }
+        }
       }
     },
     "yeoksam": {
       "name": "역삼",
       "lines": {
-        "2": { "stationId": "221", "position": { "x": 79.39, "y": 97.04 } }
+        "2": {
+          "stationId": "221",
+          "address": "서울특별시 강남구 테헤란로 지하 156",
+          "location": {
+            "lat": 37.500622,
+            "lng": 127.036456
+          },
+          "diagramPosition": {
+            "x": 79.39,
+            "y": 97.04
+          }
+        }
       }
     },
     "gangnam": {
       "name": "강남",
       "lines": {
-        "2": { "stationId": "222", "position": { "x": 77.04, "y": 97.04 } }
+        "2": {
+          "stationId": "222",
+          "address": "서울특별시 강남구 강남대로 지하 396",
+          "location": {
+            "lat": 37.497175,
+            "lng": 127.027926
+          },
+          "diagramPosition": {
+            "x": 77.04,
+            "y": 97.04
+          }
+        }
       }
     },
     "seoulNationalUniversityOfEducation": {
       "name": "교대",
       "lines": {
-        "2": { "stationId": "223", "position": { "x": 69.85, "y": 97.04 } }
+        "2": {
+          "stationId": "223",
+          "address": "서울특별시 서초구 서초대로 지하 294",
+          "location": {
+            "lat": 37.493415,
+            "lng": 127.01408
+          },
+          "diagramPosition": {
+            "x": 69.85,
+            "y": 97.04
+          }
+        }
       }
     },
     "seocho": {
       "name": "서초",
       "lines": {
-        "2": { "stationId": "224", "position": { "x": 66.37, "y": 97.04 } }
+        "2": {
+          "stationId": "224",
+          "address": "서울특별시 서초구 서초대로 지하 233",
+          "location": {
+            "lat": 37.491897,
+            "lng": 127.007917
+          },
+          "diagramPosition": {
+            "x": 66.37,
+            "y": 97.04
+          }
+        }
       }
     },
     "bangbae": {
       "name": "방배",
       "lines": {
-        "2": { "stationId": "225", "position": { "x": 62.33, "y": 97.04 } }
+        "2": {
+          "stationId": "225",
+          "address": "서울특별시 서초구 방배로 지하 80",
+          "location": {
+            "lat": 37.481426,
+            "lng": 126.997596
+          },
+          "diagramPosition": {
+            "x": 62.33,
+            "y": 97.04
+          }
+        }
       }
     },
     "sadang": {
       "name": "사당",
       "lines": {
-        "2": { "stationId": "226", "position": { "x": 58.61, "y": 97.04 } }
+        "2": {
+          "stationId": "226",
+          "address": "서울특별시 동작구 남부순환로 지하 2089",
+          "location": {
+            "lat": 37.47653,
+            "lng": 126.981685
+          },
+          "diagramPosition": {
+            "x": 58.61,
+            "y": 97.04
+          }
+        }
       }
     },
     "nagseongdae": {
       "name": "낙성대",
       "lines": {
-        "2": { "stationId": "227", "position": { "x": 52.06, "y": 97.04 } }
+        "2": {
+          "stationId": "227",
+          "address": "서울특별시 관악구 남부순환로 지하 1928",
+          "location": {
+            "lat": 37.47693,
+            "lng": 126.963693
+          },
+          "diagramPosition": {
+            "x": 52.06,
+            "y": 97.04
+          }
+        }
       }
     },
     "seoulNationalUniversity": {
       "name": "서울대입구",
       "lines": {
-        "2": { "stationId": "228", "position": { "x": 45.19, "y": 97.04 } }
+        "2": {
+          "stationId": "228",
+          "address": "서울특별시 관악구 남부순환로 지하 1822",
+          "location": {
+            "lat": 37.481247,
+            "lng": 126.952739
+          },
+          "diagramPosition": {
+            "x": 45.19,
+            "y": 97.04
+          }
+        }
       }
     },
     "bongcheon": {
       "name": "봉천",
       "lines": {
-        "2": { "stationId": "229", "position": { "x": 38.8, "y": 97.04 } }
+        "2": {
+          "stationId": "229",
+          "address": "서울특별시 관악구 남부순환로 지하 1721",
+          "location": {
+            "lat": 37.482362,
+            "lng": 126.941892
+          },
+          "diagramPosition": {
+            "x": 38.8,
+            "y": 97.04
+          }
+        }
       }
     },
     "sillim": {
       "name": "신림",
       "lines": {
-        "2": { "stationId": "230", "position": { "x": 32.26, "y": 97.04 } }
+        "2": {
+          "stationId": "230",
+          "address": "서울특별시 관악구 남부순환로 지하 1614",
+          "location": {
+            "lat": 37.484201,
+            "lng": 126.929715
+          },
+          "diagramPosition": {
+            "x": 32.26,
+            "y": 97.04
+          }
+        }
       }
     },
     "sindaebang": {
       "name": "신대방",
       "lines": {
-        "2": { "stationId": "231", "position": { "x": 27.49, "y": 94.08 } }
+        "2": {
+          "stationId": "231",
+          "address": "서울특별시 동작구 대림로 2",
+          "location": {
+            "lat": 37.487462,
+            "lng": 126.913149
+          },
+          "diagramPosition": {
+            "x": 27.49,
+            "y": 94.08
+          }
+        }
       }
     },
     "guroDigitalComplex": {
       "name": "구로디지털단지",
       "lines": {
-        "2": { "stationId": "232", "position": { "x": 24.58, "y": 89.57 } }
+        "2": {
+          "stationId": "232",
+          "address": "서울특별시 구로구 도림천로 477",
+          "location": {
+            "lat": 37.485266,
+            "lng": 126.901401
+          },
+          "diagramPosition": {
+            "x": 24.58,
+            "y": 89.57
+          }
+        }
       }
     },
     "daerim": {
       "name": "대림",
       "lines": {
-        "2": { "stationId": "233", "position": { "x": 23.2, "y": 80.33 } }
+        "2": {
+          "stationId": "233",
+          "address": "서울특별시 구로구 도림천로 351",
+          "location": {
+            "lat": 37.49297,
+            "lng": 126.895801
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 80.33
+          }
+        }
       }
     },
     "sindorim": {
       "name": "신도림",
       "lines": {
-        "2": { "stationId": "234", "position": { "x": 23.2, "y": 67.42 } }
+        "2": {
+          "stationId": "234",
+          "address": "서울특별시 구로구 새말로 지하 117-21",
+          "location": {
+            "lat": 37.508725,
+            "lng": 126.891295
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 67.42
+          }
+        }
       }
     },
     "mullae": {
       "name": "문래",
       "lines": {
-        "2": { "stationId": "235", "position": { "x": 23.2, "y": 62.8 } }
+        "2": {
+          "stationId": "235",
+          "address": "서울특별시 영등포구 당산로 지하 28",
+          "location": {
+            "lat": 37.517933,
+            "lng": 126.89476
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 62.8
+          }
+        }
       }
     },
     "yeongdeungpoGuOffice": {
       "name": "영등포구청",
       "lines": {
-        "2": { "stationId": "236", "position": { "x": 23.2, "y": 59 } }
+        "2": {
+          "stationId": "236",
+          "address": "서울특별시 영등포구 당산로 지하 121",
+          "location": {
+            "lat": 37.52497,
+            "lng": 126.895951
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 59
+          }
+        }
       }
     },
     "dangsan": {
       "name": "당산",
       "lines": {
-        "2": { "stationId": "237", "position": { "x": 23.2, "y": 50 } }
+        "2": {
+          "stationId": "237",
+          "address": "서울특별시 영등포구 당산로 229",
+          "location": {
+            "lat": 37.53438,
+            "lng": 126.902281
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 50
+          }
+        }
       }
     },
     "hapjeong": {
       "name": "합정",
       "lines": {
-        "2": { "stationId": "238", "position": { "x": 23.2, "y": 40.4 } }
+        "2": {
+          "stationId": "238",
+          "address": "서울특별시 마포구 양화로 지하 55",
+          "location": {
+            "lat": 37.549463,
+            "lng": 126.913739
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 40.4
+          }
+        }
       }
     },
     "hongikUniversity": {
       "name": "홍대입구",
       "lines": {
-        "2": { "stationId": "239", "position": { "x": 23.2, "y": 31.04 } }
+        "2": {
+          "stationId": "239",
+          "address": "서울특별시 마포구 양화로 지하 160",
+          "location": {
+            "lat": 37.557192,
+            "lng": 126.925381
+          },
+          "diagramPosition": {
+            "x": 23.2,
+            "y": 31.04
+          }
+        }
       }
     },
     "sinchon": {
       "name": "신촌",
       "lines": {
-        "2": { "stationId": "240", "position": { "x": 25, "y": 22.16 } }
+        "2": {
+          "stationId": "240",
+          "address": "서울특별시 마포구 신촌로 지하 90",
+          "location": {
+            "lat": 37.555134,
+            "lng": 126.936893
+          },
+          "diagramPosition": {
+            "x": 25,
+            "y": 22.16
+          }
+        }
       }
     },
     "ewhaWomansUniversity": {
       "name": "이대",
       "lines": {
-        "2": { "stationId": "241", "position": { "x": 29, "y": 16.8 } }
+        "2": {
+          "stationId": "241",
+          "address": "서울특별시 마포구 신촌로 지하 180",
+          "location": {
+            "lat": 37.556733,
+            "lng": 126.946013
+          },
+          "diagramPosition": {
+            "x": 29,
+            "y": 16.8
+          }
+        }
       }
     },
     "ahyeon": {
       "name": "아현",
       "lines": {
-        "2": { "stationId": "242", "position": { "x": 34.2, "y": 15.28 } }
+        "2": {
+          "stationId": "242",
+          "address": "서울특별시 마포구 신촌로 지하 270",
+          "location": {
+            "lat": 37.557345,
+            "lng": 126.956141
+          },
+          "diagramPosition": {
+            "x": 34.2,
+            "y": 15.28
+          }
+        }
       }
     },
     "chungjeongno": {
       "name": "충정로",
       "lines": {
-        "2": { "stationId": "243", "position": { "x": 38.64, "y": 15.28 } }
+        "2": {
+          "stationId": "243",
+          "address": "서울특별시 서대문구 서소문로 지하 17",
+          "location": {
+            "lat": 37.559973,
+            "lng": 126.963672
+          },
+          "diagramPosition": {
+            "x": 38.64,
+            "y": 15.28
+          }
+        }
       }
     },
     "yongdap": {
       "name": "용답",
       "lines": {
-        "2": { "stationId": "211-1", "position": { "x": 92.72, "y": 25.95 } }
+        "2": {
+          "stationId": "244",
+          "address": "서울특별시 성동구 용답길 86",
+          "location": {
+            "lat": 37.561904,
+            "lng": 127.050899
+          },
+          "diagramPosition": {
+            "x": 92.72,
+            "y": 25.95
+          }
+        }
       }
     },
     "sindap": {
       "name": "신답",
       "lines": {
-        "2": { "stationId": "211-2", "position": { "x": 92.72, "y": 13.5 } }
+        "2": {
+          "stationId": "245",
+          "address": "서울특별시 성동구 천호대로 232",
+          "location": {
+            "lat": 37.57004,
+            "lng": 127.046481
+          },
+          "diagramPosition": {
+            "x": 92.72,
+            "y": 13.5
+          }
+        }
       }
     },
     "yongdu": {
-      "name": "용두",
+      "name": "용두(동대문구청)",
       "lines": {
-        "2": { "stationId": "211-3", "position": { "x": 81.5, "y": 5 } }
+        "2": {
+          "stationId": "246",
+          "address": "서울특별시 동대문구 천호대로 지하 129",
+          "location": {
+            "lat": 37.574028,
+            "lng": 127.038091
+          },
+          "diagramPosition": {
+            "x": 81.5,
+            "y": 5
+          }
+        }
       }
     },
     "sinseolDong": {
       "name": "신설동",
       "lines": {
-        "2": { "stationId": "211-4", "position": { "x": 77.2, "y": 4.15 } }
+        "2": {
+          "stationId": "247",
+          "address": "서울특별시 동대문구 왕산로 지하 1",
+          "location": {
+            "lat": 37.575297,
+            "lng": 127.025087
+          },
+          "diagramPosition": {
+            "x": 77.2,
+            "y": 4.15
+          }
+        }
       }
     },
     "dorimcheon": {
       "name": "도림천",
       "lines": {
-        "2": { "stationId": "234-1", "position": { "x": 17.38, "y": 66.47 } }
+        "2": {
+          "stationId": "248",
+          "address": "서울특별시 구로구 경인로67길 160",
+          "location": {
+            "lat": 37.514287,
+            "lng": 126.882768
+          },
+          "diagramPosition": {
+            "x": 17.38,
+            "y": 66.47
+          }
+        }
       }
     },
     "yangcheonGuOffice": {
       "name": "양천구청",
       "lines": {
-        "2": { "stationId": "234-2", "position": { "x": 11.64, "y": 66.47 } }
+        "2": {
+          "stationId": "249",
+          "address": "서울특별시 양천구 목동로3길 지하 33",
+          "location": {
+            "lat": 37.512398,
+            "lng": 126.865819
+          },
+          "diagramPosition": {
+            "x": 11.64,
+            "y": 66.47
+          }
+        }
       }
     },
     "sinjeongnegeori": {
       "name": "신정네거리",
       "lines": {
-        "2": { "stationId": "234-3", "position": { "x": 5.82, "y": 66.47 } }
+        "2": {
+          "stationId": "250",
+          "address": "서울특별시 양천구 중앙로 지하 261",
+          "location": {
+            "lat": 37.520074,
+            "lng": 126.852912
+          },
+          "diagramPosition": {
+            "x": 5.82,
+            "y": 66.47
+          }
+        }
       }
     },
     "kkachisan": {
       "name": "까치산",
       "lines": {
-        "2": { "stationId": "234-4", "position": { "x": 1.86, "y": 60.07 } }
+        "2": {
+          "stationId": "251",
+          "address": "서울특별시 강서구 강서로 지하 54",
+          "location": {
+            "lat": 37.531768,
+            "lng": 126.846683
+          },
+          "diagramPosition": {
+            "x": 1.86,
+            "y": 60.07
+          }
+        }
       }
     }
   },
   "lines": {
     "2": {
-      "mainLoopStationKeys": [
+      "name": "2호선",
+      "stationKeys": [
         "cityHall",
         "euljiro1Ga",
         "euljiro3Ga",
@@ -352,14 +915,75 @@
         "sinchon",
         "ewhaWomansUniversity",
         "ahyeon",
-        "chungjeongno"
+        "chungjeongno",
+        "yongdap",
+        "sindap",
+        "yongdu",
+        "sinseolDong",
+        "dorimcheon",
+        "yangcheonGuOffice",
+        "sinjeongnegeori",
+        "kkachisan"
       ],
-      "branches": [
+      "routes": [
         {
+          "id": "main-loop",
+          "type": "loop",
+          "stationKeys": [
+            "cityHall",
+            "euljiro1Ga",
+            "euljiro3Ga",
+            "euljiro4Ga",
+            "dongdaemunHistoryCulturePark",
+            "sindang",
+            "sangwangsimni",
+            "wangsimni",
+            "hanyangUniversity",
+            "ttukseom",
+            "seongsu",
+            "konkukUniversity",
+            "guui",
+            "gangbyeon",
+            "jamsillaru",
+            "jamsil",
+            "jamsilsaenae",
+            "sportsComplex",
+            "samseong",
+            "seolleung",
+            "yeoksam",
+            "gangnam",
+            "seoulNationalUniversityOfEducation",
+            "seocho",
+            "bangbae",
+            "sadang",
+            "nagseongdae",
+            "seoulNationalUniversity",
+            "bongcheon",
+            "sillim",
+            "sindaebang",
+            "guroDigitalComplex",
+            "daerim",
+            "sindorim",
+            "mullae",
+            "yeongdeungpoGuOffice",
+            "dangsan",
+            "hapjeong",
+            "hongikUniversity",
+            "sinchon",
+            "ewhaWomansUniversity",
+            "ahyeon",
+            "chungjeongno"
+          ]
+        },
+        {
+          "id": "seongsu-branch",
+          "type": "branch",
           "junctionStationKey": "seongsu",
           "stationKeys": ["yongdap", "sindap", "yongdu", "sinseolDong"]
         },
         {
+          "id": "sinjeong-branch",
+          "type": "branch",
           "junctionStationKey": "sindorim",
           "stationKeys": ["dorimcheon", "yangcheonGuOffice", "sinjeongnegeori", "kkachisan"]
         }
