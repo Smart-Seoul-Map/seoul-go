@@ -6,6 +6,7 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
+import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
 import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge";
 import { ExplorationMap } from "./ExplorationMap";
@@ -65,18 +66,7 @@ export function ExplorationPage({
   }, []);
 
   const displayedPlaceMarkers = useMemo(
-    () => ({
-      ...placeMarkers,
-      features: placeMarkers.features.map((feature) => ({
-        ...feature,
-        properties: {
-          ...feature.properties,
-          markerImage: revealedPlaceIds.has(feature.properties.id)
-            ? feature.properties.openMarkerImage
-            : feature.properties.closedMarkerImage,
-        },
-      })),
-    }),
+    () => createRevealedPlaceMarkers({ placeMarkers, revealedPlaceIds }),
     [placeMarkers, revealedPlaceIds]
   );
 
