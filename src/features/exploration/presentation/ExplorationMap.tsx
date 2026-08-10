@@ -28,7 +28,6 @@ import {
   PLACE_CARD_REVEAL_RADIUS_METERS,
   resolveExplorationMapTileSourceConfig,
 } from "../config/explorationMapConfig";
-import { EXPLORATION_PLACE_MARKERS_LAYER_ID } from "../config/explorationPlaceMarkerLayer";
 import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
@@ -154,16 +153,6 @@ export function ExplorationMap({
     });
 
     map.on("click", (event) => {
-      if (map.getLayer(EXPLORATION_PLACE_MARKERS_LAYER_ID)) {
-        const clickedPlaces = map.queryRenderedFeatures(event.point, {
-          layers: [EXPLORATION_PLACE_MARKERS_LAYER_ID],
-        });
-
-        if (clickedPlaces.length > 0) {
-          return;
-        }
-      }
-
       onPlaceMarkerClear?.();
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);

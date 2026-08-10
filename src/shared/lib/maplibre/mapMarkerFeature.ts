@@ -5,7 +5,9 @@ export type MapMarkerFeatureProperties = {
   themeId: string;
   themeName: string;
   markerColor: string;
+  closedMarkerImage: string;
   markerImage: string;
+  openMarkerImage: string;
 };
 
 export type MapMarkerPointGeometry = {

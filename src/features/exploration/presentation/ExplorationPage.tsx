@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactElement } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactElement } from "react";
 
 import "./ExplorationPage.css";
 
@@ -40,24 +40,45 @@ export function ExplorationPage({
 }: ExplorationPageProps): ReactElement {
   const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
   const [revealedPlaceIds, setRevealedPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
+  const selectedPlaceRef = useRef<ExplorationPlaceMarkerSelection | null>(null);
 
   const selectPlace = useCallback((place: ExplorationPlaceMarkerSelection) => {
+    selectedPlaceRef.current = place;
     setSelectedPlace(place);
+  }, []);
+
+  const clearSelectedPlace = useCallback(() => {
+    const currentPlace = selectedPlaceRef.current;
+
     setRevealedPlaceIds((currentPlaceIds) => {
-      if (currentPlaceIds.has(place.id)) {
+      if (!currentPlace || currentPlaceIds.has(currentPlace.id)) {
         return currentPlaceIds;
       }
 
       const nextPlaceIds = new Set(currentPlaceIds);
-      nextPlaceIds.add(place.id);
+      nextPlaceIds.add(currentPlace.id);
 
       return nextPlaceIds;
     });
-  }, []);
-
-  const clearSelectedPlace = useCallback(() => {
+    selectedPlaceRef.current = null;
     setSelectedPlace(null);
   }, []);
+
+  const displayedPlaceMarkers = useMemo(
+    () => ({
+      ...placeMarkers,
+      features: placeMarkers.features.map((feature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          markerImage: revealedPlaceIds.has(feature.properties.id)
+            ? feature.properties.openMarkerImage
+            : feature.properties.closedMarkerImage,
+        },
+      })),
+    }),
+    [placeMarkers, revealedPlaceIds]
+  );
 
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
@@ -68,7 +89,7 @@ export function ExplorationPage({
           initialCenter={initialCenter}
           onPlaceMarkerClear={clearSelectedPlace}
           onPlaceMarkerSelect={selectPlace}
-          placeMarkers={placeMarkers}
+          placeMarkers={displayedPlaceMarkers}
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />

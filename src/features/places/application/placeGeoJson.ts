@@ -11,22 +11,30 @@ export function createPlacesFeatureCollection(
 ): MapMarkerFeatureCollection {
   return {
     type: "FeatureCollection",
-    features: places.map<MapMarkerFeature>((place) => ({
-      type: "Feature",
-      id: place.id,
-      geometry: {
-        type: "Point",
-        coordinates: [place.position.lng, place.position.lat],
-      },
-      properties: {
+    features: places.map<MapMarkerFeature>((place) => {
+      const theme = getSmartSeoulPlaceTheme(place.themeId);
+      const closedMarkerImage = theme?.closedBoxImage ?? "black_closed_box";
+      const openMarkerImage = theme?.openBoxImage ?? "black_open_box";
+
+      return {
+        type: "Feature",
         id: place.id,
-        imageUrl: place.imageUrl,
-        name: place.name,
-        themeId: place.themeId,
-        themeName: place.themeName,
-        markerColor: getSmartSeoulPlaceTheme(place.themeId)?.markerColor ?? "#17201a",
-        markerImage: getSmartSeoulPlaceTheme(place.themeId)?.closedBoxImage ?? "black_closed_box",
-      },
-    })),
+        geometry: {
+          type: "Point",
+          coordinates: [place.position.lng, place.position.lat],
+        },
+        properties: {
+          id: place.id,
+          imageUrl: place.imageUrl,
+          name: place.name,
+          themeId: place.themeId,
+          themeName: place.themeName,
+          markerColor: theme?.markerColor ?? "#17201a",
+          closedMarkerImage,
+          markerImage: closedMarkerImage,
+          openMarkerImage,
+        },
+      };
+    }),
   };
 }

@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createPlacesFeatureCollection } from "./placeGeoJson";
 
 describe("createPlacesFeatureCollection", () => {
-  test("converts places to MapLibre marker GeoJSON", () => {
+  test("converts places to MapLibre marker GeoJSON with closed and open marker images", () => {
     const collection = createPlacesFeatureCollection([
       {
         address: "Seoul",
@@ -30,11 +30,13 @@ describe("createPlacesFeatureCollection", () => {
         coordinates: [126.97842, 37.56668],
       },
       properties: {
+        closedMarkerImage: "red_closed_box",
         id: "smart-seoul:100032:place-1",
         imageUrl: "https://example.com/library.jpg",
         markerColor: "#c92a2a",
         markerImage: "red_closed_box",
         name: "Library",
+        openMarkerImage: "red_open_box",
         themeId: "100032",
         themeName: "Theme",
       },
