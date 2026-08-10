@@ -1,22 +1,18 @@
-import { useCallback, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
 import { PATH } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-import { useStampCourseStore } from "@features/course";
 import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
 import {
-  createStampCoursePlaceInputFromSelection,
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
   createDistrictExplorationTarget,
   createStationExplorationTarget,
   parseDistrictExplorationTargetIdParam,
-  type AddExplorationPlaceToCourseResultStatus,
   type DistrictExplorationTarget,
-  type ExplorationPlaceMarkerSelection,
   type ExplorationTarget,
   type StationExplorationTarget,
 } from "@features/exploration";
@@ -25,6 +21,7 @@ import {
   useDistrictExplorationRoutePlaces,
   useStationExplorationRoutePlaces,
 } from "./useExplorationRoutePlaces";
+import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
 type ExplorationRouteProps = {
@@ -60,18 +57,6 @@ function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElemen
 
 function DefaultExplorationRouteContent(): ReactElement {
   return <DistrictExplorationRouteContent target={null} />;
-}
-
-function useAddExplorationPlaceToCourse(): (
-  place: ExplorationPlaceMarkerSelection
-) => AddExplorationPlaceToCourseResultStatus {
-  const addPlace = useStampCourseStore((state) => state.addPlace);
-
-  return useCallback(
-    (place: ExplorationPlaceMarkerSelection) =>
-      addPlace(createStampCoursePlaceInputFromSelection(place)).status,
-    [addPlace]
-  );
 }
 
 type DistrictExplorationRouteContentProps = {
