@@ -156,7 +156,13 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [districtBoundary, initialPosition, onPlaceMarkerClear, onPlaceMarkerSelect, stationRadiusMeters]);
+  }, [
+    districtBoundary,
+    initialPosition,
+    onPlaceMarkerClear,
+    onPlaceMarkerSelect,
+    stationRadiusMeters,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
