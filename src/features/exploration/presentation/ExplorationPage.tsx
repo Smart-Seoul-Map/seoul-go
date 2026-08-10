@@ -39,6 +39,22 @@ export function ExplorationPage({
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
+  const [revealedPlaceIds, setRevealedPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
+
+  const selectPlace = useCallback((place: ExplorationPlaceMarkerSelection) => {
+    setSelectedPlace(place);
+    setRevealedPlaceIds((currentPlaceIds) => {
+      if (currentPlaceIds.has(place.id)) {
+        return currentPlaceIds;
+      }
+
+      const nextPlaceIds = new Set(currentPlaceIds);
+      nextPlaceIds.add(place.id);
+
+      return nextPlaceIds;
+    });
+  }, []);
+
   const clearSelectedPlace = useCallback(() => {
     setSelectedPlace(null);
   }, []);
@@ -48,10 +64,12 @@ export function ExplorationPage({
       <section className="map-stage" aria-label="서울 지도">
         <ExplorationMap
           districtId={districtId}
+          hasActivePlaceCard={selectedPlace !== null}
           initialCenter={initialCenter}
           onPlaceMarkerClear={clearSelectedPlace}
-          onPlaceMarkerSelect={setSelectedPlace}
+          onPlaceMarkerSelect={selectPlace}
           placeMarkers={placeMarkers}
+          revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
         {districtName ? (
