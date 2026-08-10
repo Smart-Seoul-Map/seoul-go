@@ -14,7 +14,7 @@ import {
 } from "./explorationPlaceMarkers";
 
 describe("addExplorationPlaceMarkersLayer", () => {
-  it("loads marker images and adds the place marker source and symbol layer", async () => {
+  it("loads closed and open marker images and adds the marker source and layer", async () => {
     const map = {
       addImage: vi.fn(),
       addLayer: vi.fn(),
@@ -26,8 +26,8 @@ describe("addExplorationPlaceMarkersLayer", () => {
 
     await addExplorationPlaceMarkersLayer(map as never);
 
-    expect(map.loadImage).toHaveBeenCalledTimes(5);
-    expect(map.addImage).toHaveBeenCalledTimes(5);
+    expect(map.loadImage).toHaveBeenCalledTimes(10);
+    expect(map.addImage).toHaveBeenCalledTimes(10);
     expect(map.loadImage.mock.calls.map(([url]) => url)).toEqual(
       EXPLORATION_PLACE_MARKER_IMAGES.map(({ url }) => url)
     );
@@ -44,7 +44,7 @@ describe("addExplorationPlaceMarkersLayer", () => {
     );
   });
 
-  it("uses the latest marker data when the marker source is added after image loading", async () => {
+  it("uses the latest marker data when the source is added after image loading", async () => {
     const resolveImageLoads: Array<(value: { data: { url: string } }) => void> = [];
     let placeMarkers: MapMarkerFeatureCollection = { features: [], type: "FeatureCollection" };
     const nextPlaceMarkers: MapMarkerFeatureCollection = {
@@ -53,13 +53,15 @@ describe("addExplorationPlaceMarkersLayer", () => {
           geometry: { coordinates: [126.990703, 37.532326], type: "Point" },
           id: "place-1",
           properties: {
+            closedMarkerImage: "black_closed_box",
             id: "place-1",
             imageUrl: "https://example.com/place.jpg",
             markerColor: "#20252b",
             markerImage: "black_closed_box",
-            name: "테스트 장소",
+            name: "Test Place",
+            openMarkerImage: "black_open_box",
             themeId: "theme-1",
-            themeName: "테스트 테마",
+            themeName: "Theme",
           },
           type: "Feature",
         },

@@ -5,13 +5,27 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 
 import { ExplorationMap } from "./ExplorationMap";
 
-type MapEventHandler = () => void;
+type MapEventHandler = (event?: MapClickEvent) => void;
+type MapClickEvent = {
+  lngLat: {
+    lat: number;
+    lng: number;
+  };
+  point: unknown;
+};
 
 const maplibreMock = vi.hoisted(() => ({
   instances: [] as Array<{
-    emit: (eventName: string) => void;
+    emit: (eventName: string, event?: MapClickEvent) => void;
+    getLayer: ReturnType<typeof vi.fn>;
     handlers: Map<string, MapEventHandler[]>;
+    queryRenderedFeatures: ReturnType<typeof vi.fn>;
   }>,
+}));
+
+const characterMovementMock = vi.hoisted(() => ({
+  moveTo: vi.fn(),
+  stop: vi.fn(),
 }));
 
 const placeMarkerLayerMock = vi.hoisted(() => ({
@@ -31,7 +45,9 @@ vi.mock("maplibre-gl", () => {
     constructor() {
       maplibreMock.instances.push({
         emit: this.emit.bind(this),
+        getLayer: this.getLayer,
         handlers: this.handlers,
+        queryRenderedFeatures: this.queryRenderedFeatures,
       });
     }
 
@@ -65,8 +81,8 @@ vi.mock("maplibre-gl", () => {
       return this;
     }
 
-    emit(eventName: string) {
-      this.handlers.get(eventName)?.forEach((handler) => handler());
+    emit(eventName: string, event?: MapClickEvent) {
+      this.handlers.get(eventName)?.forEach((handler) => handler(event));
     }
   }
 
@@ -90,6 +106,17 @@ vi.mock("../application/explorationMapInteractions", () => ({
 vi.mock("../application/explorationPlaceMarkers", () => placeMarkerLayerMock);
 
 vi.mock("../application/explorationStationRadiusLayer", () => stationRadiusLayerMock);
+
+vi.mock("../application/useCharacterMovementController", () => ({
+  useCharacterMovementController: () => ({
+    getCurrentPosition: vi.fn(),
+    getIsMoving: vi.fn(),
+    headingRadians: 0,
+    modelKey: "idlePrimary",
+    moveTo: characterMovementMock.moveTo,
+    stop: characterMovementMock.stop,
+  }),
+}));
 
 function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
   return {
@@ -147,5 +174,25 @@ describe("ExplorationMap", () => {
       initialCenter,
       1000
     );
+  });
+
+  test("moves the character when a place marker is clicked", () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    render(<ExplorationMap />);
+    const map = maplibreMock.instances.at(-1);
+    map?.getLayer.mockReturnValue(true);
+    map?.queryRenderedFeatures.mockReturnValue([{ properties: { id: "place-1" } }]);
+
+    act(() => {
+      map?.emit("click", {
+        lngLat: { lat: 37.532326, lng: 126.990703 },
+        point: {},
+      });
+    });
+
+    expect(characterMovementMock.moveTo).toHaveBeenCalledWith({
+      lat: 37.532326,
+      lng: 126.990703,
+    });
   });
 });

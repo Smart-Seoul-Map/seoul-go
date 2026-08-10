@@ -12,10 +12,10 @@ import { disableExplorationMapDragInteractions } from "../application/exploratio
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
+import { findNearestArrivedPlaceMarker } from "../application/explorationPlaceMarkerArrival";
 import { addExplorationStationRadiusLayers } from "../application/explorationStationRadiusLayer";
 import {
   addExplorationPlaceMarkersLayer,
-  getExplorationPlaceMarkerSelection,
   type ExplorationPlaceMarkerSelection,
   updateExplorationPlaceMarkersSource,
 } from "../application/explorationPlaceMarkers";
@@ -25,19 +25,21 @@ import {
   CHARACTER_SPEED_METERS_PER_SECOND,
   EXPLORATION_MAP_BEARING,
   EXPLORATION_MAP_CENTER,
+  PLACE_CARD_REVEAL_RADIUS_METERS,
   resolveExplorationMapTileSourceConfig,
 } from "../config/explorationMapConfig";
-import { EXPLORATION_PLACE_MARKERS_LAYER_ID } from "../config/explorationPlaceMarkerLayer";
 import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 type ExplorationMapProps = {
   districtId?: number;
+  hasActivePlaceCard?: boolean;
   initialCenter?: Coordinates;
   onPlaceMarkerClear?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
+  revealedPlaceIds?: ReadonlySet<string>;
   stationRadiusMeters?: number;
 };
 
@@ -53,10 +55,12 @@ function formatMapZoomLevel(zoomLevel: number): string {
 
 export function ExplorationMap({
   districtId,
+  hasActivePlaceCard = false,
   initialCenter,
   onPlaceMarkerClear,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  revealedPlaceIds = new Set(),
   stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -66,6 +70,12 @@ export function ExplorationMap({
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const placeMarkersRef = useRef(placeMarkers);
   placeMarkersRef.current = placeMarkers;
+  const hasActivePlaceCardRef = useRef(hasActivePlaceCard);
+  hasActivePlaceCardRef.current = hasActivePlaceCard;
+  const onPlaceMarkerSelectRef = useRef(onPlaceMarkerSelect);
+  onPlaceMarkerSelectRef.current = onPlaceMarkerSelect;
+  const revealedPlaceIdsRef = useRef(revealedPlaceIds);
+  revealedPlaceIdsRef.current = revealedPlaceIds;
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -78,6 +88,23 @@ export function ExplorationMap({
     }),
     onFrame: ({ position }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
+
+      if (hasActivePlaceCardRef.current) {
+        return;
+      }
+
+      const arrivedPlace = findNearestArrivedPlaceMarker({
+        arrivalRadiusMeters: PLACE_CARD_REVEAL_RADIUS_METERS,
+        placeMarkers: placeMarkersRef.current,
+        position,
+        revealedPlaceIds: revealedPlaceIdsRef.current,
+      });
+
+      if (arrivedPlace) {
+        hasActivePlaceCardRef.current = true;
+        characterMovementRef.current.stop();
+        onPlaceMarkerSelectRef.current?.(arrivedPlace);
+      }
     },
     speedPerSecond: CHARACTER_SPEED_METERS_PER_SECOND,
   });
@@ -125,27 +152,7 @@ export function ExplorationMap({
       });
     });
 
-    map.on("click", EXPLORATION_PLACE_MARKERS_LAYER_ID, (event) => {
-      const place = getExplorationPlaceMarkerSelection(event.features?.[0]);
-
-      if (!place) {
-        return;
-      }
-
-      onPlaceMarkerSelect?.(place);
-    });
-
     map.on("click", (event) => {
-      if (map.getLayer(EXPLORATION_PLACE_MARKERS_LAYER_ID)) {
-        const clickedPlaces = map.queryRenderedFeatures(event.point, {
-          layers: [EXPLORATION_PLACE_MARKERS_LAYER_ID],
-        });
-
-        if (clickedPlaces.length > 0) {
-          return;
-        }
-      }
-
       onPlaceMarkerClear?.();
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);
@@ -156,13 +163,7 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [
-    districtBoundary,
-    initialPosition,
-    onPlaceMarkerClear,
-    onPlaceMarkerSelect,
-    stationRadiusMeters,
-  ]);
+  }, [districtBoundary, initialPosition, onPlaceMarkerClear, stationRadiusMeters]);
 
   useEffect(() => {
     const map = mapRef.current;

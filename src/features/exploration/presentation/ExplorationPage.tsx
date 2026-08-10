@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactElement } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactElement } from "react";
 
 import "./ExplorationPage.css";
 
@@ -6,6 +6,7 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
+import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
 import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge";
 import { ExplorationMap } from "./ExplorationMap";
@@ -39,19 +40,47 @@ export function ExplorationPage({
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
+  const [revealedPlaceIds, setRevealedPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
+  const selectedPlaceRef = useRef<ExplorationPlaceMarkerSelection | null>(null);
+
+  const selectPlace = useCallback((place: ExplorationPlaceMarkerSelection) => {
+    selectedPlaceRef.current = place;
+    setSelectedPlace(place);
+  }, []);
+
   const clearSelectedPlace = useCallback(() => {
+    const currentPlace = selectedPlaceRef.current;
+
+    setRevealedPlaceIds((currentPlaceIds) => {
+      if (!currentPlace || currentPlaceIds.has(currentPlace.id)) {
+        return currentPlaceIds;
+      }
+
+      const nextPlaceIds = new Set(currentPlaceIds);
+      nextPlaceIds.add(currentPlace.id);
+
+      return nextPlaceIds;
+    });
+    selectedPlaceRef.current = null;
     setSelectedPlace(null);
   }, []);
+
+  const displayedPlaceMarkers = useMemo(
+    () => createRevealedPlaceMarkers({ placeMarkers, revealedPlaceIds }),
+    [placeMarkers, revealedPlaceIds]
+  );
 
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
       <section className="map-stage" aria-label="서울 지도">
         <ExplorationMap
           districtId={districtId}
+          hasActivePlaceCard={selectedPlace !== null}
           initialCenter={initialCenter}
           onPlaceMarkerClear={clearSelectedPlace}
-          onPlaceMarkerSelect={setSelectedPlace}
-          placeMarkers={placeMarkers}
+          onPlaceMarkerSelect={selectPlace}
+          placeMarkers={displayedPlaceMarkers}
+          revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
         {districtName ? (
