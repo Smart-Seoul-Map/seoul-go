@@ -49,15 +49,9 @@ export function AppToastProvider({ children }: AppToastProviderProps): ReactElem
   const showToast = useCallback((options: AppToastOptions): string => {
     const toast = createToast(options);
 
-    setActiveToast((currentToast) => {
-      if (!currentToast) {
-        return toast;
-      }
-
-      setToastQueue((currentQueue) => [...currentQueue, toast]);
-
-      return currentToast;
-    });
+    setToastQueue([]);
+    setActiveToast(toast);
+    setIsPaused(false);
 
     return toast.id;
   }, []);

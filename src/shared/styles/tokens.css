@@ -266,6 +266,7 @@
   --sg-toast-radius: var(--sg-radius-2);
   --sg-toast-shadow: var(--sg-panel-shadow);
   --sg-toast-min-height: 44px;
+  --sg-toast-min-width: 280px;
   --sg-toast-max-width: 560px;
   --sg-toast-padding-x: var(--sg-spacing-2_5);
   --sg-toast-padding-y: var(--sg-spacing-2_5);

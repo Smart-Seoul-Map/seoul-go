@@ -137,7 +137,7 @@ describe("AppToast", () => {
     expect(screen.queryByRole("status")).toBeNull();
   });
 
-  test("queues multiple toast requests and shows the next one after the current toast closes", () => {
+  test("replaces the active toast with the latest toast request", () => {
     function QueueTrigger() {
       const { showToast } = useAppToast();
 
@@ -161,13 +161,8 @@ describe("AppToast", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Queue toasts" }));
 
-    expect(screen.getByRole("status").textContent).toContain("First notice");
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
     expect(screen.getByRole("status").textContent).toContain("Second notice");
+    expect(screen.queryByText("First notice")).toBeNull();
   });
 
   test("pauses auto dismiss while the toast is pressed", () => {
