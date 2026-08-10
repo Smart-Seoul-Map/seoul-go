@@ -1,13 +1,15 @@
-import type { ReactElement } from "react";
+import { useCallback, useState, type ReactElement } from "react";
 
 import "./ExplorationPage.css";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
+import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import type { Coordinates } from "../domain/explorationGeo";
 import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge";
 import { ExplorationMap } from "./ExplorationMap";
+import { ExplorationPlaceCard } from "./ExplorationPlaceCard";
 import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
 
 type ExplorationThemePlaceCountItem = {
@@ -36,12 +38,19 @@ export function ExplorationPage({
   stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
+  const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
+  const clearSelectedPlace = useCallback(() => {
+    setSelectedPlace(null);
+  }, []);
+
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
       <section className="map-stage" aria-label="서울 지도">
         <ExplorationMap
           districtId={districtId}
           initialCenter={initialCenter}
+          onPlaceMarkerClear={clearSelectedPlace}
+          onPlaceMarkerSelect={setSelectedPlace}
           placeMarkers={placeMarkers}
           stationRadiusMeters={stationRadiusMeters}
         />
@@ -63,6 +72,11 @@ export function ExplorationPage({
             </li>
           ))}
         </ul>
+        {selectedPlace ? (
+          <div className="exploration-place-card-layer">
+            <ExplorationPlaceCard place={selectedPlace} />
+          </div>
+        ) : null}
       </section>
     </main>
   );

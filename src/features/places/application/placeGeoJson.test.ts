@@ -9,6 +9,7 @@ describe("createPlacesFeatureCollection", () => {
         address: "Seoul",
         districtName: "district-a",
         id: "smart-seoul:100032:place-1",
+        imageUrl: "https://example.com/library.jpg",
         name: "Library",
         position: {
           lat: 37.56668,
@@ -30,6 +31,7 @@ describe("createPlacesFeatureCollection", () => {
       },
       properties: {
         id: "smart-seoul:100032:place-1",
+        imageUrl: "https://example.com/library.jpg",
         markerColor: "#c92a2a",
         markerImage: "red_closed_box",
         name: "Library",

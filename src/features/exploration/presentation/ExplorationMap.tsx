@@ -15,7 +15,8 @@ import { addExplorationDistrictBoundaryLayers } from "../application/exploration
 import { addExplorationStationRadiusLayers } from "../application/explorationStationRadiusLayer";
 import {
   addExplorationPlaceMarkersLayer,
-  getExplorationPlaceMarkerName,
+  getExplorationPlaceMarkerSelection,
+  type ExplorationPlaceMarkerSelection,
   updateExplorationPlaceMarkersSource,
 } from "../application/explorationPlaceMarkers";
 import { useCharacterMovementController } from "../application/useCharacterMovementController";
@@ -34,6 +35,8 @@ import { CharacterModelOverlay } from "./CharacterModelOverlay";
 type ExplorationMapProps = {
   districtId?: number;
   initialCenter?: Coordinates;
+  onPlaceMarkerClear?: () => void;
+  onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
   stationRadiusMeters?: number;
 };
@@ -51,6 +54,8 @@ function formatMapZoomLevel(zoomLevel: number): string {
 export function ExplorationMap({
   districtId,
   initialCenter,
+  onPlaceMarkerClear,
+  onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
@@ -121,13 +126,13 @@ export function ExplorationMap({
     });
 
     map.on("click", EXPLORATION_PLACE_MARKERS_LAYER_ID, (event) => {
-      const name = getExplorationPlaceMarkerName(event.features?.[0]);
+      const place = getExplorationPlaceMarkerSelection(event.features?.[0]);
 
-      if (!name) {
+      if (!place) {
         return;
       }
 
-      new maplibregl.Popup({ closeButton: true }).setLngLat(event.lngLat).setText(name).addTo(map);
+      onPlaceMarkerSelect?.(place);
     });
 
     map.on("click", (event) => {
@@ -141,6 +146,7 @@ export function ExplorationMap({
         }
       }
 
+      onPlaceMarkerClear?.();
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);
     });
@@ -150,7 +156,13 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [districtBoundary, initialPosition, stationRadiusMeters]);
+  }, [
+    districtBoundary,
+    initialPosition,
+    onPlaceMarkerClear,
+    onPlaceMarkerSelect,
+    stationRadiusMeters,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -18,10 +18,31 @@ type PlaceMarkersSourceMap = Pick<MapLibreMap, "getSource">;
 type AddExplorationPlaceMarkersLayerOptions = {
   getPlaceMarkers?: () => MapMarkerFeatureCollection;
 };
-type FeatureWithPlaceName = {
-  properties?: {
-    name?: unknown;
+type FeatureWithPlaceMarkerSelection = {
+  geometry?: {
+    coordinates?: unknown;
   } | null;
+  properties?: {
+    id?: unknown;
+    imageUrl?: unknown;
+    markerColor?: unknown;
+    name?: unknown;
+    themeId?: unknown;
+    themeName?: unknown;
+  } | null;
+};
+
+export type ExplorationPlaceMarkerSelection = {
+  id: string;
+  imageUrl: string;
+  markerColor: string;
+  name: string;
+  position: {
+    lat: number;
+    lng: number;
+  };
+  themeId: string;
+  themeName: string;
 };
 
 function createExplorationPlaceMarkersLayer(): SymbolLayerSpecification {
@@ -83,12 +104,49 @@ export function updateExplorationPlaceMarkersSource(
   geoJsonSource.setData(placeMarkers as Parameters<GeoJSONSource["setData"]>[0]);
 }
 
-export function getExplorationPlaceMarkerName(feature?: FeatureWithPlaceName): string | null {
-  const name = feature?.properties?.name;
+export function getExplorationPlaceMarkerSelection(
+  feature?: FeatureWithPlaceMarkerSelection
+): ExplorationPlaceMarkerSelection | null {
+  const id = readString(feature?.properties?.id);
+  const name = readString(feature?.properties?.name);
+  const themeId = readString(feature?.properties?.themeId);
+  const themeName = readString(feature?.properties?.themeName);
+  const markerColor = readString(feature?.properties?.markerColor);
+  const imageUrl = readString(feature?.properties?.imageUrl);
+  const coordinates = feature?.geometry?.coordinates;
 
-  if (typeof name !== "string" || !name) {
+  if (
+    !id ||
+    !name ||
+    !themeId ||
+    !themeName ||
+    !markerColor ||
+    !Array.isArray(coordinates) ||
+    coordinates.length < 2
+  ) {
     return null;
   }
 
-  return name;
+  const [lng, lat] = coordinates;
+
+  if (typeof lng !== "number" || typeof lat !== "number") {
+    return null;
+  }
+
+  return {
+    id,
+    imageUrl,
+    markerColor,
+    name,
+    position: {
+      lat,
+      lng,
+    },
+    themeId,
+    themeName,
+  };
+}
+
+function readString(value: unknown): string {
+  return typeof value === "string" ? value : "";
 }

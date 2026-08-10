@@ -2,6 +2,7 @@ import { getSmartSeoulPlaceTheme } from "../config/placeThemeConfig";
 import type { SmartSeoulThemePlace } from "./place";
 
 type RawSmartSeoulThemeContent = Record<string, unknown>;
+const SMART_SEOUL_IMAGE_BASE_URL = "https://map.seoul.go.kr/";
 
 export type SmartSeoulThemeContentsResponse = {
   header?: Record<string, unknown>;
@@ -45,6 +46,18 @@ function finiteNumber(value: string): number | undefined {
   return Number.isFinite(number) ? number : undefined;
 }
 
+function normalizeSmartSeoulImageUrl(value: string): string {
+  if (!value) {
+    return "";
+  }
+
+  try {
+    return new URL(value, SMART_SEOUL_IMAGE_BASE_URL).href;
+  } catch {
+    return value;
+  }
+}
+
 export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePlace | null {
   if (!raw || typeof raw !== "object") {
     return null;
@@ -75,6 +88,7 @@ export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePl
     themeId,
     themeName: theme.name,
     address: field(source, ["COT_ADDR_FULL_NEW", "ADDR_NEW", "COT_ADDR_FULL_OLD", "ADDR_OLD"]),
+    imageUrl: normalizeSmartSeoulImageUrl(field(source, ["COT_IMG_MAIN_URL", "IMG_MAIN_URL"])),
     position: {
       lng,
       lat,

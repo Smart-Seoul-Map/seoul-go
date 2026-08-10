@@ -9,7 +9,7 @@ import {
 } from "../config/explorationPlaceMarkerLayer";
 import {
   addExplorationPlaceMarkersLayer,
-  getExplorationPlaceMarkerName,
+  getExplorationPlaceMarkerSelection,
   updateExplorationPlaceMarkersSource,
 } from "./explorationPlaceMarkers";
 
@@ -54,6 +54,7 @@ describe("addExplorationPlaceMarkersLayer", () => {
           id: "place-1",
           properties: {
             id: "place-1",
+            imageUrl: "https://example.com/place.jpg",
             markerColor: "#20252b",
             markerImage: "black_closed_box",
             name: "테스트 장소",
@@ -127,11 +128,30 @@ describe("updateExplorationPlaceMarkersSource", () => {
   });
 });
 
-describe("getExplorationPlaceMarkerName", () => {
-  it("returns marker name only when feature has a non-empty string name", () => {
-    expect(getExplorationPlaceMarkerName({ properties: { name: "장소" } } as never)).toBe("장소");
-    expect(getExplorationPlaceMarkerName({ properties: { name: "" } } as never)).toBeNull();
-    expect(getExplorationPlaceMarkerName({ properties: { name: 1 } } as never)).toBeNull();
-    expect(getExplorationPlaceMarkerName(undefined)).toBeNull();
+describe("getExplorationPlaceMarkerSelection", () => {
+  it("returns card data only when required marker fields exist", () => {
+    expect(
+      getExplorationPlaceMarkerSelection({
+        geometry: { coordinates: [126.9, 37.5] },
+        properties: {
+          id: "place-1",
+          imageUrl: "https://example.com/place.jpg",
+          markerColor: "#c92a2a",
+          name: "Place",
+          themeId: "100032",
+          themeName: "Theme",
+        },
+      })
+    ).toEqual({
+      id: "place-1",
+      imageUrl: "https://example.com/place.jpg",
+      markerColor: "#c92a2a",
+      name: "Place",
+      position: { lat: 37.5, lng: 126.9 },
+      themeId: "100032",
+      themeName: "Theme",
+    });
+
+    expect(getExplorationPlaceMarkerSelection({ properties: { id: "place-1" } })).toBeNull();
   });
 });

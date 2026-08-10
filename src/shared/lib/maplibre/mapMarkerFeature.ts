@@ -1,5 +1,6 @@
 export type MapMarkerFeatureProperties = {
   id: string;
+  imageUrl: string;
   name: string;
   themeId: string;
   themeName: string;
