@@ -1,0 +1,4 @@
+.subway-selection-result > * > * {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
