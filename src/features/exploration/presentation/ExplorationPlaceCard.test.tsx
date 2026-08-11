@@ -18,13 +18,15 @@ const place = {
   themeName: "서울 미래유산",
 };
 
+const noopAddToCourse = () => {};
+
 describe("ExplorationPlaceCard", () => {
   afterEach(() => {
     cleanup();
   });
 
   test("renders the place name and image", () => {
-    render(<ExplorationPlaceCard place={place} />);
+    render(<ExplorationPlaceCard onAddToCourse={noopAddToCourse} place={place} />);
 
     expect(screen.getByText("Namsan Tower")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Namsan Tower 대표 이미지" })).toHaveAttribute(
@@ -34,7 +36,9 @@ describe("ExplorationPlaceCard", () => {
   });
 
   test("separates the layered card body from the footer", () => {
-    const { container } = render(<ExplorationPlaceCard place={place} />);
+    const { container } = render(
+      <ExplorationPlaceCard onAddToCourse={noopAddToCourse} place={place} />
+    );
 
     expect(container.querySelector(".exploration-place-card-panel-line")).not.toBeInTheDocument();
 

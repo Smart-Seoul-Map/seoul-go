@@ -22,7 +22,7 @@ export type ExplorationPlaceCardPlace = {
 };
 
 type ExplorationPlaceCardProps = {
-  onAddToCourse?: (place: ExplorationPlaceCardPlace) => void;
+  onAddToCourse: (place: ExplorationPlaceCardPlace) => void;
   place: ExplorationPlaceCardPlace;
 };
 
@@ -90,7 +90,7 @@ export function ExplorationPlaceCard({
         <AppButton
           onClick={(event) => {
             event.stopPropagation();
-            onAddToCourse?.(place);
+            onAddToCourse(place);
           }}
           size="xs"
           variant="ghost"

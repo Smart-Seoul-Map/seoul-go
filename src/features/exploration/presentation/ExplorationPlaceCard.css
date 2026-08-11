@@ -440,26 +440,6 @@
   width: 1px;
 }
 
-/* .exploration-place-card-sparkles span:nth-child(even) {
-  background: #f8fff4;
-  box-shadow:
-    0 -6px 0 var(--exploration-place-card-sparkle-color, #76ff6a),
-    0 6px 0 var(--exploration-place-card-sparkle-color, #76ff6a),
-    -6px 0 0 var(--exploration-place-card-sparkle-color, #76ff6a),
-    6px 0 0 var(--exploration-place-card-sparkle-color, #76ff6a),
-    0 -3px 0 #caffb3,
-    0 3px 0 #caffb3,
-    -3px 0 0 #caffb3,
-    3px 0 0 #caffb3;
-  height: 3px;
-  width: 3px;
-}
-
-.exploration-place-card-sparkles span:nth-child(even)::before,
-.exploration-place-card-sparkles span:nth-child(even)::after {
-  content: none;
-} */
-
 .exploration-place-card-footer {
   align-items: center;
   box-sizing: border-box;
