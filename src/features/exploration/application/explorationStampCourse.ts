@@ -1,9 +1,15 @@
-import type { AppToastOptions } from "@shared/ui/toast";
-
 import type { ExplorationPlaceMarkerSelection } from "./explorationPlaceMarkers";
+
+const STAMP_COURSE_TOAST_DURATION_MS = 2000;
 
 export type AddExplorationPlaceToCourseResultStatus =
   "added" | "duplicate" | "full" | "invalid-place";
+
+export type ExplorationStampCourseToastMessage = {
+  durationMs: number;
+  message: string;
+  status: "error" | "info" | "success";
+};
 
 export type ExplorationStampCoursePlaceInput = {
   id: string;
@@ -28,12 +34,10 @@ export function createStampCoursePlaceInputFromSelection(
 
 export function createStampCourseToastMessage(
   status: AddExplorationPlaceToCourseResultStatus
-): Pick<AppToastOptions, "durationMs" | "message" | "status"> {
-  const durationMs = 2000;
-
+): ExplorationStampCourseToastMessage {
   if (status === "added") {
     return {
-      durationMs,
+      durationMs: STAMP_COURSE_TOAST_DURATION_MS,
       message: "스탬프 코스에 담았어요",
       status: "success",
     };
@@ -41,7 +45,7 @@ export function createStampCourseToastMessage(
 
   if (status === "duplicate") {
     return {
-      durationMs,
+      durationMs: STAMP_COURSE_TOAST_DURATION_MS,
       message: "이미 담긴 장소예요",
       status: "info",
     };
@@ -49,14 +53,14 @@ export function createStampCourseToastMessage(
 
   if (status === "full") {
     return {
-      durationMs,
+      durationMs: STAMP_COURSE_TOAST_DURATION_MS,
       message: "스탬프 코스는 최대 6개까지 담을 수 있어요",
       status: "error",
     };
   }
 
   return {
-    durationMs,
+    durationMs: STAMP_COURSE_TOAST_DURATION_MS,
     message: "장소 정보를 확인할 수 없어요",
     status: "error",
   };
