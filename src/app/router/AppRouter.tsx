@@ -21,6 +21,7 @@ import {
   useDistrictExplorationRoutePlaces,
   useStationExplorationRoutePlaces,
 } from "./useExplorationRoutePlaces";
+import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
 type ExplorationRouteProps = {
@@ -65,6 +66,7 @@ type DistrictExplorationRouteContentProps = {
 function DistrictExplorationRouteContent({
   target,
 }: DistrictExplorationRouteContentProps): ReactElement {
+  const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
   const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
 
   return (
@@ -72,6 +74,7 @@ function DistrictExplorationRouteContent({
       districtId={target?.districtId}
       districtName={target?.districtName}
       initialCenter={target?.center}
+      onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}
     />
@@ -85,11 +88,13 @@ type StationExplorationRouteContentProps = {
 function StationExplorationRouteContent({
   target,
 }: StationExplorationRouteContentProps): ReactElement {
+  const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
   const { placeMarkers, themeProgressItems } = useStationExplorationRoutePlaces(target);
 
   return (
     <ExplorationPage
       initialCenter={target.center}
+      onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}

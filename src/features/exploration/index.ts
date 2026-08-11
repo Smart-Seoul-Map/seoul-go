@@ -29,6 +29,27 @@ export {
   type StationExplorationRadiusStep,
 } from "./domain/explorationStationRadius";
 export {
+  VISITED_PLACE_STORAGE_KEY,
+  VISITED_PLACE_STORAGE_VERSION,
+  clearVisitedPlaceIds,
+  loadVisitedPlaceIds,
+  saveVisitedPlaceIds,
+  type VisitedPlaceStorage,
+} from "./data/visitedPlaceStorage";
+export {
+  createVisitedPlaceStore,
+  type CreateVisitedPlaceStoreOptions,
+  type VisitedPlaceStoreState,
+  type VisitPlaceResult,
+} from "./application/visitedPlaceStore";
+export { useVisitedPlaceStore, visitedPlaceStore } from "./application/useVisitedPlaceStore";
+export {
+  createStampCoursePlaceInputFromSelection,
+  type AddExplorationPlaceToCourseResultStatus,
+  type ExplorationStampCoursePlaceInput,
+} from "./application/explorationStampCourse";
+export type { ExplorationPlaceMarkerSelection } from "./application/explorationPlaceMarkers";
+export {
   advanceMovement,
   createMovement,
   type CharacterMovement,

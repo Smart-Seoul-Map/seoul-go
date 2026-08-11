@@ -38,7 +38,6 @@ export type AppToastProviderProps = {
 
 export function AppToastProvider({ children }: AppToastProviderProps): ReactElement {
   const [activeToast, setActiveToast] = useState<AppToastItem | null>(null);
-  const [toastQueue, setToastQueue] = useState<AppToastItem[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const activeToastRef = useRef<AppToastItem | null>(null);
 
@@ -49,40 +48,21 @@ export function AppToastProvider({ children }: AppToastProviderProps): ReactElem
   const showToast = useCallback((options: AppToastOptions): string => {
     const toast = createToast(options);
 
-    setActiveToast((currentToast) => {
-      if (!currentToast) {
-        return toast;
-      }
-
-      setToastQueue((currentQueue) => [...currentQueue, toast]);
-
-      return currentToast;
-    });
+    setActiveToast(toast);
+    setIsPaused(false);
 
     return toast.id;
   }, []);
 
   const dismissToast = useCallback((toastId: string): void => {
-    setToastQueue((currentQueue) => currentQueue.filter((toast) => toast.id !== toastId));
     setActiveToast((currentToast) => (currentToast?.id === toastId ? null : currentToast));
     setIsPaused(false);
   }, []);
 
   const clearToasts = useCallback((): void => {
     setActiveToast(null);
-    setToastQueue([]);
     setIsPaused(false);
   }, []);
-
-  useEffect(() => {
-    if (activeToast || toastQueue.length === 0) {
-      return;
-    }
-
-    const [nextToast, ...remainingToasts] = toastQueue;
-    setActiveToast(nextToast);
-    setToastQueue(remainingToasts);
-  }, [activeToast, toastQueue]);
 
   useEffect(() => {
     if (!activeToast || isPaused) {

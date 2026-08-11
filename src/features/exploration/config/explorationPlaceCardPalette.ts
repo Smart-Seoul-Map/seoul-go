@@ -19,8 +19,10 @@ export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlac
       "--exploration-place-card-footer-ink": "#111111",
       "--exploration-place-card-card-bg-weak": "#d79d27",
       "--exploration-place-card-character-image": "url('/images/seoul-characters/moo.png')",
-      "--exploration-place-card-character-width": "82px",
-      "--exploration-place-card-character-bottom": "-24px",
+      "--exploration-place-card-character-width-mobile": "82px",
+      "--exploration-place-card-character-width-pc": "131.2px",
+      "--exploration-place-card-character-bottom-mobile": "-24px",
+      "--exploration-place-card-character-bottom-pc": "-38.4px",
     } as ExplorationPlaceCardPalette;
   }
 
@@ -40,8 +42,10 @@ export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlac
       "--exploration-place-card-footer-ink": "#1f1510",
       "--exploration-place-card-card-bg-weak": "#FD6737",
       "--exploration-place-card-character-image": "url('/images/seoul-characters/hachi.png')",
-      "--exploration-place-card-character-width": "84px",
-      "--exploration-place-card-character-bottom": "-26px",
+      "--exploration-place-card-character-width-mobile": "84px",
+      "--exploration-place-card-character-width-pc": "134.4px",
+      "--exploration-place-card-character-bottom-mobile": "-26px",
+      "--exploration-place-card-character-bottom-pc": "-41.6px",
     } as ExplorationPlaceCardPalette;
   }
 
@@ -61,8 +65,10 @@ export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlac
       "--exploration-place-card-footer-ink": "#fff0c8",
       "--exploration-place-card-card-bg-weak": "#9b38d8",
       "--exploration-place-card-character-image": "url('/images/seoul-characters/hou.png')",
-      "--exploration-place-card-character-width": "82px",
-      "--exploration-place-card-character-bottom": "-25px",
+      "--exploration-place-card-character-width-mobile": "82px",
+      "--exploration-place-card-character-width-pc": "131.2px",
+      "--exploration-place-card-character-bottom-mobile": "-25px",
+      "--exploration-place-card-character-bottom-pc": "-40px",
     } as ExplorationPlaceCardPalette;
   }
 
@@ -82,8 +88,10 @@ export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlac
       "--exploration-place-card-footer-ink": "#eaf6ff",
       "--exploration-place-card-card-bg-weak": "#147ddc",
       "--exploration-place-card-character-image": "url('/images/seoul-characters/young.png')",
-      "--exploration-place-card-character-width": "92px",
-      "--exploration-place-card-character-bottom": "-20px",
+      "--exploration-place-card-character-width-mobile": "92px",
+      "--exploration-place-card-character-width-pc": "147.2px",
+      "--exploration-place-card-character-bottom-mobile": "-20px",
+      "--exploration-place-card-character-bottom-pc": "-32px",
     } as ExplorationPlaceCardPalette;
   }
 
@@ -102,7 +110,9 @@ export function getExplorationPlaceCardPalette(themeId: string): ExplorationPlac
     "--exploration-place-card-footer-ink": "#2b1c0d",
     "--exploration-place-card-card-bg-weak": "#F7D580",
     "--exploration-place-card-character-image": "url('/images/seoul-characters/joo.png')",
-    "--exploration-place-card-character-width": "80px",
-    "--exploration-place-card-character-bottom": "-24px",
+    "--exploration-place-card-character-width-mobile": "80px",
+    "--exploration-place-card-character-width-pc": "128px",
+    "--exploration-place-card-character-bottom-mobile": "-24px",
+    "--exploration-place-card-character-bottom-pc": "-38.4px",
   } as ExplorationPlaceCardPalette;
 }

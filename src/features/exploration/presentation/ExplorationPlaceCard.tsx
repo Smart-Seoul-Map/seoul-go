@@ -2,22 +2,34 @@ import type { CSSProperties, ReactElement } from "react";
 
 import "./ExplorationPlaceCard.css";
 
-import { getExplorationPlaceCardPalette } from "../config/explorationPlaceCardPalette";
+import { AppButton } from "@shared/ui/button";
 import { AppVStack } from "@shared/ui/layout";
 import { AppText } from "@shared/ui/typography";
 
+import { getExplorationPlaceCardPalette } from "../config/explorationPlaceCardPalette";
+
 export type ExplorationPlaceCardPlace = {
+  id: string;
   imageUrl: string;
   markerColor: string;
   name: string;
+  position: {
+    lat: number;
+    lng: number;
+  };
   themeId: string;
+  themeName: string;
 };
 
 type ExplorationPlaceCardProps = {
+  onAddToCourse: (place: ExplorationPlaceCardPlace) => void;
   place: ExplorationPlaceCardPlace;
 };
 
-export function ExplorationPlaceCard({ place }: ExplorationPlaceCardProps): ReactElement {
+export function ExplorationPlaceCard({
+  onAddToCourse,
+  place,
+}: ExplorationPlaceCardProps): ReactElement {
   const cardStyle = {
     "--exploration-place-card-theme-color": place.markerColor,
     ...getExplorationPlaceCardPalette(place.themeId),
@@ -74,8 +86,17 @@ export function ExplorationPlaceCard({ place }: ExplorationPlaceCardProps): Reac
           </div>
         </div>
       </div>
-      <div className="exploration-place-card-footer" aria-hidden="true">
-        SEOUL GO
+      <div className="exploration-place-card-footer">
+        <AppButton
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddToCourse(place);
+          }}
+          size="xs"
+          variant="ghost"
+        >
+          스탬프 코스 +
+        </AppButton>
       </div>
     </article>
   );
