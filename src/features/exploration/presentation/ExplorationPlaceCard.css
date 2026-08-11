@@ -38,8 +38,12 @@
   --exploration-place-card-title-font-size: var(--sg-font-size-5);
   --exploration-place-card-title-line-height: var(--sg-line-height-5);
   --exploration-place-card-character-image: none;
-  --exploration-place-card-character-width: 128px;
-  --exploration-place-card-character-bottom: -24px;
+  --exploration-place-card-character-width-mobile: 128px;
+  --exploration-place-card-character-width-pc: 204.8px;
+  --exploration-place-card-character-width: var(--exploration-place-card-character-width-mobile);
+  --exploration-place-card-character-bottom-mobile: -24px;
+  --exploration-place-card-character-bottom-pc: -38.4px;
+  --exploration-place-card-character-bottom: var(--exploration-place-card-character-bottom-mobile);
   --exploration-place-card-sparkles-width: 146px;
   --exploration-place-card-sparkles-height: 132px;
   --exploration-place-card-sparkles-top: -10px;
@@ -492,8 +496,8 @@
     --exploration-place-card-message-padding-x: 12.8px;
     --exploration-place-card-title-font-size: 1.6rem;
     --exploration-place-card-title-line-height: 2.2rem;
-    --exploration-place-card-character-width: 204.8px;
-    --exploration-place-card-character-bottom: -38.4px;
+    --exploration-place-card-character-width: var(--exploration-place-card-character-width-pc);
+    --exploration-place-card-character-bottom: var(--exploration-place-card-character-bottom-pc);
     --exploration-place-card-sparkles-width: 233.6px;
     --exploration-place-card-sparkles-height: 211.2px;
     --exploration-place-card-sparkles-top: -16px;
