@@ -13,9 +13,37 @@
   --exploration-place-card-ink: #151716;
   --exploration-place-card-footer-bg: #ff8a68;
   --exploration-place-card-footer-ink: #1f1510;
+  --exploration-place-card-width: 184px;
+  --exploration-place-card-body-height: 302px;
+  --exploration-place-card-panel-min-height: 251px;
+  --exploration-place-card-image-size: 88px;
+  --exploration-place-card-body-margin: 4px 4px 0;
+  --exploration-place-card-body-padding: 6px;
+  --exploration-place-card-header-font-size: var(--sg-font-size-3);
+  --exploration-place-card-header-line-height: var(--sg-line-height-3);
+  --exploration-place-card-header-margin: 0 var(--sg-spacing-0_5) 9px;
+  --exploration-place-card-header-min-height: var(--sg-spacing-4);
+  --exploration-place-card-header-padding: 1px;
+  --exploration-place-card-header-offset-y: var(--sg-spacing-1);
+  --exploration-place-card-panel-frame-margin: 0 var(--sg-spacing-0_5);
+  --exploration-place-card-panel-frame-padding: 0.5px;
+  --exploration-place-card-panel-padding: 1px;
+  --exploration-place-card-panel-inner-padding: 3px;
+  --exploration-place-card-panel-padding-x: var(--sg-spacing-3);
+  --exploration-place-card-panel-padding-y: var(--sg-spacing-4);
+  --exploration-place-card-panel-padding-bottom: var(--sg-spacing-3);
+  --exploration-place-card-message-margin: var(--sg-spacing-0_5) 0 var(--sg-spacing-6);
+  --exploration-place-card-message-min-height: var(--sg-spacing-14);
+  --exploration-place-card-message-padding-x: var(--sg-spacing-2);
+  --exploration-place-card-title-font-size: var(--sg-font-size-5);
+  --exploration-place-card-title-line-height: var(--sg-line-height-5);
   --exploration-place-card-character-image: none;
   --exploration-place-card-character-width: 128px;
   --exploration-place-card-character-bottom: -24px;
+  --exploration-place-card-sparkles-width: 146px;
+  --exploration-place-card-sparkles-height: 132px;
+  --exploration-place-card-sparkles-top: -10px;
+  --exploration-place-card-sparkles-scale: 1;
   --exploration-place-card-frame-layer-1: color-mix(
     in srgb,
     var(--exploration-place-card-accent) 78%,
@@ -103,16 +131,16 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: min(184px, calc(100vw - var(--sg-spacing-8)));
+  width: min(var(--exploration-place-card-width), calc(100vw - var(--sg-spacing-8)));
 }
 
 .exploration-place-card-body {
   background: var(--exploration-place-card-ink);
   box-sizing: border-box;
   clip-path: var(--exploration-place-card-header-pixel-corners);
-  height: 302px;
-  margin: 4px 4px 0;
-  padding: 6px;
+  height: var(--exploration-place-card-body-height);
+  margin: var(--exploration-place-card-body-margin);
+  padding: var(--exploration-place-card-body-padding);
   position: relative;
 }
 
@@ -131,15 +159,15 @@
   clip-path: var(--exploration-place-card-header-pixel-corners);
   color: var(--exploration-place-card-header-ink);
   display: flex;
-  font-size: var(--sg-font-size-3);
+  font-size: var(--exploration-place-card-header-font-size);
   font-weight: var(--sg-font-weight-bold);
   justify-content: center;
-  line-height: var(--sg-line-height-3);
-  margin: 0 var(--sg-spacing-0_5) 9px;
-  min-height: var(--sg-spacing-4);
-  padding: 1px;
+  line-height: var(--exploration-place-card-header-line-height);
+  margin: var(--exploration-place-card-header-margin);
+  min-height: var(--exploration-place-card-header-min-height);
+  padding: var(--exploration-place-card-header-padding);
   position: relative;
-  top: var(--sg-spacing-1);
+  top: var(--exploration-place-card-header-offset-y);
   text-transform: uppercase;
   z-index: 1;
 }
@@ -186,9 +214,9 @@
   box-sizing: border-box;
   clip-path: var(--exploration-place-card-header-pixel-corners);
   display: flex;
-  margin: 0 var(--sg-spacing-0_5);
-  min-height: 251px;
-  padding: 0.5px;
+  margin: var(--exploration-place-card-panel-frame-margin);
+  min-height: var(--exploration-place-card-panel-min-height);
+  padding: var(--exploration-place-card-panel-frame-padding);
   position: relative;
   z-index: 1;
 }
@@ -200,7 +228,7 @@
   display: flex;
   flex: 1;
   min-width: 0;
-  padding: 1px;
+  padding: var(--exploration-place-card-panel-padding);
 }
 
 .exploration-place-card-panel-inner {
@@ -209,7 +237,7 @@
   display: flex;
   flex: 1;
   min-width: 0;
-  padding: 3px;
+  padding: var(--exploration-place-card-panel-inner-padding);
 }
 
 .exploration-place-card-panel-surface {
@@ -217,33 +245,34 @@
   clip-path: var(--exploration-place-card-header-pixel-corners);
   flex: 1;
   min-width: 0;
-  padding: var(--sg-spacing-4) var(--sg-spacing-3) var(--sg-spacing-3);
+  padding: var(--exploration-place-card-panel-padding-y)
+    var(--exploration-place-card-panel-padding-x) var(--exploration-place-card-panel-padding-bottom);
 }
 
 .exploration-place-card-message {
   align-items: center;
   display: flex;
   justify-content: center;
-  margin: var(--sg-spacing-0_5) 0 var(--sg-spacing-6);
-  min-height: var(--sg-spacing-14);
-  padding: 0 var(--sg-spacing-2);
+  margin: var(--exploration-place-card-message-margin);
+  min-height: var(--exploration-place-card-message-min-height);
+  padding: 0 var(--exploration-place-card-message-padding-x);
 }
 
 .exploration-place-card-message .AppText {
   color: var(--exploration-place-card-title-ink);
-  font-size: var(--sg-font-size-5);
+  font-size: var(--exploration-place-card-title-font-size);
   font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-5);
+  line-height: var(--exploration-place-card-title-line-height);
 }
 
 .exploration-place-card-image-frame {
   background: color-mix(in srgb, var(--exploration-place-card-panel-bg) 72%, #ffffff);
   border: 1px solid #ffffff;
-  height: 88px;
+  height: var(--exploration-place-card-image-size);
   outline: 1px solid #ffffff;
   overflow: hidden;
   position: relative;
-  width: 88px;
+  width: var(--exploration-place-card-image-size);
   z-index: 1;
 }
 
@@ -283,13 +312,13 @@
 }
 
 .exploration-place-card-sparkles {
-  height: 132px;
+  height: var(--exploration-place-card-sparkles-height);
   left: 50%;
   pointer-events: none;
   position: absolute;
-  top: -10px;
-  transform: translateX(-50%);
-  width: 146px;
+  top: var(--exploration-place-card-sparkles-top);
+  transform: translateX(-50%) scale(var(--exploration-place-card-sparkles-scale));
+  width: var(--exploration-place-card-sparkles-width);
   z-index: 0;
 }
 
@@ -435,4 +464,39 @@
   margin: 0 2px 2px;
   position: relative;
   z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .exploration-place-card {
+    --exploration-place-card-width: 294.4px;
+    --exploration-place-card-body-height: 483.2px;
+    --exploration-place-card-panel-min-height: 401.6px;
+    --exploration-place-card-image-size: 140.8px;
+    --exploration-place-card-body-margin: 6.4px 6.4px 0;
+    --exploration-place-card-body-padding: 9.6px;
+    --exploration-place-card-header-font-size: 1.3rem;
+    --exploration-place-card-header-line-height: 1.8rem;
+    --exploration-place-card-header-margin: 0 3.2px 14.4px;
+    --exploration-place-card-header-min-height: 25.6px;
+    --exploration-place-card-header-padding: 1.6px;
+    --exploration-place-card-header-offset-y: 6.4px;
+    --exploration-place-card-panel-frame-margin: 0 3.2px;
+    --exploration-place-card-panel-frame-padding: 0.8px;
+    --exploration-place-card-panel-padding: 1.6px;
+    --exploration-place-card-panel-inner-padding: 4.8px;
+    --exploration-place-card-panel-padding-x: 19.2px;
+    --exploration-place-card-panel-padding-y: 25.6px;
+    --exploration-place-card-panel-padding-bottom: 19.2px;
+    --exploration-place-card-message-margin: 3.2px 0 38.4px;
+    --exploration-place-card-message-min-height: 89.6px;
+    --exploration-place-card-message-padding-x: 12.8px;
+    --exploration-place-card-title-font-size: 1.6rem;
+    --exploration-place-card-title-line-height: 2.2rem;
+    --exploration-place-card-character-width: 204.8px;
+    --exploration-place-card-character-bottom: -38.4px;
+    --exploration-place-card-sparkles-width: 233.6px;
+    --exploration-place-card-sparkles-height: 211.2px;
+    --exploration-place-card-sparkles-top: -16px;
+    --exploration-place-card-sparkles-scale: 1.6;
+  }
 }
