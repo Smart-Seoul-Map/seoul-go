@@ -1,14 +1,32 @@
 import "@testing-library/jest-dom/vitest";
 
 import type { ReactElement } from "react";
-import { render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test } from "vitest";
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppToastProvider } from "@shared/ui/toast";
 
+import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
 import { ExplorationPage } from "./ExplorationPage";
+
+type MockExplorationMapProps = {
+  onPlaceMarkerClear?: () => void;
+  onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
+};
+
+const explorationMapMock = vi.hoisted(() => ({
+  latestProps: null as MockExplorationMapProps | null,
+}));
+
+vi.mock("./ExplorationMap", () => ({
+  ExplorationMap: (props: MockExplorationMapProps) => {
+    explorationMapMock.latestProps = props;
+
+    return <div data-testid="exploration-map" />;
+  },
+}));
 
 const themeProgressItems = [
   {
@@ -31,7 +49,9 @@ const themeProgressItems = [
 
 describe("ExplorationPage", () => {
   afterEach(() => {
+    cleanup();
     visitedPlaceStore.setState({ placeIds: [] });
+    explorationMapMock.latestProps = null;
   });
 
   test("지도 위에 테마별 장소 개수 배지를 표시한다", () => {
@@ -78,6 +98,25 @@ describe("ExplorationPage", () => {
     expect(screen.getByText("1/3")).toBeInTheDocument();
     expect(screen.getByText("1/2")).toBeInTheDocument();
   });
+
+  test("장소 카드가 열린 시점에 방문 장소 수를 반영한다", () => {
+    renderExplorationPage(
+      <ExplorationPage
+        placeMarkers={createPlaceMarkers()}
+        themeProgressItems={themeProgressItems}
+      />
+    );
+
+    expect(screen.getByText("0/3")).toBeInTheDocument();
+    expect(screen.getByText("0/2")).toBeInTheDocument();
+
+    act(() => {
+      explorationMapMock.latestProps?.onPlaceMarkerSelect?.(createPlaceMarkerSelection());
+    });
+
+    expect(screen.getByText("1/3")).toBeInTheDocument();
+    expect(screen.getByText("1/2")).toBeInTheDocument();
+  });
 });
 
 function renderExplorationPage(ui: ReactElement) {
@@ -105,5 +144,20 @@ function createPlaceMarkers(): MapMarkerFeatureCollection {
       },
     ],
     type: "FeatureCollection",
+  };
+}
+
+function createPlaceMarkerSelection(): ExplorationPlaceMarkerSelection {
+  return {
+    id: "place-1",
+    imageUrl: "",
+    markerColor: "#1971c2",
+    name: "place-1",
+    position: {
+      lat: 37.5,
+      lng: 126.9,
+    },
+    themeId: "night",
+    themeName: "Night",
   };
 }

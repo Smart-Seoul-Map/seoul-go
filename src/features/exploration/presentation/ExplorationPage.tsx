@@ -51,21 +51,19 @@ export function ExplorationPage({
   const selectedPlaceRef = useRef<ExplorationPlaceMarkerSelection | null>(null);
   const revealedPlaceIds = useMemo(() => new Set(visitedPlaceIds), [visitedPlaceIds]);
 
-  const selectPlace = useCallback((place: ExplorationPlaceMarkerSelection) => {
-    selectedPlaceRef.current = place;
-    setSelectedPlace(place);
-  }, []);
+  const selectPlace = useCallback(
+    (place: ExplorationPlaceMarkerSelection) => {
+      visitPlace(place.id);
+      selectedPlaceRef.current = place;
+      setSelectedPlace(place);
+    },
+    [visitPlace]
+  );
 
   const clearSelectedPlace = useCallback(() => {
-    const currentPlace = selectedPlaceRef.current;
-
-    if (currentPlace) {
-      visitPlace(currentPlace.id);
-    }
-
     selectedPlaceRef.current = null;
     setSelectedPlace(null);
-  }, [visitPlace]);
+  }, []);
 
   const displayedPlaceMarkers = useMemo(
     () => createRevealedPlaceMarkers({ placeMarkers, revealedPlaceIds }),
