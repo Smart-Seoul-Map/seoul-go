@@ -14,3 +14,6 @@ public/assets/generated/
 .wrangler/
 .DS_Store
 *.log
+
+*storybook.log
+storybook-static

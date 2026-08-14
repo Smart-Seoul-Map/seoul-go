@@ -1,11 +1,9 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 const fromRoot = (path) => resolve(fileURLToPath(new URL(".", import.meta.url)), path);
-
 const SMART_SEOUL_TILE_PROXY_PATH = "/api/smart-seoul-map";
 const SMART_SEOUL_TMS_TILE_BASE_PATH = "/tms";
 const SMART_SEOUL_TMS_MAP_ID = "dawul_kor_normal_3857_20260223";
@@ -18,11 +16,9 @@ const SMART_SEOUL_TMS_TILE_PATH_PATTERN = new RegExp(
 const rewriteSmartSeoulTileProxyPath = (path) => {
   const url = new URL(path, "http://localhost");
   const smartSeoulPath = url.pathname.slice(SMART_SEOUL_TILE_PROXY_PATH.length);
-
   if (SMART_SEOUL_TMS_TILE_PATH_PATTERN.test(smartSeoulPath)) {
     return smartSeoulPath;
   }
-
   return `${SMART_SEOUL_TMS_TILE_BASE_PATH}/invalid-smart-seoul-tile-request.png`;
 };
 
