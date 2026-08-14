@@ -29,7 +29,6 @@
     "build-storybook": "storybook build"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "latest",
     "@cloudflare/workers-types": "^4.20241112.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.61.1",
@@ -42,7 +41,6 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^5.1.0",
-    "@vitest/browser-playwright": "4.1.9",
     "@vitest/coverage-v8": "4.1.9",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
