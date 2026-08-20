@@ -2,8 +2,9 @@ import type { CSSProperties, ReactElement } from "react";
 
 import "./ExplorationPlaceCard.css";
 
+import { createExternalSearchLinks } from "@shared/lib/externalSearch/externalSearchUrl";
 import { AppButton } from "@shared/ui/button";
-import { AppVStack } from "@shared/ui/layout";
+import { AppInline, AppVStack } from "@shared/ui/layout";
 import { AppText } from "@shared/ui/typography";
 
 import { getExplorationPlaceCardPalette } from "../config/explorationPlaceCardPalette";
@@ -97,6 +98,23 @@ export function ExplorationPlaceCard({
         >
           스탬프 코스 +
         </AppButton>
+      </div>
+      {/* url 연동 확인을 위한 임시 코드 */}
+      <div className="exploration-place-card-footer">
+        <AppInline gap="xs">
+          {createExternalSearchLinks(place.name).map((link) => (
+            <a
+              key={link.providerId}
+              href={link.url}
+              onClick={(event) => event.stopPropagation()}
+              rel="noopener noreferrer"
+              style={{ color: "inherit" }}
+              target="_blank"
+            >
+              {link.label}
+            </a>
+          ))}
+        </AppInline>
       </div>
     </article>
   );
