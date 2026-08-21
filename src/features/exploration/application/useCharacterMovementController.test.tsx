@@ -14,6 +14,10 @@ const interpolate = (from: Point, to: Point, ratio: number): Point => ({
   x: from.x + (to.x - from.x) * ratio,
   y: from.y + (to.y - from.y) * ratio,
 });
+const advanceByDirection = (position: Point, direction: Point, distance: number): Point => ({
+  x: position.x + direction.x * distance,
+  y: position.y + direction.y * distance,
+});
 
 function createControllerOptions(overrides = {}) {
   return {
@@ -97,5 +101,84 @@ describe("useCharacterMovementController", () => {
         status: "arrived",
       })
     );
+  });
+
+  test("moves continuously in a direction until stopped", () => {
+    const onFrame = vi.fn();
+    const { result } = renderHook(() =>
+      useCharacterMovementController(createControllerOptions({ onFrame }))
+    );
+
+    act(() => {
+      result.current.moveInDirection({
+        advancePosition: advanceByDirection,
+        direction: { x: 1, y: 0 },
+      });
+    });
+    act(() => {
+      frameCallbacks.shift()?.(0);
+      frameCallbacks.shift()?.(1000);
+    });
+
+    expect(result.current.getCurrentPosition()).toEqual({ x: 5, y: 0 });
+    expect(result.current.modelKey).toBe("run");
+    expect(onFrame).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        movementType: "direction",
+        position: { x: 5, y: 0 },
+        status: "moving",
+      })
+    );
+
+    act(() => {
+      result.current.stop();
+    });
+
+    expect(result.current.getCurrentPosition()).toEqual({ x: 5, y: 0 });
+    expect(result.current.modelKey).toBe("idlePrimary");
+  });
+
+  test("direction movement replaces a clicked target", () => {
+    const onFrame = vi.fn();
+    const { result } = renderHook(() =>
+      useCharacterMovementController(createControllerOptions({ onFrame }))
+    );
+
+    act(() => {
+      result.current.moveTo({ x: 10, y: 0 });
+      result.current.moveInDirection({
+        advancePosition: advanceByDirection,
+        direction: { x: 0, y: 1 },
+      });
+    });
+    act(() => {
+      frameCallbacks.shift()?.(0);
+      frameCallbacks.shift()?.(1000);
+    });
+
+    expect(result.current.getCurrentPosition()).toEqual({ x: 0, y: 5 });
+    expect(onFrame).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        movementType: "direction",
+        position: { x: 0, y: 5 },
+      })
+    );
+  });
+
+  test("uses direction magnitude as continuous movement strength", () => {
+    const { result } = renderHook(() => useCharacterMovementController(createControllerOptions()));
+
+    act(() => {
+      result.current.moveInDirection({
+        advancePosition: advanceByDirection,
+        direction: { x: 0.5, y: 0 },
+      });
+    });
+    act(() => {
+      frameCallbacks.shift()?.(0);
+      frameCallbacks.shift()?.(1000);
+    });
+
+    expect(result.current.getCurrentPosition()).toEqual({ x: 2.5, y: 0 });
   });
 });
