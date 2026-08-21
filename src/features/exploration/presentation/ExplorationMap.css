@@ -29,8 +29,21 @@
   z-index: 4;
 }
 
+.app-virtual-joystick.exploration-map-joystick {
+  bottom: var(--sg-spacing-6);
+  display: none;
+  left: 50%; /* 왼쪽 50% 지점으로 이동 */
+  transform: translateX(-50%);
+  position: absolute;
+  z-index: 5;
+}
+
 @media (max-width: 860px) {
   .map-canvas-stack {
     min-height: 100vh;
+  }
+
+  .app-virtual-joystick.exploration-map-joystick {
+    display: flex;
   }
 }

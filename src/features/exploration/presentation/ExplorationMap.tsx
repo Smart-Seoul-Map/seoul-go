@@ -1,12 +1,15 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./ExplorationMap.css";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import type { ReactElement } from "react";
 
+import type { CharacterDirection } from "@shared/lib/character/characterDirection";
+import { useKeyboardCharacterDirection } from "@shared/lib/character/useKeyboardCharacterDirection";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+import { AppVirtualJoystick } from "@shared/ui/virtual-joystick";
 
 import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
@@ -29,6 +32,7 @@ import {
   resolveExplorationMapTileSourceConfig,
 } from "../config/explorationMapConfig";
 import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
+import { advanceCoordinatesByScreenDirection } from "../domain/explorationDirectionalMovement";
 import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
@@ -110,6 +114,35 @@ export function ExplorationMap({
   });
   const characterMovementRef = useRef(characterMovement);
   characterMovementRef.current = characterMovement;
+
+  const handleCharacterDirectionChange = useCallback((direction: CharacterDirection) => {
+    if (hasActivePlaceCardRef.current || (direction.x === 0 && direction.y === 0)) {
+      characterMovementRef.current.stop();
+      return;
+    }
+
+    characterMovementRef.current.moveInDirection({
+      advancePosition: (position, nextDirection, distance) =>
+        advanceCoordinatesByScreenDirection(
+          position,
+          nextDirection,
+          distance,
+          EXPLORATION_MAP_BEARING
+        ),
+      direction,
+    });
+  }, []);
+
+  useKeyboardCharacterDirection({
+    disabled: hasActivePlaceCard,
+    onDirectionChange: handleCharacterDirectionChange,
+  });
+
+  useEffect(() => {
+    if (hasActivePlaceCard) {
+      characterMovementRef.current.stop();
+    }
+  }, [hasActivePlaceCard]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -193,6 +226,12 @@ export function ExplorationMap({
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
         modelKey={characterMovement.modelKey}
+      />
+      <AppVirtualJoystick
+        ariaLabel="캐릭터 이동"
+        className="exploration-map-joystick"
+        disabled={hasActivePlaceCard}
+        onDirectionChange={handleCharacterDirectionChange}
       />
     </div>
   );

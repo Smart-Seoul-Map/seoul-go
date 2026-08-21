@@ -1,5 +1,5 @@
-import { act, render } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { act, cleanup, render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
@@ -24,8 +24,14 @@ const maplibreMock = vi.hoisted(() => ({
 }));
 
 const characterMovementMock = vi.hoisted(() => ({
+  moveInDirection: vi.fn(),
   moveTo: vi.fn(),
   stop: vi.fn(),
+}));
+
+const keyboardDirectionMock = vi.hoisted(() => ({
+  disabled: false,
+  onDirectionChange: null as ((direction: { x: number; y: number }) => void) | null,
 }));
 
 const placeMarkerLayerMock = vi.hoisted(() => ({
@@ -113,9 +119,40 @@ vi.mock("../application/useCharacterMovementController", () => ({
     getIsMoving: vi.fn(),
     headingRadians: 0,
     modelKey: "idlePrimary",
+    moveInDirection: characterMovementMock.moveInDirection,
     moveTo: characterMovementMock.moveTo,
     stop: characterMovementMock.stop,
   }),
+}));
+
+vi.mock("@shared/lib/character/useKeyboardCharacterDirection", () => ({
+  useKeyboardCharacterDirection: ({
+    disabled,
+    onDirectionChange,
+  }: {
+    disabled: boolean;
+    onDirectionChange: (direction: { x: number; y: number }) => void;
+  }) => {
+    keyboardDirectionMock.disabled = disabled;
+    keyboardDirectionMock.onDirectionChange = onDirectionChange;
+  },
+}));
+
+vi.mock("@shared/ui/virtual-joystick", () => ({
+  AppVirtualJoystick: ({
+    disabled,
+    onDirectionChange,
+  }: {
+    disabled: boolean;
+    onDirectionChange: (direction: { x: number; y: number }) => void;
+  }) => (
+    <button
+      data-disabled={disabled}
+      data-testid="exploration-map-joystick"
+      onClick={() => onDirectionChange({ x: 1, y: 0 })}
+      type="button"
+    />
+  ),
 }));
 
 function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
@@ -138,6 +175,14 @@ function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
     type: "FeatureCollection",
   } as MapMarkerFeatureCollection;
 }
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  keyboardDirectionMock.disabled = false;
+  keyboardDirectionMock.onDirectionChange = null;
+});
+
+afterEach(cleanup);
 
 describe("ExplorationMap", () => {
   test("passes the latest place markers to the marker layer setup", () => {
@@ -194,5 +239,38 @@ describe("ExplorationMap", () => {
       lat: 37.532326,
       lng: 126.990703,
     });
+  });
+
+  test("starts directional movement from keyboard input", () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    render(<ExplorationMap />);
+
+    act(() => {
+      keyboardDirectionMock.onDirectionChange?.({ x: 1, y: 0 });
+    });
+
+    expect(characterMovementMock.moveInDirection).toHaveBeenCalledWith(
+      expect.objectContaining({ direction: { x: 1, y: 0 } })
+    );
+  });
+
+  test("stops directional movement when keyboard input returns to idle", () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    render(<ExplorationMap />);
+
+    act(() => {
+      keyboardDirectionMock.onDirectionChange?.({ x: 0, y: 0 });
+    });
+
+    expect(characterMovementMock.stop).toHaveBeenCalled();
+  });
+
+  test("disables keyboard and joystick input while a place card is active", () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    const { getByTestId } = render(<ExplorationMap hasActivePlaceCard />);
+
+    expect(keyboardDirectionMock.disabled).toBe(true);
+    expect(getByTestId("exploration-map-joystick").getAttribute("data-disabled")).toBe("true");
+    expect(characterMovementMock.stop).toHaveBeenCalled();
   });
 });
