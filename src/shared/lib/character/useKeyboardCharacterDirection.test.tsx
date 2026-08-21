@@ -1,15 +1,22 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { useKeyboardCharacterDirection } from "./useKeyboardCharacterDirection";
 
 function dispatchKeyboardEvent(type: "keydown" | "keyup", key: string, target?: Element): void {
   const event = new KeyboardEvent(type, { bubbles: true, cancelable: true, key });
-
   (target ?? window).dispatchEvent(event);
 }
 
 describe("useKeyboardCharacterDirection", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   test("combines WASD keys into a normalized direction and stops after release", () => {
     const onDirectionChange = vi.fn();
 
@@ -18,6 +25,8 @@ describe("useKeyboardCharacterDirection", () => {
     act(() => {
       dispatchKeyboardEvent("keydown", "w");
       dispatchKeyboardEvent("keydown", "d");
+      // requestAnimationFrame 실행을 위해 틱 진행
+      vi.advanceTimersByTime(16);
     });
 
     const diagonalDirection = onDirectionChange.mock.lastCall?.[0];
@@ -39,6 +48,7 @@ describe("useKeyboardCharacterDirection", () => {
 
     act(() => {
       dispatchKeyboardEvent("keydown", "ArrowLeft");
+      vi.advanceTimersByTime(16);
     });
 
     expect(onDirectionChange).toHaveBeenLastCalledWith({ x: -1, y: 0 });
@@ -53,6 +63,7 @@ describe("useKeyboardCharacterDirection", () => {
 
     act(() => {
       dispatchKeyboardEvent("keydown", "w", input);
+      vi.advanceTimersByTime(16);
     });
 
     expect(onDirectionChange).not.toHaveBeenCalled();
@@ -68,8 +79,12 @@ describe("useKeyboardCharacterDirection", () => {
 
     act(() => {
       dispatchKeyboardEvent("keydown", "w");
+      vi.advanceTimersByTime(16);
     });
-    rerender({ disabled: true });
+
+    act(() => {
+      rerender({ disabled: true });
+    });
 
     expect(onDirectionChange).toHaveBeenLastCalledWith({ x: 0, y: 0 });
   });
