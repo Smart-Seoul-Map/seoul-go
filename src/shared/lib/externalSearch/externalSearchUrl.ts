@@ -1,14 +1,13 @@
 import {
   EXTERNAL_SEARCH_PROVIDER_IDS,
   EXTERNAL_SEARCH_PROVIDERS,
-  EXTERNAL_SEARCH_QUERY_PLACEHOLDER,
 } from "@shared/constants/externalSearch";
 import type {
   ExternalSearchProvider,
   ExternalSearchProviderId,
 } from "@shared/constants/externalSearch";
 
-const SECURE_NEW_TAB_WINDOW_FEATURES = "noopener,noreferrer";
+const NEW_TAB_TARGET = "_blank";
 
 export type ExternalSearchLink = {
   providerId: ExternalSearchProviderId;
@@ -32,10 +31,12 @@ export function buildExternalSearchUrl(
     return "";
   }
 
-  return getExternalSearchProvider(providerId).searchUrlTemplate.replace(
-    EXTERNAL_SEARCH_QUERY_PLACEHOLDER,
-    encodeURIComponent(keyword)
-  );
+  const { searchUrl, queryParam } = getExternalSearchProvider(providerId);
+  const url = new URL(searchUrl);
+
+  url.searchParams.set(queryParam, keyword);
+
+  return url.toString();
 }
 
 export function createExternalSearchLinks(
@@ -51,14 +52,16 @@ export function createExternalSearchLinks(
     .filter((link) => link.url !== "");
 }
 
-export function openExternalSearch(providerId: ExternalSearchProviderId, query: string): boolean {
+export function openExternalSearch(providerId: ExternalSearchProviderId, query: string): void {
   const url = buildExternalSearchUrl(providerId, query);
 
   if (!url) {
-    return false;
+    return;
   }
 
-  window.open(url, "_blank", SECURE_NEW_TAB_WINDOW_FEATURES);
+  const openedWindow = window.open(url, NEW_TAB_TARGET);
 
-  return true;
+  if (openedWindow) {
+    openedWindow.opener = null;
+  }
 }
