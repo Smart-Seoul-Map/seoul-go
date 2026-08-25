@@ -13,6 +13,8 @@ import {
 import {
   EXPLORATION_MAP_BEARING,
   EXPLORATION_MAP_CENTER,
+  EXPLORATION_MAP_MAX_ZOOM,
+  EXPLORATION_MAP_MIN_ZOOM,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
 import { createExplorationMapOptions } from "./explorationMapCreation";
@@ -31,11 +33,37 @@ describe("createExplorationMapOptions", () => {
       bearing: EXPLORATION_MAP_BEARING,
       center: EXPLORATION_MAP_CENTER,
       container,
-      maxZoom: SMART_SEOUL_TMS_MAX_ZOOM,
-      minZoom: SMART_SEOUL_TMS_MIN_ZOOM,
+      maxZoom: EXPLORATION_MAP_MAX_ZOOM,
+      minZoom: EXPLORATION_MAP_MIN_ZOOM,
       pitch: EXPLORATION_MAP_PITCH,
       zoom: SMART_SEOUL_TMS_INITIAL_ZOOM,
     });
+  });
+
+  it("only allows zooming out from the default level", () => {
+    const options = createExplorationMapOptions({
+      container: document.createElement("div"),
+      tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
+    });
+
+    expect(options.maxZoom).toBe(options.zoom);
+    expect(options.minZoom).toBe(14);
+  });
+
+  it("turns off the inputs that produce zoom levels between the control button steps", () => {
+    const options = createExplorationMapOptions({
+      container: document.createElement("div"),
+      tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
+    });
+
+    expect(options.doubleClickZoom).toBe(false);
+    expect(options.scrollZoom).toBe(false);
+    expect(options.touchZoomRotate).toBe(false);
+  });
+
+  it("keeps the interaction zoom range inside the tile source zoom range", () => {
+    expect(EXPLORATION_MAP_MIN_ZOOM).toBeGreaterThanOrEqual(SMART_SEOUL_TMS_MIN_ZOOM);
+    expect(EXPLORATION_MAP_MAX_ZOOM).toBeLessThanOrEqual(SMART_SEOUL_TMS_MAX_ZOOM);
   });
 
   it("uses custom center when it is provided", () => {
