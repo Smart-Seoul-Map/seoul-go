@@ -17,6 +17,9 @@ import {
   type CharacterModelKey,
 } from "../config/explorationCharacterModels";
 
+const MODEL_TARGET_SIZE = 0.86;
+const MODEL_OFFSET_Y = -0.2;
+
 interface CharacterModelOverlayProps {
   headingRadians: number;
   modelKey: CharacterModelKey;
@@ -114,9 +117,11 @@ export function CharacterModelOverlay({
       const size = new THREE.Vector3();
       box.getSize(size);
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
-      model.scale.setScalar(0.86 / maxAxis);
-      model.position.set(0, -0.2, 0);
+      const modelScale = MODEL_TARGET_SIZE / maxAxis;
+      model.scale.setScalar(modelScale);
+      model.position.set(0, MODEL_OFFSET_Y, 0);
       model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
+      camera.lookAt(0, box.min.y * modelScale + MODEL_OFFSET_Y, 0);
 
       modelRef.current = model;
       scene.add(model);
