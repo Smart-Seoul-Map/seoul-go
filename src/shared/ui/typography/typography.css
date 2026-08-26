@@ -56,18 +56,21 @@
 }
 
 .AppText[data-role="body"] {
+  font-family: var(--sg-typography-body-font-family);
   font-size: var(--sg-typography-body-font-size);
   font-weight: var(--sg-typography-body-font-weight);
   line-height: var(--sg-typography-body-line-height);
 }
 
 .AppText[data-role="supporting"] {
+  font-family: var(--sg-typography-supporting-font-family);
   font-size: var(--sg-typography-supporting-font-size);
   font-weight: var(--sg-typography-supporting-font-weight);
   line-height: var(--sg-typography-supporting-line-height);
 }
 
 .AppText[data-role="dialogBody"] {
+  font-family: var(--sg-typography-dialog-body-font-family);
   font-size: var(--sg-typography-dialog-body-font-size);
   font-weight: var(--sg-typography-dialog-body-font-weight);
   line-height: var(--sg-typography-dialog-body-line-height);
@@ -78,21 +81,25 @@
 }
 
 .AppHeading[data-size="sm"] {
+  font-family: var(--sg-typography-supporting-font-family);
   font-size: var(--sg-font-size-6);
   line-height: var(--sg-line-height-6);
 }
 
 .AppHeading[data-size="md"] {
+  font-family: var(--sg-typography-dialog-title-font-family);
   font-size: var(--sg-typography-dialog-title-font-size);
   line-height: var(--sg-typography-dialog-title-line-height);
 }
 
 .AppHeading[data-size="lg"] {
+  font-family: var(--sg-typography-result-title-font-family);
   font-size: var(--sg-typography-result-title-font-size);
   line-height: var(--sg-typography-result-title-line-height);
 }
 
 .AppCaption {
+  font-family: var(--sg-typography-caption-font-family);
   font-size: var(--sg-typography-caption-font-size);
   font-weight: var(--sg-typography-caption-font-weight);
   line-height: var(--sg-typography-caption-line-height);
