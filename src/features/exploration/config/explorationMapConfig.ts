@@ -9,8 +9,8 @@ type ExplorationMapTileSourceConfig = {
 };
 
 export const EXPLORATION_MAP_CENTER: [number, number] = [126.899384, 37.576672];
-export const EXPLORATION_MAP_MIN_ZOOM = 14;
-export const EXPLORATION_MAP_MAX_ZOOM = 16;
+export const EXPLORATION_MAP_MIN_ZOOM = 15;
+export const EXPLORATION_MAP_MAX_ZOOM = 17;
 export const EXPLORATION_MAP_PITCH = 40;
 export const EXPLORATION_MAP_BEARING = -28;
 export const CHARACTER_ARRIVAL_RADIUS_METERS = 25;

@@ -40,24 +40,27 @@ describe("createExplorationMapOptions", () => {
     });
   });
 
-  it("only allows zooming out from the default level", () => {
+  it("leaves room to zoom both in and out from the default level", () => {
     const options = createExplorationMapOptions({
       container: document.createElement("div"),
       tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
     });
 
-    expect(options.maxZoom).toBe(options.zoom);
-    expect(options.minZoom).toBe(14);
+    expect(options.minZoom).toBeLessThan(SMART_SEOUL_TMS_INITIAL_ZOOM);
+    expect(options.maxZoom).toBeGreaterThan(SMART_SEOUL_TMS_INITIAL_ZOOM);
   });
 
-  it("turns off the inputs that produce zoom levels between the control button steps", () => {
+  it("keeps every zoom input on whole levels", () => {
     const options = createExplorationMapOptions({
       container: document.createElement("div"),
       tileUrlTemplate: SMART_SEOUL_TMS_TILE_URL_TEMPLATE,
     });
 
+    const zoomSnap = options.zoomSnap ?? 0;
+
+    expect(zoomSnap).toBeGreaterThan(0);
+    expect(((options.maxZoom ?? 0) - (options.minZoom ?? 0)) % zoomSnap).toBeCloseTo(0);
     expect(options.doubleClickZoom).toBe(false);
-    expect(options.scrollZoom).toBe(false);
     expect(options.touchZoomRotate).toBe(false);
   });
 

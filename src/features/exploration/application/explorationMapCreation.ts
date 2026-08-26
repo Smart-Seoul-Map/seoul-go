@@ -29,12 +29,13 @@ export function createExplorationMapOptions({
     center: center ? [center.lng, center.lat] : EXPLORATION_MAP_CENTER,
     container,
     doubleClickZoom: false,
+    keyboard: false,
     maxZoom: EXPLORATION_MAP_MAX_ZOOM,
     minZoom: EXPLORATION_MAP_MIN_ZOOM,
     pitch: EXPLORATION_MAP_PITCH,
-    scrollZoom: false,
     style: buildRasterMapStyle(tileUrlTemplate),
     touchZoomRotate: false,
     zoom: SMART_SEOUL_TMS_INITIAL_ZOOM,
+    zoomSnap: 1,
   };
 }

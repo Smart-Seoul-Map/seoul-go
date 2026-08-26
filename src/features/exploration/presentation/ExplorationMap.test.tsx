@@ -61,6 +61,7 @@ vi.mock("maplibre-gl", () => {
     getLayer = vi.fn(() => false);
     getZoom = vi.fn(() => 12);
     isStyleLoaded = vi.fn(() => false);
+    isZooming = vi.fn(() => false);
     jumpTo = vi.fn();
     off = vi.fn();
     once = vi.fn((eventName: string, handler: MapEventHandler) => {
@@ -107,6 +108,7 @@ vi.mock("./CharacterModelOverlay", () => ({
 
 vi.mock("../application/explorationMapInteractions", () => ({
   disableExplorationMapDragInteractions: vi.fn(),
+  setExplorationMapZoomEnabled: vi.fn(),
 }));
 
 vi.mock("../application/explorationPlaceMarkers", () => placeMarkerLayerMock);

@@ -11,7 +11,10 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppVirtualJoystick } from "@shared/ui/virtual-joystick";
 
-import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
+import {
+  disableExplorationMapDragInteractions,
+  setExplorationMapZoomEnabled,
+} from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
@@ -145,6 +148,14 @@ export function ExplorationMap({
   }, [hasActivePlaceCard]);
 
   useEffect(() => {
+    const map = mapRef.current;
+
+    if (map) {
+      setExplorationMapZoomEnabled(map, characterMovement.modelKey !== "run");
+    }
+  }, [characterMovement.modelKey]);
+
+  useEffect(() => {
     const container = containerRef.current;
 
     if (!container || typeof WebGLRenderingContext === "undefined") {
@@ -165,6 +176,7 @@ export function ExplorationMap({
     mapRef.current = map;
 
     disableExplorationMapDragInteractions(map);
+    setExplorationMapZoomEnabled(map, !characterMovementRef.current.getIsMoving());
     map.addControl(
       new maplibregl.NavigationControl({ showZoom: true, visualizePitch: true }),
       "top-right"
