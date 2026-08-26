@@ -11,7 +11,9 @@ body {
 body {
   color: var(--sg-color-text-default);
   background: var(--sg-color-bg-page);
-  font-family: "Galmuri11", "Galmuri9", "DotGothic16", monospace;
+  font-family: var(--sg-typography-body-font-family);
+  font-size: var(--sg-typography-body-font-size);
+  line-height: var(--sg-typography-body-line-height);
 }
 
 #app,

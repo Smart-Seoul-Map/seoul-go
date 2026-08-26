@@ -1,31 +1,53 @@
-/*
- * 서울고 디자인 토큰
- */
-
 :root {
+  /* Typography - Font Families*/
+  --sg-font-namsan:
+    "SeoulNamsan", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  --sg-font-alrim:
+    "SeoulAlrim", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  --sg-font-hangang:
+    "SeoulHangang", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+
+  /* Primitive Colors  */
+  --sg-v3-pink-500: #ff2e94;
+  --sg-v3-pink-600: #e61f82;
+  --sg-v3-pink-100: #fff0f7;
+
+  --sg-v3-blue-500: #08b2f0;
+  --sg-v3-blue-600: #0082ff;
+
+  --sg-v3-green-500: #00c46e;
+  --sg-v3-yellow-500: #ffc91f;
+
+  --sg-v3-ink-900: #1b1c21;
+  --sg-v3-ink-700: #24262b;
+  --sg-v3-ink-500: #575c66;
+
+  --sg-v3-paper-50: #fffff0;
+  --sg-v3-paper-100: #f9f0e6;
+
   /* Color - text */
-  --sg-color-text-default: #1a1c20;
-  --sg-color-text-muted: #555d6d;
+  --sg-color-text-default: var(--sg-v3-ink-900);
+  --sg-color-text-muted: var(--sg-v3-ink-500);
   --sg-color-text-subtle: #868b94;
   --sg-color-text-inverted: #ffffff;
   --sg-color-text-disabled: #d1d3d8;
   --sg-color-text-placeholder: #b0b3ba;
-  --sg-color-text-brand: #ff6600;
+  --sg-color-text-brand: var(--sg-v3-pink-500);
   --sg-color-text-danger: #fa342c;
-  --sg-color-text-info: #217cf9;
-  --sg-color-text-positive: #079171;
-  --sg-color-text-warning: #9b7821;
+  --sg-color-text-info: var(--sg-v3-blue-500);
+  --sg-color-text-positive: var(--sg-v3-green-500);
+  --sg-color-text-warning: var(--sg-v3-yellow-500);
 
   /* Color - background */
-  --sg-color-bg-page: #f3f4f5;
-  --sg-color-bg-surface: #ffffff;
-  --sg-color-bg-surface-pressed: #f7f8f9;
+  --sg-color-bg-page: var(--sg-v3-paper-100);
+  --sg-color-bg-surface: var(--sg-v3-paper-50);
+  --sg-color-bg-surface-pressed: #f0e6dc;
   --sg-color-bg-floating: #ffffff;
   --sg-color-bg-floating-pressed: #f7f8f9;
-  --sg-color-bg-brand: #ff6600;
-  --sg-color-bg-brand-pressed: #e14d00;
-  --sg-color-bg-brand-weak: #fff2ec;
-  --sg-color-bg-neutral-strong: #1a1c20;
+  --sg-color-bg-brand: var(--sg-v3-pink-500);
+  --sg-color-bg-brand-pressed: var(--sg-v3-pink-600);
+  --sg-color-bg-brand-weak: var(--sg-v3-pink-100);
+  --sg-color-bg-neutral-strong: var(--sg-v3-ink-900);
   --sg-color-bg-neutral-weak: #f3f4f5;
   --sg-color-bg-neutral-weak-pressed: #eeeff1;
   --sg-color-bg-disabled: #f3f4f5;
@@ -40,12 +62,12 @@
   --sg-color-stroke-default: #00000010;
   --sg-color-stroke-subtle: #0000000c;
   --sg-color-stroke-weak: #dcdee3;
-  --sg-color-stroke-strong: #555d6d;
-  --sg-color-stroke-brand: #e14d00;
+  --sg-color-stroke-strong: var(--sg-v3-ink-500);
+  --sg-color-stroke-brand: var(--sg-v3-pink-600);
   --sg-color-stroke-brand-weak: #ffd5c0;
   --sg-color-stroke-danger: #fa342c;
   --sg-color-stroke-danger-weak: #fed4d2;
-  --sg-color-stroke-focus: #5e98fe;
+  --sg-color-stroke-focus: var(--sg-v3-blue-600);
 
   /* Color - state */
   --sg-state-focus-ring: var(--sg-color-stroke-focus);
@@ -77,7 +99,9 @@
   --sg-spacing-4: 16px;
   --sg-spacing-4_5: 18px;
   --sg-spacing-5: 20px;
+  --sg-spacing-5_5: 22px;
   --sg-spacing-6: 24px;
+  --sg-spacing-6_5: 26px;
   --sg-spacing-7: 28px;
   --sg-spacing-8: 32px;
   --sg-spacing-9: 36px;
@@ -171,24 +195,37 @@
   --sg-font-weight-bold: 700;
 
   /* Typography - semantic roles */
+  --sg-typography-body-font-family: var(--sg-font-namsan);
   --sg-typography-body-font-size: var(--sg-font-size-5);
   --sg-typography-body-line-height: var(--sg-line-height-5);
   --sg-typography-body-font-weight: var(--sg-font-weight-regular);
+
+  --sg-typography-supporting-font-family: var(--sg-font-namsan);
   --sg-typography-supporting-font-size: var(--sg-font-size-4);
   --sg-typography-supporting-line-height: var(--sg-line-height-4);
   --sg-typography-supporting-font-weight: var(--sg-font-weight-regular);
+
+  --sg-typography-caption-font-family: var(--sg-font-hangang);
   --sg-typography-caption-font-size: var(--sg-font-size-3);
   --sg-typography-caption-line-height: var(--sg-line-height-3);
   --sg-typography-caption-font-weight: var(--sg-font-weight-regular);
+
+  --sg-typography-button-label-font-family: var(--sg-font-namsan);
   --sg-typography-button-label-font-size: var(--sg-font-size-4);
   --sg-typography-button-label-line-height: var(--sg-line-height-4);
   --sg-typography-button-label-font-weight: var(--sg-font-weight-bold);
+
+  --sg-typography-dialog-title-font-family: var(--sg-font-alrim);
   --sg-typography-dialog-title-font-size: var(--sg-font-size-7);
   --sg-typography-dialog-title-line-height: var(--sg-line-height-7);
   --sg-typography-dialog-title-font-weight: var(--sg-font-weight-bold);
+
+  --sg-typography-dialog-body-font-family: var(--sg-font-namsan);
   --sg-typography-dialog-body-font-size: var(--sg-font-size-5);
   --sg-typography-dialog-body-line-height: var(--sg-line-height-5);
   --sg-typography-dialog-body-font-weight: var(--sg-font-weight-regular);
+
+  --sg-typography-result-title-font-family: var(--sg-font-alrim);
   --sg-typography-result-title-font-size: var(--sg-font-size-8);
   --sg-typography-result-title-line-height: var(--sg-line-height-8);
   --sg-typography-result-title-font-weight: var(--sg-font-weight-bold);
@@ -246,42 +283,14 @@
   --sg-badge-info-fg: var(--sg-color-text-info);
   --sg-badge-warning-fg: var(--sg-color-text-warning);
   --sg-badge-positive-fg: var(--sg-color-text-positive);
-  --sg-badge-font-size: var(--sg-font-size-4);
-  --sg-badge-line-height: var(--sg-line-height-4);
-  --sg-badge-font-weight: var(--sg-font-weight-medium);
   --sg-badge-radius: var(--sg-pill-radius);
   --sg-badge-shadow: var(--sg-panel-shadow);
-  --sg-badge-height-md: var(--sg-spacing-9);
-  --sg-badge-height-lg: var(--sg-spacing-10);
+  --sg-badge-height-md: var(--sg-icon-button-size-nav);
+  --sg-badge-height-lg: var(--sg-spacing-13);
   --sg-badge-padding-x-md: var(--sg-spacing-5);
   --sg-badge-padding-x-lg: var(--sg-spacing-6);
   --sg-badge-gap: var(--sg-spacing-2);
   --sg-badge-dot-size: var(--sg-spacing-3_5);
-
-  /* Toast component tokens */
-  --sg-toast-bg: var(--sg-color-bg-neutral-strong);
-  --sg-toast-fg: var(--sg-color-text-inverted);
-  --sg-toast-success-accent: var(--sg-state-positive-fg);
-  --sg-toast-error-accent: var(--sg-state-danger-fg);
-  --sg-toast-radius: var(--sg-radius-2);
-  --sg-toast-shadow: var(--sg-panel-shadow);
-  --sg-toast-min-height: 44px;
-  --sg-toast-min-width: 280px;
-  --sg-toast-max-width: 560px;
-  --sg-toast-padding-x: var(--sg-spacing-2_5);
-  --sg-toast-padding-y: var(--sg-spacing-2_5);
-  --sg-toast-content-gap: var(--sg-spacing-2_5);
-  --sg-toast-viewport-bottom: var(--sg-spacing-4);
-  --sg-toast-viewport-padding-x: var(--sg-spacing-2);
-  --sg-toast-z-index: 1100;
-  --sg-toast-accent-width: var(--sg-spacing-1);
-  --sg-toast-message-font-size: var(--sg-font-size-4);
-  --sg-toast-message-line-height: var(--sg-line-height-4);
-  --sg-toast-message-font-weight: var(--sg-font-weight-regular);
-  --sg-toast-enter-duration: var(--sg-motion-duration-3);
-  --sg-toast-enter-easing: var(--sg-motion-easing-enter);
-  --sg-toast-enter-scale: 0.8;
-  --sg-toast-enter-offset-y: var(--sg-spacing-2);
 
   /* Dialog component tokens */
   --sg-dialog-backdrop-bg: var(--sg-color-bg-overlay);
