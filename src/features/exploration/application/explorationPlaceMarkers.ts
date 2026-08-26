@@ -1,14 +1,23 @@
-import type { GeoJSONSource, Map as MapLibreMap, SymbolLayerSpecification } from "maplibre-gl";
+import type {
+  DataDrivenPropertyValueSpecification,
+  GeoJSONSource,
+  Map as MapLibreMap,
+  SymbolLayerSpecification,
+} from "maplibre-gl";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 
+import { EXPLORATION_MAP_MAX_ZOOM, EXPLORATION_MAP_MIN_ZOOM } from "../config/explorationMapConfig";
 import {
   EXPLORATION_PLACE_MARKER_ICON_SIZE,
   EXPLORATION_PLACE_MARKER_IMAGES,
   EXPLORATION_PLACE_MARKERS_LAYER_ID,
   EXPLORATION_PLACE_MARKERS_SOURCE_ID,
 } from "../config/explorationPlaceMarkerLayer";
+import { calculateZoomScaleRatio } from "../domain/explorationZoomScale";
+
+const ICON_SIZE_STOP_ZOOM_HEADROOM = 1;
 
 type PlaceMarkersLayerMap = Pick<
   MapLibreMap,
@@ -45,6 +54,24 @@ export type ExplorationPlaceMarkerSelection = {
   themeName: string;
 };
 
+function createPlaceMarkerIconSizeStop(zoomLevel: number): number[] {
+  return [
+    zoomLevel,
+    EXPLORATION_PLACE_MARKER_ICON_SIZE *
+      calculateZoomScaleRatio(zoomLevel, EXPLORATION_MAP_MAX_ZOOM),
+  ];
+}
+
+function createPlaceMarkerIconSize(): DataDrivenPropertyValueSpecification<number> {
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    ...createPlaceMarkerIconSizeStop(EXPLORATION_MAP_MIN_ZOOM),
+    ...createPlaceMarkerIconSizeStop(EXPLORATION_MAP_MAX_ZOOM + ICON_SIZE_STOP_ZOOM_HEADROOM),
+  ];
+}
+
 function createExplorationPlaceMarkersLayer(): SymbolLayerSpecification {
   return {
     id: EXPLORATION_PLACE_MARKERS_LAYER_ID,
@@ -55,7 +82,7 @@ function createExplorationPlaceMarkersLayer(): SymbolLayerSpecification {
       "icon-anchor": "bottom",
       "icon-ignore-placement": true,
       "icon-image": ["get", "markerImage"],
-      "icon-size": EXPLORATION_PLACE_MARKER_ICON_SIZE,
+      "icon-size": createPlaceMarkerIconSize(),
     },
   };
 }

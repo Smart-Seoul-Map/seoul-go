@@ -72,7 +72,7 @@ export function ExplorationMap({
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
+  const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const placeMarkersRef = useRef(placeMarkers);
@@ -182,12 +182,12 @@ export function ExplorationMap({
       "top-right"
     );
 
-    const updateZoomLevelLabel = () => {
-      setZoomLevelLabel(formatMapZoomLevel(map.getZoom()));
+    const updateMapZoomLevel = () => {
+      setMapZoomLevel(map.getZoom());
     };
 
-    updateZoomLevelLabel();
-    map.on("zoom", updateZoomLevelLabel);
+    updateMapZoomLevel();
+    map.on("zoom", updateMapZoomLevel);
 
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
@@ -204,7 +204,7 @@ export function ExplorationMap({
     });
 
     return () => {
-      map.off("zoom", updateZoomLevelLabel);
+      map.off("zoom", updateMapZoomLevel);
       map.remove();
       mapRef.current = null;
     };
@@ -227,6 +227,8 @@ export function ExplorationMap({
     map.once("load", updateSource);
   }, [placeMarkers]);
 
+  const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
+
   return (
     <div className="map-canvas-stack">
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
@@ -237,6 +239,7 @@ export function ExplorationMap({
       ) : null}
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
+        mapZoomLevel={mapZoomLevel ?? undefined}
         modelKey={characterMovement.modelKey}
       />
       <AppVirtualJoystick

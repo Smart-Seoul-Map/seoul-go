@@ -208,6 +208,16 @@ describe("CharacterModelOverlay", () => {
     expect(groundAnchorY).toBeCloseTo(-0.5 * 0.86 - 0.2);
   });
 
+  test("shrinks the character together with the ground scale when zooming out", () => {
+    const { container } = render(
+      <CharacterModelOverlay headingRadians={0} mapZoomLevel={15} modelKey="idlePrimary" />
+    );
+
+    const overlay = container.querySelector(".character-overlay") as HTMLElement;
+
+    expect(overlay.style.getPropertyValue("--character-map-scale")).toBe("0.5");
+  });
+
   test("plays the run animation faster than idle without changing movement speed", async () => {
     const { rerender } = render(renderCharacter("idlePrimary"));
 

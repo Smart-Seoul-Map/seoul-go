@@ -14,8 +14,8 @@ export const EXPLORATION_MAP_MAX_ZOOM = 17;
 export const EXPLORATION_MAP_PITCH = 40;
 export const EXPLORATION_MAP_BEARING = -28;
 export const CHARACTER_ARRIVAL_RADIUS_METERS = 25;
-export const PLACE_CARD_REVEAL_RADIUS_METERS = 80;
-export const CHARACTER_SPEED_METERS_PER_SECOND = 300;
+export const PLACE_CARD_REVEAL_RADIUS_METERS = 30;
+export const CHARACTER_SPEED_METERS_PER_SECOND = 200;
 
 function createSmartSeoulTmsTileUrlTemplate(proxyBasePath: string): string {
   return `${proxyBasePath}${END_POINTS.smartSeoulTmsTileTemplate({
