@@ -5,9 +5,9 @@ import path from "node:path";
 
 const ROUTES_TO_CHECK = ["/", "/exploration", "/exploration/districts/8"] as const;
 const CHARACTER_GLB_PATHS = [
-  "/models/chunsik_v1.glb",
-  "/models/chunsik_idle_01_v1.glb",
-  "/models/chunsik_run_v1.glb",
+  "/models/haechi_v1.glb",
+  "/models/haechi_idle_01_v1.glb",
+  "/models/haechi_walk_v1.glb",
 ] as const;
 const TRANSPARENT_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
@@ -108,15 +108,15 @@ test("reuses character GLBs when route changes in one app session", async ({ pag
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("canvas").first()).toBeVisible({ timeout: 15_000 });
-  await expect.poll(() => glbRequestCounts.get("/models/chunsik_v1.glb") ?? 0).toBe(1);
-  await expect.poll(() => glbRequestCounts.get("/models/chunsik_idle_01_v1.glb") ?? 0).toBe(1);
+  await expect.poll(() => glbRequestCounts.get("/models/haechi_v1.glb") ?? 0).toBe(1);
+  await expect.poll(() => glbRequestCounts.get("/models/haechi_idle_01_v1.glb") ?? 0).toBe(1);
 
   await navigateInSameAppSession(page, "/exploration");
   await expect(page).toHaveURL(/\/exploration$/);
   await expect(page.locator("canvas").first()).toBeVisible({ timeout: 15_000 });
   await page.waitForTimeout(1_000);
 
-  expect(glbRequestCounts.get("/models/chunsik_v1.glb")).toBe(1);
-  expect(glbRequestCounts.get("/models/chunsik_idle_01_v1.glb")).toBe(1);
-  expect(glbRequestCounts.get("/models/chunsik_run_v1.glb") ?? 0).toBeLessThanOrEqual(1);
+  expect(glbRequestCounts.get("/models/haechi_v1.glb")).toBe(1);
+  expect(glbRequestCounts.get("/models/haechi_idle_01_v1.glb")).toBe(1);
+  expect(glbRequestCounts.get("/models/haechi_walk_v1.glb") ?? 0).toBeLessThanOrEqual(1);
 });
