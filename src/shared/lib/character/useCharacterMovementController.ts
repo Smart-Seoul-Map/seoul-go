@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { clampCharacterDirection, type CharacterDirection } from "./characterDirection";
 
 export type CharacterMovementStatus = "moving" | "arrived";
-export type CharacterMovementModelKey = "idlePrimary" | "run";
+export type CharacterMovementModelKey = "idlePrimary" | "walk";
 
 export type CharacterMovementFrame<TPosition> =
   | {
@@ -219,7 +219,7 @@ export function useCharacterMovementController<TPosition>({
       isMovingRef.current = true;
       lastFrameTimeRef.current = null;
       setHeadingRadians(optionsRef.current.getHeadingRadians(currentPosition, target));
-      setModelKey("run");
+      setModelKey("walk");
       scheduleNextFrame();
     },
     [cancelScheduledFrame, scheduleNextFrame]
@@ -239,7 +239,7 @@ export function useCharacterMovementController<TPosition>({
       const headingTarget = movement.advancePosition(currentPosition, direction, 1);
 
       setHeadingRadians(optionsRef.current.getHeadingRadians(currentPosition, headingTarget));
-      setModelKey("run");
+      setModelKey("walk");
 
       if (directionalMovementRef.current) {
         directionalMovementRef.current = nextMovement;

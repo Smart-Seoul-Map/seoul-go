@@ -151,7 +151,7 @@ export function ExplorationMap({
     const map = mapRef.current;
 
     if (map) {
-      setExplorationMapZoomEnabled(map, characterMovement.modelKey !== "run");
+      setExplorationMapZoomEnabled(map, characterMovement.modelKey !== "walk");
     }
   }, [characterMovement.modelKey]);
 

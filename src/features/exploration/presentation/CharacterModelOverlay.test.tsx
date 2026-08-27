@@ -156,7 +156,7 @@ describe("CharacterModelOverlay", () => {
   test("keeps one renderer and uses the original GLB scene for animation scale compatibility", async () => {
     const { rerender } = render(renderCharacter("idlePrimary"));
 
-    rerender(renderCharacter("run"));
+    rerender(renderCharacter("walk"));
 
     expect(threeMock.renderers).toHaveBeenCalledTimes(1);
     expect(
@@ -186,7 +186,7 @@ describe("CharacterModelOverlay", () => {
       expect(threeMock.sceneAdds).toContain(threeMock.sourceScene);
     });
 
-    rerender(renderCharacter("run", Math.PI / 2));
+    rerender(renderCharacter("walk", Math.PI / 2));
 
     expect((threeMock.sourceScene as { rotation: { y: number } }).rotation.y).toBe(-Math.PI / 2);
     expect(
@@ -225,7 +225,7 @@ describe("CharacterModelOverlay", () => {
       expect(threeMock.animationActions.at(-1)?.timeScale).toBe(1);
     });
 
-    rerender(renderCharacter("run"));
+    rerender(renderCharacter("walk"));
 
     await waitFor(() => {
       expect(threeMock.animationActions.at(-1)?.timeScale).toBeGreaterThan(1);
