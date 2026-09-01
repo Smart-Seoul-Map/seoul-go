@@ -11,7 +11,10 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppVirtualJoystick } from "@shared/ui/virtual-joystick";
 
-import { disableExplorationMapDragInteractions } from "../application/explorationMapInteractions";
+import {
+  disableExplorationMapDragInteractions,
+  setExplorationMapZoomEnabled,
+} from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
@@ -69,7 +72,7 @@ export function ExplorationMap({
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const [zoomLevelLabel, setZoomLevelLabel] = useState<string | null>(null);
+  const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const placeMarkersRef = useRef(placeMarkers);
@@ -145,6 +148,14 @@ export function ExplorationMap({
   }, [hasActivePlaceCard]);
 
   useEffect(() => {
+    const map = mapRef.current;
+
+    if (map) {
+      setExplorationMapZoomEnabled(map, characterMovement.modelKey !== "walk");
+    }
+  }, [characterMovement.modelKey]);
+
+  useEffect(() => {
     const container = containerRef.current;
 
     if (!container || typeof WebGLRenderingContext === "undefined") {
@@ -165,17 +176,18 @@ export function ExplorationMap({
     mapRef.current = map;
 
     disableExplorationMapDragInteractions(map);
+    setExplorationMapZoomEnabled(map, !characterMovementRef.current.getIsMoving());
     map.addControl(
       new maplibregl.NavigationControl({ showZoom: true, visualizePitch: true }),
       "top-right"
     );
 
-    const updateZoomLevelLabel = () => {
-      setZoomLevelLabel(formatMapZoomLevel(map.getZoom()));
+    const updateMapZoomLevel = () => {
+      setMapZoomLevel(map.getZoom());
     };
 
-    updateZoomLevelLabel();
-    map.on("zoom", updateZoomLevelLabel);
+    updateMapZoomLevel();
+    map.on("zoom", updateMapZoomLevel);
 
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
@@ -192,7 +204,7 @@ export function ExplorationMap({
     });
 
     return () => {
-      map.off("zoom", updateZoomLevelLabel);
+      map.off("zoom", updateMapZoomLevel);
       map.remove();
       mapRef.current = null;
     };
@@ -215,6 +227,8 @@ export function ExplorationMap({
     map.once("load", updateSource);
   }, [placeMarkers]);
 
+  const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
+
   return (
     <div className="map-canvas-stack">
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
@@ -225,6 +239,7 @@ export function ExplorationMap({
       ) : null}
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
+        mapZoomLevel={mapZoomLevel ?? undefined}
         modelKey={characterMovement.modelKey}
       />
       <AppVirtualJoystick

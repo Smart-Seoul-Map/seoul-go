@@ -14,7 +14,7 @@ export interface TrackedMovementFrame {
 }
 
 export function selectCharacterModelKey(status: MovementStatus): CharacterModelKey {
-  return status === "moving" ? "run" : "idlePrimary";
+  return status === "moving" ? "walk" : "idlePrimary";
 }
 
 function toRadians(degrees: number): number {

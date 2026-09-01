@@ -11,6 +11,7 @@ import {
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 const threeMock = vi.hoisted(() => ({
+  cameraLookAt: vi.fn(),
   createClonedScene: vi.fn(),
   cloneSkeleton: vi.fn(),
   disposeGeometry: vi.fn(),
@@ -63,6 +64,7 @@ vi.mock("three", () => {
       update = vi.fn();
     },
     Box3: class {
+      min = { x: -0.5, y: -0.5, z: -0.5 };
       setFromObject = vi.fn().mockReturnThis();
       getSize = vi.fn((size: { x: number; y: number; z: number }) => {
         size.x = 1;
@@ -75,7 +77,7 @@ vi.mock("three", () => {
     Mesh,
     PerspectiveCamera: class extends Object3D {
       aspect = 1;
-      lookAt = vi.fn();
+      lookAt = threeMock.cameraLookAt;
       updateProjectionMatrix = vi.fn();
     },
     Scene: class extends Object3D {},
@@ -116,6 +118,7 @@ function renderCharacter(modelKey: CharacterModelKey, headingRadians = 0): React
 describe("CharacterModelOverlay", () => {
   beforeEach(() => {
     clearCharacterGltfCache();
+    threeMock.cameraLookAt.mockClear();
     vi.stubGlobal("WebGLRenderingContext", class {});
     vi.stubGlobal(
       "requestAnimationFrame",
@@ -153,7 +156,7 @@ describe("CharacterModelOverlay", () => {
   test("keeps one renderer and uses the original GLB scene for animation scale compatibility", async () => {
     const { rerender } = render(renderCharacter("idlePrimary"));
 
-    rerender(renderCharacter("run"));
+    rerender(renderCharacter("walk"));
 
     expect(threeMock.renderers).toHaveBeenCalledTimes(1);
     expect(
@@ -183,12 +186,36 @@ describe("CharacterModelOverlay", () => {
       expect(threeMock.sceneAdds).toContain(threeMock.sourceScene);
     });
 
-    rerender(renderCharacter("run", Math.PI / 2));
+    rerender(renderCharacter("walk", Math.PI / 2));
 
     expect((threeMock.sourceScene as { rotation: { y: number } }).rotation.y).toBe(-Math.PI / 2);
     expect(
       threeMock.load.mock.calls.filter(([url]) => url === CHARACTER_MODEL_MANIFEST.mesh)
     ).toHaveLength(1);
+  });
+
+  test("targets the camera at the character ground anchor so the feet land on the canvas center", async () => {
+    render(renderCharacter("idlePrimary"));
+
+    await waitFor(() => {
+      expect(threeMock.sceneAdds).toContain(threeMock.sourceScene);
+    });
+
+    const [x, groundAnchorY, z] = threeMock.cameraLookAt.mock.calls.at(-1) as number[];
+
+    expect(x).toBe(0);
+    expect(z).toBe(0);
+    expect(groundAnchorY).toBeCloseTo(-0.5 * 0.86 - 0.2);
+  });
+
+  test("shrinks the character together with the ground scale when zooming out", () => {
+    const { container } = render(
+      <CharacterModelOverlay headingRadians={0} mapZoomLevel={15} modelKey="idlePrimary" />
+    );
+
+    const overlay = container.querySelector(".character-overlay") as HTMLElement;
+
+    expect(overlay.style.getPropertyValue("--character-map-scale")).toBe("0.5");
   });
 
   test("plays the run animation faster than idle without changing movement speed", async () => {
@@ -198,7 +225,7 @@ describe("CharacterModelOverlay", () => {
       expect(threeMock.animationActions.at(-1)?.timeScale).toBe(1);
     });
 
-    rerender(renderCharacter("run"));
+    rerender(renderCharacter("walk"));
 
     await waitFor(() => {
       expect(threeMock.animationActions.at(-1)?.timeScale).toBeGreaterThan(1);

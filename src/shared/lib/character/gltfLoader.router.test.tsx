@@ -3,7 +3,7 @@ import { useEffect, type ReactElement } from "react";
 import { Link, RouterProvider, createMemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const CHARACTER_MODEL_PATH = "/models/chunsik_v1.glb";
+const CHARACTER_MODEL_PATH = "/models/haechi_v1.glb";
 
 const gltfLoaderMock = vi.hoisted(() => ({
   load: vi.fn(),

@@ -22,22 +22,22 @@ describe("loadCharacterGltf", () => {
   });
 
   test("loads a GLB file through GLTFLoader", async () => {
-    const gltf = await loadCharacterGltf("/models/chunsik_v1.glb");
+    const gltf = await loadCharacterGltf("/models/haechi_v1.glb");
 
     expect(gltfLoaderMock.load).toHaveBeenCalledWith(
-      "/models/chunsik_v1.glb",
+      "/models/haechi_v1.glb",
       expect.any(Function),
       undefined,
       expect.any(Function)
     );
     expect(gltf).toMatchObject({
-      scene: { path: "/models/chunsik_v1.glb" },
+      scene: { path: "/models/haechi_v1.glb" },
     });
   });
 
   test("reuses the cached GLB promise for the same path", async () => {
-    const firstGltf = await loadCharacterGltf("/models/chunsik_v1.glb");
-    const secondGltf = await loadCharacterGltf("/models/chunsik_v1.glb");
+    const firstGltf = await loadCharacterGltf("/models/haechi_v1.glb");
+    const secondGltf = await loadCharacterGltf("/models/haechi_v1.glb");
 
     expect(secondGltf).toBe(firstGltf);
     expect(gltfLoaderMock.load).toHaveBeenCalledTimes(1);

@@ -63,7 +63,7 @@ describe("useCharacterMovementController", () => {
       frameCallbacks.shift()?.(1000);
     });
 
-    expect(result.current.modelKey).toBe("run");
+    expect(result.current.modelKey).toBe("walk");
     expect(result.current.headingRadians).toBe(0);
     expect(onFrame).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -121,7 +121,7 @@ describe("useCharacterMovementController", () => {
     });
 
     expect(result.current.getCurrentPosition()).toEqual({ x: 5, y: 0 });
-    expect(result.current.modelKey).toBe("run");
+    expect(result.current.modelKey).toBe("walk");
     expect(onFrame).toHaveBeenLastCalledWith(
       expect.objectContaining({
         movementType: "direction",

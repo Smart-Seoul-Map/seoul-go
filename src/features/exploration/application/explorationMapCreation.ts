@@ -1,15 +1,13 @@
 import type { MapOptions } from "maplibre-gl";
 
-import {
-  SMART_SEOUL_TMS_INITIAL_ZOOM,
-  SMART_SEOUL_TMS_MAX_ZOOM,
-  SMART_SEOUL_TMS_MIN_ZOOM,
-} from "@shared/constants/map";
+import { SMART_SEOUL_TMS_INITIAL_ZOOM } from "@shared/constants/map";
 import { buildRasterMapStyle } from "@shared/lib/maplibre/maplibreStyle";
 
 import {
   EXPLORATION_MAP_BEARING,
   EXPLORATION_MAP_CENTER,
+  EXPLORATION_MAP_MAX_ZOOM,
+  EXPLORATION_MAP_MIN_ZOOM,
   EXPLORATION_MAP_PITCH,
 } from "../config/explorationMapConfig";
 import type { Coordinates } from "../domain/explorationGeo";
@@ -30,10 +28,14 @@ export function createExplorationMapOptions({
     bearing: EXPLORATION_MAP_BEARING,
     center: center ? [center.lng, center.lat] : EXPLORATION_MAP_CENTER,
     container,
-    maxZoom: SMART_SEOUL_TMS_MAX_ZOOM,
-    minZoom: SMART_SEOUL_TMS_MIN_ZOOM,
+    doubleClickZoom: false,
+    keyboard: false,
+    maxZoom: EXPLORATION_MAP_MAX_ZOOM,
+    minZoom: EXPLORATION_MAP_MIN_ZOOM,
     pitch: EXPLORATION_MAP_PITCH,
     style: buildRasterMapStyle(tileUrlTemplate),
+    touchZoomRotate: false,
     zoom: SMART_SEOUL_TMS_INITIAL_ZOOM,
+    zoomSnap: 1,
   };
 }

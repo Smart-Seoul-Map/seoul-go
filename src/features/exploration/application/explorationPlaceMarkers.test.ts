@@ -44,6 +44,31 @@ describe("addExplorationPlaceMarkersLayer", () => {
     );
   });
 
+  it("spans the whole zoom range with a single icon size stop pair so retained tiles keep scaling", async () => {
+    const map = {
+      addImage: vi.fn(),
+      addLayer: vi.fn(),
+      addSource: vi.fn(),
+      getSource: vi.fn(() => undefined),
+      hasImage: vi.fn(() => false),
+      loadImage: vi.fn(async (url: string) => ({ data: { url } })),
+    };
+
+    await addExplorationPlaceMarkersLayer(map as never);
+
+    const [layer] = map.addLayer.mock.calls[0] as [{ layout: { "icon-size": unknown } }];
+
+    expect(layer.layout["icon-size"]).toEqual([
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      15,
+      0.25,
+      18,
+      0.625,
+    ]);
+  });
+
   it("uses the latest marker data when the source is added after image loading", async () => {
     const resolveImageLoads: Array<(value: { data: { url: string } }) => void> = [];
     let placeMarkers: MapMarkerFeatureCollection = { features: [], type: "FeatureCollection" };

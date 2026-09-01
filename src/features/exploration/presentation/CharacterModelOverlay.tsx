@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { ReactElement } from "react";
+import type { CSSProperties, ReactElement } from "react";
 import * as THREE from "three";
 
 import "./CharacterModelOverlay.css";
@@ -16,14 +16,21 @@ import {
   CHARACTER_MODEL_MANIFEST,
   type CharacterModelKey,
 } from "../config/explorationCharacterModels";
+import { EXPLORATION_MAP_MAX_ZOOM } from "../config/explorationMapConfig";
+import { calculateZoomScaleRatio } from "../domain/explorationZoomScale";
+
+const MODEL_TARGET_SIZE = 0.86;
+const MODEL_OFFSET_Y = -0.2;
 
 interface CharacterModelOverlayProps {
   headingRadians: number;
+  mapZoomLevel?: number;
   modelKey: CharacterModelKey;
 }
 
 export function CharacterModelOverlay({
   headingRadians,
+  mapZoomLevel = EXPLORATION_MAP_MAX_ZOOM,
   modelKey,
 }: CharacterModelOverlayProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -95,9 +102,8 @@ export function CharacterModelOverlay({
     let disposed = false;
 
     const resize = () => {
-      const rect = container.getBoundingClientRect();
-      const width = Math.max(rect.width, 1);
-      const height = Math.max(rect.height, 1);
+      const width = Math.max(container.clientWidth, 1);
+      const height = Math.max(container.clientHeight, 1);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
@@ -114,9 +120,11 @@ export function CharacterModelOverlay({
       const size = new THREE.Vector3();
       box.getSize(size);
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
-      model.scale.setScalar(0.86 / maxAxis);
-      model.position.set(0, -0.2, 0);
+      const modelScale = MODEL_TARGET_SIZE / maxAxis;
+      model.scale.setScalar(modelScale);
+      model.position.set(0, MODEL_OFFSET_Y, 0);
       model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
+      camera.lookAt(0, box.min.y * modelScale + MODEL_OFFSET_Y, 0);
 
       modelRef.current = model;
       scene.add(model);
@@ -149,5 +157,11 @@ export function CharacterModelOverlay({
     };
   }, [playAnimation]);
 
-  return <div ref={containerRef} aria-hidden="true" className="character-overlay" />;
+  const overlayStyle = {
+    "--character-map-scale": calculateZoomScaleRatio(mapZoomLevel, EXPLORATION_MAP_MAX_ZOOM),
+  } as CSSProperties;
+
+  return (
+    <div ref={containerRef} aria-hidden="true" className="character-overlay" style={overlayStyle} />
+  );
 }

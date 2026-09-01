@@ -11,7 +11,7 @@ describe("3D 캐릭터 모델 매니페스트", () => {
     expect(anims).toEqual({
       idlePrimary: "/models/haechi_idle_01_v1.glb",
       idleSecondary: "/models/haechi_idle_02_v1.glb",
-      run: "/models/haechi_walk_v1.glb",
+      walk: "/models/haechi_walk_v1.glb",
     });
     // 모든 값이 경로 형식인지 확인
     Object.values(anims).forEach((path) => {

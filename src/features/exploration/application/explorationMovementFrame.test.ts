@@ -15,7 +15,7 @@ describe("tracked exploration movement frame", () => {
     const movement = createMovement(start, target);
     const frame = advanceTrackedMovement(movement, 1, 2);
 
-    expect(frame.modelKey).toBe("run");
+    expect(frame.modelKey).toBe("walk");
     expect(frame.cameraCenter.lng).toBeLessThan(start.lng);
     expect(frame.cameraCenter.lat).toBeLessThan(start.lat);
   });
@@ -30,7 +30,7 @@ describe("tracked exploration movement frame", () => {
 
   test("selects the character model by movement status", () => {
     expect(selectCharacterModelKey("idle")).toBe("idlePrimary");
-    expect(selectCharacterModelKey("moving")).toBe("run");
+    expect(selectCharacterModelKey("moving")).toBe("walk");
     expect(selectCharacterModelKey("arrived")).toBe("idlePrimary");
   });
 
