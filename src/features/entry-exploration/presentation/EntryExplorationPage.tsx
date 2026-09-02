@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,8 @@ import { useEntryExplorationDistrictSelection } from "../application/useEntryExp
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
+import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
+import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 
@@ -32,8 +34,25 @@ export function EntryExplorationPage({
   const navigate = useNavigate();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
+  const [isDartGuideVisible, setIsDartGuideVisible] = useState(false);
+  const [isDartTargetHovered, setIsDartTargetHovered] = useState(false);
+  const [dartShotId, setDartShotId] = useState<number | null>(null);
+  const handleDartViewActiveChange = useCallback((isActive: boolean) => {
+    setIsDartGuideVisible(isActive);
+
+    if (!isActive) {
+      setIsDartTargetHovered(false);
+      setDartShotId(null);
+    }
+  }, []);
+  const handleDartThrowResult = useCallback(() => {
+    setDartShotId((currentShotId) => (currentShotId ?? 0) + 1);
+  }, []);
   const districtSelection = useEntryExplorationDistrictSelection({
     createExtraSceneInteractionControllers: createSubwayInteractionControllers,
+    onDartThrowResult: handleDartThrowResult,
+    onDartViewActiveChange: handleDartViewActiveChange,
+    onDartTargetHoverChange: setIsDartTargetHovered,
   });
 
   useEntryExplorationThreeScene({
@@ -55,11 +74,17 @@ export function EntryExplorationPage({
   };
 
   return (
-    <main className="entry-exploration-page">
+    <main className="entry-exploration-page" data-dart-target={isDartTargetHovered}>
       <div
         ref={containerRef}
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
+      />
+      <EntryExplorationDartGuide isVisible={isDartGuideVisible} />
+      <EntryExplorationDartArrow
+        isTargetHovered={isDartTargetHovered}
+        isVisible={isDartGuideVisible}
+        shotId={dartShotId}
       />
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
