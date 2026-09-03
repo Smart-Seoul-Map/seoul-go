@@ -319,6 +319,7 @@ boundaries.features.forEach((feature) => {
         Math.max(...outer.map(([x]) => x)),
         Math.max(...outer.map(([, y]) => y)),
       ],
+      name: feature.properties.name,
       rings: projected,
     });
   });
@@ -339,8 +340,8 @@ function isPointInRing(x, y, ring) {
   return inside;
 }
 
-function isLandPoint(x, y) {
-  return landPolygons.some(({ bbox, rings }) => {
+function findLandDistrict(x, y) {
+  return landPolygons.find(({ bbox, rings }) => {
     if (x < bbox[0] || x > bbox[2] || y < bbox[1] || y > bbox[3]) {
       return false;
     }
@@ -350,36 +351,63 @@ function isLandPoint(x, y) {
     }
 
     return !rings.slice(1).some((hole) => isPointInRing(x, y, hole));
-  });
+  })?.name;
 }
 
-function measureCellCoverage(eastKm, northKm) {
+function measureCell(eastKm, northKm) {
+  const districtHits = new Map();
   let hits = 0;
 
   for (let sy = 0; sy < CELL_SUBSAMPLES; sy += 1) {
     for (let sx = 0; sx < CELL_SUBSAMPLES; sx += 1) {
-      if (
-        isLandPoint(eastKm + (sx + 0.5) / CELL_SUBSAMPLES, northKm + (sy + 0.5) / CELL_SUBSAMPLES)
-      ) {
-        hits += 1;
+      const district = findLandDistrict(
+        eastKm + (sx + 0.5) / CELL_SUBSAMPLES,
+        northKm + (sy + 0.5) / CELL_SUBSAMPLES
+      );
+
+      if (!district) {
+        continue;
       }
+
+      hits += 1;
+      districtHits.set(district, (districtHits.get(district) ?? 0) + 1);
     }
   }
 
-  return hits / (CELL_SUBSAMPLES * CELL_SUBSAMPLES);
+  const dominant = [...districtHits.entries()].sort((a, b) => b[1] - a[1])[0];
+
+  return {
+    coverage: hits / (CELL_SUBSAMPLES * CELL_SUBSAMPLES),
+    district: dominant ? dominant[0] : null,
+  };
 }
 
-const validCellRows = Array.from({ length: rows }, (_, row) =>
+const measuredCells = Array.from({ length: rows }, (_, row) =>
   Array.from({ length: columns }, (_, column) =>
-    measureCellCoverage(cellMinX + column, cellMinY + (rows - 1 - row)) >= CELL_COVERAGE_THRESHOLD
-      ? "1"
-      : "0"
-  ).join("")
+    measureCell(cellMinX + column, cellMinY + (rows - 1 - row))
+  )
 );
-const validCellCount = validCellRows
+const districtNames = [
+  ...new Set(
+    measuredCells
+      .flat()
+      .filter((cell) => cell.coverage >= CELL_COVERAGE_THRESHOLD && cell.district)
+      .map((cell) => cell.district)
+  ),
+].sort();
+const districtCellRows = measuredCells.map((cells) =>
+  cells
+    .map((cell) =>
+      cell.coverage >= CELL_COVERAGE_THRESHOLD && cell.district
+        ? districtNames.indexOf(cell.district).toString(36)
+        : "-"
+    )
+    .join("")
+);
+const validCellCount = districtCellRows
   .join("")
   .split("")
-  .filter((flag) => flag === "1").length;
+  .filter((code) => code !== "-").length;
 
 fs.writeFileSync(
   path.join(REPO, "src/features/entry-exploration/config/seoulGridCells.json"),
@@ -388,8 +416,9 @@ fs.writeFileSync(
       columns,
       coverageThreshold: CELL_COVERAGE_THRESHOLD,
       originKm: { x: cellMinX, y: cellMinY },
+      districtCellRows,
+      districtNames,
       rows,
-      validCellRows,
     },
     null,
     2
@@ -406,6 +435,7 @@ console.log(
       vertices: { original: originalVertexCount, simplified: simplifiedVertexCount },
       riverSharedVertices: river.sharedCount,
       validCellCount,
+      districtCount: districtNames.length,
       bytes: Buffer.byteLength(svg),
     },
     null,

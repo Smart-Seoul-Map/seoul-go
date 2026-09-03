@@ -19,7 +19,8 @@ export const SEOUL_GRID_NUMBER_LETTERS = [
 
 export const SEOUL_GRID_MAP_CONFIG = {
   columns: seoulGridCells.columns,
+  districtCellRows: seoulGridCells.districtCellRows as readonly string[],
+  districtNames: seoulGridCells.districtNames as readonly string[],
   originKm: seoulGridCells.originKm,
   rows: seoulGridCells.rows,
-  validCellRows: seoulGridCells.validCellRows as readonly string[],
 } as const;

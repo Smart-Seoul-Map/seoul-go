@@ -26,8 +26,18 @@ export function toSeoulGridCell(point: SeoulGridMapPoint, size: SeoulGridMapSize
   };
 }
 
-export function isSeoulGridCellValid({ column, row }: SeoulGridCell): boolean {
-  return SEOUL_GRID_MAP_CONFIG.validCellRows[row]?.[column] === "1";
+export function getSeoulGridCellDistrict({ column, row }: SeoulGridCell): string | null {
+  const encoded = SEOUL_GRID_MAP_CONFIG.districtCellRows[row]?.[column];
+
+  if (!encoded || encoded === "-") {
+    return null;
+  }
+
+  return SEOUL_GRID_MAP_CONFIG.districtNames[Number.parseInt(encoded, 36)] ?? null;
+}
+
+export function isSeoulGridCellValid(cell: SeoulGridCell): boolean {
+  return getSeoulGridCellDistrict(cell) !== null;
 }
 
 export function toSeoulGridNumber({ column, row }: SeoulGridCell): string {
