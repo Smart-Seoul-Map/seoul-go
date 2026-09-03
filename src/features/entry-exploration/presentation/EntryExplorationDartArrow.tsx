@@ -16,11 +16,13 @@ import "./EntryExplorationDartArrow.css";
 export type EntryExplorationDartArrowProps = {
   isTargetHovered: boolean;
   isVisible: boolean;
+  onFlightEnd?: () => void;
   shotId: number | null;
 };
 
 type DartFlight = {
   from: EntryExplorationDartScreenPoint;
+  shotId: number;
   startedAt: number;
   to: EntryExplorationDartScreenPoint;
 };
@@ -35,9 +37,16 @@ const nockOffset = {
   y: spriteHeight * sprite.nockRatio.y,
 };
 
+function getRestPoint(container: HTMLDivElement): EntryExplorationDartScreenPoint {
+  const rect = container.getBoundingClientRect();
+
+  return { x: rect.width * ARROW_REST_RATIO.x, y: rect.height * ARROW_REST_RATIO.y };
+}
+
 export function EntryExplorationDartArrow({
   isTargetHovered,
   isVisible,
+  onFlightEnd,
   shotId,
 }: EntryExplorationDartArrowProps): ReactElement | null {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +55,10 @@ export function EntryExplorationDartArrow({
   const pointerRef = useRef<EntryExplorationDartScreenPoint | null>(null);
   const rotationRef = useRef<number>(idleArrow.restRotationDegrees);
   const flightRef = useRef<DartFlight | null>(null);
+  const landedShotRef = useRef<number | null>(null);
+  const onFlightEndRef = useRef(onFlightEnd);
+
+  onFlightEndRef.current = onFlightEnd;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -66,8 +79,7 @@ export function EntryExplorationDartArrow({
     let lastTime: number | null = null;
 
     const render = (time: number) => {
-      const rect = container.getBoundingClientRect();
-      const restPoint = { x: rect.width * ARROW_REST_RATIO.x, y: rect.height * ARROW_REST_RATIO.y };
+      const restPoint = getRestPoint(container);
 
       rotationRef.current = getEntryExplorationDartSmoothedRotation({
         current: rotationRef.current,
@@ -85,6 +97,11 @@ export function EntryExplorationDartArrow({
 
       const activeFlight = flightRef.current;
       const isFlying = activeFlight !== null && time - activeFlight.startedAt < flight.durationMs;
+
+      if (activeFlight && !isFlying && landedShotRef.current !== activeFlight.shotId) {
+        landedShotRef.current = activeFlight.shotId;
+        onFlightEndRef.current?.();
+      }
 
       drawCrosshair(crosshairRef.current, isFlying ? activeFlight.to : pointerRef.current);
       drawArrow(arrowRef.current, activeFlight, restPoint, rotationRef.current, time);
@@ -109,14 +126,13 @@ export function EntryExplorationDartArrow({
       return;
     }
 
-    const rect = container.getBoundingClientRect();
-
     flightRef.current = {
       from: getEntryExplorationDartTipPoint({
-        anchorPoint: { x: rect.width * ARROW_REST_RATIO.x, y: rect.height * ARROW_REST_RATIO.y },
+        anchorPoint: getRestPoint(container),
         offsetFromAnchor: { x: tipOffset.x - nockOffset.x, y: tipOffset.y - nockOffset.y },
         rotationDegrees: rotationRef.current,
       }),
+      shotId,
       startedAt: performance.now(),
       to: { ...pointer },
     };

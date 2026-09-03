@@ -1,16 +1,23 @@
 import type { ReactElement } from "react";
 
+import { AppBadge } from "@shared/ui/badge";
 import { AppStack } from "@shared/ui/layout";
 import { AppHeading, AppText } from "@shared/ui/typography";
+
+import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartGuide.css";
 
 export type EntryExplorationDartGuideProps = {
   isVisible: boolean;
+  landedResult: EntryExplorationDartThrowResult | null;
+  shotResult: EntryExplorationDartThrowResult | null;
 };
 
 export function EntryExplorationDartGuide({
   isVisible,
+  landedResult,
+  shotResult,
 }: EntryExplorationDartGuideProps): ReactElement | null {
   if (!isVisible) {
     return null;
@@ -32,22 +39,47 @@ export function EntryExplorationDartGuide({
         </AppStack>
       </section>
 
-      <section className="entry-exploration-dart-guide__info">
-        <AppStack align="start" gap="sm">
-          <AppHeading as="h3" size="sm" tone="brand">
-            격자번호란?
-          </AppHeading>
-          <AppText role="supporting">
-            서울을 일정한 칸으로 나누고 각 칸에 번호를 부여한 탐방 기준이에요.
-          </AppText>
-        </AppStack>
-      </section>
+      {landedResult ? <DartResultPanel result={landedResult} /> : null}
 
-      <section className="entry-exploration-dart-guide__hint">
-        <AppText align="center" role="supporting">
-          화살을 클릭해 서울 지도로 쏴보세요!
-        </AppText>
-      </section>
+      {shotResult ? null : (
+        <>
+          <section className="entry-exploration-dart-guide__side">
+            <AppStack align="start" gap="sm">
+              <AppHeading as="h3" size="sm" tone="brand">
+                격자번호란?
+              </AppHeading>
+              <AppText role="supporting">
+                서울을 일정한 칸으로 나누고 각 칸에 번호를 부여한 탐방 기준이에요.
+              </AppText>
+            </AppStack>
+          </section>
+
+          <section className="entry-exploration-dart-guide__hint">
+            <AppText align="center" role="supporting">
+              화살을 클릭해 서울 지도로 쏴보세요!
+            </AppText>
+          </section>
+        </>
+      )}
     </div>
+  );
+}
+
+function DartResultPanel({ result }: { result: EntryExplorationDartThrowResult }): ReactElement {
+  return (
+    <section className="entry-exploration-dart-guide__side">
+      <AppStack align="start" gap="sm">
+        <AppBadge tone="brand" variant="weak">
+          오늘의 시작점
+        </AppBadge>
+        <AppHeading as="h3" size="lg" tone="brand">
+          {result.gridNumber}
+        </AppHeading>
+        <hr className="entry-exploration-dart-guide__divider" />
+        <AppText role="supporting">
+          이 격자는 {result.district ?? "서울"}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
+        </AppText>
+      </AppStack>
+    </section>
   );
 }

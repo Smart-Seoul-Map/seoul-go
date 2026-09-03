@@ -13,4 +13,9 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
     z: 3.02,
   },
   characterFacingDistance: 0.7,
+  hitCellHighlight: {
+    color: 0xff2e94,
+    opacity: 0.55,
+    yOffset: 0.01,
+  },
 } as const;

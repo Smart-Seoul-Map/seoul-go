@@ -7,6 +7,10 @@ import {
   createSubwayStationExplorationPath,
 } from "@shared/constants/path";
 
+import type {
+  EntryExplorationDartThrowResult,
+  EntryExplorationDartViewControls,
+} from "../application/entryExplorationSeoulTileMapViewInteraction";
 import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
 import type { EntryExplorationSubwaySelectionStatus } from "../application/entryExplorationSubwaySelectionInteraction";
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
@@ -37,21 +41,44 @@ export function EntryExplorationPage({
   const [isDartGuideVisible, setIsDartGuideVisible] = useState(false);
   const [isDartTargetHovered, setIsDartTargetHovered] = useState(false);
   const [dartShotId, setDartShotId] = useState<number | null>(null);
+  const [dartShotResult, setDartShotResult] = useState<EntryExplorationDartThrowResult | null>(
+    null
+  );
+  const [dartLandedResult, setDartLandedResult] = useState<EntryExplorationDartThrowResult | null>(
+    null
+  );
+  const dartShotResultRef = useRef<EntryExplorationDartThrowResult | null>(null);
+  const dartViewControlsRef = useRef<EntryExplorationDartViewControls | null>(null);
+  const handleDartViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
+    dartViewControlsRef.current = controls;
+  }, []);
   const handleDartViewActiveChange = useCallback((isActive: boolean) => {
     setIsDartGuideVisible(isActive);
 
     if (!isActive) {
       setIsDartTargetHovered(false);
       setDartShotId(null);
+      setDartShotResult(null);
+      setDartLandedResult(null);
+      dartViewControlsRef.current?.setHitCell(null);
     }
   }, []);
-  const handleDartThrowResult = useCallback(() => {
+  const handleDartThrowResult = useCallback((result: EntryExplorationDartThrowResult) => {
+    dartShotResultRef.current = result;
     setDartShotId((currentShotId) => (currentShotId ?? 0) + 1);
+    setDartShotResult(result);
+  }, []);
+  const handleDartFlightEnd = useCallback(() => {
+    const landed = dartShotResultRef.current;
+
+    setDartLandedResult(landed);
+    dartViewControlsRef.current?.setHitCell(landed?.cell ?? null);
   }, []);
   const districtSelection = useEntryExplorationDistrictSelection({
     createExtraSceneInteractionControllers: createSubwayInteractionControllers,
     onDartThrowResult: handleDartThrowResult,
     onDartViewActiveChange: handleDartViewActiveChange,
+    onDartViewControlsReady: handleDartViewControlsReady,
     onDartTargetHoverChange: setIsDartTargetHovered,
   });
 
@@ -80,10 +107,15 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      <EntryExplorationDartGuide isVisible={isDartGuideVisible} />
+      <EntryExplorationDartGuide
+        isVisible={isDartGuideVisible}
+        landedResult={dartLandedResult}
+        shotResult={dartShotResult}
+      />
       <EntryExplorationDartArrow
         isTargetHovered={isDartTargetHovered}
         isVisible={isDartGuideVisible}
+        onFlightEnd={handleDartFlightEnd}
         shotId={dartShotId}
       />
       <SubwaySelectionDialog

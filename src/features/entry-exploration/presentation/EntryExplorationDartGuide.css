@@ -9,7 +9,7 @@
 }
 
 .entry-exploration-dart-guide__prompt,
-.entry-exploration-dart-guide__info,
+.entry-exploration-dart-guide__side,
 .entry-exploration-dart-guide__hint {
   position: absolute;
   background: var(--sg-color-bg-surface);
@@ -26,11 +26,11 @@
   box-shadow: var(--sg-panel-shadow);
 }
 
-.entry-exploration-dart-guide__info {
+.entry-exploration-dart-guide__side {
   top: 48%;
   right: var(--sg-spacing-10);
   width: 18%;
-  padding: var(--sg-spacing-3_5) var(--sg-spacing-4) var(--sg-spacing-5);
+  padding: var(--sg-spacing-4);
   border-radius: var(--sg-radius-5);
   box-shadow: var(--sg-shadow-3);
 }
@@ -43,4 +43,11 @@
   padding: var(--sg-spacing-6) var(--sg-spacing-5_5) var(--sg-spacing-4);
   border-radius: var(--sg-radius-5);
   box-shadow: var(--sg-floating-control-shadow);
+}
+
+.entry-exploration-dart-guide__divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px dashed var(--sg-color-stroke-weak);
 }
