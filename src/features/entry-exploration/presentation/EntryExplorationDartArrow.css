@@ -1,0 +1,34 @@
+.entry-exploration-dart-arrow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.entry-exploration-page[data-dart-target="true"],
+.entry-exploration-page[data-dart-target="true"] .entry-exploration-scene canvas {
+  cursor: none !important;
+}
+
+.entry-exploration-dart-arrow__arrow,
+.entry-exploration-dart-arrow__crosshair {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.entry-exploration-dart-arrow__arrow {
+  filter: drop-shadow(var(--sg-shadow-3));
+}
+
+.entry-exploration-dart-arrow__crosshair {
+  filter: drop-shadow(var(--sg-floating-control-shadow));
+  opacity: 0;
+  transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
+}
+
+.entry-exploration-dart-arrow__crosshair[data-shown="true"] {
+  opacity: 1;
+}

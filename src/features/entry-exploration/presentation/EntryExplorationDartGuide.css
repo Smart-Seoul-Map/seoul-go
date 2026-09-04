@@ -1,0 +1,58 @@
+.entry-exploration-dart-guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.entry-exploration-dart-guide__accent {
+  color: var(--sg-color-text-brand);
+}
+
+.entry-exploration-dart-guide__prompt,
+.entry-exploration-dart-guide__side,
+.entry-exploration-dart-guide__hint {
+  position: absolute;
+  background: var(--sg-color-bg-surface);
+  border: 1px solid var(--sg-v3-pink-500);
+}
+
+.entry-exploration-dart-guide__prompt {
+  top: var(--sg-spacing-8);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 51%;
+  padding: var(--sg-spacing-10) var(--sg-spacing-9) var(--sg-spacing-12);
+  border-radius: var(--sg-radius-6);
+  box-shadow: var(--sg-panel-shadow);
+}
+
+.entry-exploration-dart-guide__side {
+  top: 48%;
+  right: var(--sg-spacing-10);
+  width: 18%;
+  padding: var(--sg-spacing-4);
+  border-radius: var(--sg-radius-5);
+  box-shadow: var(--sg-shadow-3);
+}
+
+.entry-exploration-dart-guide__hint {
+  bottom: var(--sg-spacing-10);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 29%;
+  padding: var(--sg-spacing-6) var(--sg-spacing-5_5) var(--sg-spacing-4);
+  border-radius: var(--sg-radius-5);
+  box-shadow: var(--sg-floating-control-shadow);
+}
+
+.entry-exploration-dart-guide__divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px dashed var(--sg-color-stroke-weak);
+}
+
+.entry-exploration-dart-guide__action {
+  width: 100%;
+  pointer-events: auto;
+}

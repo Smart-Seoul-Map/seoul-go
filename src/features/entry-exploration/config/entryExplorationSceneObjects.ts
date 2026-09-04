@@ -42,6 +42,7 @@ export type EntryExplorationSceneObject =
   EntryExplorationFloorOverlayObject | EntryExplorationStandingPropObject;
 
 export const ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID = "subway-selection-route-map";
+export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID = "seoul-tile-map-floor-sketch";
 
 export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
   {
@@ -73,6 +74,18 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     size: { width: 14, depth: 9.55 },
     type: "floorOverlay",
     yOffset: 0.05,
+  },
+  {
+    assetKey: "seoulTileMap",
+    id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+    interaction: {
+      triggerRadius: 5.4,
+    },
+    position: { x: 4, z: 16 },
+    rotationY: 0,
+    size: { width: 12, depth: 9.79 },
+    type: "floorOverlay",
+    yOffset: 0.042,
   },
   {
     assetKey: "namsanTower",

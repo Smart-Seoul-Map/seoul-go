@@ -1,12 +1,20 @@
 import { useCallback, useRef, useState } from "react";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
+import type {
+  EntryExplorationDartThrowResult,
+  EntryExplorationDartViewControls,
+} from "./entryExplorationSeoulTileMapViewInteraction";
 import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
 export type UseEntryExplorationDistrictSelectionOptions = {
   createExtraSceneInteractionControllers?: () => readonly EntryExplorationSceneInteractionController[];
+  onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
+  onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
+  onDartViewActiveChange?: (isActive: boolean) => void;
+  onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
 };
 
 const createNoExtraSceneInteractionControllers =
@@ -14,6 +22,10 @@ const createNoExtraSceneInteractionControllers =
 
 export function useEntryExplorationDistrictSelection({
   createExtraSceneInteractionControllers = createNoExtraSceneInteractionControllers,
+  onDartThrowResult,
+  onDartTargetHoverChange,
+  onDartViewActiveChange,
+  onDartViewControlsReady,
 }: UseEntryExplorationDistrictSelectionOptions = {}) {
   const sceneControlsRef = useRef<EntryExplorationThreeSceneControls | null>(null);
   const [selectionResult, setSelectionResult] =
@@ -23,9 +35,19 @@ export function useEntryExplorationDistrictSelection({
     () =>
       createEntryExplorationSceneInteractionControllers({
         extraControllers: createExtraSceneInteractionControllers(),
+        onDartThrowResult,
+        onDartTargetHoverChange,
+        onDartViewActiveChange,
+        onDartViewControlsReady,
         onDistrictSelectionResult: setSelectionResult,
       }),
-    [createExtraSceneInteractionControllers]
+    [
+      createExtraSceneInteractionControllers,
+      onDartTargetHoverChange,
+      onDartThrowResult,
+      onDartViewActiveChange,
+      onDartViewControlsReady,
+    ]
   );
 
   const handleSceneControlsReady = useCallback(
