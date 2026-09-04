@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 import { AppBadge } from "@shared/ui/badge";
+import { AppButton } from "@shared/ui/button";
 import { AppStack } from "@shared/ui/layout";
 import { AppHeading, AppText } from "@shared/ui/typography";
 
@@ -10,6 +11,7 @@ import type { EntryExplorationDartThrowResult } from "../application/entryExplor
 import "./EntryExplorationDartGuide.css";
 
 export type EntryExplorationDartGuideProps = {
+  onStartExploration: (result: EntryExplorationDartThrowResult) => void;
   isVisible: boolean;
   landedResult: EntryExplorationDartThrowResult | null;
   shotResult: EntryExplorationDartThrowResult | null;
@@ -18,6 +20,7 @@ export type EntryExplorationDartGuideProps = {
 export function EntryExplorationDartGuide({
   isVisible,
   landedResult,
+  onStartExploration,
   shotResult,
 }: EntryExplorationDartGuideProps): ReactElement | null {
   if (!isVisible) {
@@ -40,7 +43,9 @@ export function EntryExplorationDartGuide({
         </AppStack>
       </section>
 
-      {landedResult ? <DartResultPanel result={landedResult} /> : null}
+      {landedResult ? (
+        <DartResultPanel onStartExploration={onStartExploration} result={landedResult} />
+      ) : null}
 
       {shotResult ? null : (
         <>
@@ -66,7 +71,12 @@ export function EntryExplorationDartGuide({
   );
 }
 
-function DartResultPanel({ result }: { result: EntryExplorationDartThrowResult }): ReactElement {
+type DartResultPanelProps = {
+  onStartExploration: (result: EntryExplorationDartThrowResult) => void;
+  result: EntryExplorationDartThrowResult;
+};
+
+function DartResultPanel({ onStartExploration, result }: DartResultPanelProps): ReactElement {
   const districtName = getSeoulDistrictById(result.districtId ?? 0)?.name ?? "서울";
 
   return (
@@ -82,6 +92,11 @@ function DartResultPanel({ result }: { result: EntryExplorationDartThrowResult }
         <AppText role="supporting">
           이 격자는 {districtName}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
         </AppText>
+        <div className="entry-exploration-dart-guide__action">
+          <AppButton onClick={() => onStartExploration(result)} size="md" variant="primary">
+            {districtName}에서 탐방 시작
+          </AppButton>
+        </div>
       </AppStack>
     </section>
   );

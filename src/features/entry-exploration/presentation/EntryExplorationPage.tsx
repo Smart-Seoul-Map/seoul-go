@@ -6,6 +6,7 @@ import {
   createDistrictExplorationPath,
   createSubwayStationExplorationPath,
 } from "@shared/constants/path";
+import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
 import type {
   EntryExplorationDartThrowResult,
@@ -17,6 +18,7 @@ import { useEntryExplorationDistrictSelection } from "../application/useEntryExp
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
+import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
@@ -92,6 +94,16 @@ export function EntryExplorationPage({
     onSubwayStationSelectionChange?.(subwaySelection.selectedStation, subwaySelection.status);
   }, [onSubwayStationSelectionChange, subwaySelection.selectedStation, subwaySelection.status]);
 
+  const handleStartGridExploration = (result: EntryExplorationDartThrowResult): void => {
+    const district = result.districtId ? getSeoulDistrictById(result.districtId) : null;
+
+    if (!district) {
+      return;
+    }
+
+    navigate(createDistrictExplorationPath(district.id, toSeoulGridCellCenter(result.cell)));
+  };
+
   const handleExploreDistrict = (districtId: number): void => {
     navigate(createDistrictExplorationPath(districtId));
   };
@@ -110,6 +122,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={isDartGuideVisible}
         landedResult={dartLandedResult}
+        onStartExploration={handleStartGridExploration}
         shotResult={dartShotResult}
       />
       <EntryExplorationDartArrow

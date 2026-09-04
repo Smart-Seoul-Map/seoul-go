@@ -51,3 +51,8 @@
   border: 0;
   border-top: 1px dashed var(--sg-color-stroke-weak);
 }
+
+.entry-exploration-dart-guide__action {
+  width: 100%;
+  pointer-events: auto;
+}
