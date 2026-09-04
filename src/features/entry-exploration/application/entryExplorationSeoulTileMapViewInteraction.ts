@@ -21,7 +21,7 @@ import {
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
 import {
-  getSeoulGridCellDistrict,
+  getSeoulGridCellDistrictId,
   isSeoulGridCellValid,
   toSeoulGridCell,
   toSeoulGridNumber,
@@ -35,7 +35,7 @@ import type { EntryExplorationSceneInteractionController } from "./useEntryExplo
 
 export type EntryExplorationDartThrowResult = {
   cell: SeoulGridCell;
-  district: string | null;
+  districtId: number | null;
   gridNumber: string;
   isHit: boolean;
 };
@@ -96,7 +96,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     return {
       cell,
-      district: getSeoulGridCellDistrict(cell),
+      districtId: getSeoulGridCellDistrictId(cell),
       gridNumber: toSeoulGridNumber(cell),
       isHit: isSeoulGridCellValid(cell),
     };

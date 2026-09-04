@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 import { AppBadge } from "@shared/ui/badge";
 import { AppStack } from "@shared/ui/layout";
 import { AppHeading, AppText } from "@shared/ui/typography";
@@ -66,6 +67,8 @@ export function EntryExplorationDartGuide({
 }
 
 function DartResultPanel({ result }: { result: EntryExplorationDartThrowResult }): ReactElement {
+  const districtName = getSeoulDistrictById(result.districtId ?? 0)?.name ?? "서울";
+
   return (
     <section className="entry-exploration-dart-guide__side">
       <AppStack align="start" gap="sm">
@@ -77,7 +80,7 @@ function DartResultPanel({ result }: { result: EntryExplorationDartThrowResult }
         </AppHeading>
         <hr className="entry-exploration-dart-guide__divider" />
         <AppText role="supporting">
-          이 격자는 {result.district ?? "서울"}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
+          이 격자는 {districtName}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
         </AppText>
       </AppStack>
     </section>

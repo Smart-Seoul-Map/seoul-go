@@ -17,10 +17,20 @@ export const SEOUL_GRID_NUMBER_LETTERS = [
   "하",
 ] as const;
 
+export const UTMK_PROJECTION = {
+  falseEasting: 1_000_000,
+  falseNorthing: 2_000_000,
+  inverseFlattening: 298.257222101,
+  latitudeOrigin: 38,
+  longitudeOrigin: 127.5,
+  scaleFactor: 0.9996,
+  semiMajorAxis: 6_378_137,
+} as const;
+
 export const SEOUL_GRID_MAP_CONFIG = {
   columns: seoulGridCells.columns,
   districtCellRows: seoulGridCells.districtCellRows as readonly string[],
-  districtNames: seoulGridCells.districtNames as readonly string[],
   originKm: seoulGridCells.originKm,
+  originUtmk: seoulGridCells.originUtmk,
   rows: seoulGridCells.rows,
 } as const;
