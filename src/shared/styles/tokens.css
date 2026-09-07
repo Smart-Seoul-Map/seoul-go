@@ -234,7 +234,9 @@
   --sg-button-primary-bg: var(--sg-color-bg-brand);
   --sg-button-primary-bg-pressed: var(--sg-color-bg-brand-pressed);
   --sg-button-primary-fg: var(--sg-color-text-inverted);
-  --sg-button-strong-bg: #2a3038;
+  --sg-button-strong-bg: var(--sg-v3-blue-500);
+  --sg-button-strong-bg-pressed: var(--sg-v3-blue-600);
+  --sg-button-strong-border: var(--sg-v3-blue-600);
   --sg-button-strong-fg: var(--sg-color-text-inverted);
   --sg-button-secondary-bg: var(--sg-color-bg-neutral-weak);
   --sg-button-secondary-bg-pressed: var(--sg-color-bg-neutral-weak-pressed);
