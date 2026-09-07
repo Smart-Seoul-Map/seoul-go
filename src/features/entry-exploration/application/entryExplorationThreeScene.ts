@@ -8,7 +8,6 @@ import {
 import type {
   EntryExplorationFloorOverlayObject,
   EntryExplorationSceneObject,
-  EntryExplorationStandingPropObject,
 } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 
@@ -22,14 +21,7 @@ const ENTRY_EXPLORATION_KEY_LIGHT_POSITION = {
   z: 8,
 } as const;
 const ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM = 1;
-const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET = {
-  x: 0.28,
-  z: -0.22,
-} as const;
-const ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE = 128;
-
 const textureLoader = new THREE.TextureLoader();
-let standingPropShadowTexture: THREE.CanvasTexture | null = null;
 
 export function createEntryExplorationCamera(
   width: number,
@@ -153,27 +145,10 @@ export function createEntryExplorationFloorOverlayMesh(
   return mesh;
 }
 
-export function createEntryExplorationStandingPropGroup(
-  object: EntryExplorationStandingPropObject
-): THREE.Group {
-  const group = new THREE.Group();
-  const propMesh = createStandingPropMesh(object);
-  const shadowMesh = createStandingPropShadowMesh(object);
-
-  group.add(shadowMesh);
-  group.add(propMesh);
-
-  return group;
-}
-
 export function createEntryExplorationSceneObject(
   object: EntryExplorationSceneObject
 ): THREE.Object3D {
-  if (object.type === "floorOverlay") {
-    return createEntryExplorationFloorOverlayMesh(object);
-  }
-
-  return createEntryExplorationStandingPropGroup(object);
+  return createEntryExplorationFloorOverlayMesh(object);
 }
 
 export function addEntryExplorationLights(scene: THREE.Scene): void {
@@ -250,80 +225,4 @@ function getCameraFacingFloorOverlayRotationY(): number {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
   return Math.atan2(cameraOffset.x, cameraOffset.z);
-}
-
-function createStandingPropMesh(object: EntryExplorationStandingPropObject): THREE.Mesh {
-  const asset = ENTRY_EXPLORATION_TEXTURE_ASSETS[object.assetKey];
-  const texture = textureLoader.load(asset.src);
-  texture.colorSpace = THREE.SRGBColorSpace;
-
-  const geometry = new THREE.PlaneGeometry(object.size.width, object.size.height);
-  const material = new THREE.MeshBasicMaterial({
-    alphaTest: 0.02,
-    map: texture,
-    side: THREE.DoubleSide,
-    transparent: true,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-
-  mesh.position.set(object.position.x, object.yOffset, object.position.z);
-  mesh.rotation.set(0, object.rotationY + getCameraFacingFloorOverlayRotationY(), 0);
-
-  return mesh;
-}
-
-function createStandingPropShadowMesh(object: EntryExplorationStandingPropObject): THREE.Mesh {
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({
-    depthWrite: false,
-    map: getStandingPropShadowTexture(),
-    opacity: object.shadow.opacity,
-    transparent: true,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-
-  mesh.position.set(
-    object.position.x + ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET.x,
-    0.025,
-    object.position.z + ENTRY_EXPLORATION_STANDING_PROP_SHADOW_OFFSET.z
-  );
-  mesh.rotation.set(-Math.PI / 2, 0, object.rotationY + getCameraFacingFloorOverlayRotationY());
-  mesh.scale.set(object.shadow.width, object.shadow.depth, 1);
-
-  return mesh;
-}
-
-function getStandingPropShadowTexture(): THREE.CanvasTexture {
-  if (standingPropShadowTexture) {
-    return standingPropShadowTexture;
-  }
-
-  const canvas = document.createElement("canvas");
-  canvas.width = ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE;
-  canvas.height = ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    throw new Error("Failed to create standing prop shadow texture.");
-  }
-
-  const center = ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE / 2;
-  const gradient = context.createRadialGradient(center, center, 6, center, center, center);
-
-  gradient.addColorStop(0, "rgba(23, 32, 26, 0.52)");
-  gradient.addColorStop(0.45, "rgba(23, 32, 26, 0.24)");
-  gradient.addColorStop(1, "rgba(23, 32, 26, 0)");
-
-  context.fillStyle = gradient;
-  context.fillRect(
-    0,
-    0,
-    ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE,
-    ENTRY_EXPLORATION_STANDING_PROP_SHADOW_TEXTURE_SIZE
-  );
-
-  standingPropShadowTexture = new THREE.CanvasTexture(canvas);
-  standingPropShadowTexture.colorSpace = THREE.SRGBColorSpace;
-
-  return standingPropShadowTexture;
 }

@@ -102,6 +102,8 @@ describe("useEntryExplorationDistrictSelection", () => {
 function createSceneControls(): EntryExplorationThreeSceneControls {
   return {
     deactivateActiveInteraction: vi.fn(),
+    isIntroReady: true,
     retryActiveInteraction: vi.fn(),
+    startIntro: vi.fn(() => true),
   };
 }
