@@ -1,0 +1,260 @@
+.AppResponsivePanelLayer {
+  --panel-enter-x: 100%;
+  --panel-enter-y: 0%;
+  --panel-exit-duration: var(--sg-panel-exit-duration);
+  --panel-exit-easing: var(--sg-panel-exit-easing);
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--sg-panel-layer) + var(--panel-stack-index, 0));
+  pointer-events: none;
+  font-family: var(--sg-font-namsan);
+  color: var(--sg-color-text-default);
+  letter-spacing: 0;
+}
+
+.AppResponsivePanelLayer[data-direction="left"] {
+  --panel-enter-x: -100%;
+}
+.AppResponsivePanelLayer[data-presentation="bottom-sheet"] {
+  --panel-enter-x: 0%;
+  --panel-enter-y: 100%;
+  --panel-exit-duration: var(--sg-panel-sheet-exit-duration);
+  --panel-exit-easing: var(--sg-panel-sheet-exit-easing);
+}
+.AppResponsivePanelBackdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: var(--sg-panel-backdrop-bg);
+  animation: app-panel-backdrop-in var(--sg-panel-enter-duration) var(--sg-motion-easing-enter) both;
+}
+.AppResponsivePanelBackdrop[data-faded="false"] {
+  background: var(--sg-color-bg-transparent);
+}
+.AppResponsivePanelContent {
+  --panel-preset-width: var(--sg-panel-width-medium);
+  box-sizing: border-box;
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--panel-custom-width, var(--panel-preset-width));
+  max-width: min(100%, var(--panel-custom-max-width, 100%));
+  min-width: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  background: var(--sg-panel-bg);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  outline: none;
+  transform: translateY(var(--panel-drag-y, 0px));
+  transition:
+    transform var(--sg-panel-enter-duration) var(--sg-panel-enter-easing),
+    height var(--sg-panel-enter-duration) var(--sg-panel-enter-easing);
+  animation: app-panel-in var(--sg-panel-enter-duration) var(--sg-panel-enter-easing);
+}
+.AppResponsivePanelContent *,
+.AppResponsivePanelContent *::before,
+.AppResponsivePanelContent *::after {
+  box-sizing: border-box;
+}
+.AppResponsivePanelContent[data-size="small"] {
+  --panel-preset-width: var(--sg-panel-width-small);
+}
+.AppResponsivePanelContent[data-size="large"] {
+  --panel-preset-width: var(--sg-panel-width-large);
+}
+.AppResponsivePanelLayer[data-direction="left"] .AppResponsivePanelContent {
+  right: auto;
+  left: 0;
+}
+.AppResponsivePanelLayer[data-presentation="bottom-sheet"] .AppResponsivePanelContent {
+  inset: auto 0 0;
+  width: 100%;
+  max-width: var(--sg-panel-sheet-max-width);
+  margin-inline: auto;
+  height: var(--panel-drag-height, var(--panel-snap-height, auto));
+  max-height: var(--sg-panel-sheet-max-height);
+  border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
+}
+.AppResponsivePanelHeader {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  gap: var(--sg-panel-header-gap);
+  min-height: var(--sg-panel-header-min-height);
+  padding: calc(var(--sg-panel-header-padding-top) + env(safe-area-inset-top, 0px))
+    var(--sg-panel-padding-x) var(--sg-panel-header-padding-bottom);
+}
+.AppResponsivePanelContent[data-has-close] .AppResponsivePanelHeader {
+  padding-right: calc(var(--sg-panel-padding-x) + var(--sg-panel-close-size));
+}
+.AppResponsivePanelContent[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  gap: var(--sg-spacing-2);
+  padding-top: var(--sg-spacing-6);
+}
+.AppResponsivePanelContent[data-presentation="bottom-sheet"][data-header-align="center"]
+  .AppResponsivePanelHeader {
+  text-align: center;
+  padding-inline: calc(var(--sg-spacing-4) + var(--sg-panel-close-size));
+}
+.AppResponsivePanelTitle {
+  margin: 0;
+  font-family: var(--sg-font-alrim);
+  font-size: var(--sg-panel-title-size);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-panel-title-line-height);
+  overflow-wrap: anywhere;
+}
+.AppResponsivePanelDescription {
+  color: var(--sg-color-text-muted);
+  font-size: var(--sg-panel-description-size);
+  line-height: var(--sg-panel-description-line-height);
+  overflow-wrap: anywhere;
+}
+.AppResponsivePanelHeader[data-hidden] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.AppResponsivePanelClose {
+  position: absolute;
+  top: calc(var(--sg-spacing-5) + env(safe-area-inset-top, 0px));
+  right: var(--sg-spacing-4);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--sg-panel-close-size);
+  height: var(--sg-panel-close-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-color-bg-transparent);
+  color: var(--sg-color-text-default);
+  font-size: var(--sg-panel-close-glyph-size);
+  line-height: 1;
+  cursor: pointer;
+}
+.AppResponsivePanelClose:hover {
+  background: var(--sg-color-bg-transparent-pressed);
+}
+.AppResponsivePanelClose:focus-visible,
+.AppResponsivePanelHandle:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}
+.AppResponsivePanelBody {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--sg-panel-padding-x) var(--sg-panel-body-padding-bottom);
+  border-top: var(--sg-panel-divider-width) solid transparent;
+  transition: border-color var(--sg-motion-duration-color-transition);
+}
+.AppResponsivePanelBody[data-scrolled] {
+  border-top-color: var(--sg-color-stroke-weak);
+}
+.AppResponsivePanelFooter {
+  flex: none;
+  display: flex;
+  gap: var(--sg-spacing-2);
+  padding: var(--sg-panel-footer-padding-top) var(--sg-panel-padding-x)
+    var(--sg-panel-footer-padding-bottom);
+}
+.AppResponsivePanelContent[data-presentation="bottom-sheet"] .AppResponsivePanelBody {
+  padding-inline: var(--sg-spacing-semantic-screen-gutter-x);
+  padding-bottom: var(--sg-spacing-4);
+}
+.AppResponsivePanelContent[data-presentation="bottom-sheet"] .AppResponsivePanelFooter {
+  padding: var(--sg-spacing-3) var(--sg-spacing-semantic-screen-gutter-x) var(--sg-spacing-4);
+}
+.AppResponsivePanelHandle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  width: var(--sg-icon-button-size-nav);
+  height: var(--sg-icon-button-size-nav);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+.AppResponsivePanelHandle span {
+  position: absolute;
+  top: var(--sg-panel-handle-offset);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--sg-panel-handle-width);
+  height: var(--sg-panel-handle-height);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-panel-handle-color);
+}
+.AppResponsivePanelHandle:active span {
+  background: var(--sg-color-text-muted);
+}
+.AppResponsivePanelContent[data-dragging] {
+  transition: none;
+  animation: none;
+  user-select: none;
+}
+.AppResponsivePanelLayer[data-state="closed"] .AppResponsivePanelContent {
+  animation: app-panel-out var(--panel-exit-duration) var(--panel-exit-easing) both;
+}
+.AppResponsivePanelLayer[data-state="closed"] .AppResponsivePanelBackdrop {
+  animation: app-panel-backdrop-out var(--panel-exit-duration) var(--sg-motion-easing-exit) both;
+}
+.AppResponsivePanelLayer[data-skip-animation] .AppResponsivePanelContent,
+.AppResponsivePanelLayer[data-skip-animation] .AppResponsivePanelBackdrop {
+  animation: none;
+  transition: none;
+}
+@keyframes app-panel-in {
+  from {
+    transform: translate(var(--panel-enter-x), var(--panel-enter-y));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+@keyframes app-panel-out {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(var(--panel-enter-x), var(--panel-enter-y));
+  }
+}
+@keyframes app-panel-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes app-panel-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .AppResponsivePanelContent,
+  .AppResponsivePanelBackdrop {
+    animation: none !important;
+    transition: none !important;
+  }
+}
