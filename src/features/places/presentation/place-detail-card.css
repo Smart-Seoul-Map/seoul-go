@@ -82,6 +82,10 @@
 .PlaceDetailPanel .PlaceDetailPanelBody {
   padding: 0;
   border: 0;
+  scrollbar-width: none;
+}
+.PlaceDetailPanel .PlaceDetailPanelBody::-webkit-scrollbar {
+  display: none;
 }
 .PlaceDetailPanel .PlaceDetailCard {
   border: 0;

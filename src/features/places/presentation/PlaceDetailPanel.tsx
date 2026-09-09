@@ -31,7 +31,7 @@ export function PlaceDetailPanel({
   return (
     <AppResponsivePanel.Root
       {...rootProps}
-      sidePanelRootProps={{ direction: "left", size: "small" }}
+      sidePanelRootProps={{ presentation: "floating", direction: "right", size: "small" }}
       bottomSheetRootProps={{ handleOnly: true }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}

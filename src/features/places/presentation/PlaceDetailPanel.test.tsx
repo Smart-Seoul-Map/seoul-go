@@ -22,10 +22,13 @@ afterEach(() => {
 test("omits the subtitle only in the bottom sheet and restores it after resizing", () => {
   resize(1200);
   render(<PlaceDetailPanel place={{ ...place, subtitle }} defaultOpen />);
+  expect(screen.getByRole("dialog").dataset.appearance).toBe("floating");
+  expect(screen.getByRole("dialog").getAttribute("aria-modal")).toBe("true");
   expect(screen.getByText(subtitle)).toBeTruthy();
   resize(375);
   expect(screen.queryByText(subtitle)).toBeNull();
   expect(screen.getByRole("dialog")).toBeTruthy();
+  expect(screen.getByRole("dialog").dataset.appearance).toBeUndefined();
   resize(1200);
   expect(screen.getByText(subtitle)).toBeTruthy();
 });
