@@ -322,7 +322,12 @@
   --sg-dialog-motion-enter-scale: 1.3;
 
   /* Responsive panel */
+  --sg-breakpoint-sm: 480px;
   --sg-breakpoint-md: 768px;
+  --sg-breakpoint-lg: 1280px;
+  --sg-breakpoint-xl: 1440px;
+  --sg-safe-area-top: env(safe-area-inset-top, 0px);
+  --sg-safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --sg-panel-layer: 900;
   --sg-panel-width-small: 480px;
   --sg-panel-width-medium: 720px;
@@ -360,17 +365,13 @@
   --sg-focus-ring-width: 2px;
   --sg-focus-ring-offset: 2px;
 
-  /* Card and place detail */
+  /* Surfaces and place detail */
   --sg-color-bg-surface-paper: #fffbf0;
   --sg-radius-4_5: 18px;
   --sg-radius-5_5: 22px;
   --sg-radius-7: 28px;
-  --sg-card-bg: var(--sg-color-bg-surface-paper);
-  --sg-card-stroke: var(--sg-color-stroke-weak);
-  --sg-card-stroke-width: 1.2px;
-  --sg-card-radius: var(--sg-radius-7);
-  --sg-card-inset-radius: var(--sg-radius-4_5);
-  --sg-card-shadow: 0 6px 16px #0000001a;
+  --sg-stroke-width-surface: 1.2px;
+  --sg-shadow-raised: 0 6px 16px #0000001a;
   --sg-detail-width: 500px;
   --sg-detail-min-height: 660px;
   --sg-detail-header-min-height: var(--sg-icon-button-size-nav);
