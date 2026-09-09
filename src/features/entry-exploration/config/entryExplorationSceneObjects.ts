@@ -35,7 +35,7 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     interaction: {
       triggerRadius: 5.2,
     },
-    position: { x: 18, z: 6 },
+    position: { x: 18, z: 52 },
     rotationY: 0,
     size: { width: 14, depth: 9.55 },
     type: "floorOverlay",

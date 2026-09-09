@@ -30,6 +30,8 @@ import {
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
 import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
+import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
+import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 import {
   addEntryExplorationLights,
   createEntryExplorationCamera,
@@ -77,6 +79,7 @@ export function useEntryExplorationThreeScene({
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
+  const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
   const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
@@ -157,6 +160,10 @@ export function useEntryExplorationThreeScene({
         ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
+      );
+      guideArrowRef.current?.start(
+        performance.now(),
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
       );
     },
     speedPerSecond: ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond,
@@ -319,6 +326,19 @@ export function useEntryExplorationThreeScene({
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
+      const entryRect = container.getBoundingClientRect();
+      const towerPosition = atlasScenery.positionTowerAtEntry(
+        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
+      );
+      if (towerPosition) {
+        const guide = createEntryExplorationGuideArrow({
+          origin: cameraTarget,
+          towerPosition,
+          color: getEntryExplorationIntroTheme().guideColor,
+        });
+        guideArrowRef.current = guide;
+        scene.add(guide.object);
+      }
       introStatusRef.current = "entering";
       renderer.domElement.style.cursor = "default";
       renderer.domElement.setAttribute("aria-label", "서울 탐방을 시작하는 중");
@@ -485,6 +505,7 @@ export function useEntryExplorationThreeScene({
       if (introStatusRef.current === "ready") {
         updateActiveSceneInteractionCamera(camera, time, characterPosition);
       }
+      guideArrowRef.current?.update(time);
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(render);
     };
@@ -511,6 +532,8 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.removeEventListener("keydown", handleKeyDown);
       cancelAnimationFrame(frameId);
       introFloor.cancelPendingRefresh();
+      guideArrowRef.current?.dispose();
+      guideArrowRef.current = null;
       atlasScenery.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);

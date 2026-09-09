@@ -7,11 +7,13 @@ type AtlasPlacement = {
   width: number;
 };
 
+export const ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X = 0.95;
+
 // Offsets are relative to the fixed intro arrival point, not the moving character.
 export const ENTRY_EXPLORATION_ATLAS_OBJECTS = [
   { key: "bench", offset: { x: -2, z: 7 }, width: 2.6 },
   { key: "streetlamp", offset: { x: 5, z: -3 }, width: 1.6 },
-  { key: "tower", offset: { x: -13, z: 5 }, width: 2.6 },
+  { key: "tower", offset: { x: 19, z: 15 }, width: 4.8 },
   { key: "park", offset: { x: -18, z: -10 }, width: 11 },
   { key: "waterfront", offset: { x: -32, z: 5 }, width: 13 },
   { key: "store", offset: { x: 15, z: -12 }, width: 8 },

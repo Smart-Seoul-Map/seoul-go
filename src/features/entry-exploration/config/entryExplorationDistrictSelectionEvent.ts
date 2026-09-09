@@ -7,8 +7,8 @@ export const ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG = {
   bounceMaxHeight: 2.6,
   chargeMaxDurationMs: 1400,
   jumpMapPosition: {
-    x: 5.8,
-    z: 6.8,
+    x: 5,
+    z: 40,
   },
   jumpStartPoint: {
     x: 0,
