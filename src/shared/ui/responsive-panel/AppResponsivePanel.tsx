@@ -222,6 +222,7 @@ function MountedContent({
   });
   const drag = useSheetDrag(contentRef, panel, showHandle);
   const presentation = panel.isDesktop ? "side-panel" : "bottom-sheet";
+  const appearance = panel.isDesktop ? (panel.side.presentation ?? "attached") : undefined;
   const snapIndex = panel.sheet.snapPoints?.findIndex((point) => point === panel.snapPoint) ?? 0;
   const backdropVisible = panel.isDesktop || snapIndex >= (panel.sheet.fadeFromIndex ?? 0);
   const contentStyle = {
@@ -236,6 +237,7 @@ function MountedContent({
     <div
       className="AppResponsivePanelLayer"
       data-presentation={presentation}
+      data-appearance={appearance}
       data-state={panel.open ? "open" : "closed"}
       data-direction={panel.side.direction ?? "right"}
       data-skip-animation={panel.skipAnimation || undefined}
@@ -262,6 +264,7 @@ function MountedContent({
         className={["AppResponsivePanelContent", className].filter(Boolean).join(" ")}
         style={contentStyle}
         data-presentation={presentation}
+        data-appearance={appearance}
         data-state={panel.open ? "open" : "closed"}
         data-size={panel.side.size ?? "medium"}
         data-header-align={panel.sheet.headerAlign ?? "left"}

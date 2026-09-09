@@ -34,7 +34,9 @@ import { AppResponsivePanel } from "@shared/ui/responsive-panel";
 
 ## 화면별 옵션
 
-- `sidePanelRootProps`: direction(left/right, 기본 right), size(small/medium/large, 기본 medium), modal, dismissible.
+- `sidePanelRootProps`: presentation(attached/floating, 기본 attached), direction(left/right, 기본 right), size(small/medium/large, 기본 medium), modal, dismissible.
+- `presentation: "floating"`은 데스크톱 외형만 변경한다. 화면 가장자리 여백, 내용 높이, 테두리, 모서리와 그림자를 적용하고 긴 본문은 화면 안에서 스크롤한다. 모달, 포커스, 닫기 규칙은 변경하지 않는다. 모바일에서는 이 옵션과 관계없이 기존 바텀시트를 사용한다.
+- 떠 있는 패널 외형은 `--sg-panel-floating-*` 토큰으로 조정한다. `useResponsivePanelPresentation()`은 외형과 관계없이 데스크톱에서 `side-panel`, 모바일에서 `bottom-sheet`를 반환한다.
 - 기본 너비는 480/720/960px이며 Content의 width/maxWidth로 덮어쓸 수 있다.
 - `bottomSheetRootProps`: modal, dismissible, headerAlign(left/center), handleOnly, skipAnimation, snapPoints, activeSnapPoint, setActiveSnapPoint, fadeFromIndex.
 - 스냅 포인트는 작은 순서로 전달한다. `"300px"`은 픽셀, `0.5`는 뷰포트 높이의 절반이다. 최대 높이는 `--sg-panel-sheet-max-height`에 제한된다.

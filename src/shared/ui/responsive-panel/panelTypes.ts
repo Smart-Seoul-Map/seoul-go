@@ -17,6 +17,7 @@ export type PanelOpenChangeDetails = {
 };
 
 export type SidePanelOptions = {
+  presentation?: "attached" | "floating";
   direction?: "left" | "right";
   size?: "small" | "medium" | "large";
   modal?: boolean;

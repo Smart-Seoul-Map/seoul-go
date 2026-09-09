@@ -332,6 +332,11 @@
   --sg-panel-width-small: 480px;
   --sg-panel-width-medium: 720px;
   --sg-panel-width-large: 960px;
+  --sg-panel-floating-gap: var(--sg-spacing-6);
+  --sg-panel-floating-radius: var(--sg-radius-7);
+  --sg-panel-floating-shadow: var(--sg-shadow-raised);
+  --sg-panel-floating-stroke: var(--sg-color-stroke-weak);
+  --sg-panel-floating-stroke-width: var(--sg-stroke-width-surface);
   --sg-panel-bg: var(--sg-color-bg-floating);
   --sg-panel-backdrop-bg: var(--sg-color-bg-overlay);
   --sg-panel-header-min-height: 70px;

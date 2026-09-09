@@ -77,6 +77,35 @@
   max-height: var(--sg-panel-sheet-max-height);
   border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
 }
+.AppResponsivePanelLayer[data-appearance="floating"] {
+  --panel-floating-top: max(var(--sg-panel-floating-gap), env(safe-area-inset-top, 0px));
+  --panel-floating-bottom: max(var(--sg-panel-floating-gap), env(safe-area-inset-bottom, 0px));
+  --panel-floating-left: max(var(--sg-panel-floating-gap), env(safe-area-inset-left, 0px));
+  --panel-floating-right: max(var(--sg-panel-floating-gap), env(safe-area-inset-right, 0px));
+  --panel-enter-x: calc(100% + var(--panel-floating-right));
+}
+.AppResponsivePanelLayer[data-appearance="floating"][data-direction="left"] {
+  --panel-enter-x: calc(-100% - var(--panel-floating-left));
+}
+.AppResponsivePanelLayer[data-appearance="floating"] > .AppResponsivePanelContent {
+  top: var(--panel-floating-top);
+  bottom: auto;
+  right: var(--panel-floating-right);
+  height: auto;
+  max-height: calc(100dvh - var(--panel-floating-top) - var(--panel-floating-bottom));
+  max-width: min(
+    calc(100% - var(--panel-floating-left) - var(--panel-floating-right)),
+    var(--panel-custom-max-width, 100%)
+  );
+  border: var(--sg-panel-floating-stroke-width) solid var(--sg-panel-floating-stroke);
+  border-radius: var(--sg-panel-floating-radius);
+  box-shadow: var(--sg-panel-floating-shadow);
+}
+.AppResponsivePanelLayer[data-appearance="floating"][data-direction="left"]
+  > .AppResponsivePanelContent {
+  right: auto;
+  left: var(--panel-floating-left);
+}
 .AppResponsivePanelHeader {
   position: relative;
   display: flex;

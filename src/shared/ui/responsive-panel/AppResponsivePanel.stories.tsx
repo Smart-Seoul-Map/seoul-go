@@ -54,6 +54,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+export const Floating: Story = {
+  args: { sidePanelRootProps: { presentation: "floating", size: "small" } },
+};
+export const FloatingLeft: Story = {
+  args: { sidePanelRootProps: { presentation: "floating", direction: "left", size: "small" } },
+};
 export const Left: Story = { args: { sidePanelRootProps: { direction: "left", size: "small" } } };
 export const Large: Story = { args: { sidePanelRootProps: { size: "large" } } };
 export const NonModal: Story = { args: { modal: false } };

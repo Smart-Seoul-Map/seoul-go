@@ -38,6 +38,46 @@ afterEach(() => {
 });
 
 describe("AppResponsivePanel", () => {
+  test("floating appearance preserves modal behavior and content across mobile resizing", () => {
+    const { container } = render(<Panel sidePanelRootProps={{ presentation: "floating" }} />);
+    const trigger = screen.getByRole("button", { name: "Open panel" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.dataset.appearance).toBe("floating");
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    expect(container.inert).toBe(true);
+    expect(document.body.style.overflow).toBe("hidden");
+    fireEvent.change(screen.getByLabelText("Notes"), {
+      target: { value: "Keep floating content" },
+    });
+    resize(375);
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(dialog.dataset.presentation).toBe("bottom-sheet");
+    expect(dialog.dataset.appearance).toBeUndefined();
+    expect(screen.getByRole("button", { name: "패널 높이 조절" })).toBeTruthy();
+    resize(1200);
+    expect(dialog.dataset.appearance).toBe("floating");
+    expect((screen.getByLabelText("Notes") as HTMLInputElement).value).toBe(
+      "Keep floating content"
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    expect(container.inert).toBe(false);
+  });
+
+  test("keeps the default attached appearance and floating outside-click dismissal", () => {
+    const { rerender } = render(<Panel defaultOpen />);
+    expect(screen.getByRole("dialog").dataset.appearance).toBe("attached");
+    rerender(
+      <Panel defaultOpen sidePanelRootProps={{ presentation: "floating", direction: "left" }} />
+    );
+    expect(screen.getByRole("dialog").dataset.appearance).toBe("floating");
+    fireEvent.click(document.querySelector(".AppResponsivePanelBackdrop")!);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
   test("preserves both refs when composing a trigger with AppButton", () => {
     const triggerRef = createRef<HTMLButtonElement>();
     const buttonRef = createRef<HTMLButtonElement>();
