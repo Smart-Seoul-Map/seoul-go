@@ -21,6 +21,7 @@ import {
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
+import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -62,6 +63,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
+  placeVisit?: EntryExplorationPlaceVisit;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -75,6 +77,7 @@ export function useEntryExplorationThreeScene({
   containerRef,
   createSceneInteractionControllers,
   onSceneControlsReady,
+  placeVisit,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
@@ -254,6 +257,7 @@ export function useEntryExplorationThreeScene({
     const width = Math.max(rect.width, 1);
     const height = Math.max(rect.height, 1);
     const scene = new THREE.Scene();
+    placeVisit?.reset();
     const camera = createEntryExplorationCamera(width, height);
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
@@ -396,6 +400,7 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
+      placeVisit?.dismiss();
       movementRef.current.moveTo({
         x: floorHit.point.x,
         z: floorHit.point.z,
@@ -481,6 +486,10 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        const destination = guideArrowRef.current?.destination;
+        if (destination && placeVisit?.update(characterPosition, destination)) {
+          movementRef.current.stop();
+        }
         updateSceneInteractionTriggers(characterPosition);
         activateReadySceneInteraction(time, (controller) => {
           const characterDestination = controller.getActivationCharacterDestination?.();
@@ -558,6 +567,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
+    placeVisit,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -16,11 +16,14 @@ import {
   useEntryExplorationThreeScene,
 } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
+import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import { ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS } from "../config/entryExplorationPlace";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 
 export type EntryExplorationPageProps = {
+  renderPlacePanel?: (props: { open: boolean; onClose: () => void }) => ReactNode;
   onSubwayStationSelectionChange?: (
     station: Line2Station | null,
     status: EntryExplorationSubwaySelectionStatus
@@ -29,6 +32,7 @@ export type EntryExplorationPageProps = {
 };
 
 export function EntryExplorationPage({
+  renderPlacePanel,
   onSubwayStationSelectionChange,
   subwayStationAvailabilityStatus,
 }: EntryExplorationPageProps): ReactElement {
@@ -37,6 +41,13 @@ export function EntryExplorationPage({
   const [startIntro, setStartIntro] = useState<(() => boolean) | null>(null);
   const [isIntroReady, setIsIntroReady] = useState(false);
   const [isIntroVisible, setIsIntroVisible] = useState(true);
+  const [isPlaceOpen, setIsPlaceOpen] = useState(false);
+  const [placeVisit] = useState(() =>
+    createEntryExplorationPlaceVisit({
+      radius: ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
+      onOpenChange: setIsPlaceOpen,
+    })
+  );
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
   const districtSelection = useEntryExplorationDistrictSelection({
@@ -56,6 +67,7 @@ export function EntryExplorationPage({
     containerRef,
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
+    placeVisit,
   });
 
   const handleStartIntro = (): void => {
@@ -86,6 +98,7 @@ export function EntryExplorationPage({
       {isIntroVisible ? (
         <EntryExplorationIntroOverlay disabled={!isIntroReady} onStart={handleStartIntro} />
       ) : null}
+      {!isIntroVisible && renderPlacePanel?.({ open: isPlaceOpen, onClose: placeVisit.dismiss })}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}

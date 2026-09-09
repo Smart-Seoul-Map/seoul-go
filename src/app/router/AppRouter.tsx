@@ -5,7 +5,12 @@ import { App } from "@app/App";
 import { PATH } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
+import {
+  EntryExplorationPage,
+  ENTRY_EXPLORATION_PLACE,
+  getLine2StationById,
+} from "@features/entry-exploration";
+import { PlaceDetailPanel } from "@features/places";
 import {
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
@@ -35,6 +40,17 @@ function EntryExplorationRoute(): ReactElement {
     <EntryExplorationPage
       onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
       subwayStationAvailabilityStatus={availabilityStatus}
+      renderPlacePanel={({ open, onClose }) => (
+        <PlaceDetailPanel
+          place={ENTRY_EXPLORATION_PLACE}
+          open={open}
+          modal={false}
+          mobileMaxHeight="var(--sg-entry-place-sheet-max-height)"
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) onClose();
+          }}
+        />
+      )}
     />
   );
 }

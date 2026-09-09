@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -21,6 +21,7 @@ const sceneControls = {
 
 let districtSelectionResultHandler:
   ((result: EntryExplorationDistrictSelectionResult) => void) | null = null;
+let placeVisit: UseEntryExplorationThreeSceneOptions["placeVisit"];
 const subwaySelectionViewModel: EntryExplorationSubwaySelectionViewModel = {
   handleClose: vi.fn(),
   handleStationSelection: vi.fn(),
@@ -42,7 +43,9 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
   useEntryExplorationThreeScene: ({
     createSceneInteractionControllers,
     onSceneControlsReady,
+    placeVisit: visit,
   }: UseEntryExplorationThreeSceneOptions) => {
+    placeVisit = visit;
     createSceneInteractionControllers();
     useEffect(() => {
       onSceneControlsReady?.(sceneControls);
@@ -177,6 +180,29 @@ describe("EntryExplorationPage", () => {
     expect(sceneControls.startIntro).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("button", { name: "탐방 시작" })).toBeNull();
   });
+
+  test("shows the tower panel on arrival and keeps manual dismissal until reentry", async () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
+    const destination = { x: 10, z: 20 };
+    act(() => {
+      placeVisit?.update(destination, destination);
+    });
+    const panel = await screen.findByRole("dialog", { name: "N서울타워" });
+    expect(panel.getAttribute("aria-modal")).not.toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull());
+    act(() => {
+      placeVisit?.update(destination, destination);
+    });
+    expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
+    act(() => {
+      placeVisit?.update({ x: 20, z: 20 }, destination);
+      placeVisit?.update(destination, destination);
+    });
+    expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
+  });
 });
 
 function renderEntryExplorationPage({
@@ -209,6 +235,13 @@ function renderEntryExplorationPage({
     {
       element: (
         <EntryExplorationPage
+          renderPlacePanel={({ open, onClose }) =>
+            open ? (
+              <section role="dialog" aria-label="N서울타워">
+                <button onClick={onClose}>닫기</button>
+              </section>
+            ) : null
+          }
           onSubwayStationSelectionChange={onSubwayStationSelectionChange}
           subwayStationAvailabilityStatus={subwayStationAvailabilityStatus}
         />

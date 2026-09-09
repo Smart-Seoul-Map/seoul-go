@@ -1,4 +1,5 @@
 export { EntryExplorationPage } from "./presentation/EntryExplorationPage";
+export { ENTRY_EXPLORATION_PLACE } from "./config/entryExplorationPlace";
 export { getLine2StationById } from "./config/line2SelectionConfig";
 export { getSubwayStationAvailabilityStatus } from "./application/subwayStationAvailability";
 export type { SubwayStationAvailabilityStatus } from "./application/subwayStationAvailability";
