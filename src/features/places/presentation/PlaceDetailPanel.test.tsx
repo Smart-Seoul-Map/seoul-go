@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, test } from "vitest";
 import { PlaceDetailCard } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
@@ -26,6 +26,24 @@ test("accepts a screen-specific mobile height cap without fixing the sheet heigh
   expect(dialog.style.getPropertyValue("--place-detail-mobile-max-height")).toBe("40dvh");
   expect(dialog.style.height).toBe("");
   expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("");
+});
+
+test("starts a mobile sheet at the first snap point and expands from the handle", () => {
+  resize(390);
+  render(
+    <PlaceDetailPanel
+      place={place}
+      defaultOpen
+      mobileMaxHeight="600px"
+      mobileSnapPoints={[0.4, "600px"]}
+    />
+  );
+  const dialog = screen.getByRole("dialog");
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("40dvh");
+  fireEvent.click(screen.getByRole("button", { name: "패널 높이 조절" }));
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("600px");
+  fireEvent.click(screen.getByRole("button", { name: "패널 높이 조절" }));
+  expect(screen.getByRole("dialog")).toBeTruthy();
 });
 
 test("leaves the default mobile height cap to the detail tokens", () => {

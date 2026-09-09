@@ -3,6 +3,7 @@ import {
   AppResponsivePanel,
   useResponsivePanelPresentation,
   type AppResponsivePanelRootProps,
+  type PanelSnapPoint,
 } from "@shared/ui/responsive-panel";
 import { PlaceDetailCard, type PlaceDetailCardProps } from "./PlaceDetailCard";
 
@@ -14,6 +15,9 @@ export type PlaceDetailPanelProps = Pick<
   trigger?: ReactElement;
   footer?: ReactNode;
   mobileMaxHeight?: CSSProperties["maxHeight"];
+  mobileSnapPoints?: PanelSnapPoint[];
+  mobileActiveSnapPoint?: PanelSnapPoint | null;
+  onMobileSnapPointChange?: (point: PanelSnapPoint | null) => void;
 };
 
 type PlaceDetailPanelStyle = CSSProperties & {
@@ -32,6 +36,9 @@ export function PlaceDetailPanel({
   trigger,
   footer,
   mobileMaxHeight,
+  mobileSnapPoints,
+  mobileActiveSnapPoint,
+  onMobileSnapPointChange,
   ...rootProps
 }: PlaceDetailPanelProps): ReactElement {
   const style: PlaceDetailPanelStyle = {
@@ -43,7 +50,13 @@ export function PlaceDetailPanel({
     <AppResponsivePanel.Root
       {...rootProps}
       sidePanelRootProps={{ presentation: "floating", direction: "right", size: "small" }}
-      bottomSheetRootProps={{ handleOnly: true }}
+      bottomSheetRootProps={{
+        handleOnly: true,
+        closeOnFinalSnapClick: false,
+        snapPoints: mobileSnapPoints,
+        activeSnapPoint: mobileActiveSnapPoint,
+        setActiveSnapPoint: onMobileSnapPointChange,
+      }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}
       <AppResponsivePanel.Content

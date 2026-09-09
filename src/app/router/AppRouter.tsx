@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
@@ -11,6 +11,7 @@ import {
   getLine2StationById,
 } from "@features/entry-exploration";
 import { PlaceDetailPanel } from "@features/places";
+import type { PanelSnapPoint } from "@shared/ui/responsive-panel";
 import {
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
@@ -33,8 +34,13 @@ type ExplorationRouteProps = {
   target?: ExplorationTarget | null;
 };
 
+const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.4, "600px"];
+
 function EntryExplorationRoute(): ReactElement {
   const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
+  const [entryPlaceSnapPoint, setEntryPlaceSnapPoint] = useState<PanelSnapPoint | null>(
+    ENTRY_PLACE_SNAP_POINTS[0]
+  );
 
   return (
     <EntryExplorationPage
@@ -45,9 +51,15 @@ function EntryExplorationRoute(): ReactElement {
           place={ENTRY_EXPLORATION_PLACE}
           open={open}
           modal={false}
-          mobileMaxHeight="var(--sg-entry-place-sheet-max-height)"
+          mobileMaxHeight="var(--sg-detail-sheet-max-height)"
+          mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
+          mobileActiveSnapPoint={entryPlaceSnapPoint}
+          onMobileSnapPointChange={setEntryPlaceSnapPoint}
           onOpenChange={(nextOpen) => {
-            if (!nextOpen) onClose();
+            if (!nextOpen) {
+              setEntryPlaceSnapPoint(ENTRY_PLACE_SNAP_POINTS[0]);
+              onClose();
+            }
           }}
         />
       )}
