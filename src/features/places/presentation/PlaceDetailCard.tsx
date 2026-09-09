@@ -44,7 +44,6 @@ export function PlaceDetailCard({
       borderRadius="radius.7"
       width="var(--sg-detail-width)"
       maxWidth="full"
-      minHeight="var(--sg-detail-min-height)"
       py="spacing.7"
       px="spacing.5"
     >

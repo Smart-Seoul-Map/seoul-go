@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 import {
   AppResponsivePanel,
   useResponsivePanelPresentation,
@@ -13,6 +13,11 @@ export type PlaceDetailPanelProps = Pick<
   place: PlaceDetailCardProps;
   trigger?: ReactElement;
   footer?: ReactNode;
+  mobileMaxHeight?: CSSProperties["maxHeight"];
+};
+
+type PlaceDetailPanelStyle = CSSProperties & {
+  "--place-detail-mobile-max-height"?: CSSProperties["maxHeight"];
 };
 
 function PanelPlaceCard({ place }: Pick<PlaceDetailPanelProps, "place">): ReactElement {
@@ -26,8 +31,14 @@ export function PlaceDetailPanel({
   place,
   trigger,
   footer,
+  mobileMaxHeight,
   ...rootProps
 }: PlaceDetailPanelProps): ReactElement {
+  const style: PlaceDetailPanelStyle = {
+    "--place-detail-mobile-max-height":
+      typeof mobileMaxHeight === "number" ? `${mobileMaxHeight}px` : mobileMaxHeight,
+  };
+
   return (
     <AppResponsivePanel.Root
       {...rootProps}
@@ -41,6 +52,7 @@ export function PlaceDetailPanel({
         showHandle
         width="var(--sg-detail-width)"
         className="PlaceDetailPanel"
+        style={style}
       >
         <AppResponsivePanel.Body className="PlaceDetailPanelBody">
           <PanelPlaceCard place={place} />

@@ -378,7 +378,9 @@
   --sg-stroke-width-surface: 1.2px;
   --sg-shadow-raised: 0 6px 16px #0000001a;
   --sg-detail-width: 500px;
-  --sg-detail-min-height: 660px;
+  --sg-detail-max-height: 852px;
+  --sg-detail-sheet-max-height: 600px;
+  --sg-entry-place-sheet-max-height: 40dvh;
   --sg-detail-header-min-height: var(--sg-icon-button-size-nav);
   --sg-detail-title-size: 2.125rem;
   --sg-detail-supporting-size: 1.1875rem;

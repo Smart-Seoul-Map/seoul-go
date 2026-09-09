@@ -19,6 +19,23 @@ afterEach(() => {
   resize(originalWidth);
 });
 
+test("accepts a screen-specific mobile height cap without fixing the sheet height", () => {
+  resize(390);
+  render(<PlaceDetailPanel place={place} defaultOpen mobileMaxHeight="40dvh" />);
+  const dialog = screen.getByRole("dialog");
+  expect(dialog.style.getPropertyValue("--place-detail-mobile-max-height")).toBe("40dvh");
+  expect(dialog.style.height).toBe("");
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("");
+});
+
+test("leaves the default mobile height cap to the detail tokens", () => {
+  resize(390);
+  render(<PlaceDetailPanel place={place} defaultOpen />);
+  expect(
+    screen.getByRole("dialog").style.getPropertyValue("--place-detail-mobile-max-height")
+  ).toBe("");
+});
+
 test("omits the subtitle only in the bottom sheet and restores it after resizing", () => {
   resize(1200);
   render(<PlaceDetailPanel place={{ ...place, subtitle }} defaultOpen />);

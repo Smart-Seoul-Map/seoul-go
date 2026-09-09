@@ -1,5 +1,13 @@
 .PlaceDetailCard {
-  overflow: hidden;
+  max-height: min(
+    var(--sg-detail-max-height),
+    calc(
+      100dvh - var(--sg-spacing-6) * 2 - env(safe-area-inset-top, 0px) -
+        env(safe-area-inset-bottom, 0px)
+    )
+  );
+  overflow: auto;
+  overscroll-behavior: contain;
   font-family: var(--sg-font-namsan);
   letter-spacing: 0;
   container-type: inline-size;
@@ -58,6 +66,7 @@
   object-fit: cover;
 }
 .PlaceDetailCardDescription p {
+  min-width: 0;
   margin: 0;
   font-size: var(--sg-font-size-8);
   line-height: var(--sg-line-height-7);
@@ -78,6 +87,18 @@
 }
 .PlaceDetailPanel {
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
+  --sg-panel-sheet-max-width: 100%;
+  --sg-panel-sheet-max-height: min(
+    var(--sg-detail-sheet-max-height),
+    var(--place-detail-mobile-max-height, 100dvh),
+    calc(100dvh - var(--sg-spacing-6) - env(safe-area-inset-top, 0px))
+  );
+}
+.AppResponsivePanelLayer[data-appearance="floating"] > .PlaceDetailPanel.AppResponsivePanelContent {
+  max-height: min(
+    var(--sg-detail-max-height),
+    calc(100dvh - var(--panel-floating-top) - var(--panel-floating-bottom))
+  );
 }
 .PlaceDetailPanel .PlaceDetailPanelBody {
   padding: 0;
@@ -90,7 +111,10 @@
 .PlaceDetailPanel .PlaceDetailCard {
   border: 0;
   border-radius: 0;
-  min-height: var(--sg-detail-min-height);
+  max-height: none;
+  overflow: hidden;
+  /* Let wheel and touch scrolling reach the panel body instead of this clipped card. */
+  overscroll-behavior: auto;
 }
 .PlaceDetailPanel[data-hide-title] .AppResponsivePanelClose {
   position: relative;
