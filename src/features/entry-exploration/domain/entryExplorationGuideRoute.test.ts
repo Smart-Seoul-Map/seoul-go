@@ -6,8 +6,11 @@ const options = {
   origin: { x: 0, z: 3.8 },
   towerPosition: { x: 23, z: 15 },
   cameraOffset: { x: 11, y: 13, z: 11 },
-  characterHeight: 2.3,
 };
+
+test("ends exactly at the tower base without a front or lateral offset", () => {
+  expect(createEntryExplorationGuideRoute(options).destination).toEqual(options.towerPosition);
+});
 
 test("starts down-screen and finishes rightward with a rounded L bend", () => {
   const route = createEntryExplorationGuideRoute(options);

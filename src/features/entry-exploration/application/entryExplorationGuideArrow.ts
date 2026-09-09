@@ -20,7 +20,6 @@ export function createEntryExplorationGuideArrow({
     origin,
     towerPosition,
     cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
-    characterHeight: ENTRY_EXPLORATION_SCENE_CONFIG.characterHeight,
   });
   const path = new THREE.CurvePath<THREE.Vector3>();
   path.add(new THREE.LineCurve3(toFloorPoint(route.start), toFloorPoint(route.bendStart)));

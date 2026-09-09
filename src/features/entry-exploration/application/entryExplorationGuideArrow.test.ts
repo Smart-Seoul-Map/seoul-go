@@ -26,11 +26,11 @@ test("waits for arrival, reveals dashes in order, then shows a directional arrow
   guide.update(1000);
   expect(dashes.count).toBe(0);
   guide.start(1000);
-  guide.update(1800);
+  guide.update(1300);
   const partialCount = dashes.count;
   expect(partialCount).toBeGreaterThan(0);
   expect(head.visible).toBe(false);
-  guide.update(10000);
+  guide.update(1600);
   expect(dashes.count).toBeGreaterThan(partialCount);
   expect(head.visible).toBe(true);
   expect(head.position.x).toBeCloseTo(guide.destination.x);
@@ -68,7 +68,7 @@ test.each([
   [853, 872],
   [375, 812],
   [390, 844],
-])("keeps the character clear of the tower at the guide destination at %ix%i", (width, height) => {
+])("aligns the arrowhead with the visible tower base at %ix%i", (width, height) => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
   const scenery = createEntryExplorationAtlasScenery();
   onTestFinished(scenery.dispose);
@@ -91,12 +91,11 @@ test.each([
     const vertex = new THREE.Vector3().fromBufferAttribute(positions, index);
     bounds.expandByPoint(tower.localToWorld(vertex).project(camera));
   }
-  const characterTop = new THREE.Vector3(
-    guide.destination.x,
-    ENTRY_EXPLORATION_SCENE_CONFIG.characterHeight,
-    guide.destination.z
-  ).project(camera);
-  expect(bounds.min.y).toBeGreaterThan(characterTop.y);
+  const head = guide.object.getObjectByName("entry-guide-head");
+  if (!head) throw new Error("The arrowhead is missing.");
+  const headScreen = head.position.clone().project(camera);
+  expect(headScreen.x).toBeCloseTo(bounds.getCenter(new THREE.Vector3()).x, 2);
+  expect(headScreen.y).toBeCloseTo(bounds.min.y, 2);
   expect(bounds.max.y).toBeLessThan(1);
   expect(bounds.min.x).toBeGreaterThan(-1);
   expect(bounds.max.x).toBeLessThan(1);

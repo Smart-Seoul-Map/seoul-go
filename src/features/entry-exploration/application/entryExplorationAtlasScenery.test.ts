@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { afterEach, beforeEach, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
+import { createEntryExplorationGuideRoute } from "../domain/entryExplorationGuideRoute";
 import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
 import {
   createEntryExplorationCamera,
@@ -21,7 +22,7 @@ test.each([
   [1920, 1080],
   [375, 812],
   [390, 844],
-])("reveals the tower tip at entry and the whole tower on approach at %ix%i", (width, height) => {
+])("keeps the tower to the right with a 2-3 second guide route at %ix%i", (width, height) => {
   const scenery = createEntryExplorationAtlasScenery();
   onTestFinished(() => scenery.dispose());
   scenery.positionTowerAtEntry(width / height);
@@ -36,13 +37,32 @@ test.each([
   updateEntryExplorationCameraFocus(camera, arrival);
   const initialBounds = projectMeshBounds(tower, camera);
 
-  // NDC ranges from -1 to 1: only the upper part should peek above the bottom edge.
-  expect(initialBounds.max.y).toBeGreaterThan(-0.95);
-  expect(initialBounds.max.y).toBeLessThan(-0.7);
-  expect(initialBounds.min.y).toBeLessThan(-1);
+  expect(initialBounds.max.y).toBeGreaterThan(-1);
+  expect(initialBounds.min.x).toBeLessThan(1);
   const tipX = initialBounds.getCenter(new THREE.Vector3()).x;
-  expect(tipX).toBeGreaterThan(0.88);
+  expect(tipX).toBeGreaterThan(2 / 3);
   expect(tipX).toBeLessThan(0.92);
+
+  const route = createEntryExplorationGuideRoute({
+    origin: arrival,
+    towerPosition: tower.position,
+    cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
+  });
+  const point = ({ x, z }: { x: number; z: number }) => new THREE.Vector3(x, 0, z);
+  const length =
+    point(arrival).distanceTo(point(route.bendStart)) +
+    new THREE.QuadraticBezierCurve3(
+      point(route.bendStart),
+      point(route.bendControl),
+      point(route.bendEnd)
+    ).getLength() +
+    point(route.bendEnd).distanceTo(point(route.destination));
+  const seconds = length / ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond;
+  expect(seconds).toBeGreaterThanOrEqual(2);
+  expect(seconds).toBeLessThanOrEqual(3);
+  const firstPosition = tower.position.clone();
+  scenery.positionTowerAtEntry(width / height);
+  expect(tower.position.distanceTo(firstPosition)).toBeLessThan(0.0001);
 
   updateEntryExplorationCameraFocus(camera, {
     x: arrival.x + (tower.position.x - arrival.x) * 0.8,

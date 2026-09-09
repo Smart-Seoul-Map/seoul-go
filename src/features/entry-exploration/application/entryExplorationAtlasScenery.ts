@@ -9,6 +9,7 @@ import {
   ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X,
 } from "../config/entryExplorationAtlasObjects";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
+import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 
 export function createEntryExplorationAtlasScenery() {
@@ -65,14 +66,24 @@ export function createEntryExplorationAtlasScenery() {
         return null;
       }
 
-      // Move along camera-right only, preserving the tower's bottom-edge reveal and scale.
       const right = new THREE.Vector3(1, 0, 0).applyQuaternion(facing);
-      const offset = tower.position
-        .clone()
-        .sub(new THREE.Vector3(intro.targetPosition.x, 0, intro.targetPosition.z));
+      const forward = new THREE.Vector3(cameraOffset.x, 0, cameraOffset.z).normalize();
       const halfWidth = (ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize / 2) * viewportAspect;
       const targetRight = (ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X * 2 - 1) * halfWidth;
-      tower.position.addScaledVector(right, targetRight - offset.dot(right));
+      // Bound the two legs of the L route; rounding the corner makes travel slightly shorter.
+      const travelDistance =
+        ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond *
+        ENTRY_EXPLORATION_GUIDE_CONFIG.targetTravelSeconds;
+      const endRight = Math.min(
+        targetRight,
+        travelDistance -
+          ENTRY_EXPLORATION_GUIDE_CONFIG.startForwardOffset -
+          ENTRY_EXPLORATION_GUIDE_CONFIG.bendRadius
+      );
+      tower.position
+        .set(intro.targetPosition.x, 0.06, intro.targetPosition.z)
+        .addScaledVector(right, endRight)
+        .addScaledVector(forward, travelDistance - Math.abs(endRight));
 
       return { x: tower.position.x, z: tower.position.z };
     },
