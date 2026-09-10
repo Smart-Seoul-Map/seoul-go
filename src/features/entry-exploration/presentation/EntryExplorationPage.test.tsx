@@ -11,6 +11,7 @@ import type {
   UseEntryExplorationThreeSceneOptions,
 } from "../application/useEntryExplorationThreeScene";
 import { EntryExplorationPage } from "./EntryExplorationPage";
+import { ENTRY_EXPLORATION_PLACES } from "../config/entryExplorationPlace";
 
 const sceneControls = {
   deactivateActiveInteraction: vi.fn(),
@@ -21,7 +22,7 @@ const sceneControls = {
 
 let districtSelectionResultHandler:
   ((result: EntryExplorationDistrictSelectionResult) => void) | null = null;
-let placeVisit: UseEntryExplorationThreeSceneOptions["placeVisit"];
+let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
 const subwaySelectionViewModel: EntryExplorationSubwaySelectionViewModel = {
   handleClose: vi.fn(),
   handleStationSelection: vi.fn(),
@@ -43,9 +44,9 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
   useEntryExplorationThreeScene: ({
     createSceneInteractionControllers,
     onSceneControlsReady,
-    placeVisit: visit,
+    placeVisits: visits,
   }: UseEntryExplorationThreeSceneOptions) => {
-    placeVisit = visit;
+    placeVisits = visits;
     createSceneInteractionControllers();
     useEffect(() => {
       onSceneControlsReady?.(sceneControls);
@@ -187,21 +188,51 @@ describe("EntryExplorationPage", () => {
     expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
     const destination = { x: 10, z: 20 };
     act(() => {
-      placeVisit?.update(destination, destination);
+      placeVisits?.tower.update(destination, destination);
     });
     const panel = await screen.findByRole("dialog", { name: "N서울타워" });
     expect(panel.getAttribute("aria-modal")).not.toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull());
     act(() => {
-      placeVisit?.update(destination, destination);
+      placeVisits?.tower.update(destination, destination);
     });
     expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
     act(() => {
-      placeVisit?.update({ x: 20, z: 20 }, destination);
-      placeVisit?.update(destination, destination);
+      placeVisits?.tower.update({ x: 20, z: 20 }, destination);
+      placeVisits?.tower.update(destination, destination);
     });
     expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
+  });
+
+  test("shows the hanok link, preserves dismissal, and switches to tower details without the link", async () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    const hanok = { x: 10, z: 20 };
+    act(() => {
+      placeVisits?.hanok.update(hanok, hanok);
+    });
+    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /한옥체험 지도 보기/ }).getAttribute("href")).toBe(
+      "https://map.seoul.go.kr/smgis2/short/6P5oo"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    act(() => {
+      placeVisits?.hanok.update(hanok, hanok);
+    });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    act(() => {
+      placeVisits?.hanok.update({ x: 30, z: 20 }, hanok);
+      placeVisits?.hanok.update(hanok, hanok);
+    });
+    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    act(() => {
+      placeVisits?.tower.update({ x: 30, z: 20 }, { x: 30, z: 20 });
+      placeVisits?.hanok.update({ x: 30, z: 20 }, hanok);
+    });
+    expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
+    expect(screen.queryByRole("link")).toBeNull();
   });
 });
 
@@ -235,12 +266,22 @@ function renderEntryExplorationPage({
     {
       element: (
         <EntryExplorationPage
-          renderPlacePanel={({ open, onClose }) =>
-            open ? (
-              <section role="dialog" aria-label="N서울타워">
+          renderPlacePanel={({ open, onClose, placeId }) =>
+            open && (
+              <div role="dialog" aria-label={ENTRY_EXPLORATION_PLACES[placeId].title}>
                 <button onClick={onClose}>닫기</button>
-              </section>
-            ) : null
+                {placeId === "hanok" && (
+                  <a
+                    href={ENTRY_EXPLORATION_PLACES.hanok.externalLink.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="한옥체험 지도 보기 (새 탭에서 열기)"
+                  >
+                    한옥체험 지도 보기
+                  </a>
+                )}
+              </div>
+            )
           }
           onSubwayStationSelectionChange={onSubwayStationSelectionChange}
           subwayStationAvailabilityStatus={subwayStationAvailabilityStatus}

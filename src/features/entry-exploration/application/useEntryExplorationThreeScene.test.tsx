@@ -294,8 +294,9 @@ describe("useEntryExplorationThreeScene", () => {
     expect(dispose).toHaveBeenCalledOnce();
   });
 
-  test("opens at the tower, stops once, and rearms only after leaving", async () => {
+  test("opens each landmark independently and rearms after leaving", async () => {
     const onOpenChange = vi.fn();
+    const onHanokOpenChange = vi.fn();
     const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
     const containerRef = createContainerRef();
     let startIntro: (() => boolean) | undefined;
@@ -304,7 +305,10 @@ describe("useEntryExplorationThreeScene", () => {
       useEntryExplorationThreeScene({
         containerRef,
         createSceneInteractionControllers: () => [],
-        placeVisit,
+        placeVisits: {
+          tower: placeVisit,
+          hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: onHanokOpenChange }),
+        },
         onSceneControlsReady: (controls) => {
           startIntro = controls?.startIntro;
         },
@@ -317,9 +321,11 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       startIntro?.();
     });
-    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
-    if (!head) throw new Error("The guide head is missing.");
-    const destination = { x: head.position.x, z: head.position.z };
+    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
+    if (!head || !tower) throw new Error("The guide head or tower is missing.");
+    const guideDestination = { x: head.position.x, z: head.position.z };
+    const destination = { x: tower.position.x, z: tower.position.z };
     const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
     mocks.movement.getCurrentPosition.mockReturnValue(destination);
     act(() => {
@@ -330,11 +336,21 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
       mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+      mocks.movement.getCurrentPosition.mockReturnValue(guideDestination);
+      frame?.(performance.now());
+    });
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onHanokOpenChange.mock.calls).toEqual([[true]]);
+    expect(mocks.movement.stop).toHaveBeenCalledOnce();
+
+    act(() => {
+      mocks.movement.getCurrentPosition.mockReturnValue(destination);
       frame?.(performance.now());
       frame?.(performance.now());
     });
     expect(onOpenChange.mock.calls).toEqual([[true]]);
-    expect(mocks.movement.stop).toHaveBeenCalledOnce();
+    expect(onHanokOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(mocks.movement.stop).toHaveBeenCalledTimes(2);
 
     const intersect = vi
       .spyOn(THREE.Raycaster.prototype, "intersectObject")
@@ -360,7 +376,7 @@ describe("useEntryExplorationThreeScene", () => {
       frame?.(performance.now());
     });
     expect(onOpenChange.mock.calls).toEqual([[true], [false], [true]]);
-    expect(mocks.movement.stop).toHaveBeenCalledTimes(2);
+    expect(mocks.movement.stop).toHaveBeenCalledTimes(3);
   });
 
   test("deactivates the active interaction instead of moving when the user clicks the floor outside the interaction", async () => {

@@ -22,6 +22,7 @@ import {
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -63,7 +64,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
-  placeVisit?: EntryExplorationPlaceVisit;
+  placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -77,7 +78,7 @@ export function useEntryExplorationThreeScene({
   containerRef,
   createSceneInteractionControllers,
   onSceneControlsReady,
-  placeVisit,
+  placeVisits,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
@@ -257,12 +258,16 @@ export function useEntryExplorationThreeScene({
     const width = Math.max(rect.width, 1);
     const height = Math.max(rect.height, 1);
     const scene = new THREE.Scene();
-    placeVisit?.reset();
+    Object.values(placeVisits ?? {}).forEach((visit) => visit.reset());
     const camera = createEntryExplorationCamera(width, height);
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
     const atlasScenery = createEntryExplorationAtlasScenery();
+    const landmarks = {
+      hanok: atlasScenery.object.getObjectByName("entry-atlas-hanok"),
+      tower: atlasScenery.object.getObjectByName("entry-atlas-tower"),
+    };
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
     ).map(createEntryExplorationSceneObject);
@@ -400,7 +405,7 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
-      placeVisit?.dismiss();
+      Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
       movementRef.current.moveTo({
         x: floorHit.point.x,
         z: floorHit.point.z,
@@ -486,9 +491,11 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
-        const destination = atlasScenery.object.getObjectByName("entry-atlas-tower")?.position;
-        if (destination && placeVisit?.update(characterPosition, destination)) {
-          movementRef.current.stop();
+        for (const placeId of ["hanok", "tower"] as const) {
+          const destination = landmarks[placeId]?.position;
+          if (destination && placeVisits?.[placeId].update(characterPosition, destination)) {
+            movementRef.current.stop();
+          }
         }
         updateSceneInteractionTriggers(characterPosition);
         activateReadySceneInteraction(time, (controller) => {
@@ -567,7 +574,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
-    placeVisit,
+    placeVisits,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,

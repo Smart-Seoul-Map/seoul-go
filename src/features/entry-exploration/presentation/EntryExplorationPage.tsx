@@ -17,13 +17,20 @@ import {
 } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
-import { ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS } from "../config/entryExplorationPlace";
+import {
+  ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
+  type EntryExplorationPlaceId,
+} from "../config/entryExplorationPlace";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 
 export type EntryExplorationPageProps = {
-  renderPlacePanel?: (props: { open: boolean; onClose: () => void }) => ReactNode;
+  renderPlacePanel?: (props: {
+    open: boolean;
+    onClose: () => void;
+    placeId: EntryExplorationPlaceId;
+  }) => ReactNode;
   onSubwayStationSelectionChange?: (
     station: Line2Station | null,
     status: EntryExplorationSubwaySelectionStatus
@@ -41,13 +48,22 @@ export function EntryExplorationPage({
   const [startIntro, setStartIntro] = useState<(() => boolean) | null>(null);
   const [isIntroReady, setIsIntroReady] = useState(false);
   const [isIntroVisible, setIsIntroVisible] = useState(true);
-  const [isPlaceOpen, setIsPlaceOpen] = useState(false);
-  const [placeVisit] = useState(() =>
-    createEntryExplorationPlaceVisit({
-      radius: ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
-      onOpenChange: setIsPlaceOpen,
-    })
+  const [placePanel, setPlacePanel] = useState<{ placeId: EntryExplorationPlaceId; open: boolean }>(
+    { placeId: "hanok", open: false }
   );
+  const [placeVisits] = useState(() => {
+    const createVisit = (placeId: EntryExplorationPlaceId) =>
+      createEntryExplorationPlaceVisit({
+        radius: ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
+        onOpenChange: (open) =>
+          setPlacePanel((current) => {
+            // Leaving another landmark must not close the newly opened place.
+            if (!open && current.placeId !== placeId) return current;
+            return { placeId, open };
+          }),
+      });
+    return { hanok: createVisit("hanok"), tower: createVisit("tower") };
+  });
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
   const districtSelection = useEntryExplorationDistrictSelection({
@@ -67,7 +83,7 @@ export function EntryExplorationPage({
     containerRef,
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
-    placeVisit,
+    placeVisits,
   });
 
   const handleStartIntro = (): void => {
@@ -98,7 +114,8 @@ export function EntryExplorationPage({
       {isIntroVisible ? (
         <EntryExplorationIntroOverlay disabled={!isIntroReady} onStart={handleStartIntro} />
       ) : null}
-      {!isIntroVisible && renderPlacePanel?.({ open: isPlaceOpen, onClose: placeVisit.dismiss })}
+      {!isIntroVisible &&
+        renderPlacePanel?.({ ...placePanel, onClose: placeVisits[placePanel.placeId].dismiss })}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}

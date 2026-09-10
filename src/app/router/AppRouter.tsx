@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
 
 import { App } from "@app/App";
@@ -7,7 +7,8 @@ import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
 import {
   EntryExplorationPage,
-  ENTRY_EXPLORATION_PLACE,
+  ENTRY_EXPLORATION_PLACES,
+  type EntryExplorationPlaceId,
   getLine2StationById,
 } from "@features/entry-exploration";
 import { PlaceDetailPanel } from "@features/places";
@@ -36,32 +37,45 @@ type ExplorationRouteProps = {
 
 const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.4, "600px"];
 
-function EntryExplorationRoute(): ReactElement {
-  const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
+type EntryPlacePanelProps = {
+  placeId: EntryExplorationPlaceId;
+  open: boolean;
+  onClose: () => void;
+};
+
+function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): ReactElement {
   const [entryPlaceSnapPoint, setEntryPlaceSnapPoint] = useState<PanelSnapPoint | null>(
     ENTRY_PLACE_SNAP_POINTS[0]
   );
+  useEffect(() => {
+    if (!open) setEntryPlaceSnapPoint(ENTRY_PLACE_SNAP_POINTS[0]);
+  }, [open]);
+
+  return (
+    <PlaceDetailPanel
+      place={ENTRY_EXPLORATION_PLACES[placeId]}
+      open={open}
+      modal={false}
+      mobileMaxHeight="var(--sg-detail-sheet-max-height)"
+      mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
+      mobileActiveSnapPoint={entryPlaceSnapPoint}
+      onMobileSnapPointChange={setEntryPlaceSnapPoint}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onClose();
+      }}
+    />
+  );
+}
+
+function EntryExplorationRoute(): ReactElement {
+  const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
 
   return (
     <EntryExplorationPage
       onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
       subwayStationAvailabilityStatus={availabilityStatus}
-      renderPlacePanel={({ open, onClose }) => (
-        <PlaceDetailPanel
-          place={ENTRY_EXPLORATION_PLACE}
-          open={open}
-          modal={false}
-          mobileMaxHeight="var(--sg-detail-sheet-max-height)"
-          mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
-          mobileActiveSnapPoint={entryPlaceSnapPoint}
-          onMobileSnapPointChange={setEntryPlaceSnapPoint}
-          onOpenChange={(nextOpen) => {
-            if (!nextOpen) {
-              setEntryPlaceSnapPoint(ENTRY_PLACE_SNAP_POINTS[0]);
-              onClose();
-            }
-          }}
-        />
+      renderPlacePanel={({ placeId, ...props }) => (
+        <EntryPlacePanel key={placeId} placeId={placeId} {...props} />
       )}
     />
   );
