@@ -6,6 +6,7 @@ import {
   type PanelSnapPoint,
 } from "@shared/ui/responsive-panel";
 import { PlaceDetailCard, type PlaceDetailCardProps } from "./PlaceDetailCard";
+import { PlaceDetailExternalLink } from "./PlaceDetailExternalLink";
 
 export type PlaceDetailPanelProps = Pick<
   AppResponsivePanelRootProps,
@@ -27,7 +28,11 @@ type PlaceDetailPanelStyle = CSSProperties & {
 function PanelPlaceCard({ place }: Pick<PlaceDetailPanelProps, "place">): ReactElement {
   const presentation = useResponsivePanelPresentation();
   return (
-    <PlaceDetailCard {...place} subtitle={presentation === "bottom-sheet" ? "" : place.subtitle} />
+    <PlaceDetailCard
+      {...place}
+      externalLink={undefined}
+      subtitle={presentation === "bottom-sheet" ? "" : place.subtitle}
+    />
   );
 }
 
@@ -70,7 +75,12 @@ export function PlaceDetailPanel({
         <AppResponsivePanel.Body className="PlaceDetailPanelBody">
           <PanelPlaceCard place={place} />
         </AppResponsivePanel.Body>
-        {footer && <AppResponsivePanel.Footer>{footer}</AppResponsivePanel.Footer>}
+        {(footer || place.externalLink) && (
+          <AppResponsivePanel.Footer className="PlaceDetailPanelFooter">
+            {place.externalLink && <PlaceDetailExternalLink {...place.externalLink} />}
+            {footer}
+          </AppResponsivePanel.Footer>
+        )}
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>
   );

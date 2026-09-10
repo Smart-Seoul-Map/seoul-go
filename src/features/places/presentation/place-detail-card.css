@@ -85,6 +85,38 @@
   line-height: var(--sg-line-height-6);
   overflow-wrap: anywhere;
 }
+.PlaceDetailExternalLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--sg-button-height-lg);
+  padding: var(--sg-spacing-3) var(--sg-spacing-4);
+  border-radius: var(--sg-button-radius);
+  background: var(--sg-button-primary-bg);
+  color: var(--sg-button-primary-fg);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-typography-button-label-font-size);
+  font-weight: var(--sg-typography-button-label-font-weight);
+  line-height: var(--sg-typography-button-label-line-height);
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.PlaceDetailExternalLink:hover,
+.PlaceDetailExternalLink:active {
+  background: var(--sg-button-primary-bg-pressed);
+}
+.PlaceDetailExternalLink:focus-visible {
+  outline: 3px solid var(--sg-state-focus-ring);
+  outline-offset: 2px;
+}
+.PlaceDetailCard > .PlaceDetailExternalLink {
+  margin-top: var(--sg-spacing-4);
+}
+.PlaceDetailPanel .PlaceDetailPanelFooter {
+  flex-direction: column;
+}
 .PlaceDetailPanel {
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
   --sg-panel-sheet-max-width: 100%;

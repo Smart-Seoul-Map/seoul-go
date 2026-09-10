@@ -7,6 +7,26 @@ const place = { title: "Tower", description: "Description", address: "Address" }
 const subtitle = "Custom subtitle";
 const originalWidth = window.innerWidth;
 
+test.each([390, 1366])("keeps the external link outside scrolling content at %ipx", (width) => {
+  resize(width);
+  render(
+    <PlaceDetailPanel
+      defaultOpen
+      place={{
+        ...place,
+        externalLink: {
+          label: "한옥체험 지도 보기",
+          href: "https://map.seoul.go.kr/smgis2/short/6P5oo",
+        },
+      }}
+    />
+  );
+  const links = screen.getAllByRole("link", { name: /한옥체험 지도 보기/ });
+  expect(links).toHaveLength(1);
+  expect(links[0].closest(".AppResponsivePanelFooter")).not.toBeNull();
+  expect(links[0].closest(".PlaceDetailPanelBody")).toBeNull();
+});
+
 function resize(width: number) {
   act(() => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
