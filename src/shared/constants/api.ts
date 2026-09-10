@@ -8,7 +8,7 @@ export const API_PROXY_PATH = {
 } as const;
 
 export const SMART_SEOUL_TMS_MAP_IDS = {
-  KOREAN: "dawul_kor_normal_3857_20260223",
+  KOREAN: "dawul_kor_normal_3857_20260526",
 } as const;
 
 export const END_POINTS = {

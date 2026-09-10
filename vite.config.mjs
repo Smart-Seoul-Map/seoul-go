@@ -8,7 +8,7 @@ const fromRoot = (path) => resolve(fileURLToPath(new URL(".", import.meta.url)),
 
 const SMART_SEOUL_TILE_PROXY_PATH = "/api/smart-seoul-map";
 const SMART_SEOUL_TMS_TILE_BASE_PATH = "/tms";
-const SMART_SEOUL_TMS_MAP_ID = "dawul_kor_normal_3857_20260223";
+const SMART_SEOUL_TMS_MAP_ID = "dawul_kor_normal_3857_20260526";
 const SMART_SEOUL_TILE_ACCEPT_HEADER =
   "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 const SMART_SEOUL_TMS_TILE_PATH_PATTERN = new RegExp(

@@ -20,7 +20,7 @@ describe("resolveExplorationMapTileSourceConfig", () => {
 
     expect(config).toEqual({
       smartSeoulMapTileUrlTemplate:
-        "/custom-map-proxy/tms/dawul_kor_normal_3857_20260223/{z}/{y}/{x}.png",
+        "/custom-map-proxy/tms/dawul_kor_normal_3857_20260526/{z}/{y}/{x}.png",
     });
   });
 });
