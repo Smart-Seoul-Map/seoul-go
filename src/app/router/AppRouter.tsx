@@ -18,7 +18,6 @@ import {
   createDistrictExplorationTarget,
   createStationExplorationTarget,
   parseDistrictExplorationTargetIdParam,
-  type Coordinates,
   type DistrictExplorationTarget,
   type ExplorationTarget,
   type StationExplorationTarget,
@@ -32,7 +31,6 @@ import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse
 import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
 type ExplorationRouteProps = {
-  spawnCenter?: Coordinates | null;
   target?: ExplorationTarget | null;
 };
 
@@ -47,16 +45,13 @@ function EntryExplorationRoute(): ReactElement {
   );
 }
 
-function ExplorationRoute({
-  spawnCenter = null,
-  target = null,
-}: ExplorationRouteProps): ReactElement {
+function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
   if (!target) {
     return <DefaultExplorationRouteContent />;
   }
 
   if (target.type === "district") {
-    return <DistrictExplorationRouteContent spawnCenter={spawnCenter} target={target} />;
+    return <DistrictExplorationRouteContent target={target} />;
   }
 
   if (target.type === "station") {
@@ -71,14 +66,13 @@ function DefaultExplorationRouteContent(): ReactElement {
 }
 
 type DistrictExplorationRouteContentProps = {
-  spawnCenter?: Coordinates | null;
   target: DistrictExplorationTarget | null;
 };
 
 function DistrictExplorationRouteContent({
-  spawnCenter = null,
   target,
 }: DistrictExplorationRouteContentProps): ReactElement {
+  const [searchParams] = useSearchParams();
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
   const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
 
@@ -86,7 +80,7 @@ function DistrictExplorationRouteContent({
     <ExplorationPage
       districtId={target?.districtId}
       districtName={target?.districtName}
-      initialCenter={spawnCenter ?? target?.center}
+      initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}
@@ -117,7 +111,6 @@ function StationExplorationRouteContent({
 
 function DistrictExplorationRoute(): ReactElement {
   const { districtId } = useParams();
-  const [searchParams] = useSearchParams();
   const parsedDistrictId = parseDistrictExplorationTargetIdParam(districtId);
   const district = parsedDistrictId ? getSeoulDistrictById(parsedDistrictId) : null;
 
@@ -125,13 +118,7 @@ function DistrictExplorationRoute(): ReactElement {
     return <Navigate to={PATH.HOME} replace />;
   }
 
-  return (
-    <ExplorationRoute
-      key={district.id}
-      spawnCenter={parseExplorationSpawnCenter(searchParams)}
-      target={createDistrictExplorationTarget(district)}
-    />
-  );
+  return <ExplorationRoute key={district.id} target={createDistrictExplorationTarget(district)} />;
 }
 
 function SubwayStationExplorationRoute(): ReactElement {

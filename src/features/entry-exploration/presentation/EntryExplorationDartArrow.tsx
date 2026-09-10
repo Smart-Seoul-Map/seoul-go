@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 
-import type { EntryExplorationDartViewportPoint } from "../application/entryExplorationSeoulTileMapViewInteraction";
+import type {
+  EntryExplorationDartThrowResult,
+  EntryExplorationDartViewportPoint,
+} from "../application/entryExplorationSeoulTileMapViewInteraction";
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
 import { ENTRY_EXPLORATION_DART_CONFIG } from "../config/entryExplorationDartConfig";
 import {
@@ -18,13 +21,12 @@ export type EntryExplorationDartArrowProps = {
   isTargetHovered: boolean;
   isVisible: boolean;
   onFlightEnd?: () => void;
-  shotId: number | null;
-  targetPoint: EntryExplorationDartViewportPoint | null;
+  shot: EntryExplorationDartThrowResult | null;
 };
 
 type DartFlight = {
   from: EntryExplorationDartScreenPoint;
-  shotId: number;
+  shot: EntryExplorationDartThrowResult;
   startedAt: number;
   to: EntryExplorationDartScreenPoint;
 };
@@ -67,8 +69,7 @@ export function EntryExplorationDartArrow({
   isTargetHovered,
   isVisible,
   onFlightEnd,
-  shotId,
-  targetPoint,
+  shot,
 }: EntryExplorationDartArrowProps): ReactElement | null {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<HTMLImageElement | null>(null);
@@ -76,7 +77,7 @@ export function EntryExplorationDartArrow({
   const clickHintRef = useRef<HTMLImageElement | null>(null);
   const pointerRef = useRef<EntryExplorationDartScreenPoint | null>(null);
   const flightRef = useRef<DartFlight | null>(null);
-  const landedShotRef = useRef<number | null>(null);
+  const landedShotRef = useRef<EntryExplorationDartThrowResult | null>(null);
   const rotationRef = useRef<number>(idleArrow.restRotationDegrees);
   const isTargetHoveredRef = useRef(isTargetHovered);
   const onFlightEndRef = useRef(onFlightEnd);
@@ -124,8 +125,8 @@ export function EntryExplorationDartArrow({
       const activeFlight = flightRef.current;
       const isFlying = activeFlight !== null && time - activeFlight.startedAt < flight.durationMs;
 
-      if (activeFlight && !isFlying && landedShotRef.current !== activeFlight.shotId) {
-        landedShotRef.current = activeFlight.shotId;
+      if (activeFlight && !isFlying && landedShotRef.current !== activeFlight.shot) {
+        landedShotRef.current = activeFlight.shot;
         onFlightEndRef.current?.();
       }
 
@@ -155,17 +156,17 @@ export function EntryExplorationDartArrow({
   useEffect(() => {
     const container = containerRef.current;
 
-    if (shotId === null || !container || !targetPoint) {
+    if (!shot || !container) {
       return;
     }
 
     flightRef.current = {
       from: getTipPoint(getRestPoint(container), rotationRef.current),
-      shotId,
+      shot,
       startedAt: performance.now(),
-      to: toScreenPoint(container, targetPoint),
+      to: toScreenPoint(container, shot.viewportPoint),
     };
-  }, [shotId, targetPoint]);
+  }, [shot]);
 
   if (!isVisible) {
     return null;
@@ -177,7 +178,7 @@ export function EntryExplorationDartArrow({
         ref={crosshairRef}
         alt=""
         className="entry-exploration-dart-arrow__crosshair"
-        data-shown={isTargetHovered || shotId !== null}
+        data-shown={isTargetHovered || shot !== null}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartCrosshair.src}
         style={{ width: crosshairSize }}
       />
@@ -186,7 +187,7 @@ export function EntryExplorationDartArrow({
         ref={clickHintRef}
         alt=""
         className="entry-exploration-dart-arrow__click-hint"
-        data-shown={shotId === null && !isTargetHovered}
+        data-shown={shot === null && !isTargetHovered}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartClickHint.src}
         style={{ width: clickHint.width }}
       />

@@ -8,12 +8,10 @@ import {
 } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-import type {
-  EntryExplorationDartThrowResult,
-  EntryExplorationDartViewControls,
-} from "../application/entryExplorationSeoulTileMapViewInteraction";
+import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
 import type { EntryExplorationSubwaySelectionStatus } from "../application/entryExplorationSubwaySelectionInteraction";
+import { useEntryExplorationDartShot } from "../application/useEntryExplorationDartShot";
 import { useEntryExplorationDistrictSelection } from "../application/useEntryExplorationDistrictSelection";
 import { useEntryExplorationSubwaySelection } from "../application/useEntryExplorationSubwaySelection";
 import {
@@ -47,48 +45,20 @@ export function EntryExplorationPage({
   const [isIntroVisible, setIsIntroVisible] = useState(true);
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
-  const [isDartGuideVisible, setIsDartGuideVisible] = useState(false);
-  const [isDartTargetHovered, setIsDartTargetHovered] = useState(false);
-  const [dartShotId, setDartShotId] = useState<number | null>(null);
-  const [dartShotResult, setDartShotResult] = useState<EntryExplorationDartThrowResult | null>(
-    null
-  );
-  const [dartLandedResult, setDartLandedResult] = useState<EntryExplorationDartThrowResult | null>(
-    null
-  );
-  const dartShotResultRef = useRef<EntryExplorationDartThrowResult | null>(null);
-  const dartViewControlsRef = useRef<EntryExplorationDartViewControls | null>(null);
-  const handleDartViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
-    dartViewControlsRef.current = controls;
-  }, []);
-  const handleDartViewActiveChange = useCallback((isActive: boolean) => {
-    setIsDartGuideVisible(isActive);
-
-    if (!isActive) {
-      setIsDartTargetHovered(false);
-      setDartShotId(null);
-      setDartShotResult(null);
-      setDartLandedResult(null);
-      dartViewControlsRef.current?.setHitCell(null);
-    }
-  }, []);
-  const handleDartThrowResult = useCallback((result: EntryExplorationDartThrowResult) => {
-    dartShotResultRef.current = result;
-    setDartShotId((currentShotId) => (currentShotId ?? 0) + 1);
-    setDartShotResult(result);
-  }, []);
-  const handleDartFlightEnd = useCallback(() => {
-    const landed = dartShotResultRef.current;
-
-    setDartLandedResult(landed);
-    dartViewControlsRef.current?.setHitCell(landed?.cell ?? null);
-  }, []);
+  const {
+    dartShot,
+    onDartTargetHoverChange,
+    onDartThrowResult,
+    onDartViewActiveChange,
+    onDartViewControlsReady,
+    onFlightEnd,
+  } = useEntryExplorationDartShot();
   const districtSelection = useEntryExplorationDistrictSelection({
     createExtraSceneInteractionControllers: createSubwayInteractionControllers,
-    onDartThrowResult: handleDartThrowResult,
-    onDartViewActiveChange: handleDartViewActiveChange,
-    onDartViewControlsReady: handleDartViewControlsReady,
-    onDartTargetHoverChange: setIsDartTargetHovered,
+    onDartTargetHoverChange,
+    onDartThrowResult,
+    onDartViewActiveChange,
+    onDartViewControlsReady,
   });
 
   const handleSceneControlsReady = useCallback(
@@ -135,7 +105,7 @@ export function EntryExplorationPage({
   };
 
   return (
-    <main className="entry-exploration-page" data-dart-target={isDartTargetHovered}>
+    <main className="entry-exploration-page" data-dart-target={dartShot.isTargetHovered}>
       <div
         ref={containerRef}
         aria-label="서울고 탐색 진입 화면"
@@ -145,17 +115,16 @@ export function EntryExplorationPage({
         <EntryExplorationIntroOverlay disabled={!isIntroReady} onStart={handleStartIntro} />
       ) : null}
       <EntryExplorationDartGuide
-        isVisible={isDartGuideVisible}
-        landedResult={dartLandedResult}
+        isVisible={dartShot.isGuideVisible}
+        landedResult={dartShot.landedResult}
         onStartExploration={handleStartGridExploration}
-        shotResult={dartShotResult}
+        shotResult={dartShot.shotResult}
       />
       <EntryExplorationDartArrow
-        isTargetHovered={isDartTargetHovered}
-        isVisible={isDartGuideVisible}
-        onFlightEnd={handleDartFlightEnd}
-        shotId={dartShotId}
-        targetPoint={dartShotResult?.viewportPoint ?? null}
+        isTargetHovered={dartShot.isTargetHovered}
+        isVisible={dartShot.isGuideVisible}
+        onFlightEnd={onFlightEnd}
+        shot={dartShot.shotResult}
       />
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}

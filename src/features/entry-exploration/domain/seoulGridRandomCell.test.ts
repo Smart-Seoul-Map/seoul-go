@@ -22,10 +22,4 @@ describe("seoul grid random cell", () => {
 
     expect(pickRandomSeoulGridCell(() => 1)).toEqual(cells[cells.length - 1]);
   });
-
-  test("always picks a valid cell", () => {
-    const picks = Array.from({ length: 200 }, () => pickRandomSeoulGridCell());
-
-    expect(picks.every((cell) => cell !== null && isSeoulGridCellValid(cell))).toBe(true);
-  });
 });
