@@ -1,5 +1,5 @@
 const SMART_SEOUL_TMS_TILE_BASE_URL = "https://map.seoul.go.kr/tms";
-const SMART_SEOUL_TMS_KOREAN_MAP_ID = "dawul_kor_normal_3857_20260223";
+const SMART_SEOUL_TMS_KOREAN_MAP_ID = "dawul_kor_normal_3857_20260526";
 const SMART_SEOUL_TILE_CACHE_CONTROL = "public, max-age=86400";
 const SMART_SEOUL_TILE_FALLBACK_CONTENT_TYPE = "image/png";
 const SMART_SEOUL_TILE_ACCEPT_HEADER =
@@ -7,7 +7,7 @@ const SMART_SEOUL_TILE_ACCEPT_HEADER =
 const SMART_SEOUL_TILE_PROXY_HEADER_NAME = "X-Smart-Seoul-Map-Proxy";
 const SMART_SEOUL_TILE_PROXY_HEADER_VALUE = "hit";
 const SMART_SEOUL_TMS_TILE_PATH_PATTERN =
-  /^\/api\/smart-seoul-map\/tms\/dawul_kor_normal_3857_20260223\/\d+\/\d+\/\d+\.png$/;
+  /^\/api\/smart-seoul-map\/tms\/dawul_kor_normal_3857_20260526\/\d+\/\d+\/\d+\.png$/;
 
 function createTextResponse(message: string, status: number): Response {
   return new Response(message, {
