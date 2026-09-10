@@ -1,3 +1,5 @@
+import type { ComponentPropsWithRef } from "react";
+
 import { type AppButtonSharedProps } from "./buttonTypes";
 
 import "./button.css";
@@ -5,10 +7,11 @@ import "./button.css";
 export type AppButtonVariant = "primary" | "secondary" | "strong" | "danger" | "outline" | "ghost";
 export type AppButtonSize = "xs" | "sm" | "md" | "lg";
 
-export type AppButtonProps = AppButtonSharedProps & {
-  size?: AppButtonSize;
-  variant?: AppButtonVariant;
-};
+export type AppButtonProps = AppButtonSharedProps &
+  ComponentPropsWithRef<"button"> & {
+    size?: AppButtonSize;
+    variant?: AppButtonVariant;
+  };
 
 export function AppButton({
   children,
@@ -18,10 +21,13 @@ export function AppButton({
   size = "md",
   type = "button",
   variant = "secondary",
+  className,
+  ...buttonProps
 }: AppButtonProps) {
   return (
     <button
-      className="AppButton"
+      {...buttonProps}
+      className={["AppButton", className].filter(Boolean).join(" ")}
       data-size={size}
       data-variant={variant}
       disabled={disabled}

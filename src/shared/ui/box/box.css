@@ -1,0 +1,727 @@
+/* Private variables reset on every Box so nested boxes never inherit layout props. */
+:where(.AppBox) {
+  box-sizing: border-box;
+  border-style: solid;
+  --sg-box-background: initial;
+  --sg-box-color: initial;
+  --sg-box-border-color: currentColor;
+  --sg-box-border-width: 0px;
+  --sg-box-border-radius: 0px;
+  --sg-box-box-shadow: none;
+  --sg-box-top: auto;
+  --sg-box-right: auto;
+  --sg-box-bottom: auto;
+  --sg-box-left: auto;
+  --sg-box-position: static;
+  --sg-box-overflow-x: visible;
+  --sg-box-overflow-y: visible;
+  --sg-box-z-index: auto;
+  --sg-box-flex-grow: 0;
+  --sg-box-flex-shrink: 1;
+  --sg-box-flex-wrap: nowrap;
+  --sg-box-justify-content: normal;
+  --sg-box-justify-self: auto;
+  --sg-box-align-items: stretch;
+  --sg-box-align-content: stretch;
+  --sg-box-align-self: auto;
+  --sg-box-grid-column: auto;
+  --sg-box-grid-row: auto;
+  --sg-box-transform: none;
+  --sg-box-active-background: initial;
+  --sg-box-border-top-width: var(--sg-box-border-width);
+  --sg-box-border-right-width: var(--sg-box-border-width);
+  --sg-box-border-bottom-width: var(--sg-box-border-width);
+  --sg-box-border-left-width: var(--sg-box-border-width);
+  --sg-box-border-top-left-radius: var(--sg-box-border-radius);
+  --sg-box-border-top-right-radius: var(--sg-box-border-radius);
+  --sg-box-border-bottom-right-radius: var(--sg-box-border-radius);
+  --sg-box-border-bottom-left-radius: var(--sg-box-border-radius);
+  --sg-box-display-base: initial;
+  --sg-box-display-sm: initial;
+  --sg-box-display-md: initial;
+  --sg-box-display-lg: initial;
+  --sg-box-display-xl: initial;
+  --sg-box-flex-direction-base: initial;
+  --sg-box-flex-direction-sm: initial;
+  --sg-box-flex-direction-md: initial;
+  --sg-box-flex-direction-lg: initial;
+  --sg-box-flex-direction-xl: initial;
+  --sg-box-gap-base: initial;
+  --sg-box-gap-sm: initial;
+  --sg-box-gap-md: initial;
+  --sg-box-gap-lg: initial;
+  --sg-box-gap-xl: initial;
+  --sg-box-width-base: initial;
+  --sg-box-width-sm: initial;
+  --sg-box-width-md: initial;
+  --sg-box-width-lg: initial;
+  --sg-box-width-xl: initial;
+  --sg-box-min-width-base: initial;
+  --sg-box-min-width-sm: initial;
+  --sg-box-min-width-md: initial;
+  --sg-box-min-width-lg: initial;
+  --sg-box-min-width-xl: initial;
+  --sg-box-max-width-base: initial;
+  --sg-box-max-width-sm: initial;
+  --sg-box-max-width-md: initial;
+  --sg-box-max-width-lg: initial;
+  --sg-box-max-width-xl: initial;
+  --sg-box-height-base: initial;
+  --sg-box-height-sm: initial;
+  --sg-box-height-md: initial;
+  --sg-box-height-lg: initial;
+  --sg-box-height-xl: initial;
+  --sg-box-min-height-base: initial;
+  --sg-box-min-height-sm: initial;
+  --sg-box-min-height-md: initial;
+  --sg-box-min-height-lg: initial;
+  --sg-box-min-height-xl: initial;
+  --sg-box-max-height-base: initial;
+  --sg-box-max-height-sm: initial;
+  --sg-box-max-height-md: initial;
+  --sg-box-max-height-lg: initial;
+  --sg-box-max-height-xl: initial;
+  --sg-box-padding-base: initial;
+  --sg-box-padding-sm: initial;
+  --sg-box-padding-md: initial;
+  --sg-box-padding-lg: initial;
+  --sg-box-padding-xl: initial;
+  --sg-box-padding-x-base: initial;
+  --sg-box-padding-x-sm: initial;
+  --sg-box-padding-x-md: initial;
+  --sg-box-padding-x-lg: initial;
+  --sg-box-padding-x-xl: initial;
+  --sg-box-padding-y-base: initial;
+  --sg-box-padding-y-sm: initial;
+  --sg-box-padding-y-md: initial;
+  --sg-box-padding-y-lg: initial;
+  --sg-box-padding-y-xl: initial;
+  --sg-box-padding-top-base: initial;
+  --sg-box-padding-top-sm: initial;
+  --sg-box-padding-top-md: initial;
+  --sg-box-padding-top-lg: initial;
+  --sg-box-padding-top-xl: initial;
+  --sg-box-padding-right-base: initial;
+  --sg-box-padding-right-sm: initial;
+  --sg-box-padding-right-md: initial;
+  --sg-box-padding-right-lg: initial;
+  --sg-box-padding-right-xl: initial;
+  --sg-box-padding-bottom-base: initial;
+  --sg-box-padding-bottom-sm: initial;
+  --sg-box-padding-bottom-md: initial;
+  --sg-box-padding-bottom-lg: initial;
+  --sg-box-padding-bottom-xl: initial;
+  --sg-box-padding-left-base: initial;
+  --sg-box-padding-left-sm: initial;
+  --sg-box-padding-left-md: initial;
+  --sg-box-padding-left-lg: initial;
+  --sg-box-padding-left-xl: initial;
+  --sg-box-margin-base: initial;
+  --sg-box-margin-sm: initial;
+  --sg-box-margin-md: initial;
+  --sg-box-margin-lg: initial;
+  --sg-box-margin-xl: initial;
+  --sg-box-margin-x-base: initial;
+  --sg-box-margin-x-sm: initial;
+  --sg-box-margin-x-md: initial;
+  --sg-box-margin-x-lg: initial;
+  --sg-box-margin-x-xl: initial;
+  --sg-box-margin-y-base: initial;
+  --sg-box-margin-y-sm: initial;
+  --sg-box-margin-y-md: initial;
+  --sg-box-margin-y-lg: initial;
+  --sg-box-margin-y-xl: initial;
+  --sg-box-margin-top-base: initial;
+  --sg-box-margin-top-sm: initial;
+  --sg-box-margin-top-md: initial;
+  --sg-box-margin-top-lg: initial;
+  --sg-box-margin-top-xl: initial;
+  --sg-box-margin-right-base: initial;
+  --sg-box-margin-right-sm: initial;
+  --sg-box-margin-right-md: initial;
+  --sg-box-margin-right-lg: initial;
+  --sg-box-margin-right-xl: initial;
+  --sg-box-margin-bottom-base: initial;
+  --sg-box-margin-bottom-sm: initial;
+  --sg-box-margin-bottom-md: initial;
+  --sg-box-margin-bottom-lg: initial;
+  --sg-box-margin-bottom-xl: initial;
+  --sg-box-margin-left-base: initial;
+  --sg-box-margin-left-sm: initial;
+  --sg-box-margin-left-md: initial;
+  --sg-box-margin-left-lg: initial;
+  --sg-box-margin-left-xl: initial;
+  --sg-box-display: var(--sg-box-display-base, block);
+  --sg-box-flex-direction: var(--sg-box-flex-direction-base, row);
+  --sg-box-gap: var(--sg-box-gap-base, 0px);
+  --sg-box-width: var(--sg-box-width-base, auto);
+  --sg-box-min-width: var(--sg-box-min-width-base, auto);
+  --sg-box-max-width: var(--sg-box-max-width-base, none);
+  --sg-box-height: var(--sg-box-height-base, auto);
+  --sg-box-min-height: var(--sg-box-min-height-base, auto);
+  --sg-box-max-height: var(--sg-box-max-height-base, none);
+  --sg-box-padding: var(--sg-box-padding-base, 0px);
+  --sg-box-padding-x: var(--sg-box-padding-x-base, var(--sg-box-padding));
+  --sg-box-padding-y: var(--sg-box-padding-y-base, var(--sg-box-padding));
+  --sg-box-padding-top: var(--sg-box-padding-top-base, var(--sg-box-padding-y));
+  --sg-box-padding-right: var(--sg-box-padding-right-base, var(--sg-box-padding-x));
+  --sg-box-padding-bottom: var(--sg-box-padding-bottom-base, var(--sg-box-padding-y));
+  --sg-box-padding-left: var(--sg-box-padding-left-base, var(--sg-box-padding-x));
+  --sg-box-margin: var(--sg-box-margin-base, 0px);
+  --sg-box-margin-x: var(--sg-box-margin-x-base, var(--sg-box-margin));
+  --sg-box-margin-y: var(--sg-box-margin-y-base, var(--sg-box-margin));
+  --sg-box-margin-top: var(--sg-box-margin-top-base, var(--sg-box-margin-y));
+  --sg-box-margin-right: var(--sg-box-margin-right-base, var(--sg-box-margin-x));
+  --sg-box-margin-bottom: var(--sg-box-margin-bottom-base, var(--sg-box-margin-y));
+  --sg-box-margin-left: var(--sg-box-margin-left-base, var(--sg-box-margin-x));
+  background: var(--sg-box-background);
+  color: var(--sg-box-color);
+  border-color: var(--sg-box-border-color);
+  box-shadow: var(--sg-box-box-shadow);
+  top: var(--sg-box-top);
+  right: var(--sg-box-right);
+  bottom: var(--sg-box-bottom);
+  left: var(--sg-box-left);
+  position: var(--sg-box-position);
+  overflow-x: var(--sg-box-overflow-x);
+  overflow-y: var(--sg-box-overflow-y);
+  z-index: var(--sg-box-z-index);
+  flex-grow: var(--sg-box-flex-grow);
+  flex-shrink: var(--sg-box-flex-shrink);
+  flex-wrap: var(--sg-box-flex-wrap);
+  justify-content: var(--sg-box-justify-content);
+  justify-self: var(--sg-box-justify-self);
+  align-items: var(--sg-box-align-items);
+  align-content: var(--sg-box-align-content);
+  align-self: var(--sg-box-align-self);
+  grid-column: var(--sg-box-grid-column);
+  grid-row: var(--sg-box-grid-row);
+  transform: var(--sg-box-transform);
+  border-top-width: var(--sg-box-border-top-width);
+  border-right-width: var(--sg-box-border-right-width);
+  border-bottom-width: var(--sg-box-border-bottom-width);
+  border-left-width: var(--sg-box-border-left-width);
+  border-top-left-radius: var(--sg-box-border-top-left-radius);
+  border-top-right-radius: var(--sg-box-border-top-right-radius);
+  border-bottom-right-radius: var(--sg-box-border-bottom-right-radius);
+  border-bottom-left-radius: var(--sg-box-border-bottom-left-radius);
+  display: var(--sg-box-display);
+  flex-direction: var(--sg-box-flex-direction);
+  gap: var(--sg-box-gap);
+  width: var(--sg-box-width);
+  min-width: var(--sg-box-min-width);
+  max-width: var(--sg-box-max-width);
+  height: var(--sg-box-height);
+  min-height: var(--sg-box-min-height);
+  max-height: var(--sg-box-max-height);
+  padding-top: var(--sg-box-padding-top);
+  padding-right: var(--sg-box-padding-right);
+  padding-bottom: var(--sg-box-padding-bottom);
+  padding-left: var(--sg-box-padding-left);
+  margin-top: var(--sg-box-margin-top);
+  margin-right: var(--sg-box-margin-right);
+  margin-bottom: var(--sg-box-margin-bottom);
+  margin-left: var(--sg-box-margin-left);
+}
+.AppBox[data-box-active]:active {
+  background: var(--sg-box-active-background);
+}
+
+@media (min-width: 480px) {
+  :where(.AppBox) {
+    --sg-box-display: var(--sg-box-display-sm, var(--sg-box-display-base, block));
+    --sg-box-flex-direction: var(
+      --sg-box-flex-direction-sm,
+      var(--sg-box-flex-direction-base, row)
+    );
+    --sg-box-gap: var(--sg-box-gap-sm, var(--sg-box-gap-base, 0px));
+    --sg-box-width: var(--sg-box-width-sm, var(--sg-box-width-base, auto));
+    --sg-box-min-width: var(--sg-box-min-width-sm, var(--sg-box-min-width-base, auto));
+    --sg-box-max-width: var(--sg-box-max-width-sm, var(--sg-box-max-width-base, none));
+    --sg-box-height: var(--sg-box-height-sm, var(--sg-box-height-base, auto));
+    --sg-box-min-height: var(--sg-box-min-height-sm, var(--sg-box-min-height-base, auto));
+    --sg-box-max-height: var(--sg-box-max-height-sm, var(--sg-box-max-height-base, none));
+    --sg-box-padding: var(--sg-box-padding-sm, var(--sg-box-padding-base, 0px));
+    --sg-box-padding-x: var(
+      --sg-box-padding-x-sm,
+      var(--sg-box-padding-x-base, var(--sg-box-padding))
+    );
+    --sg-box-padding-y: var(
+      --sg-box-padding-y-sm,
+      var(--sg-box-padding-y-base, var(--sg-box-padding))
+    );
+    --sg-box-padding-top: var(
+      --sg-box-padding-top-sm,
+      var(--sg-box-padding-top-base, var(--sg-box-padding-y))
+    );
+    --sg-box-padding-right: var(
+      --sg-box-padding-right-sm,
+      var(--sg-box-padding-right-base, var(--sg-box-padding-x))
+    );
+    --sg-box-padding-bottom: var(
+      --sg-box-padding-bottom-sm,
+      var(--sg-box-padding-bottom-base, var(--sg-box-padding-y))
+    );
+    --sg-box-padding-left: var(
+      --sg-box-padding-left-sm,
+      var(--sg-box-padding-left-base, var(--sg-box-padding-x))
+    );
+    --sg-box-margin: var(--sg-box-margin-sm, var(--sg-box-margin-base, 0px));
+    --sg-box-margin-x: var(--sg-box-margin-x-sm, var(--sg-box-margin-x-base, var(--sg-box-margin)));
+    --sg-box-margin-y: var(--sg-box-margin-y-sm, var(--sg-box-margin-y-base, var(--sg-box-margin)));
+    --sg-box-margin-top: var(
+      --sg-box-margin-top-sm,
+      var(--sg-box-margin-top-base, var(--sg-box-margin-y))
+    );
+    --sg-box-margin-right: var(
+      --sg-box-margin-right-sm,
+      var(--sg-box-margin-right-base, var(--sg-box-margin-x))
+    );
+    --sg-box-margin-bottom: var(
+      --sg-box-margin-bottom-sm,
+      var(--sg-box-margin-bottom-base, var(--sg-box-margin-y))
+    );
+    --sg-box-margin-left: var(
+      --sg-box-margin-left-sm,
+      var(--sg-box-margin-left-base, var(--sg-box-margin-x))
+    );
+  }
+}
+
+@media (min-width: 768px) {
+  :where(.AppBox) {
+    --sg-box-display: var(
+      --sg-box-display-md,
+      var(--sg-box-display-sm, var(--sg-box-display-base, block))
+    );
+    --sg-box-flex-direction: var(
+      --sg-box-flex-direction-md,
+      var(--sg-box-flex-direction-sm, var(--sg-box-flex-direction-base, row))
+    );
+    --sg-box-gap: var(--sg-box-gap-md, var(--sg-box-gap-sm, var(--sg-box-gap-base, 0px)));
+    --sg-box-width: var(--sg-box-width-md, var(--sg-box-width-sm, var(--sg-box-width-base, auto)));
+    --sg-box-min-width: var(
+      --sg-box-min-width-md,
+      var(--sg-box-min-width-sm, var(--sg-box-min-width-base, auto))
+    );
+    --sg-box-max-width: var(
+      --sg-box-max-width-md,
+      var(--sg-box-max-width-sm, var(--sg-box-max-width-base, none))
+    );
+    --sg-box-height: var(
+      --sg-box-height-md,
+      var(--sg-box-height-sm, var(--sg-box-height-base, auto))
+    );
+    --sg-box-min-height: var(
+      --sg-box-min-height-md,
+      var(--sg-box-min-height-sm, var(--sg-box-min-height-base, auto))
+    );
+    --sg-box-max-height: var(
+      --sg-box-max-height-md,
+      var(--sg-box-max-height-sm, var(--sg-box-max-height-base, none))
+    );
+    --sg-box-padding: var(
+      --sg-box-padding-md,
+      var(--sg-box-padding-sm, var(--sg-box-padding-base, 0px))
+    );
+    --sg-box-padding-x: var(
+      --sg-box-padding-x-md,
+      var(--sg-box-padding-x-sm, var(--sg-box-padding-x-base, var(--sg-box-padding)))
+    );
+    --sg-box-padding-y: var(
+      --sg-box-padding-y-md,
+      var(--sg-box-padding-y-sm, var(--sg-box-padding-y-base, var(--sg-box-padding)))
+    );
+    --sg-box-padding-top: var(
+      --sg-box-padding-top-md,
+      var(--sg-box-padding-top-sm, var(--sg-box-padding-top-base, var(--sg-box-padding-y)))
+    );
+    --sg-box-padding-right: var(
+      --sg-box-padding-right-md,
+      var(--sg-box-padding-right-sm, var(--sg-box-padding-right-base, var(--sg-box-padding-x)))
+    );
+    --sg-box-padding-bottom: var(
+      --sg-box-padding-bottom-md,
+      var(--sg-box-padding-bottom-sm, var(--sg-box-padding-bottom-base, var(--sg-box-padding-y)))
+    );
+    --sg-box-padding-left: var(
+      --sg-box-padding-left-md,
+      var(--sg-box-padding-left-sm, var(--sg-box-padding-left-base, var(--sg-box-padding-x)))
+    );
+    --sg-box-margin: var(
+      --sg-box-margin-md,
+      var(--sg-box-margin-sm, var(--sg-box-margin-base, 0px))
+    );
+    --sg-box-margin-x: var(
+      --sg-box-margin-x-md,
+      var(--sg-box-margin-x-sm, var(--sg-box-margin-x-base, var(--sg-box-margin)))
+    );
+    --sg-box-margin-y: var(
+      --sg-box-margin-y-md,
+      var(--sg-box-margin-y-sm, var(--sg-box-margin-y-base, var(--sg-box-margin)))
+    );
+    --sg-box-margin-top: var(
+      --sg-box-margin-top-md,
+      var(--sg-box-margin-top-sm, var(--sg-box-margin-top-base, var(--sg-box-margin-y)))
+    );
+    --sg-box-margin-right: var(
+      --sg-box-margin-right-md,
+      var(--sg-box-margin-right-sm, var(--sg-box-margin-right-base, var(--sg-box-margin-x)))
+    );
+    --sg-box-margin-bottom: var(
+      --sg-box-margin-bottom-md,
+      var(--sg-box-margin-bottom-sm, var(--sg-box-margin-bottom-base, var(--sg-box-margin-y)))
+    );
+    --sg-box-margin-left: var(
+      --sg-box-margin-left-md,
+      var(--sg-box-margin-left-sm, var(--sg-box-margin-left-base, var(--sg-box-margin-x)))
+    );
+  }
+}
+
+@media (min-width: 1280px) {
+  :where(.AppBox) {
+    --sg-box-display: var(
+      --sg-box-display-lg,
+      var(--sg-box-display-md, var(--sg-box-display-sm, var(--sg-box-display-base, block)))
+    );
+    --sg-box-flex-direction: var(
+      --sg-box-flex-direction-lg,
+      var(
+        --sg-box-flex-direction-md,
+        var(--sg-box-flex-direction-sm, var(--sg-box-flex-direction-base, row))
+      )
+    );
+    --sg-box-gap: var(
+      --sg-box-gap-lg,
+      var(--sg-box-gap-md, var(--sg-box-gap-sm, var(--sg-box-gap-base, 0px)))
+    );
+    --sg-box-width: var(
+      --sg-box-width-lg,
+      var(--sg-box-width-md, var(--sg-box-width-sm, var(--sg-box-width-base, auto)))
+    );
+    --sg-box-min-width: var(
+      --sg-box-min-width-lg,
+      var(--sg-box-min-width-md, var(--sg-box-min-width-sm, var(--sg-box-min-width-base, auto)))
+    );
+    --sg-box-max-width: var(
+      --sg-box-max-width-lg,
+      var(--sg-box-max-width-md, var(--sg-box-max-width-sm, var(--sg-box-max-width-base, none)))
+    );
+    --sg-box-height: var(
+      --sg-box-height-lg,
+      var(--sg-box-height-md, var(--sg-box-height-sm, var(--sg-box-height-base, auto)))
+    );
+    --sg-box-min-height: var(
+      --sg-box-min-height-lg,
+      var(--sg-box-min-height-md, var(--sg-box-min-height-sm, var(--sg-box-min-height-base, auto)))
+    );
+    --sg-box-max-height: var(
+      --sg-box-max-height-lg,
+      var(--sg-box-max-height-md, var(--sg-box-max-height-sm, var(--sg-box-max-height-base, none)))
+    );
+    --sg-box-padding: var(
+      --sg-box-padding-lg,
+      var(--sg-box-padding-md, var(--sg-box-padding-sm, var(--sg-box-padding-base, 0px)))
+    );
+    --sg-box-padding-x: var(
+      --sg-box-padding-x-lg,
+      var(
+        --sg-box-padding-x-md,
+        var(--sg-box-padding-x-sm, var(--sg-box-padding-x-base, var(--sg-box-padding)))
+      )
+    );
+    --sg-box-padding-y: var(
+      --sg-box-padding-y-lg,
+      var(
+        --sg-box-padding-y-md,
+        var(--sg-box-padding-y-sm, var(--sg-box-padding-y-base, var(--sg-box-padding)))
+      )
+    );
+    --sg-box-padding-top: var(
+      --sg-box-padding-top-lg,
+      var(
+        --sg-box-padding-top-md,
+        var(--sg-box-padding-top-sm, var(--sg-box-padding-top-base, var(--sg-box-padding-y)))
+      )
+    );
+    --sg-box-padding-right: var(
+      --sg-box-padding-right-lg,
+      var(
+        --sg-box-padding-right-md,
+        var(--sg-box-padding-right-sm, var(--sg-box-padding-right-base, var(--sg-box-padding-x)))
+      )
+    );
+    --sg-box-padding-bottom: var(
+      --sg-box-padding-bottom-lg,
+      var(
+        --sg-box-padding-bottom-md,
+        var(--sg-box-padding-bottom-sm, var(--sg-box-padding-bottom-base, var(--sg-box-padding-y)))
+      )
+    );
+    --sg-box-padding-left: var(
+      --sg-box-padding-left-lg,
+      var(
+        --sg-box-padding-left-md,
+        var(--sg-box-padding-left-sm, var(--sg-box-padding-left-base, var(--sg-box-padding-x)))
+      )
+    );
+    --sg-box-margin: var(
+      --sg-box-margin-lg,
+      var(--sg-box-margin-md, var(--sg-box-margin-sm, var(--sg-box-margin-base, 0px)))
+    );
+    --sg-box-margin-x: var(
+      --sg-box-margin-x-lg,
+      var(
+        --sg-box-margin-x-md,
+        var(--sg-box-margin-x-sm, var(--sg-box-margin-x-base, var(--sg-box-margin)))
+      )
+    );
+    --sg-box-margin-y: var(
+      --sg-box-margin-y-lg,
+      var(
+        --sg-box-margin-y-md,
+        var(--sg-box-margin-y-sm, var(--sg-box-margin-y-base, var(--sg-box-margin)))
+      )
+    );
+    --sg-box-margin-top: var(
+      --sg-box-margin-top-lg,
+      var(
+        --sg-box-margin-top-md,
+        var(--sg-box-margin-top-sm, var(--sg-box-margin-top-base, var(--sg-box-margin-y)))
+      )
+    );
+    --sg-box-margin-right: var(
+      --sg-box-margin-right-lg,
+      var(
+        --sg-box-margin-right-md,
+        var(--sg-box-margin-right-sm, var(--sg-box-margin-right-base, var(--sg-box-margin-x)))
+      )
+    );
+    --sg-box-margin-bottom: var(
+      --sg-box-margin-bottom-lg,
+      var(
+        --sg-box-margin-bottom-md,
+        var(--sg-box-margin-bottom-sm, var(--sg-box-margin-bottom-base, var(--sg-box-margin-y)))
+      )
+    );
+    --sg-box-margin-left: var(
+      --sg-box-margin-left-lg,
+      var(
+        --sg-box-margin-left-md,
+        var(--sg-box-margin-left-sm, var(--sg-box-margin-left-base, var(--sg-box-margin-x)))
+      )
+    );
+  }
+}
+
+@media (min-width: 1440px) {
+  :where(.AppBox) {
+    --sg-box-display: var(
+      --sg-box-display-xl,
+      var(
+        --sg-box-display-lg,
+        var(--sg-box-display-md, var(--sg-box-display-sm, var(--sg-box-display-base, block)))
+      )
+    );
+    --sg-box-flex-direction: var(
+      --sg-box-flex-direction-xl,
+      var(
+        --sg-box-flex-direction-lg,
+        var(
+          --sg-box-flex-direction-md,
+          var(--sg-box-flex-direction-sm, var(--sg-box-flex-direction-base, row))
+        )
+      )
+    );
+    --sg-box-gap: var(
+      --sg-box-gap-xl,
+      var(--sg-box-gap-lg, var(--sg-box-gap-md, var(--sg-box-gap-sm, var(--sg-box-gap-base, 0px))))
+    );
+    --sg-box-width: var(
+      --sg-box-width-xl,
+      var(
+        --sg-box-width-lg,
+        var(--sg-box-width-md, var(--sg-box-width-sm, var(--sg-box-width-base, auto)))
+      )
+    );
+    --sg-box-min-width: var(
+      --sg-box-min-width-xl,
+      var(
+        --sg-box-min-width-lg,
+        var(--sg-box-min-width-md, var(--sg-box-min-width-sm, var(--sg-box-min-width-base, auto)))
+      )
+    );
+    --sg-box-max-width: var(
+      --sg-box-max-width-xl,
+      var(
+        --sg-box-max-width-lg,
+        var(--sg-box-max-width-md, var(--sg-box-max-width-sm, var(--sg-box-max-width-base, none)))
+      )
+    );
+    --sg-box-height: var(
+      --sg-box-height-xl,
+      var(
+        --sg-box-height-lg,
+        var(--sg-box-height-md, var(--sg-box-height-sm, var(--sg-box-height-base, auto)))
+      )
+    );
+    --sg-box-min-height: var(
+      --sg-box-min-height-xl,
+      var(
+        --sg-box-min-height-lg,
+        var(
+          --sg-box-min-height-md,
+          var(--sg-box-min-height-sm, var(--sg-box-min-height-base, auto))
+        )
+      )
+    );
+    --sg-box-max-height: var(
+      --sg-box-max-height-xl,
+      var(
+        --sg-box-max-height-lg,
+        var(
+          --sg-box-max-height-md,
+          var(--sg-box-max-height-sm, var(--sg-box-max-height-base, none))
+        )
+      )
+    );
+    --sg-box-padding: var(
+      --sg-box-padding-xl,
+      var(
+        --sg-box-padding-lg,
+        var(--sg-box-padding-md, var(--sg-box-padding-sm, var(--sg-box-padding-base, 0px)))
+      )
+    );
+    --sg-box-padding-x: var(
+      --sg-box-padding-x-xl,
+      var(
+        --sg-box-padding-x-lg,
+        var(
+          --sg-box-padding-x-md,
+          var(--sg-box-padding-x-sm, var(--sg-box-padding-x-base, var(--sg-box-padding)))
+        )
+      )
+    );
+    --sg-box-padding-y: var(
+      --sg-box-padding-y-xl,
+      var(
+        --sg-box-padding-y-lg,
+        var(
+          --sg-box-padding-y-md,
+          var(--sg-box-padding-y-sm, var(--sg-box-padding-y-base, var(--sg-box-padding)))
+        )
+      )
+    );
+    --sg-box-padding-top: var(
+      --sg-box-padding-top-xl,
+      var(
+        --sg-box-padding-top-lg,
+        var(
+          --sg-box-padding-top-md,
+          var(--sg-box-padding-top-sm, var(--sg-box-padding-top-base, var(--sg-box-padding-y)))
+        )
+      )
+    );
+    --sg-box-padding-right: var(
+      --sg-box-padding-right-xl,
+      var(
+        --sg-box-padding-right-lg,
+        var(
+          --sg-box-padding-right-md,
+          var(--sg-box-padding-right-sm, var(--sg-box-padding-right-base, var(--sg-box-padding-x)))
+        )
+      )
+    );
+    --sg-box-padding-bottom: var(
+      --sg-box-padding-bottom-xl,
+      var(
+        --sg-box-padding-bottom-lg,
+        var(
+          --sg-box-padding-bottom-md,
+          var(
+            --sg-box-padding-bottom-sm,
+            var(--sg-box-padding-bottom-base, var(--sg-box-padding-y))
+          )
+        )
+      )
+    );
+    --sg-box-padding-left: var(
+      --sg-box-padding-left-xl,
+      var(
+        --sg-box-padding-left-lg,
+        var(
+          --sg-box-padding-left-md,
+          var(--sg-box-padding-left-sm, var(--sg-box-padding-left-base, var(--sg-box-padding-x)))
+        )
+      )
+    );
+    --sg-box-margin: var(
+      --sg-box-margin-xl,
+      var(
+        --sg-box-margin-lg,
+        var(--sg-box-margin-md, var(--sg-box-margin-sm, var(--sg-box-margin-base, 0px)))
+      )
+    );
+    --sg-box-margin-x: var(
+      --sg-box-margin-x-xl,
+      var(
+        --sg-box-margin-x-lg,
+        var(
+          --sg-box-margin-x-md,
+          var(--sg-box-margin-x-sm, var(--sg-box-margin-x-base, var(--sg-box-margin)))
+        )
+      )
+    );
+    --sg-box-margin-y: var(
+      --sg-box-margin-y-xl,
+      var(
+        --sg-box-margin-y-lg,
+        var(
+          --sg-box-margin-y-md,
+          var(--sg-box-margin-y-sm, var(--sg-box-margin-y-base, var(--sg-box-margin)))
+        )
+      )
+    );
+    --sg-box-margin-top: var(
+      --sg-box-margin-top-xl,
+      var(
+        --sg-box-margin-top-lg,
+        var(
+          --sg-box-margin-top-md,
+          var(--sg-box-margin-top-sm, var(--sg-box-margin-top-base, var(--sg-box-margin-y)))
+        )
+      )
+    );
+    --sg-box-margin-right: var(
+      --sg-box-margin-right-xl,
+      var(
+        --sg-box-margin-right-lg,
+        var(
+          --sg-box-margin-right-md,
+          var(--sg-box-margin-right-sm, var(--sg-box-margin-right-base, var(--sg-box-margin-x)))
+        )
+      )
+    );
+    --sg-box-margin-bottom: var(
+      --sg-box-margin-bottom-xl,
+      var(
+        --sg-box-margin-bottom-lg,
+        var(
+          --sg-box-margin-bottom-md,
+          var(--sg-box-margin-bottom-sm, var(--sg-box-margin-bottom-base, var(--sg-box-margin-y)))
+        )
+      )
+    );
+    --sg-box-margin-left: var(
+      --sg-box-margin-left-xl,
+      var(
+        --sg-box-margin-left-lg,
+        var(
+          --sg-box-margin-left-md,
+          var(--sg-box-margin-left-sm, var(--sg-box-margin-left-base, var(--sg-box-margin-x)))
+        )
+      )
+    );
+  }
+}

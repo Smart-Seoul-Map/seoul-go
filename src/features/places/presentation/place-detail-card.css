@@ -1,0 +1,110 @@
+.PlaceDetailCard {
+  overflow: hidden;
+  font-family: var(--sg-font-namsan);
+  letter-spacing: 0;
+  container-type: inline-size;
+}
+.PlaceDetailCard * {
+  box-sizing: border-box;
+}
+.PlaceDetailCardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sg-spacing-2) var(--sg-spacing-3);
+  min-height: var(--sg-detail-header-min-height);
+  margin: 0 var(--sg-spacing-2) var(--sg-spacing-5);
+}
+.PlaceDetailCardHeader h2 {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--sg-detail-title-color);
+  font-family: var(--sg-font-alrim);
+  font-size: var(--sg-detail-title-size);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-12);
+  overflow-wrap: anywhere;
+}
+.PlaceDetailCardHeader p {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  text-align: right;
+  color: var(--sg-color-text-muted);
+  font-family: var(--sg-font-hangang);
+  font-size: var(--sg-detail-supporting-size);
+  line-height: var(--sg-line-height-6);
+  overflow-wrap: anywhere;
+}
+.PlaceDetailCardImage {
+  display: grid;
+  place-items: center;
+  aspect-ratio: var(--sg-detail-image-ratio);
+  margin: 0 var(--sg-spacing-2) var(--sg-spacing-2_5);
+  overflow: hidden;
+  border-radius: var(--sg-detail-image-radius);
+  border: var(--sg-detail-image-stroke-width) solid var(--sg-detail-image-stroke);
+  background: var(--sg-color-bg-floating);
+  box-shadow: var(--sg-detail-image-shadow);
+  color: var(--sg-color-text-muted);
+  font-size: var(--sg-font-size-7);
+}
+.PlaceDetailCardImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+.PlaceDetailCardDescription p {
+  margin: 0;
+  font-size: var(--sg-font-size-8);
+  line-height: var(--sg-line-height-7);
+  overflow-wrap: anywhere;
+}
+.PlaceDetailCardLocationIcon {
+  flex: none;
+  width: var(--sg-detail-location-icon-size);
+  height: var(--sg-detail-location-icon-size);
+  color: var(--sg-color-text-brand);
+}
+.PlaceDetailCardAddress p {
+  min-width: 0;
+  margin: 0;
+  font-size: var(--sg-detail-supporting-size);
+  line-height: var(--sg-line-height-6);
+  overflow-wrap: anywhere;
+}
+.PlaceDetailPanel {
+  --sg-panel-bg: var(--sg-color-bg-surface-paper);
+}
+.PlaceDetailPanel .PlaceDetailPanelBody {
+  padding: 0;
+  border: 0;
+  scrollbar-width: none;
+}
+.PlaceDetailPanel .PlaceDetailPanelBody::-webkit-scrollbar {
+  display: none;
+}
+.PlaceDetailPanel .PlaceDetailCard {
+  border: 0;
+  border-radius: 0;
+  min-height: var(--sg-detail-min-height);
+}
+.PlaceDetailPanel[data-hide-title] .AppResponsivePanelClose {
+  position: relative;
+  flex: none;
+  align-self: flex-end;
+  top: auto;
+  right: var(--sg-spacing-3);
+  margin-block: var(--sg-spacing-1);
+}
+.PlaceDetailPanel .PlaceDetailCardHeader {
+  margin-top: 0;
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
+  width: 100%;
+  min-height: auto;
+  padding-top: var(--sg-spacing-2);
+}
