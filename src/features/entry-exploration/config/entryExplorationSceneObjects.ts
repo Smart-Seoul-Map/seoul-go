@@ -47,9 +47,9 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
   {
     assetKey: "seoulTileMapBackground",
     id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
-    position: { x: 14.15, z: 4.9 },
+    position: { x: 29.15, z: 19.65 },
     rotationY: 0,
-    size: { width: 28.01, depth: 14.12 },
+    size: { width: 26, depth: 14.12 },
     type: "floorOverlay",
     yOffset: 0.035,
   },
@@ -59,7 +59,7 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     interaction: {
       triggerRadius: 5.4,
     },
-    position: { x: 15.25, z: 5.25 },
+    position: { x: 30.25, z: 20 },
     rotationY: 0,
     size: { width: 12, depth: 9.79 },
     type: "floorOverlay",
