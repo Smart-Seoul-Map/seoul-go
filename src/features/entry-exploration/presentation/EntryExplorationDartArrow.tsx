@@ -106,6 +106,7 @@ export function EntryExplorationDartArrow({
       window.removeEventListener("pointermove", handlePointerMove);
       cancelAnimationFrame(frameId);
       flightRef.current = null;
+      landedShotRef.current = null;
     };
   }, [isVisible]);
 

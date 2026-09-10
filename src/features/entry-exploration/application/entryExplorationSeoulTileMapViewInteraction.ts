@@ -275,7 +275,15 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     },
     getActivationCharacterDestination: getCharacterDestination,
     handlePointerDown: (raycaster) => {
-      if (!isEngaged || hasThrown || cameraTransitionStartedAt !== null) {
+      if (!isEngaged) {
+        return false;
+      }
+
+      if (cameraTransitionStartedAt !== null) {
+        return true;
+      }
+
+      if (hasThrown) {
         return false;
       }
 
@@ -292,6 +300,12 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     },
     handlePointerMove: (raycaster) => {
       if (!isEngaged) {
+        return false;
+      }
+
+      if (cameraTransitionStartedAt !== null) {
+        setTargetHover(false);
+
         return false;
       }
 

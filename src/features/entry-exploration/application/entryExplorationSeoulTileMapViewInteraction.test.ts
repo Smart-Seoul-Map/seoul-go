@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
@@ -32,6 +32,59 @@ describe("entry exploration seoul tile map view interaction", () => {
     controller.updateTriggerState(MAP_POSITION);
 
     expect(controller.canActivate()).toBe(true);
+
+    controller.dispose();
+  });
+
+  test("swallows pointers until the camera transition finishes so the view is not released", () => {
+    const onDartThrowResult = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      onDartThrowResult,
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const raycaster = new THREE.Raycaster();
+    const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+    controller.updateTriggerState(MAP_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs / 2, MAP_POSITION);
+
+    expect(controller.handlePointerDown(raycaster, 0)).toBe(true);
+    expect(onDartThrowResult).not.toHaveBeenCalled();
+
+    controller.updateCamera(camera, cameraTransitionDurationMs, MAP_POSITION);
+    controller.handlePointerDown(raycaster, 0);
+
+    expect(onDartThrowResult).toHaveBeenCalledTimes(1);
+
+    controller.dispose();
+  });
+
+  test("keeps the target crosshair hidden until the camera transition finishes", () => {
+    const onTargetHoverChange = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      onTargetHoverChange,
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+    const failingRaycaster = {
+      intersectObject: () => {
+        throw new Error("The dart view must not raycast while the camera is moving.");
+      },
+    } as unknown as THREE.Raycaster;
+
+    controller.updateTriggerState(MAP_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs / 2, MAP_POSITION);
+
+    expect(() => controller.handlePointerMove(failingRaycaster)).not.toThrow();
+    expect(onTargetHoverChange).not.toHaveBeenCalledWith(true);
+
+    controller.updateCamera(camera, cameraTransitionDurationMs, MAP_POSITION);
+
+    expect(() => controller.handlePointerMove(failingRaycaster)).toThrow();
 
     controller.dispose();
   });
