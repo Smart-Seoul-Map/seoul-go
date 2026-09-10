@@ -1,0 +1,24 @@
+{
+  "size": { "width": 2048, "height": 2048 },
+  "frames": {
+    "waterfront": { "x": 4, "y": 4, "width": 1042, "height": 995 },
+    "park": { "x": 1050, "y": 4, "width": 985, "height": 760 },
+    "bench": { "x": 1050, "y": 768, "width": 215, "height": 203 },
+    "store": { "x": 1328, "y": 768, "width": 659, "height": 575 },
+    "pin": { "x": 1992, "y": 768, "width": 47, "height": 71 },
+    "emphasis": { "x": 1991, "y": 844, "width": 51, "height": 54 },
+    "sparkle": { "x": 1992, "y": 902, "width": 35, "height": 40 },
+    "city": { "x": 4, "y": 1003, "width": 835, "height": 884 },
+    "office": { "x": 843, "y": 1003, "width": 481, "height": 729 },
+    "hanok": { "x": 1331, "y": 1347, "width": 645, "height": 628 },
+    "flower": { "x": 1980, "y": 1348, "width": 60, "height": 59 },
+    "pinkStar": { "x": 1981, "y": 1412, "width": 54, "height": 54 },
+    "streetlamp": { "x": 843, "y": 1736, "width": 113, "height": 266 },
+    "tower": { "x": 960, "y": 1736, "width": 137, "height": 205 },
+    "bicycle": { "x": 1102, "y": 1736, "width": 206, "height": 204 },
+    "hanokSticker": { "x": 4, "y": 1891, "width": 215, "height": 125 },
+    "cloud": { "x": 962, "y": 1979, "width": 79, "height": 56 },
+    "blueStar": { "x": 272, "y": 2006, "width": 37, "height": 36 },
+    "pinkSparkles": { "x": 222, "y": 2005, "width": 49, "height": 40 }
+  }
+}

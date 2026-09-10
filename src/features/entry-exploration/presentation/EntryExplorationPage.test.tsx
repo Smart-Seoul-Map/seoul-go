@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useEffect } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -13,7 +14,9 @@ import { EntryExplorationPage } from "./EntryExplorationPage";
 
 const sceneControls = {
   deactivateActiveInteraction: vi.fn(),
+  isIntroReady: true,
   retryActiveInteraction: vi.fn(),
+  startIntro: vi.fn(() => true),
 } satisfies EntryExplorationThreeSceneControls;
 
 let districtSelectionResultHandler:
@@ -41,7 +44,9 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     onSceneControlsReady,
   }: UseEntryExplorationThreeSceneOptions) => {
     createSceneInteractionControllers();
-    onSceneControlsReady?.(sceneControls);
+    useEffect(() => {
+      onSceneControlsReady?.(sceneControls);
+    }, [onSceneControlsReady]);
   },
 }));
 
@@ -65,6 +70,7 @@ describe("EntryExplorationPage", () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
   });
 
@@ -162,6 +168,15 @@ describe("EntryExplorationPage", () => {
 
     expect(handleSubwayStationSelectionChange).toHaveBeenCalledWith(selectedStation, "selected");
   });
+
+  test("starts 3D exploration from the fixed intro button", () => {
+    renderEntryExplorationPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+
+    expect(sceneControls.startIntro).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "탐방 시작" })).toBeNull();
+  });
 });
 
 function renderEntryExplorationPage({
@@ -179,6 +194,7 @@ function renderEntryExplorationPage({
   districtSelectionResultHandler = null;
   sceneControls.deactivateActiveInteraction.mockClear();
   sceneControls.retryActiveInteraction.mockClear();
+  sceneControls.startIntro.mockClear();
   Object.assign(subwaySelectionViewModel, {
     handleClose: vi.fn(),
     handleStationSelection: vi.fn(),

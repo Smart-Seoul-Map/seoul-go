@@ -1,0 +1,45 @@
+.entry-exploration-intro-overlay {
+  align-items: center;
+  background: var(--sg-color-bg-floating);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+}
+
+.entry-exploration-intro-overlay-stage {
+  aspect-ratio: 16 / 9;
+  height: min(100vh, 56.25vw);
+  position: relative;
+}
+
+.entry-exploration-intro-overlay-stage > img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  width: 100%;
+}
+
+.entry-exploration-intro-overlay-stage > .AppButton {
+  border: var(--sg-spacing-0_5) solid var(--sg-v3-blue-600);
+  border-radius: var(--sg-radius-full);
+  bottom: 4.537%;
+  font-size: var(--sg-font-size-6);
+  height: 6.481%;
+  left: 39.323%;
+  padding: 0;
+  position: absolute;
+  width: 25%;
+}
+
+.entry-exploration-intro-overlay-stage > .AppButton:disabled {
+  opacity: 0;
+}
+
+@media (max-aspect-ratio: 16 / 9) {
+  .entry-exploration-intro-overlay-stage {
+    height: auto;
+    width: 100vw;
+  }
+}

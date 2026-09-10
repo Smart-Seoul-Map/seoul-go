@@ -5,7 +5,6 @@ import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   type EntryExplorationFloorOverlayObject,
   type EntryExplorationSceneObject,
-  type EntryExplorationStandingPropObject,
 } from "./entryExplorationSceneObjects";
 
 describe("entry exploration scene objects", () => {
@@ -37,21 +36,9 @@ describe("entry exploration scene objects", () => {
     });
   });
 
-  test("keeps standing prop objects explicit", () => {
+  test("keeps static scene objects on the shared floor overlay path", () => {
     const sceneObjects: readonly EntryExplorationSceneObject[] = ENTRY_EXPLORATION_SCENE_OBJECTS;
-    const standingPropObjects = sceneObjects.filter(
-      (object): object is EntryExplorationStandingPropObject => object.type === "standingProp"
-    );
-
-    expect(standingPropObjects).toHaveLength(1);
-    standingPropObjects.forEach((object) => {
-      expect(object.assetKey).toBeTruthy();
-      expect(object.position.x).not.toBe(0);
-      expect(object.position.z).not.toBe(0);
-      expect(object.shadow.opacity).toBeGreaterThan(0);
-      expect(object.shadow.opacity).toBeLessThan(1);
-      expect(object.size.height).toBeGreaterThan(0);
-    });
+    expect(sceneObjects.every((object) => object.type === "floorOverlay")).toBe(true);
   });
 
   test("keeps interaction trigger radiuses valid", () => {

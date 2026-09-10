@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => {
     stop: vi.fn(),
   };
   const cancelPendingIntroRefresh = vi.fn();
-  const setIntroButtonPressed = vi.fn();
   const registry = {
     activateReadySceneInteraction: vi.fn(() => false),
     addSceneInteractionObjects: vi.fn(),
@@ -40,7 +39,6 @@ const mocks = vi.hoisted(() => {
     camera: null as THREE.OrthographicCamera | null,
     domElement,
     floor: null as THREE.Mesh | null,
-    introButtonMesh: null as THREE.Mesh | null,
     introFloorObject: null as THREE.Group | null,
     movement,
     movementOptions: null as {
@@ -51,7 +49,6 @@ const mocks = vi.hoisted(() => {
     } | null,
     registry,
     cancelPendingIntroRefresh,
-    setIntroButtonPressed,
     updateEntryExplorationCameraFocus,
   };
 });
@@ -81,18 +78,12 @@ vi.mock("./entryExplorationGltfLoader", () => ({
 vi.mock("./entryExplorationIntroFloor", async () => {
   const three = await vi.importActual<typeof import("three")>("three");
 
-  mocks.introButtonMesh = new three.Mesh(
-    new three.PlaneGeometry(1, 1),
-    new three.MeshBasicMaterial()
-  );
   mocks.introFloorObject = new three.Group();
 
   return {
     createEntryExplorationIntroFloor: () => ({
-      buttonMesh: mocks.introButtonMesh,
       cancelPendingRefresh: mocks.cancelPendingIntroRefresh,
       object: mocks.introFloorObject,
-      setButtonPressed: mocks.setIntroButtonPressed,
     }),
   };
 });
@@ -178,18 +169,17 @@ describe("useEntryExplorationThreeScene", () => {
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
   });
 
-  test("starts once from the floor button and keeps the camera locked while the character enters", async () => {
+  test("starts once from the exposed intro control and keeps the camera locked while the character enters", async () => {
     const containerRef = createContainerRef();
-    const intersectObject = vi
-      .spyOn(THREE.Raycaster.prototype, "intersectObject")
-      .mockImplementation((object) =>
-        object === mocks.introButtonMesh ? ([{}] as THREE.Intersection[]) : []
-      );
+    let startIntro: (() => boolean) | null = null;
 
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         containerRef,
         createSceneInteractionControllers: () => [],
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro ?? null;
+        },
       })
     );
 
@@ -197,18 +187,18 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
 
+    expect(mocks.introFloorObject?.parent).toBeTruthy();
+
     act(() => {
-      mocks.domElement.dispatchEvent(new PointerEvent("pointerdown"));
-      mocks.domElement.dispatchEvent(new PointerEvent("pointerdown"));
+      startIntro?.();
+      startIntro?.();
     });
 
-    expect(mocks.setIntroButtonPressed).toHaveBeenCalledTimes(1);
     expect(mocks.domElement.getAttribute("aria-busy")).toBe("true");
     expect(mocks.domElement.getAttribute("aria-disabled")).toBe("true");
     expect(mocks.movement.moveTo).toHaveBeenCalledTimes(1);
     expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
 
-    intersectObject.mockRestore();
     unmount();
     expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
   });
