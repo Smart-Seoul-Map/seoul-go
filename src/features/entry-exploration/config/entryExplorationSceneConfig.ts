@@ -14,9 +14,10 @@ export const ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE =
 export const ENTRY_EXPLORATION_SCENE_CONFIG = {
   arrivalRadius: 0.35,
   cameraOffset: {
-    x: 11,
-    y: 13,
-    z: 11,
+    // Preserve the measured 18.46-degree elevation with room for the foreground below it.
+    x: 22,
+    y: 10.384,
+    z: 22,
   },
   cameraTransitionDurationMs: 900,
   cameraViewSize: 19,
