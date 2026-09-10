@@ -5,7 +5,9 @@ import type { EntryExplorationDartViewportPoint } from "../application/entryExpl
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
 import { ENTRY_EXPLORATION_DART_CONFIG } from "../config/entryExplorationDartConfig";
 import {
+  getEntryExplorationDartAimRotation,
   getEntryExplorationDartFlightFrame,
+  getEntryExplorationDartSmoothedRotation,
   getEntryExplorationDartTipPoint,
   type EntryExplorationDartScreenPoint,
 } from "../domain/entryExplorationDartAim";
@@ -27,8 +29,7 @@ type DartFlight = {
   to: EntryExplorationDartScreenPoint;
 };
 
-const ARROW_REST_RATIO = { x: 0.1, y: 1.1 };
-const { crosshairSize, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
+const { clickHint, crosshairSize, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
 const spriteHeight = idleArrow.width * sprite.aspectRatio;
 const tipOffset = { x: idleArrow.width * sprite.tipRatio.x, y: spriteHeight * sprite.tipRatio.y };
 const nockOffset = {
@@ -39,7 +40,18 @@ const nockOffset = {
 function getRestPoint(container: HTMLDivElement): EntryExplorationDartScreenPoint {
   const rect = container.getBoundingClientRect();
 
-  return { x: rect.width * ARROW_REST_RATIO.x, y: rect.height * ARROW_REST_RATIO.y };
+  return { x: rect.width * idleArrow.restRatio.x, y: rect.height * idleArrow.restRatio.y };
+}
+
+function getTipPoint(
+  restPoint: EntryExplorationDartScreenPoint,
+  rotationDegrees: number
+): EntryExplorationDartScreenPoint {
+  return getEntryExplorationDartTipPoint({
+    anchorPoint: restPoint,
+    offsetFromAnchor: { x: tipOffset.x - nockOffset.x, y: tipOffset.y - nockOffset.y },
+    rotationDegrees,
+  });
 }
 
 function toScreenPoint(
@@ -61,11 +73,15 @@ export function EntryExplorationDartArrow({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<HTMLImageElement | null>(null);
   const crosshairRef = useRef<HTMLImageElement | null>(null);
+  const clickHintRef = useRef<HTMLImageElement | null>(null);
   const pointerRef = useRef<EntryExplorationDartScreenPoint | null>(null);
   const flightRef = useRef<DartFlight | null>(null);
   const landedShotRef = useRef<number | null>(null);
+  const rotationRef = useRef<number>(idleArrow.restRotationDegrees);
+  const isTargetHoveredRef = useRef(isTargetHovered);
   const onFlightEndRef = useRef(onFlightEnd);
 
+  isTargetHoveredRef.current = isTargetHovered;
   onFlightEndRef.current = onFlightEnd;
 
   useEffect(() => {
@@ -84,8 +100,27 @@ export function EntryExplorationDartArrow({
     window.addEventListener("pointermove", handlePointerMove);
 
     let frameId = 0;
+    let lastTime: number | null = null;
 
     const render = (time: number) => {
+      const restPoint = getRestPoint(container);
+
+      rotationRef.current = getEntryExplorationDartSmoothedRotation({
+        current: rotationRef.current,
+        deltaMs: lastTime === null ? 0 : time - lastTime,
+        target: isTargetHoveredRef.current
+          ? getEntryExplorationDartAimRotation({
+              aimSpanDegrees: idleArrow.aimSpanDegrees,
+              from: restPoint,
+              pointer: pointerRef.current,
+              rangeDegrees: idleArrow.aimRotationRangeDegrees,
+              restRotationDegrees: idleArrow.restRotationDegrees,
+            })
+          : idleArrow.restRotationDegrees,
+        timeConstantMs: idleArrow.aimTimeConstantMs,
+      });
+      lastTime = time;
+
       const activeFlight = flightRef.current;
       const isFlying = activeFlight !== null && time - activeFlight.startedAt < flight.durationMs;
 
@@ -94,8 +129,14 @@ export function EntryExplorationDartArrow({
         onFlightEndRef.current?.();
       }
 
-      drawCrosshair(crosshairRef.current, activeFlight?.to ?? pointerRef.current);
-      drawArrow(arrowRef.current, activeFlight, getRestPoint(container), time);
+      const restTipPoint = getTipPoint(restPoint, idleArrow.restRotationDegrees);
+
+      drawCentered(crosshairRef.current, activeFlight?.to ?? pointerRef.current);
+      drawCentered(clickHintRef.current, {
+        x: restTipPoint.x + clickHint.offsetFromTip.x,
+        y: restTipPoint.y + clickHint.offsetFromTip.y,
+      });
+      drawArrow(arrowRef.current, activeFlight, restPoint, rotationRef.current, time);
 
       frameId = requestAnimationFrame(render);
     };
@@ -107,6 +148,7 @@ export function EntryExplorationDartArrow({
       cancelAnimationFrame(frameId);
       flightRef.current = null;
       landedShotRef.current = null;
+      rotationRef.current = idleArrow.restRotationDegrees;
     };
   }, [isVisible]);
 
@@ -118,11 +160,7 @@ export function EntryExplorationDartArrow({
     }
 
     flightRef.current = {
-      from: getEntryExplorationDartTipPoint({
-        anchorPoint: getRestPoint(container),
-        offsetFromAnchor: { x: tipOffset.x - nockOffset.x, y: tipOffset.y - nockOffset.y },
-        rotationDegrees: idleArrow.restRotationDegrees,
-      }),
+      from: getTipPoint(getRestPoint(container), rotationRef.current),
       shotId,
       startedAt: performance.now(),
       to: toScreenPoint(container, targetPoint),
@@ -145,6 +183,15 @@ export function EntryExplorationDartArrow({
       />
 
       <img
+        ref={clickHintRef}
+        alt=""
+        className="entry-exploration-dart-arrow__click-hint"
+        data-shown={shotId === null && !isTargetHovered}
+        src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartClickHint.src}
+        style={{ width: clickHint.width }}
+      />
+
+      <img
         ref={arrowRef}
         alt=""
         className="entry-exploration-dart-arrow__arrow"
@@ -155,7 +202,7 @@ export function EntryExplorationDartArrow({
   );
 }
 
-function drawCrosshair(
+function drawCentered(
   element: HTMLImageElement | null,
   point: EntryExplorationDartScreenPoint | null
 ): void {
@@ -170,6 +217,7 @@ function drawArrow(
   element: HTMLImageElement | null,
   activeFlight: DartFlight | null,
   restPoint: EntryExplorationDartScreenPoint,
+  rotationDegrees: number,
   time: number
 ): void {
   if (!element) {
@@ -178,7 +226,7 @@ function drawArrow(
 
   if (!activeFlight) {
     element.style.transformOrigin = `${nockOffset.x}px ${nockOffset.y}px`;
-    element.style.transform = `translate(${restPoint.x - nockOffset.x}px, ${restPoint.y - nockOffset.y}px) rotate(${idleArrow.restRotationDegrees}deg)`;
+    element.style.transform = `translate(${restPoint.x - nockOffset.x}px, ${restPoint.y - nockOffset.y}px) rotate(${rotationDegrees}deg)`;
 
     return;
   }

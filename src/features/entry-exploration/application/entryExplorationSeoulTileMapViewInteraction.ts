@@ -43,7 +43,6 @@ export type EntryExplorationDartThrowResult = {
   cell: SeoulGridCell;
   districtId: number | null;
   gridNumber: string;
-  isHit: boolean;
   viewportPoint: EntryExplorationDartViewportPoint;
 };
 
@@ -141,7 +140,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cell,
     districtId: getSeoulGridCellDistrictId(cell),
     gridNumber: toSeoulGridNumber(cell),
-    isHit: true,
     viewportPoint: toViewportPoint(cell, camera),
   });
 

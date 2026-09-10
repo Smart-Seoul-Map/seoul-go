@@ -11,6 +11,7 @@
 }
 
 .entry-exploration-dart-arrow__arrow,
+.entry-exploration-dart-arrow__click-hint,
 .entry-exploration-dart-arrow__crosshair {
   position: absolute;
   left: 0;
@@ -23,12 +24,17 @@
   filter: drop-shadow(var(--sg-shadow-3));
 }
 
+.entry-exploration-dart-arrow__click-hint,
 .entry-exploration-dart-arrow__crosshair {
-  filter: drop-shadow(var(--sg-floating-control-shadow));
   opacity: 0;
   transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
 }
 
+.entry-exploration-dart-arrow__crosshair {
+  filter: drop-shadow(var(--sg-floating-control-shadow));
+}
+
+.entry-exploration-dart-arrow__click-hint[data-shown="true"],
 .entry-exploration-dart-arrow__crosshair[data-shown="true"] {
   opacity: 1;
 }
