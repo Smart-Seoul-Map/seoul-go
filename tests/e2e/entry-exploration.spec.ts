@@ -2,6 +2,9 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
+const HANOK_DESKTOP_POINT = { x: 1298, y: 568 };
+const HANOK_MOBILE_POINT = { x: 371, y: 659 };
+const HANOK_MAP_LINK_NAME = "한옥체험 지도 보기 (새 탭에서 열기)";
 
 base.use({ actionTimeout: 10_000, launchOptions: { args: ["--disable-dev-shm-usage"] } });
 
@@ -96,11 +99,9 @@ async function startExploration(page: Page): Promise<void> {
 async function arriveAtHanok(page: Page, mobile: boolean): Promise<void> {
   // Clicks recorded from these fixed viewports; no application world coordinates or state hooks.
   if (mobile) {
-    await scene(page).click({ position: { x: 195, y: 128 } });
-    await waitForCameraToSettle(page);
-    await scene(page).click({ position: { x: 195, y: 128 } });
+    await scene(page).click({ position: HANOK_MOBILE_POINT });
   } else {
-    await scene(page).click({ position: { x: 1235, y: 684 } });
+    await scene(page).click({ position: HANOK_DESKTOP_POINT });
   }
   await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   await expect(panel(page)).toHaveAttribute("data-state", "open");
@@ -171,7 +172,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
       panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
     ).toBeVisible();
     await expect(
-      panel(page).getByRole("link", { name: "한옥체험 지도 보기", exact: true })
+      panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
     ).toHaveAttribute("href", "https://map.seoul.go.kr/smgis2/short/6P5oo");
     await page.screenshot({ path: testInfo.outputPath("desktop-arrival.png") });
   });
@@ -189,7 +190,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
-    await scene(page).click({ position: { x: 690, y: 320 } });
+    await scene(page).click({ position: HANOK_DESKTOP_POINT });
     await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   });
   await test.step("Moving away closes the open card", async () => {
@@ -230,7 +231,7 @@ test.describe("mobile", () => {
       await swipe(page, { x: 195, y: 760 }, { x: 195, y: 410 });
       await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
       await expect(
-        panel(page).getByRole("link", { name: "한옥체험 지도 보기", exact: true })
+        panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
       ).toBeInViewport();
     });
     await test.step("Drag returns to 40dvh without moving the scene", async () => {
