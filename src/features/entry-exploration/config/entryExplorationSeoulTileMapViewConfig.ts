@@ -1,7 +1,11 @@
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "./entryExplorationSceneConfig";
 
 export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
-  cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset,
+  cameraOffset: {
+    x: 2.2,
+    y: 24,
+    z: 2.2,
+  },
   cameraTransitionDurationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
   cameraFocusOffset: {
     x: -0.72,
