@@ -46,8 +46,12 @@ function scene(page: Page) {
   return page.getByLabel("서울 탐방 공간", { exact: true });
 }
 
-function panel(page: Page) {
-  return page.getByRole("dialog", { name: "N서울타워", exact: true });
+function panel(page: Page, name = "한옥체험") {
+  return page.getByRole("dialog", { name, exact: true });
+}
+
+function openPlacePanel(page: Page) {
+  return page.locator('.PlaceDetailPanel[data-state="open"]');
 }
 
 async function sceneryScreenshot(page: Page) {
@@ -86,15 +90,15 @@ async function startExploration(page: Page): Promise<void> {
   await start.click();
   await expect(start).toHaveCount(0);
   await expect(scene(page)).toBeVisible({ timeout: 20_000 });
-  await expect(panel(page)).toHaveCount(0);
+  await expect(openPlacePanel(page)).toHaveCount(0);
 }
 
-async function arriveAtTower(page: Page, mobile: boolean): Promise<void> {
+async function arriveAtHanok(page: Page, mobile: boolean): Promise<void> {
   // Clicks recorded from these fixed viewports; no application world coordinates or state hooks.
   if (mobile) {
-    await scene(page).click({ position: { x: 195, y: 750 } });
+    await scene(page).click({ position: { x: 195, y: 128 } });
     await waitForCameraToSettle(page);
-    await scene(page).click({ position: { x: 368, y: 548 } });
+    await scene(page).click({ position: { x: 195, y: 128 } });
   } else {
     await scene(page).click({ position: { x: 1235, y: 684 } });
   }
@@ -103,7 +107,7 @@ async function arriveAtTower(page: Page, mobile: boolean): Promise<void> {
 }
 
 async function expectPanelToStayClosed(page: Page): Promise<void> {
-  await expect(panel(page)).toHaveCount(0);
+  await expect(openPlacePanel(page)).toHaveCount(0);
   // This is a bounded negative assertion, not a delay used to guess when loading finishes.
   const reopened = await page.evaluate(
     () =>
@@ -161,11 +165,14 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
   await page.setViewportSize(DESKTOP);
   await test.step("Start and arrive through the visible scene", async () => {
     await startExploration(page);
-    await arriveAtTower(page, false);
+    await arriveAtHanok(page, false);
     await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
     await expect(
       panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
     ).toBeVisible();
+    await expect(
+      panel(page).getByRole("link", { name: "한옥체험 지도 보기", exact: true })
+    ).toHaveAttribute("href", "https://map.seoul.go.kr/smgis2/short/6P5oo");
     await page.screenshot({ path: testInfo.outputPath("desktop-arrival.png") });
   });
   await test.step("Card clicks and wheel input must not move the scene", async () => {
@@ -182,7 +189,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
-    await scene(page).click({ position: { x: 940, y: 464 } });
+    await scene(page).click({ position: { x: 690, y: 320 } });
     await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   });
   await test.step("Moving away closes the open card", async () => {
@@ -200,7 +207,7 @@ test.describe("mobile", () => {
   }, testInfo) => {
     test.setTimeout(120_000);
     await startExploration(page);
-    await arriveAtTower(page, true);
+    await arriveAtHanok(page, true);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
     await expect(panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })).toHaveCount(
       0
@@ -223,7 +230,7 @@ test.describe("mobile", () => {
       await swipe(page, { x: 195, y: 760 }, { x: 195, y: 410 });
       await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
       await expect(
-        panel(page).getByText("서울 용산구 남산공원길 105", { exact: true })
+        panel(page).getByRole("link", { name: "한옥체험 지도 보기", exact: true })
       ).toBeInViewport();
     });
     await test.step("Drag returns to 40dvh without moving the scene", async () => {
