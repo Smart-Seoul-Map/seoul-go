@@ -86,7 +86,12 @@
 
 .AppButton[data-variant="strong"] {
   background: var(--sg-button-strong-bg);
+  border: 1px solid var(--sg-button-strong-border);
   color: var(--sg-button-strong-fg);
+}
+
+.AppButton[data-variant="strong"]:active {
+  background: var(--sg-button-strong-bg-pressed);
 }
 
 .AppButton[data-variant="danger"] {

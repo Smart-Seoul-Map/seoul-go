@@ -24,45 +24,14 @@ export type EntryExplorationFloorOverlayObject = EntryExplorationSceneObjectBase
   yOffset: number;
 };
 
-export type EntryExplorationStandingPropObject = EntryExplorationSceneObjectBase & {
-  shadow: {
-    depth: number;
-    opacity: number;
-    width: number;
-  };
-  size: {
-    height: number;
-    width: number;
-  };
-  type: "standingProp";
-  yOffset: number;
-};
-
-export type EntryExplorationSceneObject =
-  EntryExplorationFloorOverlayObject | EntryExplorationStandingPropObject;
+export type EntryExplorationSceneObject = EntryExplorationFloorOverlayObject;
 
 export const ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID = "subway-selection-route-map";
 export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID = "seoul-tile-map-floor-sketch";
+export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID =
+  "seoul-tile-map-background-floor-sketch";
 
 export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
-  {
-    assetKey: "haechiAndFriends",
-    id: "haechi-and-friends-floor-sketch",
-    position: { x: -8, z: -8 },
-    rotationY: 0,
-    size: { width: 10.4, depth: 6 },
-    type: "floorOverlay",
-    yOffset: 0.04,
-  },
-  {
-    assetKey: "jangjiCheonPostcard",
-    id: "jangji-cheon-postcard-floor-sketch",
-    position: { x: 8, z: -8 },
-    rotationY: 0,
-    size: { width: 5.6, depth: 7 },
-    type: "floorOverlay",
-    yOffset: 0.045,
-  },
   {
     assetKey: "line2RouteMap",
     id: ENTRY_EXPLORATION_SUBWAY_MAP_OBJECT_ID,
@@ -76,25 +45,24 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     yOffset: 0.05,
   },
   {
+    assetKey: "seoulTileMapBackground",
+    id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
+    position: { x: 14.15, z: 4.9 },
+    rotationY: 0,
+    size: { width: 28.01, depth: 14.12 },
+    type: "floorOverlay",
+    yOffset: 0.035,
+  },
+  {
     assetKey: "seoulTileMap",
     id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
     interaction: {
       triggerRadius: 5.4,
     },
-    position: { x: 4, z: 16 },
+    position: { x: 15.25, z: 5.25 },
     rotationY: 0,
     size: { width: 12, depth: 9.79 },
     type: "floorOverlay",
     yOffset: 0.042,
-  },
-  {
-    assetKey: "namsanTower",
-    id: "namsan-tower-landmark",
-    position: { x: -9.4, z: 6.8 },
-    rotationY: 0,
-    shadow: { width: 2.05, depth: 1.25, opacity: 0.16 },
-    size: { width: 3.1, height: 5.55 },
-    type: "standingProp",
-    yOffset: 2.775,
   },
 ] as const satisfies readonly EntryExplorationSceneObject[];

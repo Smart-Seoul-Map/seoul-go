@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import * as THREE from "three";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "./entryExplorationSceneConfig";
 
@@ -17,5 +18,13 @@ describe("entry exploration scene config", () => {
     expect(ENTRY_EXPLORATION_SCENE_CONFIG.shadowCameraSize).toBeGreaterThanOrEqual(
       ENTRY_EXPLORATION_SCENE_CONFIG.floorSize
     );
+  });
+
+  test("uses a three-quarter isometric camera angle for the intro scene", () => {
+    const { x, y, z } = ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset;
+    const elevationDegrees = THREE.MathUtils.radToDeg(Math.atan2(y, Math.hypot(x, z)));
+
+    expect(elevationDegrees).toBeGreaterThanOrEqual(30);
+    expect(elevationDegrees).toBeLessThanOrEqual(40);
   });
 });

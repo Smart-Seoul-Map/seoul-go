@@ -31,9 +31,9 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
         z: -0.9,
       },
       offset: {
-        x: 2.2,
-        y: 24,
-        z: 2.2,
+        x: 11,
+        y: 13,
+        z: 11,
       },
       transitionDurationMs: 1_600,
       zoom: 2.3,
@@ -43,8 +43,8 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
       z: -14,
     },
     targetPosition: {
-      x: 0.7,
-      z: 0.7,
+      x: 0,
+      z: 3.8, // [수정] 피그마 시안에 맞춘 버튼 위치 (기존 0.7에서 3.8로 이동)
     },
   },
   maxFrameDeltaSeconds: 0.04,

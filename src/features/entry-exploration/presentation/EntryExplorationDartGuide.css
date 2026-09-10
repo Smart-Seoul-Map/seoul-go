@@ -9,30 +9,44 @@
 }
 
 .entry-exploration-dart-guide__prompt,
-.entry-exploration-dart-guide__side,
 .entry-exploration-dart-guide__hint {
   position: absolute;
+}
+
+.entry-exploration-dart-guide__prompt,
+.entry-exploration-dart-guide__panel,
+.entry-exploration-dart-guide__hint {
   background: var(--sg-color-bg-surface);
   border: 1px solid var(--sg-v3-pink-500);
 }
 
 .entry-exploration-dart-guide__prompt {
-  top: var(--sg-spacing-8);
+  top: var(--sg-spacing-10);
   left: 50%;
   transform: translateX(-50%);
   width: 51%;
-  padding: var(--sg-spacing-10) var(--sg-spacing-9) var(--sg-spacing-12);
+  padding: var(--sg-spacing-10) var(--sg-spacing-9);
   border-radius: var(--sg-radius-6);
   box-shadow: var(--sg-panel-shadow);
 }
 
 .entry-exploration-dart-guide__side {
+  position: absolute;
   top: 48%;
   right: var(--sg-spacing-10);
   width: 18%;
+}
+
+.entry-exploration-dart-guide__panel {
   padding: var(--sg-spacing-4);
   border-radius: var(--sg-radius-5);
   box-shadow: var(--sg-shadow-3);
+}
+
+.entry-exploration-dart-guide__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-spacing-4);
 }
 
 .entry-exploration-dart-guide__hint {
@@ -40,7 +54,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 29%;
-  padding: var(--sg-spacing-6) var(--sg-spacing-5_5) var(--sg-spacing-4);
+  padding: var(--sg-spacing-3_5) var(--sg-spacing-5_5);
   border-radius: var(--sg-radius-5);
   box-shadow: var(--sg-floating-control-shadow);
 }
@@ -53,6 +67,9 @@
 }
 
 .entry-exploration-dart-guide__action {
-  width: 100%;
   pointer-events: auto;
+}
+
+.entry-exploration-dart-guide__action .AppButton {
+  width: 100%;
 }

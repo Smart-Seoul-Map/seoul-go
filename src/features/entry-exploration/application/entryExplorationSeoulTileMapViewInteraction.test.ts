@@ -1,10 +1,16 @@
 import * as THREE from "three";
 import { describe, expect, test } from "vitest";
 
+import {
+  ENTRY_EXPLORATION_SCENE_OBJECTS,
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+} from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { createEntryExplorationSeoulTileMapViewInteractionController } from "./entryExplorationSeoulTileMapViewInteraction";
 
-const MAP_POSITION = { x: 4, z: 16 };
+const MAP_POSITION = ENTRY_EXPLORATION_SCENE_OBJECTS.find(
+  (object) => object.id === ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
+)!.position;
 
 describe("entry exploration seoul tile map view interaction", () => {
   test("activates on arrival and waits for a trigger exit before reactivating", () => {

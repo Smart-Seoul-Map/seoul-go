@@ -5,9 +5,7 @@ export const ENTRY_EXPLORATION_DART_CONFIG = {
     durationMs: 620,
   },
   idleArrow: {
-    aimRotationRangeDegrees: 18,
-    aimSpanDegrees: 42,
-    restRotationDegrees: -9,
+    restRotationDegrees: 3,
     width: 300,
   },
   sprite: {

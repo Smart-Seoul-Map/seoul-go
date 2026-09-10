@@ -1,12 +1,10 @@
 import dartArrowUrl from "../../../assets/entry-exploration/arrow-done.png";
 import dartCrosshairUrl from "../../../assets/entry-exploration/dart-crosshair.png";
-import haechiAndFriendsUrl from "../../../assets/entry-exploration/haechi-and-friends.png";
-import jangjiCheonPostcardUrl from "../../../assets/entry-exploration/jangji-cheon-postcard.png";
+import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.png";
 import line2RouteMapUrl from "../../../assets/entry-exploration/line2-route-map.png";
-import namsanTowerUrl from "../../../assets/entry-exploration/namsan-tower.png";
-import seoulExplorationGoUrl from "../../../assets/entry-exploration/seoul-exploration-go.png";
+import seoulTileMapBackgroundUrl from "../../../assets/entry-exploration/seoul-grid-map-background.webp";
 import seoulTileMapUrl from "../../../assets/entry-exploration/seoul-grid-map.svg";
-import floorTextureUrl from "../../../assets/textures/tile.jpeg";
+import floorTextureUrl from "../../../assets/textures/tile.webp";
 
 type EntryExplorationTextureAsset = {
   src: string;
@@ -22,23 +20,17 @@ export const ENTRY_EXPLORATION_TEXTURE_ASSETS = {
   floor: {
     src: floorTextureUrl,
   },
-  haechiAndFriends: {
-    src: haechiAndFriendsUrl,
-  },
-  jangjiCheonPostcard: {
-    src: jangjiCheonPostcardUrl,
+  introBackground: {
+    src: introBackgroundUrl,
   },
   line2RouteMap: {
     src: line2RouteMapUrl,
   },
-  namsanTower: {
-    src: namsanTowerUrl,
-  },
-  seoulExplorationGo: {
-    src: seoulExplorationGoUrl,
-  },
   seoulTileMap: {
     src: seoulTileMapUrl,
+  },
+  seoulTileMapBackground: {
+    src: seoulTileMapBackgroundUrl,
   },
 } as const satisfies Record<string, EntryExplorationTextureAsset>;
 

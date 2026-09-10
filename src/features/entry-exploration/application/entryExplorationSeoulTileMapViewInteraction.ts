@@ -27,17 +27,24 @@ import {
   toSeoulGridNumber,
   type SeoulGridCell,
 } from "../domain/seoulGridNumber";
+import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 import {
   createEntryExplorationSceneObject,
   disposeEntryExplorationObject3D,
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
+export type EntryExplorationDartViewportPoint = {
+  x: number;
+  y: number;
+};
+
 export type EntryExplorationDartThrowResult = {
   cell: SeoulGridCell;
   districtId: number | null;
   gridNumber: string;
   isHit: boolean;
+  viewportPoint: EntryExplorationDartViewportPoint;
 };
 
 export type EntryExplorationDartViewControls = {
@@ -78,12 +85,34 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let characterModel: THREE.Object3D | null = null;
   let isEngaged = false;
   let isCharacterInTrigger = false;
+  let hasThrown = false;
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
 
   mapMesh.add(hitCellMesh);
 
-  const resolveTarget = (raycaster: THREE.Raycaster): EntryExplorationDartThrowResult | null => {
+  const toCellLocalPosition = (cell: SeoulGridCell, zOffset: number): THREE.Vector3 => {
+    const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
+    const cellWidth = mapSize.width / columns;
+    const cellDepth = mapSize.depth / rows;
+
+    return new THREE.Vector3(
+      -mapSize.width / 2 + (cell.column + 0.5) * cellWidth,
+      mapSize.depth / 2 - (cell.row + 0.5) * cellDepth,
+      zOffset
+    );
+  };
+
+  const toViewportPoint = (
+    cell: SeoulGridCell,
+    camera: THREE.Camera
+  ): EntryExplorationDartViewportPoint => {
+    const projected = mapMesh.localToWorld(toCellLocalPosition(cell, 0)).project(camera);
+
+    return { x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 };
+  };
+
+  const resolvePointedCell = (raycaster: THREE.Raycaster): SeoulGridCell | null => {
     const hit = raycaster.intersectObject(mapMesh, false)[0];
 
     if (!hit) {
@@ -91,39 +120,10 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     }
 
     const local = mapMesh.worldToLocal(hit.point.clone());
-    const point = { u: local.x, v: local.y };
-    const cell = toSeoulGridCell(point, mapSize);
+    const cell = toSeoulGridCell({ u: local.x, v: local.y }, mapSize);
 
-    return {
-      cell,
-      districtId: getSeoulGridCellDistrictId(cell),
-      gridNumber: toSeoulGridNumber(cell),
-      isHit: isSeoulGridCellValid(cell),
-    };
+    return isSeoulGridCellValid(cell) ? cell : null;
   };
-
-  const setHitCell = (cell: SeoulGridCell | null): void => {
-    if (!cell) {
-      hitCellMesh.visible = false;
-
-      return;
-    }
-
-    const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
-    const cellWidth = mapSize.width / columns;
-    const cellDepth = mapSize.depth / rows;
-    const local = new THREE.Vector3(
-      -mapSize.width / 2 + (cell.column + 0.5) * cellWidth,
-      mapSize.depth / 2 - (cell.row + 0.5) * cellDepth,
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.hitCellHighlight.yOffset
-    );
-
-    hitCellMesh.scale.set(cellWidth, cellDepth, 1);
-    hitCellMesh.position.copy(local);
-    hitCellMesh.visible = true;
-  };
-
-  onControlsReady?.({ setHitCell });
 
   const setTargetHover = (nextIsOverValidCell: boolean): void => {
     if (isOverValidCell === nextIsOverValidCell) {
@@ -134,6 +134,38 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     onTargetHoverChange?.(isOverValidCell);
   };
 
+  const toThrowResult = (
+    cell: SeoulGridCell,
+    camera: THREE.Camera
+  ): EntryExplorationDartThrowResult => ({
+    cell,
+    districtId: getSeoulGridCellDistrictId(cell),
+    gridNumber: toSeoulGridNumber(cell),
+    isHit: true,
+    viewportPoint: toViewportPoint(cell, camera),
+  });
+
+  const setHitCell = (cell: SeoulGridCell | null): void => {
+    if (!cell) {
+      hitCellMesh.visible = false;
+
+      return;
+    }
+
+    const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
+
+    hitCellMesh.scale.set(mapSize.width / columns, mapSize.depth / rows, 1);
+    hitCellMesh.position.copy(
+      toCellLocalPosition(
+        cell,
+        ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.hitCellHighlight.yOffset
+      )
+    );
+    hitCellMesh.visible = true;
+  };
+
+  onControlsReady?.({ setHitCell });
+
   const activate = (time: number): void => {
     if (isEngaged) {
       return;
@@ -141,6 +173,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     isEngaged = true;
     waitsForTriggerExit = false;
+    hasThrown = false;
     setHitCell(null);
     cameraTransition = null;
     cameraTransitionStartedAt = time;
@@ -150,6 +183,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   const deactivate = (): void => {
     isEngaged = false;
     waitsForTriggerExit = true;
+    hasThrown = false;
     setHitCell(null);
     cameraTransition = null;
     cameraTransitionStartedAt = null;
@@ -241,19 +275,18 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     },
     getActivationCharacterDestination: getCharacterDestination,
     handlePointerDown: (raycaster) => {
-      if (!isEngaged) {
+      if (!isEngaged || hasThrown || cameraTransitionStartedAt !== null) {
         return false;
       }
 
-      const target = resolveTarget(raycaster);
+      const cell = resolvePointedCell(raycaster) ?? pickRandomSeoulGridCell();
 
-      if (!target) {
+      if (!cell) {
         return false;
       }
 
-      if (target.isHit) {
-        onDartThrowResult?.(target);
-      }
+      hasThrown = true;
+      onDartThrowResult?.(toThrowResult(cell, raycaster.camera));
 
       return true;
     },
@@ -262,7 +295,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      setTargetHover(resolveTarget(raycaster)?.isHit === true);
+      setTargetHover(resolvePointedCell(raycaster) !== null);
 
       return false;
     },

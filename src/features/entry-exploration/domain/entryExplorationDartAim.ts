@@ -5,14 +5,6 @@ export type EntryExplorationDartScreenPoint = {
   y: number;
 };
 
-type EntryExplorationDartAimInput = {
-  aimSpanDegrees: number;
-  from: EntryExplorationDartScreenPoint;
-  pointer: EntryExplorationDartScreenPoint | null;
-  rangeDegrees: number;
-  restRotationDegrees: number;
-};
-
 type EntryExplorationDartFlightFrame = {
   rotation: number;
   scale: number;
@@ -28,32 +20,6 @@ type EntryExplorationDartFlightInput = {
 };
 
 const ARROW_TEXTURE_ROTATION_DEGREES = ENTRY_EXPLORATION_DART_CONFIG.sprite.textureRotationDegrees;
-
-export function getEntryExplorationDartAimRotation({
-  aimSpanDegrees,
-  from,
-  pointer,
-  rangeDegrees,
-  restRotationDegrees,
-}: EntryExplorationDartAimInput): number {
-  if (!pointer || aimSpanDegrees <= 0) {
-    return restRotationDegrees;
-  }
-
-  const headingDegrees = toDegrees(Math.atan2(pointer.y - from.y, pointer.x - from.x));
-  const restHeadingDegrees = restRotationDegrees + ARROW_TEXTURE_ROTATION_DEGREES;
-  const offsetRatio = clamp(
-    normalizeDegrees(headingDegrees - restHeadingDegrees) / aimSpanDegrees,
-    -1,
-    1
-  );
-
-  return restRotationDegrees + offsetRatio * rangeDegrees;
-}
-
-function normalizeDegrees(degrees: number): number {
-  return ((((degrees + 180) % 360) + 360) % 360) - 180;
-}
 
 export function getEntryExplorationDartFlightFrame({
   arcHeightRatio,
@@ -73,24 +39,6 @@ export function getEntryExplorationDartFlightFrame({
     x: from.x + (to.x - from.x) * eased,
     y: from.y + (to.y - from.y) * eased - arc,
   };
-}
-
-export function getEntryExplorationDartSmoothedRotation({
-  current,
-  deltaMs,
-  target,
-  timeConstantMs,
-}: {
-  current: number;
-  deltaMs: number;
-  target: number;
-  timeConstantMs: number;
-}): number {
-  if (timeConstantMs <= 0 || deltaMs <= 0) {
-    return target;
-  }
-
-  return current + (target - current) * (1 - Math.exp(-deltaMs / timeConstantMs));
 }
 
 export function getEntryExplorationDartTipPoint({

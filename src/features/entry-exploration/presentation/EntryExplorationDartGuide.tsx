@@ -35,7 +35,7 @@ export function EntryExplorationDartGuide({
             서울 지도에 <span className="entry-exploration-dart-guide__accent">화살을</span> 쏴
             볼까요?
           </AppHeading>
-          <AppText align="center" role="supporting">
+          <AppText align="center" role="supporting" tone="muted">
             명중하면 오늘 탐방을 시작할{" "}
             <span className="entry-exploration-dart-guide__accent">서울의 격자번호</span>가
             정해져요.
@@ -49,7 +49,7 @@ export function EntryExplorationDartGuide({
 
       {shotResult ? null : (
         <>
-          <section className="entry-exploration-dart-guide__side">
+          <section className="entry-exploration-dart-guide__side entry-exploration-dart-guide__panel">
             <AppStack align="start" gap="sm">
               <AppHeading as="h3" size="sm" tone="brand">
                 격자번호란?
@@ -80,24 +80,27 @@ function DartResultPanel({ onStartExploration, result }: DartResultPanelProps): 
   const districtName = getSeoulDistrictById(result.districtId ?? 0)?.name ?? "서울";
 
   return (
-    <section className="entry-exploration-dart-guide__side">
-      <AppStack align="start" gap="sm">
-        <AppBadge tone="brand" variant="weak">
-          오늘의 시작점
-        </AppBadge>
-        <AppHeading as="h3" size="lg" tone="brand">
-          {result.gridNumber}
-        </AppHeading>
-        <hr className="entry-exploration-dart-guide__divider" />
-        <AppText role="supporting">
-          이 격자는 {districtName}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
-        </AppText>
-        <div className="entry-exploration-dart-guide__action">
-          <AppButton onClick={() => onStartExploration(result)} size="md" variant="primary">
-            {districtName}에서 탐방 시작
-          </AppButton>
-        </div>
-      </AppStack>
-    </section>
+    <div className="entry-exploration-dart-guide__side entry-exploration-dart-guide__result">
+      <section className="entry-exploration-dart-guide__panel">
+        <AppStack align="start" gap="sm">
+          <AppBadge tone="brand" variant="weak">
+            오늘의 시작점
+          </AppBadge>
+          <AppHeading as="h3" size="lg" tone="brand">
+            {result.gridNumber}
+          </AppHeading>
+          <hr className="entry-exploration-dart-guide__divider" />
+          <AppText role="supporting">
+            이 격자는 {districtName}에 위치해 있어요. 이곳에서 오늘의 탐방을 시작합니다.
+          </AppText>
+        </AppStack>
+      </section>
+
+      <div className="entry-exploration-dart-guide__action">
+        <AppButton onClick={() => onStartExploration(result)} size="lg" variant="primary">
+          {districtName}에서 탐방 시작 →
+        </AppButton>
+      </div>
+    </div>
   );
 }

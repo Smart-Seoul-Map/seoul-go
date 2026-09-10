@@ -35,8 +35,8 @@ export function useEntryExplorationDistrictSelection({
     () =>
       createEntryExplorationSceneInteractionControllers({
         extraControllers: createExtraSceneInteractionControllers(),
-        onDartThrowResult,
         onDartTargetHoverChange,
+        onDartThrowResult,
         onDartViewActiveChange,
         onDartViewControlsReady,
         onDistrictSelectionResult: setSelectionResult,
