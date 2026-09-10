@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
 import type {
@@ -31,27 +31,66 @@ type DartFlight = {
   to: EntryExplorationDartScreenPoint;
 };
 
-const { clickHint, crosshairSize, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
-const spriteHeight = idleArrow.width * sprite.aspectRatio;
-const tipOffset = { x: idleArrow.width * sprite.tipRatio.x, y: spriteHeight * sprite.tipRatio.y };
-const nockOffset = {
-  x: idleArrow.width * sprite.nockRatio.x,
-  y: spriteHeight * sprite.nockRatio.y,
+type DartArrowLayout = {
+  crosshairSize: number;
+  restRatio: { x: number; y: number };
+  width: number;
 };
 
-function getRestPoint(container: HTMLDivElement): EntryExplorationDartScreenPoint {
-  const rect = container.getBoundingClientRect();
+type DartArrowMetrics = {
+  crosshairSize: number;
+  nockOffset: EntryExplorationDartScreenPoint;
+  restPoint: EntryExplorationDartScreenPoint;
+  scale: number;
+  tipOffset: EntryExplorationDartScreenPoint;
+  width: number;
+};
 
-  return { x: rect.width * idleArrow.restRatio.x, y: rect.height * idleArrow.restRatio.y };
+const { clickHint, crosshair, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
+
+function getArrowLayout(containerWidth: number): DartArrowLayout {
+  const { narrowViewport } = idleArrow;
+
+  if (containerWidth === 0 || containerWidth >= narrowViewport.maxContainerWidth) {
+    return {
+      crosshairSize: crosshair.size,
+      restRatio: idleArrow.restRatio,
+      width: idleArrow.width,
+    };
+  }
+
+  return {
+    crosshairSize: crosshair.narrowViewportSize,
+    restRatio: narrowViewport.restRatio,
+    width: containerWidth * narrowViewport.widthRatio,
+  };
+}
+
+function getArrowMetrics(container: HTMLDivElement): DartArrowMetrics {
+  const rect = container.getBoundingClientRect();
+  const layout = getArrowLayout(rect.width);
+  const height = layout.width * sprite.aspectRatio;
+
+  return {
+    crosshairSize: layout.crosshairSize,
+    nockOffset: { x: layout.width * sprite.nockRatio.x, y: height * sprite.nockRatio.y },
+    restPoint: { x: rect.width * layout.restRatio.x, y: rect.height * layout.restRatio.y },
+    scale: layout.width / idleArrow.width,
+    tipOffset: { x: layout.width * sprite.tipRatio.x, y: height * sprite.tipRatio.y },
+    width: layout.width,
+  };
 }
 
 function getTipPoint(
-  restPoint: EntryExplorationDartScreenPoint,
-  rotationDegrees: number
+  rotationDegrees: number,
+  metrics: DartArrowMetrics
 ): EntryExplorationDartScreenPoint {
   return getEntryExplorationDartTipPoint({
-    anchorPoint: restPoint,
-    offsetFromAnchor: { x: tipOffset.x - nockOffset.x, y: tipOffset.y - nockOffset.y },
+    anchorPoint: metrics.restPoint,
+    offsetFromAnchor: {
+      x: metrics.tipOffset.x - metrics.nockOffset.x,
+      y: metrics.tipOffset.y - metrics.nockOffset.y,
+    },
     rotationDegrees,
   });
 }
@@ -71,6 +110,7 @@ export function EntryExplorationDartArrow({
   onFlightEnd,
   shot,
 }: EntryExplorationDartArrowProps): ReactElement | null {
+  const [isLanded, setIsLanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<HTMLImageElement | null>(null);
   const crosshairRef = useRef<HTMLImageElement | null>(null);
@@ -104,7 +144,7 @@ export function EntryExplorationDartArrow({
     let lastTime: number | null = null;
 
     const render = (time: number) => {
-      const restPoint = getRestPoint(container);
+      const metrics = getArrowMetrics(container);
 
       rotationRef.current = getEntryExplorationDartSmoothedRotation({
         current: rotationRef.current,
@@ -112,7 +152,7 @@ export function EntryExplorationDartArrow({
         target: isTargetHoveredRef.current
           ? getEntryExplorationDartAimRotation({
               aimSpanDegrees: idleArrow.aimSpanDegrees,
-              from: restPoint,
+              from: metrics.restPoint,
               pointer: pointerRef.current,
               rangeDegrees: idleArrow.aimRotationRangeDegrees,
               restRotationDegrees: idleArrow.restRotationDegrees,
@@ -127,17 +167,13 @@ export function EntryExplorationDartArrow({
 
       if (activeFlight && !isFlying && landedShotRef.current !== activeFlight.shot) {
         landedShotRef.current = activeFlight.shot;
+        setIsLanded(true);
         onFlightEndRef.current?.();
       }
 
-      const restTipPoint = getTipPoint(restPoint, idleArrow.restRotationDegrees);
-
-      drawCentered(crosshairRef.current, activeFlight?.to ?? pointerRef.current);
-      drawCentered(clickHintRef.current, {
-        x: restTipPoint.x + clickHint.offsetFromTip.x,
-        y: restTipPoint.y + clickHint.offsetFromTip.y,
-      });
-      drawArrow(arrowRef.current, activeFlight, restPoint, rotationRef.current, time);
+      drawCrosshair(crosshairRef.current, activeFlight?.to ?? pointerRef.current, metrics);
+      drawClickHint(clickHintRef.current, metrics);
+      drawArrow(arrowRef.current, activeFlight, rotationRef.current, time, metrics);
 
       frameId = requestAnimationFrame(render);
     };
@@ -150,6 +186,7 @@ export function EntryExplorationDartArrow({
       flightRef.current = null;
       landedShotRef.current = null;
       rotationRef.current = idleArrow.restRotationDegrees;
+      setIsLanded(false);
     };
   }, [isVisible]);
 
@@ -160,8 +197,9 @@ export function EntryExplorationDartArrow({
       return;
     }
 
+    setIsLanded(false);
     flightRef.current = {
-      from: getTipPoint(getRestPoint(container), rotationRef.current),
+      from: getTipPoint(rotationRef.current, getArrowMetrics(container)),
       shot,
       startedAt: performance.now(),
       to: toScreenPoint(container, shot.viewportPoint),
@@ -180,7 +218,6 @@ export function EntryExplorationDartArrow({
         className="entry-exploration-dart-arrow__crosshair"
         data-shown={isTargetHovered || shot !== null}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartCrosshair.src}
-        style={{ width: crosshairSize }}
       />
 
       <img
@@ -189,15 +226,14 @@ export function EntryExplorationDartArrow({
         className="entry-exploration-dart-arrow__click-hint"
         data-shown={shot === null && !isTargetHovered}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartClickHint.src}
-        style={{ width: clickHint.width }}
       />
 
       <img
         ref={arrowRef}
         alt=""
         className="entry-exploration-dart-arrow__arrow"
+        data-landed={isLanded}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartArrow.src}
-        style={{ width: idleArrow.width }}
       />
     </div>
   );
@@ -214,16 +250,47 @@ function drawCentered(
   element.style.transform = `translate(${point.x}px, ${point.y}px) translate(-50%, -50%)`;
 }
 
-function drawArrow(
+function drawCrosshair(
   element: HTMLImageElement | null,
-  activeFlight: DartFlight | null,
-  restPoint: EntryExplorationDartScreenPoint,
-  rotationDegrees: number,
-  time: number
+  point: EntryExplorationDartScreenPoint | null,
+  metrics: DartArrowMetrics
 ): void {
   if (!element) {
     return;
   }
+
+  element.style.width = `${metrics.crosshairSize}px`;
+  drawCentered(element, point);
+}
+
+function drawClickHint(element: HTMLImageElement | null, metrics: DartArrowMetrics): void {
+  if (!element) {
+    return;
+  }
+
+  const restTipPoint = getTipPoint(idleArrow.restRotationDegrees, metrics);
+
+  element.style.width = `${clickHint.width * metrics.scale}px`;
+  drawCentered(element, {
+    x: restTipPoint.x + clickHint.offsetFromTip.x * metrics.scale,
+    y: restTipPoint.y + clickHint.offsetFromTip.y * metrics.scale,
+  });
+}
+
+function drawArrow(
+  element: HTMLImageElement | null,
+  activeFlight: DartFlight | null,
+  rotationDegrees: number,
+  time: number,
+  metrics: DartArrowMetrics
+): void {
+  if (!element) {
+    return;
+  }
+
+  const { nockOffset, restPoint, tipOffset } = metrics;
+
+  element.style.width = `${metrics.width}px`;
 
   if (!activeFlight) {
     element.style.transformOrigin = `${nockOffset.x}px ${nockOffset.y}px`;

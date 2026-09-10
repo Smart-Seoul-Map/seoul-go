@@ -4,37 +4,150 @@
   pointer-events: none;
 }
 
+.entry-exploration-dart-guide__intro,
+.entry-exploration-dart-guide__note,
+.entry-exploration-dart-guide__hint,
+.entry-exploration-dart-guide__result {
+  position: absolute;
+}
+
+.entry-exploration-dart-guide__intro {
+  top: var(--sg-spacing-6);
+  right: var(--sg-spacing-4_5);
+  left: var(--sg-spacing-4_5);
+}
+
+.entry-exploration-dart-guide__note {
+  right: var(--sg-spacing-4_5);
+  bottom: calc(var(--sg-spacing-16) + var(--sg-spacing-6));
+  width: 58%;
+}
+
+.entry-exploration-dart-guide__hint {
+  right: var(--sg-spacing-4_5);
+  bottom: var(--sg-spacing-6);
+  left: var(--sg-spacing-4_5);
+}
+
+.entry-exploration-dart-guide__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-spacing-4);
+  right: var(--sg-spacing-4_5);
+  bottom: var(--sg-spacing-7);
+  left: var(--sg-spacing-4_5);
+}
+
 .entry-exploration-dart-guide__title {
   margin: 0;
   color: var(--sg-detail-title-color);
   font-family: var(--sg-font-alrim);
-  font-size: var(--sg-detail-title-size);
+  font-size: var(--sg-font-size-7);
   font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-12);
-  text-align: center;
+  line-height: var(--sg-line-height-9);
+  text-align: start;
 }
 
 .entry-exploration-dart-guide__subtitle {
   margin: 0;
   color: var(--sg-color-text-muted);
   font-family: var(--sg-font-namsan);
-  font-size: var(--sg-detail-supporting-size);
-  font-weight: var(--sg-font-weight-regular);
-  line-height: var(--sg-line-height-6);
-  text-align: center;
+  font-size: var(--sg-font-size-4);
+  font-weight: var(--sg-font-weight-medium);
+  line-height: var(--sg-line-height-5);
+  text-align: start;
 }
 
 .entry-exploration-dart-guide__accent {
   color: var(--sg-color-text-brand);
 }
 
-.entry-exploration-dart-guide__divider {
-  width: 100%;
+.entry-exploration-dart-guide__result-caption {
   margin: 0;
-  border: 0;
-  border-top: var(--sg-panel-divider-width) dashed var(--sg-color-stroke-weak);
+  color: var(--sg-v3-blue-600);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-5);
+}
+
+.entry-exploration-dart-guide__headline {
+  margin: 0;
+  color: var(--sg-color-text-default);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-11);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-10);
+  white-space: pre-wrap;
+}
+
+.entry-exploration-dart-guide__result-note {
+  margin: 0;
+  color: var(--sg-color-text-muted);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-medium);
+  line-height: var(--sg-line-height-5);
+}
+
+.entry-exploration-dart-guide__result-emphasis {
+  margin: 0;
+  color: var(--sg-color-text-default);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-4);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-5);
 }
 
 .entry-exploration-dart-guide__action {
   pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  .entry-exploration-dart-guide__intro {
+    top: var(--sg-spacing-10);
+    right: auto;
+    left: 50%;
+    width: 51%;
+    transform: translateX(-50%);
+  }
+
+  .entry-exploration-dart-guide__note {
+    top: 48%;
+    right: var(--sg-spacing-10);
+    bottom: auto;
+    width: 18%;
+  }
+
+  .entry-exploration-dart-guide__hint {
+    right: auto;
+    bottom: var(--sg-spacing-10);
+    left: 50%;
+    width: 29%;
+    transform: translateX(-50%);
+  }
+
+  .entry-exploration-dart-guide__result {
+    top: 48%;
+    right: var(--sg-spacing-10);
+    bottom: auto;
+    left: auto;
+    width: 18%;
+  }
+
+  .entry-exploration-dart-guide__title {
+    font-size: var(--sg-detail-title-size);
+    line-height: var(--sg-line-height-12);
+    text-align: center;
+  }
+
+  .entry-exploration-dart-guide__subtitle {
+    font-size: var(--sg-detail-supporting-size);
+    text-align: center;
+  }
+
+  .entry-exploration-dart-guide__headline {
+    font-size: var(--sg-font-size-9);
+    line-height: var(--sg-line-height-9);
+  }
 }

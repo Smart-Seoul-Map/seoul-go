@@ -21,6 +21,11 @@ import {
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
 import {
+  getEntryExplorationRectanglePoints,
+  getEntryExplorationTileMapCameraFocus,
+  getEntryExplorationTileMapCameraZoom,
+} from "../domain/entryExplorationTileMapCameraFit";
+import {
   getSeoulGridCellDistrictId,
   isSeoulGridCellValid,
   toSeoulGridCell,
@@ -31,6 +36,7 @@ import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 import {
   createEntryExplorationSceneObject,
   disposeEntryExplorationObject3D,
+  updateEntryExplorationCameraView,
 } from "./entryExplorationThreeScene";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
@@ -62,6 +68,11 @@ export type EntryExplorationSeoulTileMapViewInteractionController =
     deactivate: () => void;
     isActive: () => boolean;
   };
+
+type EntryExplorationTileMapCameraView = {
+  focus: EntryExplorationScenePoint;
+  zoom: number;
+};
 
 const SEOUL_TILE_MAP_VIEW_PRIORITY = 30;
 const HIT_CELL_RENDER_ORDER = 999;
@@ -189,17 +200,75 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     onActiveChange?.(false);
   };
 
-  const updateCamera = (camera: THREE.OrthographicCamera, time: number): void => {
-    if (!isEngaged || cameraTransitionStartedAt === null) {
-      return;
-    }
+  const getCharacterDestination = (): EntryExplorationScenePoint => ({
+    x:
+      seoulTileMapObject.position.x +
+      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.x,
+    z:
+      seoulTileMapObject.position.z +
+      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.z,
+  });
 
-    const { cameraFocusOffset, cameraOffset, cameraTransitionDurationMs, cameraZoom } =
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
-    const focus = {
+  const getCameraFocus = (): EntryExplorationScenePoint => {
+    const { cameraFocusOffset } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    return {
       x: seoulTileMapObject.position.x + cameraFocusOffset.x,
       z: seoulTileMapObject.position.z + cameraFocusOffset.z,
     };
+  };
+
+  const getCameraView = (camera: THREE.OrthographicCamera): EntryExplorationTileMapCameraView => {
+    const {
+      cameraNarrowViewportContentCenterRatio,
+      cameraOffset,
+      cameraViewWidthUsageRatio,
+      cameraZoom,
+    } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+    const focus = getCameraFocus();
+    const mapPoints = getEntryExplorationRectanglePoints(seoulTileMapObject.position, mapSize);
+    const zoom = getEntryExplorationTileMapCameraZoom({
+      cameraOffset,
+      focusPoint: focus,
+      maxZoom: cameraZoom,
+      points: [...mapPoints, getCharacterDestination()],
+      viewHalfWidth: (camera.right - camera.left) / 2,
+      widthUsageRatio: cameraViewWidthUsageRatio,
+    });
+
+    if (zoom >= cameraZoom) {
+      return { focus, zoom };
+    }
+
+    return {
+      focus: getEntryExplorationTileMapCameraFocus({
+        cameraOffset,
+        contentCenterScreenRatio: cameraNarrowViewportContentCenterRatio,
+        focusPoint: focus,
+        points: mapPoints,
+        viewHalfHeight: (camera.top - camera.bottom) / 2,
+        zoom,
+      }),
+      zoom,
+    };
+  };
+
+  const updateCamera = (camera: THREE.OrthographicCamera, time: number): void => {
+    if (!isEngaged) {
+      return;
+    }
+
+    const { cameraOffset, cameraTransitionDurationMs } =
+      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+    const { focus, zoom } = getCameraView(camera);
+
+    if (cameraTransitionStartedAt === null) {
+      if (camera.zoom !== zoom || camera.position.x !== focus.x + cameraOffset.x) {
+        updateEntryExplorationCameraView(camera, focus, cameraOffset, zoom);
+      }
+
+      return;
+    }
 
     cameraTransition ??= createSceneCameraTransition({
       camera,
@@ -211,7 +280,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         cameraOffset.y,
         focus.z + cameraOffset.z
       ),
-      toZoom: cameraZoom,
+      toZoom: zoom,
     });
 
     const { done } = updateSceneCameraTransition(cameraTransition, time);
@@ -223,15 +292,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransition = null;
     cameraTransitionStartedAt = null;
   };
-
-  const getCharacterDestination = (): EntryExplorationScenePoint => ({
-    x:
-      seoulTileMapObject.position.x +
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.x,
-    z:
-      seoulTileMapObject.position.z +
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.z,
-  });
 
   const faceCharacterTowardMap = (): void => {
     if (!isEngaged || !characterModel) {

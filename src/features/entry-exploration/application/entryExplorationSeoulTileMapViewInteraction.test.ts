@@ -67,7 +67,7 @@ describe("entry exploration seoul tile map view interaction", () => {
 
   test("moves the camera to the intro entry view", () => {
     const controller = createEntryExplorationSeoulTileMapViewInteractionController();
-    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const camera = new THREE.OrthographicCamera(-20, 20, 10, -10, 0.1, 1_000);
     const { cameraFocusOffset, cameraOffset, cameraTransitionDurationMs, cameraZoom } =
       ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 
@@ -78,6 +78,20 @@ describe("entry exploration seoul tile map view interaction", () => {
     expect(camera.position.x).toBeCloseTo(MAP_POSITION.x + cameraFocusOffset.x + cameraOffset.x);
     expect(camera.position.z).toBeCloseTo(MAP_POSITION.z + cameraFocusOffset.z + cameraOffset.z);
     expect(camera.zoom).toBeCloseTo(cameraZoom);
+
+    controller.dispose();
+  });
+
+  test("zooms the camera out until the tile map fits a narrow viewport", () => {
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController();
+    const camera = new THREE.OrthographicCamera(-4.39, 4.39, 9.5, -9.5, 0.1, 1_000);
+    const { cameraTransitionDurationMs, cameraZoom } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    controller.updateTriggerState(MAP_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs, MAP_POSITION);
+
+    expect(camera.zoom).toBeLessThan(cameraZoom);
 
     controller.dispose();
   });

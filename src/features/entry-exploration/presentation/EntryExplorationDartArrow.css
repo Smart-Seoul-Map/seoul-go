@@ -22,6 +22,11 @@
 
 .entry-exploration-dart-arrow__arrow {
   filter: drop-shadow(var(--sg-shadow-3));
+  transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
+}
+
+.entry-exploration-dart-arrow__arrow[data-landed="true"] {
+  opacity: 0;
 }
 
 .entry-exploration-dart-arrow__click-hint,

@@ -11,6 +11,8 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
     x: -0.72,
     z: -0.72,
   },
+  cameraNarrowViewportContentCenterRatio: 0.38,
+  cameraViewWidthUsageRatio: 0.88,
   cameraZoom: 1.25,
   characterDestinationOffset: {
     x: -8.72,
