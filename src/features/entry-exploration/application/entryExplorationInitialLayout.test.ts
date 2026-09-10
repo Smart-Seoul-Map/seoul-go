@@ -8,7 +8,7 @@ import {
   createEntryExplorationCamera,
   createEntryExplorationSceneObject,
   disposeEntryExplorationObject3D,
-  updateEntryExplorationCameraFocus,
+  updateEntryExplorationCameraView,
 } from "./entryExplorationThreeScene";
 
 beforeEach(() => {
@@ -32,7 +32,12 @@ test.each([
     disposeEntryExplorationObject3D(subway);
   });
   const camera = createEntryExplorationCamera(width, height);
-  updateEntryExplorationCameraFocus(camera, ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition);
+  updateEntryExplorationCameraView(
+    camera,
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset,
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.zoom
+  );
   camera.updateMatrixWorld();
 
   for (const object of [district.object, subway]) {
