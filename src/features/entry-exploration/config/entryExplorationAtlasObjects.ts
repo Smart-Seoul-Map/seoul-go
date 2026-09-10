@@ -7,7 +7,11 @@ type AtlasPlacement = {
   width: number;
 };
 
-export const ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X = 0.95;
+export const ENTRY_EXPLORATION_LANDMARK_LAYOUT = {
+  hanokEntryViewportX: 0.95,
+  towerEntryEdgeOffset: 3,
+  towerForwardOffset: 25,
+} as const;
 
 // Offsets are relative to the fixed intro arrival point, not the moving character.
 export const ENTRY_EXPLORATION_ATLAS_OBJECTS = [

@@ -4,12 +4,12 @@ import { createEntryExplorationGuideRoute } from "./entryExplorationGuideRoute";
 
 const options = {
   origin: { x: 0, z: 3.8 },
-  towerPosition: { x: 23, z: 15 },
+  destination: { x: 23, z: 15 },
   cameraOffset: { x: 11, y: 13, z: 11 },
 };
 
-test("ends exactly at the tower base without a front or lateral offset", () => {
-  expect(createEntryExplorationGuideRoute(options).destination).toEqual(options.towerPosition);
+test("ends exactly at the destination base without a front or lateral offset", () => {
+  expect(createEntryExplorationGuideRoute(options).destination).toEqual({ x: 23, z: 15 });
 });
 
 test("starts down-screen and finishes rightward with a rounded L bend", () => {
@@ -32,12 +32,12 @@ test("starts down-screen and finishes rightward with a rounded L bend", () => {
   expect(route.start.z).toBeGreaterThan(options.origin.z);
 });
 
-test("uses the resolved tower position and translates the entire route with the scene", () => {
+test("uses the resolved destination and translates the entire route with the scene", () => {
   const route = createEntryExplorationGuideRoute(options);
   const translated = createEntryExplorationGuideRoute({
     ...options,
     origin: { x: 8, z: -1.2 },
-    towerPosition: { x: 31, z: 10 },
+    destination: { x: 31, z: 10 },
   });
   for (const key of ["start", "bendStart", "bendControl", "bendEnd", "destination"] as const) {
     expect(translated[key].x - route[key].x).toBeCloseTo(8);

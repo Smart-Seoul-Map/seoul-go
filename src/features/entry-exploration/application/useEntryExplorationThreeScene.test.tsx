@@ -207,7 +207,7 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
   });
 
-  test("positions the tower using the viewport at start and keeps it fixed after resizing", async () => {
+  test("positions the hanok using the viewport at start and keeps both landmarks fixed after resizing", async () => {
     const containerRef = createContainerRef();
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
@@ -222,18 +222,20 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-hanok");
     const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
-    if (!tower || !containerRef.current) {
+    if (!hanok || !tower || !containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
-    const originalPosition = tower.position.clone();
+    const originalPosition = hanok.position.clone();
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
 
     act(() => {
       startIntro?.();
     });
-    const placedPosition = tower.position.clone();
+    const placedPosition = hanok.position.clone();
+    const placedTowerPosition = tower.position.clone();
     expect(placedPosition.equals(originalPosition)).toBe(false);
     const expectedScreenRight = (19 / 2) * (375 / 812) * 0.9;
     const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
@@ -247,7 +249,8 @@ describe("useEntryExplorationThreeScene", () => {
       mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
       startIntro?.();
     });
-    expect(tower.position.equals(placedPosition)).toBe(true);
+    expect(hanok.position.equals(placedPosition)).toBe(true);
+    expect(tower.position.equals(placedTowerPosition)).toBe(true);
     viewport.mockRestore();
     unmount();
   });
@@ -291,7 +294,7 @@ describe("useEntryExplorationThreeScene", () => {
     expect(dispose).toHaveBeenCalledOnce();
   });
 
-  test("opens at the guide destination, stops once, and rearms only after leaving", async () => {
+  test("opens at the tower, stops once, and rearms only after leaving", async () => {
     const onOpenChange = vi.fn();
     const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
     const containerRef = createContainerRef();
@@ -314,7 +317,7 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       startIntro?.();
     });
-    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
+    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
     if (!head) throw new Error("The guide head is missing.");
     const destination = { x: head.position.x, z: head.position.z };
     const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];

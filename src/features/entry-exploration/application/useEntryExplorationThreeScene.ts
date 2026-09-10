@@ -331,13 +331,13 @@ export function useEntryExplorationThreeScene({
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
       const entryRect = container.getBoundingClientRect();
-      const towerPosition = atlasScenery.positionTowerAtEntry(
+      const guideDestination = atlasScenery.positionLandmarksAtEntry(
         Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
       );
-      if (towerPosition) {
+      if (guideDestination) {
         const guide = createEntryExplorationGuideArrow({
           origin: cameraTarget,
-          towerPosition,
+          destination: guideDestination,
           color: getEntryExplorationIntroTheme().guideColor,
         });
         guideArrowRef.current = guide;
@@ -486,7 +486,7 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
-        const destination = guideArrowRef.current?.destination;
+        const destination = atlasScenery.object.getObjectByName("entry-atlas-tower")?.position;
         if (destination && placeVisit?.update(characterPosition, destination)) {
           movementRef.current.stop();
         }

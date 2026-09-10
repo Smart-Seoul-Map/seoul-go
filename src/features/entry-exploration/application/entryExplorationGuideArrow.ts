@@ -7,18 +7,18 @@ import type { EntryExplorationScenePoint } from "../domain/entryExplorationScene
 
 type GuideArrowOptions = {
   origin: EntryExplorationScenePoint;
-  towerPosition: EntryExplorationScenePoint;
+  destination: EntryExplorationScenePoint;
   color: string;
 };
 
 export function createEntryExplorationGuideArrow({
   origin,
-  towerPosition,
+  destination,
   color,
 }: GuideArrowOptions) {
   const route = createEntryExplorationGuideRoute({
     origin,
-    towerPosition,
+    destination,
     cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
   });
   const path = new THREE.CurvePath<THREE.Vector3>();

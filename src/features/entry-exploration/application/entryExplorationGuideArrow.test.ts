@@ -10,7 +10,7 @@ import {
 } from "./entryExplorationThreeScene";
 
 const origin = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
-const options = { origin, towerPosition: { x: 23, z: 15 }, color: "#ff2e94" };
+const options = { origin, destination: { x: 23, z: 15 }, color: "#ff2e94" };
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -68,28 +68,28 @@ test.each([
   [853, 872],
   [375, 812],
   [390, 844],
-])("aligns the arrowhead with the visible tower base at %ix%i", (width, height) => {
+])("aligns the arrowhead with the visible hanok base at %ix%i", (width, height) => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
   const scenery = createEntryExplorationAtlasScenery();
   onTestFinished(scenery.dispose);
-  scenery.positionTowerAtEntry(width / height);
-  const tower = scenery.object.getObjectByName("entry-atlas-tower");
-  if (!(tower instanceof THREE.Mesh)) throw new Error("The tower is missing.");
+  scenery.positionLandmarksAtEntry(width / height);
+  const hanok = scenery.object.getObjectByName("entry-atlas-hanok");
+  if (!(hanok instanceof THREE.Mesh)) throw new Error("The hanok is missing.");
   const guide = createEntryExplorationGuideArrow({
     origin,
-    towerPosition: { x: tower.position.x, z: tower.position.z },
+    destination: { x: hanok.position.x, z: hanok.position.z },
     color: "#ff2e94",
   });
   onTestFinished(guide.dispose);
   const camera = createEntryExplorationCamera(width, height);
   updateEntryExplorationCameraFocus(camera, guide.destination);
   camera.updateMatrixWorld();
-  tower.updateWorldMatrix(true, false);
-  const positions = tower.geometry.getAttribute("position");
+  hanok.updateWorldMatrix(true, false);
+  const positions = hanok.geometry.getAttribute("position");
   const bounds = new THREE.Box3();
   for (let index = 0; index < positions.count; index += 1) {
     const vertex = new THREE.Vector3().fromBufferAttribute(positions, index);
-    bounds.expandByPoint(tower.localToWorld(vertex).project(camera));
+    bounds.expandByPoint(hanok.localToWorld(vertex).project(camera));
   }
   const head = guide.object.getObjectByName("entry-guide-head");
   if (!head) throw new Error("The arrowhead is missing.");

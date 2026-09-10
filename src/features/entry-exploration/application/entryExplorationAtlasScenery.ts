@@ -6,7 +6,7 @@ import manifest from "../../../assets/entry-exploration/intro-atlas.json";
 import atlasUrl from "../../../assets/entry-exploration/intro-atlas.png";
 import {
   ENTRY_EXPLORATION_ATLAS_OBJECTS,
-  ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X,
+  ENTRY_EXPLORATION_LANDMARK_LAYOUT,
 } from "../config/entryExplorationAtlasObjects";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
@@ -60,16 +60,18 @@ export function createEntryExplorationAtlasScenery() {
 
   return {
     object,
-    positionTowerAtEntry(viewportAspect: number): EntryExplorationScenePoint | null {
+    positionLandmarksAtEntry(viewportAspect: number): EntryExplorationScenePoint | null {
+      const hanok = object.getObjectByName("entry-atlas-hanok");
       const tower = object.getObjectByName("entry-atlas-tower");
-      if (!tower) {
+      if (!hanok || !tower) {
         return null;
       }
 
       const right = new THREE.Vector3(1, 0, 0).applyQuaternion(facing);
       const forward = new THREE.Vector3(cameraOffset.x, 0, cameraOffset.z).normalize();
       const halfWidth = (ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize / 2) * viewportAspect;
-      const targetRight = (ENTRY_EXPLORATION_TOWER_ENTRY_VIEWPORT_X * 2 - 1) * halfWidth;
+      const layout = ENTRY_EXPLORATION_LANDMARK_LAYOUT;
+      const targetRight = (layout.hanokEntryViewportX * 2 - 1) * halfWidth;
       // Bound the two legs of the L route; rounding the corner makes travel slightly shorter.
       const travelDistance =
         ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond *
@@ -80,12 +82,19 @@ export function createEntryExplorationAtlasScenery() {
           ENTRY_EXPLORATION_GUIDE_CONFIG.startForwardOffset -
           ENTRY_EXPLORATION_GUIDE_CONFIG.bendRadius
       );
-      tower.position
+      const endForward = travelDistance - Math.abs(endRight);
+      hanok.position
         .set(intro.targetPosition.x, 0.06, intro.targetPosition.z)
         .addScaledVector(right, endRight)
-        .addScaledVector(forward, travelDistance - Math.abs(endRight));
+        .addScaledVector(forward, endForward);
 
-      return { x: tower.position.x, z: tower.position.z };
+      // Reveal the tower from the right during the approach, below the hanok's screen bounds.
+      tower.position
+        .set(intro.targetPosition.x, 0.06, intro.targetPosition.z)
+        .addScaledVector(right, halfWidth + layout.towerEntryEdgeOffset)
+        .addScaledVector(forward, endForward + layout.towerForwardOffset);
+
+      return { x: hanok.position.x, z: hanok.position.z };
     },
     dispose() {
       geometries.forEach((geometry) => geometry.dispose());

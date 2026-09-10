@@ -3,19 +3,18 @@ import type { EntryExplorationScenePoint } from "./entryExplorationSceneMath";
 
 type GuideRouteOptions = {
   origin: EntryExplorationScenePoint;
-  towerPosition: EntryExplorationScenePoint;
+  destination: EntryExplorationScenePoint;
   cameraOffset: EntryExplorationScenePoint & { y: number };
 };
 
 export function createEntryExplorationGuideRoute({
   origin,
-  towerPosition,
+  destination,
   cameraOffset,
 }: GuideRouteOptions) {
   const horizontal = Math.hypot(cameraOffset.x, cameraOffset.z);
   const forward = { x: cameraOffset.x / horizontal, z: cameraOffset.z / horizontal };
   const right = { x: forward.z, z: -forward.x };
-  const destination = { x: towerPosition.x, z: towerPosition.z };
   const localEnd = { x: destination.x - origin.x, z: destination.z - origin.z };
   const endRight = localEnd.x * right.x + localEnd.z * right.z;
   const endForward = localEnd.x * forward.x + localEnd.z * forward.z;
