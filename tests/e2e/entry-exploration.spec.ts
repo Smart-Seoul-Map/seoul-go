@@ -3,6 +3,7 @@ import { expect, test as base, type Page } from "@playwright/test";
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
 const HANOK_DESKTOP_POINT = { x: 1298, y: 568 };
+const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 450 };
 const HANOK_MOBILE_POINT = { x: 371, y: 659 };
 const HANOK_MAP_LINK_NAME = "한옥체험 지도 보기 (새 탭에서 열기)";
 
@@ -190,7 +191,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
-    await scene(page).click({ position: HANOK_DESKTOP_POINT });
+    await scene(page).click({ position: HANOK_DESKTOP_REENTRY_POINT });
     await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   });
   await test.step("Moving away closes the open card", async () => {
