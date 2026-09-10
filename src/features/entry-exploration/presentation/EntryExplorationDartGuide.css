@@ -4,72 +4,37 @@
   pointer-events: none;
 }
 
+.entry-exploration-dart-guide__title {
+  margin: 0;
+  color: var(--sg-detail-title-color);
+  font-family: var(--sg-font-alrim);
+  font-size: var(--sg-detail-title-size);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-12);
+  text-align: center;
+}
+
+.entry-exploration-dart-guide__subtitle {
+  margin: 0;
+  color: var(--sg-color-text-muted);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-detail-supporting-size);
+  font-weight: var(--sg-font-weight-regular);
+  line-height: var(--sg-line-height-6);
+  text-align: center;
+}
+
 .entry-exploration-dart-guide__accent {
   color: var(--sg-color-text-brand);
-}
-
-.entry-exploration-dart-guide__prompt,
-.entry-exploration-dart-guide__hint {
-  position: absolute;
-}
-
-.entry-exploration-dart-guide__prompt,
-.entry-exploration-dart-guide__panel,
-.entry-exploration-dart-guide__hint {
-  background: var(--sg-color-bg-surface);
-  border: 1px solid var(--sg-v3-pink-500);
-}
-
-.entry-exploration-dart-guide__prompt {
-  top: var(--sg-spacing-10);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 51%;
-  padding: var(--sg-spacing-10) var(--sg-spacing-9);
-  border-radius: var(--sg-radius-6);
-  box-shadow: var(--sg-panel-shadow);
-}
-
-.entry-exploration-dart-guide__side {
-  position: absolute;
-  top: 48%;
-  right: var(--sg-spacing-10);
-  width: 18%;
-}
-
-.entry-exploration-dart-guide__panel {
-  padding: var(--sg-spacing-4);
-  border-radius: var(--sg-radius-5);
-  box-shadow: var(--sg-shadow-3);
-}
-
-.entry-exploration-dart-guide__result {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sg-spacing-4);
-}
-
-.entry-exploration-dart-guide__hint {
-  bottom: var(--sg-spacing-10);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 29%;
-  padding: var(--sg-spacing-3_5) var(--sg-spacing-5_5);
-  border-radius: var(--sg-radius-5);
-  box-shadow: var(--sg-floating-control-shadow);
 }
 
 .entry-exploration-dart-guide__divider {
   width: 100%;
   margin: 0;
   border: 0;
-  border-top: 1px dashed var(--sg-color-stroke-weak);
+  border-top: var(--sg-panel-divider-width) dashed var(--sg-color-stroke-weak);
 }
 
 .entry-exploration-dart-guide__action {
   pointer-events: auto;
-}
-
-.entry-exploration-dart-guide__action .AppButton {
-  width: 100%;
 }
