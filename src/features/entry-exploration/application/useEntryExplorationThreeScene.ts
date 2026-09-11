@@ -21,6 +21,8 @@ import {
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
+import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -29,7 +31,9 @@ import {
 } from "../domain/entryExplorationSceneMath";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
-import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
+import { createEntryExplorationScenery } from "./entryExplorationScenery";
+import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
+import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 import {
   addEntryExplorationLights,
   createEntryExplorationCamera,
@@ -60,6 +64,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
+  placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -73,10 +78,12 @@ export function useEntryExplorationThreeScene({
   containerRef,
   createSceneInteractionControllers,
   onSceneControlsReady,
+  placeVisits,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
+  const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
   const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
@@ -157,6 +164,10 @@ export function useEntryExplorationThreeScene({
         ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
+      );
+      guideArrowRef.current?.start(
+        performance.now(),
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
       );
     },
     speedPerSecond: ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond,
@@ -247,11 +258,16 @@ export function useEntryExplorationThreeScene({
     const width = Math.max(rect.width, 1);
     const height = Math.max(rect.height, 1);
     const scene = new THREE.Scene();
+    Object.values(placeVisits ?? {}).forEach((visit) => visit.reset());
     const camera = createEntryExplorationCamera(width, height);
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
-    const atlasScenery = createEntryExplorationAtlasScenery();
+    const scenery = createEntryExplorationScenery();
+    const landmarks = {
+      hanok: scenery.object.getObjectByName("entry-scenery-hanok"),
+      tower: scenery.object.getObjectByName("entry-scenery-tower"),
+    };
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
     ).map(createEntryExplorationSceneObject);
@@ -271,7 +287,7 @@ export function useEntryExplorationThreeScene({
     addEntryExplorationLights(scene);
     scene.add(floor);
     scene.add(introFloor.object);
-    scene.add(atlasScenery.object);
+    scene.add(scenery.object);
     sceneObjectMeshes.forEach((mesh) => {
       scene.add(mesh);
     });
@@ -319,6 +335,19 @@ export function useEntryExplorationThreeScene({
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
+      const entryRect = container.getBoundingClientRect();
+      const guideDestination = scenery.positionLandmarksAtEntry(
+        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
+      );
+      if (guideDestination) {
+        const guide = createEntryExplorationGuideArrow({
+          origin: cameraTarget,
+          destination: guideDestination,
+          color: getEntryExplorationIntroTheme().guideColor,
+        });
+        guideArrowRef.current = guide;
+        scene.add(guide.object);
+      }
       introStatusRef.current = "entering";
       renderer.domElement.style.cursor = "default";
       renderer.domElement.setAttribute("aria-label", "서울 탐방을 시작하는 중");
@@ -376,6 +405,7 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
+      Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
       movementRef.current.moveTo({
         x: floorHit.point.x,
         z: floorHit.point.z,
@@ -461,6 +491,12 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        for (const placeId of ["hanok", "tower"] as const) {
+          const destination = landmarks[placeId]?.position;
+          if (destination && placeVisits?.[placeId].update(characterPosition, destination)) {
+            movementRef.current.stop();
+          }
+        }
         updateSceneInteractionTriggers(characterPosition);
         activateReadySceneInteraction(time, (controller) => {
           const characterDestination = controller.getActivationCharacterDestination?.();
@@ -485,6 +521,7 @@ export function useEntryExplorationThreeScene({
       if (introStatusRef.current === "ready") {
         updateActiveSceneInteractionCamera(camera, time, characterPosition);
       }
+      guideArrowRef.current?.update(time);
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(render);
     };
@@ -511,7 +548,9 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.removeEventListener("keydown", handleKeyDown);
       cancelAnimationFrame(frameId);
       introFloor.cancelPendingRefresh();
-      atlasScenery.dispose();
+      guideArrowRef.current?.dispose();
+      guideArrowRef.current = null;
+      scenery.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);
       sceneObjectMeshes.forEach(disposeEntryExplorationObject3D);
@@ -535,6 +574,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
+    placeVisits,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,

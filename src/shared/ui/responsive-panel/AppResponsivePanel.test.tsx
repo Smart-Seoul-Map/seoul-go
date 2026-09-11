@@ -280,6 +280,29 @@ describe("AppResponsivePanel", () => {
     expect(onOpenChange).toHaveBeenLastCalledWith(false, { reason: "handleClickOnLastSnapPoint" });
   });
 
+  test("keeps a mobile sheet open after the final snap point when final click dismissal is disabled", () => {
+    resize(375);
+    const onOpenChange = vi.fn();
+    render(
+      <Panel
+        defaultOpen
+        onOpenChange={onOpenChange}
+        bottomSheetRootProps={{
+          closeOnFinalSnapClick: false,
+          snapPoints: ["200px", "400px"],
+        }}
+      />
+    );
+    const handle = screen.getByRole("button", { name: "패널 높이 조절" });
+    fireEvent.click(handle);
+    expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("400px");
+    fireEvent.click(handle);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false, {
+      reason: "handleClickOnLastSnapPoint",
+    });
+  });
+
   test("preserves a controlled snap point until the parent updates it", () => {
     resize(375);
     const setActiveSnapPoint = vi.fn();

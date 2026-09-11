@@ -14,9 +14,9 @@ export const ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE =
 export const ENTRY_EXPLORATION_SCENE_CONFIG = {
   arrivalRadius: 0.35,
   cameraOffset: {
-    x: 11,
+    x: 14,
     y: 13,
-    z: 11,
+    z: 14,
   },
   cameraTransitionDurationMs: 900,
   cameraViewSize: 19,

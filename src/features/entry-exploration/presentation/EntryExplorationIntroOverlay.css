@@ -25,9 +25,10 @@
   border: var(--sg-spacing-0_5) solid var(--sg-v3-blue-600);
   border-radius: var(--sg-radius-full);
   bottom: 4.537%;
-  font-size: var(--sg-font-size-6);
+  font-size: clamp(var(--sg-font-size-3), 2.8vw, var(--sg-font-size-6));
   height: 6.481%;
   left: 39.323%;
+  min-height: clamp(var(--sg-button-height-xs), 5.5vw, var(--sg-button-height-lg));
   padding: 0;
   position: absolute;
   width: 25%;
@@ -41,5 +42,9 @@
   .entry-exploration-intro-overlay-stage {
     height: auto;
     width: 100vw;
+  }
+
+  .entry-exploration-intro-overlay-stage > .AppButton {
+    bottom: 2.4%;
   }
 }

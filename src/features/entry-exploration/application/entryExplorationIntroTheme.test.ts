@@ -8,6 +8,7 @@ describe("getEntryExplorationIntroTheme", () => {
     document.documentElement.style.removeProperty("--sg-v3-blue-600");
     document.documentElement.style.removeProperty("--sg-font-size-6");
     document.documentElement.style.removeProperty("--sg-button-primary-bg");
+    document.documentElement.style.removeProperty("--sg-v3-pink-500");
   });
 
   test("uses the same blue tokens as the screen intro button", () => {
@@ -21,5 +22,10 @@ describe("getEntryExplorationIntroTheme", () => {
     expect(theme.button.activeColor).toBe("#08b2f0");
     expect(theme.button.activeShadowColor).toBe("#0082ff");
     expect(theme.button.fontSize).toBe(72);
+  });
+
+  test("reads the guide color from the main pink token", () => {
+    document.documentElement.style.setProperty("--sg-v3-pink-500", "#eb197a");
+    expect(getEntryExplorationIntroTheme().guideColor).toBe("#eb197a");
   });
 });

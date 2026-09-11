@@ -1,7 +1,17 @@
 .PlaceDetailCard {
-  overflow: hidden;
+  min-height: var(--sg-detail-card-min-height);
+  max-height: min(
+    var(--sg-detail-max-height),
+    calc(
+      100dvh - var(--sg-spacing-6) * 2 - env(safe-area-inset-top, 0px) -
+        env(safe-area-inset-bottom, 0px)
+    )
+  );
+  overflow: auto;
+  overscroll-behavior: contain;
   font-family: var(--sg-font-namsan);
   letter-spacing: 0;
+  box-shadow: var(--sg-detail-card-shadow);
   container-type: inline-size;
 }
 .PlaceDetailCard * {
@@ -15,27 +25,14 @@
   min-height: var(--sg-detail-header-min-height);
   margin: 0 var(--sg-spacing-2) var(--sg-spacing-5);
 }
-.PlaceDetailCardHeader h2 {
+.PlaceDetailCardHeader .AppHeading {
   flex: 0 1 auto;
   min-width: 0;
-  margin: 0;
   color: var(--sg-detail-title-color);
-  font-family: var(--sg-font-alrim);
-  font-size: var(--sg-detail-title-size);
-  font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-12);
-  overflow-wrap: anywhere;
 }
-.PlaceDetailCardHeader p {
+.PlaceDetailCardHeader .AppText {
   flex: 1 1 auto;
   min-width: 0;
-  margin: 0;
-  text-align: right;
-  color: var(--sg-color-text-muted);
-  font-family: var(--sg-font-hangang);
-  font-size: var(--sg-detail-supporting-size);
-  line-height: var(--sg-line-height-6);
-  overflow-wrap: anywhere;
 }
 .PlaceDetailCardImage {
   display: grid;
@@ -45,10 +42,9 @@
   overflow: hidden;
   border-radius: var(--sg-detail-image-radius);
   border: var(--sg-detail-image-stroke-width) solid var(--sg-detail-image-stroke);
-  background: var(--sg-color-bg-floating);
+  background: var(--sg-detail-image-bg);
   box-shadow: var(--sg-detail-image-shadow);
   color: var(--sg-color-text-muted);
-  font-size: var(--sg-font-size-7);
 }
 .PlaceDetailCardImage img {
   display: block;
@@ -57,11 +53,18 @@
   min-height: 0;
   object-fit: cover;
 }
-.PlaceDetailCardDescription p {
-  margin: 0;
-  font-size: var(--sg-font-size-8);
-  line-height: var(--sg-line-height-7);
-  overflow-wrap: anywhere;
+.PlaceDetailImageFallback {
+  display: grid;
+  place-items: center;
+  gap: var(--sg-spacing-2);
+}
+.PlaceDetailImageFallback img {
+  width: min(24cqw, 112px);
+  height: auto;
+  object-fit: contain;
+}
+.PlaceDetailCardDescription .AppText {
+  min-width: 0;
 }
 .PlaceDetailCardLocationIcon {
   flex: none;
@@ -69,15 +72,55 @@
   height: var(--sg-detail-location-icon-size);
   color: var(--sg-color-text-brand);
 }
-.PlaceDetailCardAddress p {
+.PlaceDetailCardAddress .AppText {
   min-width: 0;
-  margin: 0;
-  font-size: var(--sg-detail-supporting-size);
-  line-height: var(--sg-line-height-6);
+}
+.PlaceDetailExternalLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--sg-button-height-lg);
+  padding: var(--sg-spacing-3) var(--sg-spacing-4);
+  border-radius: var(--sg-button-radius);
+  background: var(--sg-button-primary-bg);
+  color: var(--sg-button-primary-fg);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-typography-button-label-font-size);
+  font-weight: var(--sg-typography-button-label-font-weight);
+  line-height: var(--sg-typography-button-label-line-height);
+  text-align: center;
+  text-decoration: none;
   overflow-wrap: anywhere;
+}
+.PlaceDetailExternalLink:hover,
+.PlaceDetailExternalLink:active {
+  background: var(--sg-button-primary-bg-pressed);
+}
+.PlaceDetailExternalLink:focus-visible {
+  outline: 3px solid var(--sg-state-focus-ring);
+  outline-offset: 2px;
+}
+.PlaceDetailCard > .PlaceDetailExternalLink {
+  margin-top: var(--sg-spacing-4);
+}
+.PlaceDetailPanel .PlaceDetailPanelFooter {
+  flex-direction: column;
 }
 .PlaceDetailPanel {
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
+  --sg-panel-sheet-max-width: 100%;
+  --sg-panel-sheet-max-height: min(
+    var(--sg-detail-sheet-max-height),
+    var(--place-detail-mobile-max-height, 100dvh),
+    calc(100dvh - var(--sg-spacing-6) - env(safe-area-inset-top, 0px))
+  );
+}
+.AppResponsivePanelLayer[data-appearance="floating"] > .PlaceDetailPanel.AppResponsivePanelContent {
+  max-height: min(
+    var(--sg-detail-max-height),
+    calc(100dvh - var(--panel-floating-top) - var(--panel-floating-bottom))
+  );
 }
 .PlaceDetailPanel .PlaceDetailPanelBody {
   padding: 0;
@@ -90,7 +133,11 @@
 .PlaceDetailPanel .PlaceDetailCard {
   border: 0;
   border-radius: 0;
-  min-height: var(--sg-detail-min-height);
+  box-shadow: none;
+  max-height: none;
+  overflow: hidden;
+  /* Let wheel and touch scrolling reach the panel body instead of this clipped card. */
+  overscroll-behavior: auto;
 }
 .PlaceDetailPanel[data-hide-title] .AppResponsivePanelClose {
   position: relative;
@@ -106,5 +153,5 @@
 .PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
   width: 100%;
   min-height: auto;
-  padding-top: var(--sg-spacing-2);
+  padding-top: var(--sg-spacing-1);
 }
