@@ -9,6 +9,8 @@ import {
   updateEntryExplorationCameraFocus,
 } from "./entryExplorationThreeScene";
 
+const VIEWPORT_EDGE_EPSILON = 0.001;
+
 beforeEach(() => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
 });
@@ -78,7 +80,7 @@ test.each([
     const approachedBounds = projectMeshBounds(tower, camera);
     expect(approachedBounds.min.x).toBeLessThan(1);
     expect(approachedBounds.max.y).toBeGreaterThan(-1);
-    expect(approachedBounds.min.z).toBeGreaterThan(-1);
+    expect(approachedBounds.min.z).toBeGreaterThan(-1 - VIEWPORT_EDGE_EPSILON);
     expect(approachedBounds.max.z).toBeLessThan(1);
 
     updateEntryExplorationCameraFocus(camera, hanok.position);

@@ -2,9 +2,9 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
-const HANOK_DESKTOP_POINT = { x: 1298, y: 568 };
-const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 450 };
-const HANOK_MOBILE_POINT = { x: 371, y: 659 };
+const HANOK_DESKTOP_POINT = { x: 1242, y: 650 };
+const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 448 };
+const HANOK_MOBILE_POINT = { x: 371, y: 801 };
 const HANOK_MAP_LINK_NAME = "한옥체험 지도 보기 (새 탭에서 열기)";
 
 base.use({ actionTimeout: 10_000, launchOptions: { args: ["--disable-dev-shm-usage"] } });
