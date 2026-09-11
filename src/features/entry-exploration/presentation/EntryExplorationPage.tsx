@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,11 +16,9 @@ import {
   useEntryExplorationThreeScene,
 } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
-import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
-import {
-  ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
-  type EntryExplorationPlaceId,
-} from "../config/entryExplorationPlace";
+import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import { useEntryExplorationIntro } from "../application/useEntryExplorationIntro";
+import { useEntryExplorationPlacePanel } from "../application/useEntryExplorationPlacePanel";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
@@ -45,25 +43,13 @@ export function EntryExplorationPage({
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-  const [startIntro, setStartIntro] = useState<(() => boolean) | null>(null);
-  const [isIntroReady, setIsIntroReady] = useState(false);
-  const [isIntroVisible, setIsIntroVisible] = useState(true);
-  const [placePanel, setPlacePanel] = useState<{ placeId: EntryExplorationPlaceId; open: boolean }>(
-    { placeId: "hanok", open: false }
-  );
-  const [placeVisits] = useState(() => {
-    const createVisit = (placeId: EntryExplorationPlaceId) =>
-      createEntryExplorationPlaceVisit({
-        radius: ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS,
-        onOpenChange: (open) =>
-          setPlacePanel((current) => {
-            // Leaving another landmark must not close the newly opened place.
-            if (!open && current.placeId !== placeId) return current;
-            return { placeId, open };
-          }),
-      });
-    return { hanok: createVisit("hanok"), tower: createVisit("tower") };
-  });
+  const {
+    isReady,
+    isVisible,
+    handleStart,
+    handleSceneControlsReady: handleIntroControlsReady,
+  } = useEntryExplorationIntro();
+  const { placeVisits, panelProps } = useEntryExplorationPlacePanel();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
   const districtSelection = useEntryExplorationDistrictSelection({
@@ -73,10 +59,9 @@ export function EntryExplorationPage({
   const handleSceneControlsReady = useCallback(
     (controls: EntryExplorationThreeSceneControls | null) => {
       districtSelection.handleSceneControlsReady(controls);
-      setStartIntro(() => controls?.startIntro ?? null);
-      setIsIntroReady(controls?.isIntroReady ?? false);
+      handleIntroControlsReady(controls);
     },
-    [districtSelection]
+    [districtSelection, handleIntroControlsReady]
   );
 
   useEntryExplorationThreeScene({
@@ -85,12 +70,6 @@ export function EntryExplorationPage({
     onSceneControlsReady: handleSceneControlsReady,
     placeVisits,
   });
-
-  const handleStartIntro = (): void => {
-    if (startIntro?.()) {
-      setIsIntroVisible(false);
-    }
-  };
 
   useEffect(() => {
     onSubwayStationSelectionChange?.(subwaySelection.selectedStation, subwaySelection.status);
@@ -111,11 +90,10 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {isIntroVisible ? (
-        <EntryExplorationIntroOverlay disabled={!isIntroReady} onStart={handleStartIntro} />
+      {isVisible ? (
+        <EntryExplorationIntroOverlay disabled={!isReady} onStart={handleStart} />
       ) : null}
-      {!isIntroVisible &&
-        renderPlacePanel?.({ ...placePanel, onClose: placeVisits[placePanel.placeId].dismiss })}
+      {!isVisible && renderPlacePanel?.(panelProps)}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}

@@ -234,6 +234,18 @@ describe("EntryExplorationPage", () => {
     expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
     expect(screen.queryByRole("link")).toBeNull();
   });
+
+  test("opens the hanok panel near the visible landmark area without requiring the exact center", async () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    const hanok = { x: 10, z: 20 };
+
+    act(() => {
+      placeVisits?.hanok.update({ x: 13, z: 20 }, hanok);
+    });
+
+    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+  });
 });
 
 function renderEntryExplorationPage({
