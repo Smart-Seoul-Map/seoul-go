@@ -1,5 +1,3 @@
-export const ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS = 1.2;
-
 export const ENTRY_EXPLORATION_PLACES = {
   tower: {
     title: "N서울타워",
@@ -21,3 +19,8 @@ export const ENTRY_EXPLORATION_PLACES = {
 } as const;
 
 export type EntryExplorationPlaceId = keyof typeof ENTRY_EXPLORATION_PLACES;
+
+export const ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID = {
+  hanok: 4,
+  tower: 2.4,
+} as const satisfies Record<EntryExplorationPlaceId, number>;

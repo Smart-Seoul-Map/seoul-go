@@ -67,6 +67,7 @@ export function PlaceDetailPanel({
       <AppResponsivePanel.Content
         title={place.title}
         hideTitle
+        showCloseButton={false}
         showHandle
         width="var(--sg-detail-width)"
         className="PlaceDetailPanel"
