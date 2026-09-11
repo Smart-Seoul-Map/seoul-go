@@ -1,0 +1,15 @@
+{
+  "pointNumberOrigin": {
+    "x": 700000,
+    "y": 1300000
+  },
+  "utmk": {
+    "falseEasting": 1000000,
+    "falseNorthing": 2000000,
+    "inverseFlattening": 298.257222101,
+    "latitudeOrigin": 38,
+    "longitudeOrigin": 127.5,
+    "scaleFactor": 0.9996,
+    "semiMajorAxis": 6378137
+  }
+}

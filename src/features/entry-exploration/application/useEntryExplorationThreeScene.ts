@@ -34,6 +34,7 @@ import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
 import { createEntryExplorationScenery } from "./entryExplorationScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
+import { createEntryExplorationArcheryRange } from "./entryExplorationArcheryRange";
 import {
   addEntryExplorationLights,
   createEntryExplorationCamera,
@@ -268,6 +269,7 @@ export function useEntryExplorationThreeScene({
       hanok: scenery.object.getObjectByName("entry-scenery-hanok"),
       tower: scenery.object.getObjectByName("entry-scenery-tower"),
     };
+    const archeryRange = createEntryExplorationArcheryRange();
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
     ).map(createEntryExplorationSceneObject);
@@ -288,6 +290,7 @@ export function useEntryExplorationThreeScene({
     scene.add(floor);
     scene.add(introFloor.object);
     scene.add(scenery.object);
+    scene.add(archeryRange.object);
     sceneObjectMeshes.forEach((mesh) => {
       scene.add(mesh);
     });
@@ -551,6 +554,7 @@ export function useEntryExplorationThreeScene({
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
       scenery.dispose();
+      archeryRange.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);
       sceneObjectMeshes.forEach(disposeEntryExplorationObject3D);

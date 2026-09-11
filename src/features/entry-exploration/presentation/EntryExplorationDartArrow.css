@@ -1,0 +1,57 @@
+.entry-exploration-dart-arrow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.entry-exploration-page[data-dart-target="true"],
+.entry-exploration-page[data-dart-target="true"] .entry-exploration-scene canvas {
+  cursor: none !important;
+}
+
+.entry-exploration-dart-arrow__arrow,
+.entry-exploration-dart-arrow__click-hint,
+.entry-exploration-dart-arrow__crosshair {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.entry-exploration-dart-arrow__arrow {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(var(--sg-shadow-3));
+  padding: 0;
+  pointer-events: auto;
+  transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
+}
+
+.entry-exploration-dart-arrow__arrow img {
+  display: block;
+  width: 100%;
+}
+
+.entry-exploration-dart-arrow__arrow[data-landed="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.entry-exploration-dart-arrow__click-hint,
+.entry-exploration-dart-arrow__crosshair {
+  opacity: 0;
+  transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
+}
+
+.entry-exploration-dart-arrow__crosshair {
+  filter: drop-shadow(var(--sg-floating-control-shadow));
+}
+
+.entry-exploration-dart-arrow__click-hint[data-shown="true"],
+.entry-exploration-dart-arrow__crosshair[data-shown="true"] {
+  opacity: 1;
+}

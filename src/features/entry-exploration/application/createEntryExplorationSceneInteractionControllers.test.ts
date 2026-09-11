@@ -24,7 +24,7 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(1);
+    expect(controllers).toHaveLength(2);
     expect(controllers.every((controller) => (controller.priority ?? 0) > 0)).toBe(true);
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
 
@@ -42,8 +42,8 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
       extraControllers: [extraController],
     });
 
-    expect(controllers).toHaveLength(2);
-    expect(controllers[1]).toBe(extraController);
+    expect(controllers).toHaveLength(3);
+    expect(controllers[2]).toBe(extraController);
 
     controllers.forEach((controller) => {
       controller.dispose();

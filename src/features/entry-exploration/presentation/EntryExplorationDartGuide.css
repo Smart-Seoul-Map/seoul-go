@@ -1,0 +1,117 @@
+.entry-exploration-dart-guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.entry-exploration-dart-guide__intro,
+.entry-exploration-dart-guide__note,
+.entry-exploration-dart-guide__hint,
+.entry-exploration-dart-guide__result {
+  position: absolute;
+}
+
+.entry-exploration-dart-guide__intro {
+  top: var(--sg-spacing-6);
+  right: var(--sg-spacing-4_5);
+  left: var(--sg-spacing-4_5);
+}
+
+.entry-exploration-dart-guide__note {
+  right: var(--sg-spacing-4_5);
+  bottom: calc(var(--sg-spacing-16) + var(--sg-spacing-6));
+  width: 58%;
+}
+
+.entry-exploration-dart-guide__hint {
+  right: var(--sg-spacing-4_5);
+  bottom: var(--sg-spacing-6);
+  left: var(--sg-spacing-4_5);
+}
+
+.entry-exploration-dart-guide__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-spacing-4);
+  right: var(--sg-spacing-4_5);
+  bottom: var(--sg-spacing-7);
+  left: var(--sg-spacing-4_5);
+  --sg-badge-font-size: var(--sg-font-size-3);
+  --sg-badge-height-md: var(--sg-spacing-7);
+  --sg-badge-padding-x-md: var(--sg-spacing-3_5);
+  --sg-button-radius: var(--sg-radius-4);
+}
+
+.entry-exploration-dart-guide__result .AppText[data-role="supporting"] {
+  color: var(--sg-v3-blue-600);
+  font-weight: var(--sg-font-weight-bold);
+}
+
+.entry-exploration-dart-guide__accent {
+  color: var(--sg-color-text-brand);
+}
+
+.entry-exploration-dart-guide__divider {
+  width: 100%;
+  border-top: var(--sg-stroke-width-surface) dashed var(--sg-color-stroke-weak);
+}
+
+.entry-exploration-dart-guide__action {
+  pointer-events: auto;
+}
+
+.entry-exploration-dart-guide__retry {
+  width: 100%;
+  border-radius: inherit;
+}
+
+.entry-exploration-dart-guide__retry-icon {
+  display: block;
+  width: var(--sg-spacing-6_5);
+  height: var(--sg-spacing-6_5);
+  background: currentColor;
+  mask: url("../../../assets/entry-exploration/icon-sync.svg") no-repeat center / contain;
+}
+
+@media (min-width: 768px) {
+  .entry-exploration-dart-guide__intro {
+    top: var(--sg-spacing-10);
+    right: auto;
+    left: 50%;
+    width: 51%;
+    transform: translateX(-50%);
+    --sg-typography-dialog-title-font-size: var(--sg-detail-title-size);
+    --sg-typography-dialog-title-line-height: var(--sg-line-height-12);
+    --sg-typography-supporting-font-size: var(--sg-detail-supporting-size);
+  }
+
+  .entry-exploration-dart-guide__note {
+    top: 48%;
+    right: var(--sg-spacing-10);
+    bottom: auto;
+    width: 18%;
+  }
+
+  .entry-exploration-dart-guide__hint {
+    right: auto;
+    bottom: var(--sg-spacing-10);
+    left: 50%;
+    width: 29%;
+    transform: translateX(-50%);
+  }
+
+  .entry-exploration-dart-guide__result {
+    top: 50%;
+    right: var(--sg-spacing-10);
+    bottom: auto;
+    left: auto;
+    width: 18%;
+    transform: translateY(-50%);
+  }
+
+  .entry-exploration-dart-guide__intro .AppHeading[data-align],
+  .entry-exploration-dart-guide__intro .AppText[data-align] {
+    width: 100%;
+    text-align: center;
+  }
+}

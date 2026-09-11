@@ -1,0 +1,27 @@
+.entry-exploration-dart-hit-badge {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - var(--sg-spacing-6)));
+  animation: entry-exploration-dart-hit-badge-enter var(--sg-motion-duration-4)
+    var(--sg-motion-easing-enter) both;
+  border-radius: var(--sg-radius-3);
+  background: var(--sg-color-bg-neutral-strong);
+  box-shadow: var(--sg-shadow-2);
+  color: var(--sg-color-text-inverted);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-4);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-4);
+  padding: var(--sg-spacing-2) var(--sg-spacing-3);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes entry-exploration-dart-hit-badge-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

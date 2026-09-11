@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
+import { getCameraFacingFloorOverlayRotationY } from "./entryExplorationThreeScene";
 
 const INTRO_BUTTON_CANVAS_SIZE = {
   height: 240,
@@ -123,8 +124,7 @@ function createFloorPlaneMesh({
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.set(position.x, yOffset, position.z);
-  const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
-  mesh.rotation.set(-Math.PI / 2, 0, Math.atan2(cameraOffset.x, cameraOffset.z));
+  mesh.rotation.set(-Math.PI / 2, 0, getCameraFacingFloorOverlayRotationY());
 
   return mesh;
 }
@@ -187,6 +187,18 @@ function refreshAfterFontsLoad(refresh: () => void): () => void {
   };
 }
 
+function traceRoundedRectangle(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+): void {
+  context.beginPath();
+  context.roundRect(x, y, width, height, Math.min(radius, width / 2, height / 2));
+}
+
 function fillRoundedRectangle(
   context: CanvasRenderingContext2D,
   x: number,
@@ -195,15 +207,7 @@ function fillRoundedRectangle(
   height: number,
   radius: number
 ): void {
-  const boundedRadius = Math.min(radius, width / 2, height / 2);
-
-  context.beginPath();
-  context.moveTo(x + boundedRadius, y);
-  context.arcTo(x + width, y, x + width, y + height, boundedRadius);
-  context.arcTo(x + width, y + height, x, y + height, boundedRadius);
-  context.arcTo(x, y + height, x, y, boundedRadius);
-  context.arcTo(x, y, x + width, y, boundedRadius);
-  context.closePath();
+  traceRoundedRectangle(context, x, y, width, height, radius);
   context.fill();
 }
 
@@ -215,10 +219,7 @@ function strokeRoundedRectangle(
   height: number,
   radius: number
 ): void {
-  const boundedRadius = Math.min(radius, width / 2, height / 2);
-
-  context.beginPath();
-  context.roundRect(x, y, width, height, boundedRadius);
+  traceRoundedRectangle(context, x, y, width, height, radius);
   context.stroke();
 }
 

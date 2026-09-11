@@ -108,6 +108,7 @@ vi.mock("./entryExplorationThreeScene", async () => {
       setSize: vi.fn(),
     })),
     createEntryExplorationSceneObject: vi.fn(() => new three.Group()),
+    getEntryExplorationFacingQuaternion: vi.fn(() => new three.Quaternion()),
     disposeEntryExplorationObject3D: vi.fn(),
     fitEntryExplorationCharacterModel: vi.fn(),
     resizeEntryExplorationCamera: vi.fn(),

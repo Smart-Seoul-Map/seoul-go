@@ -1,8 +1,14 @@
 import type { ReactElement } from "react";
-import { Navigate, RouterProvider, createBrowserRouter, useParams } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 import { App } from "@app/App";
-import { PATH } from "@shared/constants/path";
+import { PATH, parseExplorationSpawnCenter } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
 import { getLine2StationById } from "@features/entry-exploration";
@@ -55,6 +61,7 @@ type DistrictExplorationRouteContentProps = {
 function DistrictExplorationRouteContent({
   target,
 }: DistrictExplorationRouteContentProps): ReactElement {
+  const [searchParams] = useSearchParams();
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
   const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
 
@@ -62,7 +69,7 @@ function DistrictExplorationRouteContent({
     <ExplorationPage
       districtId={target?.districtId}
       districtName={target?.districtName}
-      initialCenter={target?.center}
+      initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       themeProgressItems={themeProgressItems}
