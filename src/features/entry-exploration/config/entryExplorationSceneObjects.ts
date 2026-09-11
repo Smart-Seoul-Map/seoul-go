@@ -1,3 +1,4 @@
+import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "./entryExplorationArcheryRange";
 import type { EntryExplorationSceneObjectAssetKey } from "./entryExplorationAssets";
 
 export type EntryExplorationInteraction = {
@@ -47,7 +48,7 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
   {
     assetKey: "seoulTileMapBackground",
     id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
-    position: { x: 29.15, z: 19.65 },
+    position: { x: 33.33, z: 28.32 },
     rotationY: 0,
     size: { width: 26, depth: 14.12 },
     type: "floorOverlay",
@@ -57,9 +58,9 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     assetKey: "seoulTileMap",
     id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
     interaction: {
-      triggerRadius: 5.4,
+      triggerRadius: ENTRY_EXPLORATION_ARCHERY_RANGE.triggerRadius,
     },
-    position: { x: 30.25, z: 20 },
+    position: { x: 34.43, z: 28.67 },
     rotationY: 0,
     size: { width: 12, depth: 9.79 },
     type: "floorOverlay",

@@ -8,6 +8,7 @@ import {
 } from "@shared/lib/three/sceneCameraTransition";
 import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 
+import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
@@ -33,6 +34,7 @@ import {
   type SeoulGridCell,
 } from "../domain/seoulGridNumber";
 import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
+import { createEntryExplorationDartHitMarker } from "./entryExplorationDartHitMarker";
 import {
   createEntryExplorationSceneObject,
   disposeEntryExplorationObject3D,
@@ -53,7 +55,9 @@ export type EntryExplorationDartThrowResult = {
 };
 
 export type EntryExplorationDartViewControls = {
+  resetThrow: () => void;
   setHitCell: (cell: SeoulGridCell | null) => void;
+  throwAtRandomCell: () => void;
 };
 
 export type EntryExplorationSeoulTileMapViewInteractionOptions = {
@@ -75,7 +79,6 @@ type EntryExplorationTileMapCameraView = {
 };
 
 const SEOUL_TILE_MAP_VIEW_PRIORITY = 30;
-const HIT_CELL_RENDER_ORDER = 999;
 const seoulTileMapObject = getSeoulTileMapObject();
 const mapSize = {
   depth: seoulTileMapObject.size.depth,
@@ -89,7 +92,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   onTargetHoverChange,
 }: EntryExplorationSeoulTileMapViewInteractionOptions = {}): EntryExplorationSeoulTileMapViewInteractionController {
   const mapMesh = createEntryExplorationSceneObject(seoulTileMapObject);
-  const hitCellMesh = createHitCellMesh();
+  const hitMarker = createEntryExplorationDartHitMarker();
+  let activeCamera: THREE.OrthographicCamera | null = null;
   let cameraTransition: SceneCameraTransition | null = null;
   let cameraTransitionStartedAt: number | null = null;
   let characterModel: THREE.Object3D | null = null;
@@ -99,7 +103,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
 
-  mapMesh.add(hitCellMesh);
+  mapMesh.add(hitMarker.object);
 
   const toCellLocalPosition = (cell: SeoulGridCell, zOffset: number): THREE.Vector3 => {
     const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
@@ -154,26 +158,41 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     viewportPoint: toViewportPoint(cell, camera),
   });
 
-  const setHitCell = (cell: SeoulGridCell | null): void => {
-    if (!cell) {
-      hitCellMesh.visible = false;
+  const throwAtCell = (cell: SeoulGridCell, camera: THREE.Camera): void => {
+    hasThrown = true;
+    onDartThrowResult?.(toThrowResult(cell, camera));
+  };
 
+  const throwAtRandomCell = (): void => {
+    if (!isEngaged || hasThrown || cameraTransitionStartedAt !== null || !activeCamera) {
       return;
     }
 
-    const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
+    const cell = pickRandomSeoulGridCell();
 
-    hitCellMesh.scale.set(mapSize.width / columns, mapSize.depth / rows, 1);
-    hitCellMesh.position.copy(
-      toCellLocalPosition(
-        cell,
-        ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.hitCellHighlight.yOffset
-      )
-    );
-    hitCellMesh.visible = true;
+    if (!cell) {
+      return;
+    }
+
+    throwAtCell(cell, activeCamera);
   };
 
-  onControlsReady?.({ setHitCell });
+  const setHitCell = (cell: SeoulGridCell | null): void => {
+    const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
+
+    hitMarker.setCell(cell, {
+      cellDepth: mapSize.depth / rows,
+      cellWidth: mapSize.width / columns,
+      getCellLocalPosition: toCellLocalPosition,
+    });
+  };
+
+  const resetThrow = (): void => {
+    hasThrown = false;
+    setHitCell(null);
+  };
+
+  onControlsReady?.({ resetThrow, setHitCell, throwAtRandomCell });
 
   const activate = (time: number): void => {
     if (isEngaged) {
@@ -200,14 +219,14 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     onActiveChange?.(false);
   };
 
-  const getCharacterDestination = (): EntryExplorationScenePoint => ({
-    x:
-      seoulTileMapObject.position.x +
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.x,
-    z:
-      seoulTileMapObject.position.z +
-      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.characterDestinationOffset.z,
-  });
+  const getCharacterDestination = (): EntryExplorationScenePoint => {
+    const { characterDestinationOffset } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    return {
+      x: seoulTileMapObject.position.x + characterDestinationOffset.x,
+      z: seoulTileMapObject.position.z + characterDestinationOffset.z,
+    };
+  };
 
   const getCameraFocus = (): EntryExplorationScenePoint => {
     const { cameraFocusOffset } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
@@ -257,6 +276,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     if (!isEngaged) {
       return;
     }
+
+    activeCamera = camera;
 
     const { cameraOffset, cameraTransitionDurationMs } =
       ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
@@ -316,7 +337,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     isCharacterInTrigger = isInsideSceneTriggerRadius({
       position,
       radius: seoulTileMapObject.interaction.triggerRadius,
-      triggerPoint: seoulTileMapObject.position,
+      triggerPoint: ENTRY_EXPLORATION_ARCHERY_RANGE.position,
     });
 
     if (!isCharacterInTrigger) {
@@ -345,14 +366,13 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      const cell = resolvePointedCell(raycaster) ?? pickRandomSeoulGridCell();
+      const cell = resolvePointedCell(raycaster);
 
       if (!cell) {
-        return false;
+        return true;
       }
 
-      hasThrown = true;
-      onDartThrowResult?.(toThrowResult(cell, raycaster.camera));
+      throwAtCell(cell, raycaster.camera);
 
       return true;
     },
@@ -382,25 +402,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     updateCamera,
     updateTriggerState,
   };
-}
-
-function createHitCellMesh(): THREE.Mesh {
-  const { color, opacity } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.hitCellHighlight;
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-      color,
-      depthTest: false,
-      depthWrite: false,
-      opacity,
-      transparent: true,
-    })
-  );
-
-  mesh.renderOrder = HIT_CELL_RENDER_ORDER;
-  mesh.visible = false;
-
-  return mesh;
 }
 
 function getSeoulTileMapObject(): EntryExplorationFloorOverlayObject & {
