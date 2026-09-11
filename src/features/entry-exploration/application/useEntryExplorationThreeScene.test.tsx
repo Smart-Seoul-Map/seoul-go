@@ -1,9 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import * as THREE from "three";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
+import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -26,6 +27,7 @@ const mocks = vi.hoisted(() => {
     handleSceneInteractionPointerMove: vi.fn(() => false),
     handleSceneInteractionPointerUp: vi.fn(() => false),
     hasActiveSceneInteraction: vi.fn(() => true),
+    releaseInactiveSceneInteraction: vi.fn(() => false),
     registerSceneInteractionControllers: vi.fn(),
     retryActiveSceneInteraction: vi.fn(() => false),
     setSceneInteractionCharacter: vi.fn(),
@@ -161,6 +163,8 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 describe("useEntryExplorationThreeScene", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.movement.getCurrentPosition.mockReturnValue({ x: 4, z: 5 });
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(true);
     vi.stubGlobal("WebGLRenderingContext", function WebGLRenderingContext() {});
     vi.stubGlobal(
       "requestAnimationFrame",
@@ -201,6 +205,178 @@ describe("useEntryExplorationThreeScene", () => {
 
     unmount();
     expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  test("positions the hanok using the viewport at start and keeps both landmarks fixed after resizing", async () => {
+    const containerRef = createContainerRef();
+    let startIntro: (() => boolean) | undefined;
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef,
+        createSceneInteractionControllers: () => [],
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-hanok");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    if (!hanok || !tower || !containerRef.current) {
+      throw new Error("The entry scene is missing.");
+    }
+    const originalPosition = hanok.position.clone();
+    const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
+    viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
+
+    act(() => {
+      startIntro?.();
+    });
+    const placedPosition = hanok.position.clone();
+    const placedTowerPosition = tower.position.clone();
+    expect(placedPosition.equals(originalPosition)).toBe(false);
+    const expectedScreenRight = (19 / 2) * (375 / 812) * 0.9;
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    expect((placedPosition.x - arrival.x - placedPosition.z + arrival.z) / Math.SQRT2).toBeCloseTo(
+      expectedScreenRight
+    );
+
+    viewport.mockReturnValue(new DOMRect(0, 0, 1440, 900));
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+      startIntro?.();
+    });
+    expect(hanok.position.equals(placedPosition)).toBe(true);
+    expect(tower.position.equals(placedTowerPosition)).toBe(true);
+    viewport.mockRestore();
+    unmount();
+  });
+
+  test("draws the guide only after intro arrival and disposes it on unmount", async () => {
+    const containerRef = createContainerRef();
+    let startIntro: (() => boolean) | undefined;
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef,
+        createSceneInteractionControllers: () => [],
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro?.();
+    });
+    const guide = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-arrow");
+    expect(guide).toBeDefined();
+    expect(guide?.visible).toBe(false);
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    expect(guide?.visible).toBe(true);
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+    act(() => {
+      frame?.(performance.now() + 10000);
+    });
+    const head = guide?.getObjectByName("entry-guide-head");
+    expect(head?.visible).toBe(true);
+    if (!(head instanceof THREE.Mesh)) throw new Error("The guide head is missing.");
+    const dispose = vi.spyOn(head.geometry, "dispose");
+    unmount();
+    expect(dispose).toHaveBeenCalledOnce();
+  });
+
+  test("opens each landmark independently and rearms after leaving", async () => {
+    const onOpenChange = vi.fn();
+    const onHanokOpenChange = vi.fn();
+    const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
+    const containerRef = createContainerRef();
+    let startIntro: (() => boolean) | undefined;
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef,
+        createSceneInteractionControllers: () => [],
+        placeVisits: {
+          tower: placeVisit,
+          hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: onHanokOpenChange }),
+        },
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro?.();
+    });
+    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    if (!head || !tower) throw new Error("The guide head or tower is missing.");
+    const guideDestination = { x: head.position.x, z: head.position.z };
+    const destination = { x: tower.position.x, z: tower.position.z };
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+    mocks.movement.getCurrentPosition.mockReturnValue(destination);
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    act(() => {
+      const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+      mocks.movement.getCurrentPosition.mockReturnValue(guideDestination);
+      frame?.(performance.now());
+    });
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onHanokOpenChange.mock.calls).toEqual([[true]]);
+    expect(mocks.movement.stop).toHaveBeenCalledOnce();
+
+    act(() => {
+      mocks.movement.getCurrentPosition.mockReturnValue(destination);
+      frame?.(performance.now());
+      frame?.(performance.now());
+    });
+    expect(onOpenChange.mock.calls).toEqual([[true]]);
+    expect(onHanokOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(mocks.movement.stop).toHaveBeenCalledTimes(2);
+
+    const intersect = vi
+      .spyOn(THREE.Raycaster.prototype, "intersectObject")
+      .mockReturnValue([
+        { point: new THREE.Vector3(destination.x + 0.5, 0, destination.z) } as THREE.Intersection,
+      ]);
+    onTestFinished(() => intersect.mockRestore());
+    act(() => {
+      mocks.domElement.dispatchEvent(new PointerEvent("pointerdown", { clientX: 50, clientY: 50 }));
+      frame?.(performance.now());
+    });
+    expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({
+      x: destination.x + 0.5,
+      z: destination.z,
+    });
+    mocks.movement.getCurrentPosition.mockReturnValue({ x: destination.x + 4, z: destination.z });
+    act(() => {
+      frame?.(performance.now());
+    });
+    mocks.movement.getCurrentPosition.mockReturnValue(destination);
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(onOpenChange.mock.calls).toEqual([[true], [false], [true]]);
+    expect(mocks.movement.stop).toHaveBeenCalledTimes(3);
   });
 
   test("deactivates the active interaction instead of moving when the user clicks the floor outside the interaction", async () => {

@@ -86,3 +86,14 @@ jobs:
         run: pnpm run test:e2e
         env:
           VITE_SMART_SEOUL_THEME_KEY: E2E_KEY
+
+      - name: Upload E2E report and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore

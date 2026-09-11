@@ -14,6 +14,7 @@ type EntryExplorationIntroTheme = {
     textColor: string;
   };
   fontFamily: string;
+  guideColor: string;
 };
 
 export function getEntryExplorationIntroTheme(): EntryExplorationIntroTheme {
@@ -29,6 +30,7 @@ export function getEntryExplorationIntroTheme(): EntryExplorationIntroTheme {
       textColor: readCssToken("--sg-button-primary-fg", "#ffffff"),
     },
     fontFamily: getComputedStyle(document.body).fontFamily,
+    guideColor: readCssToken("--sg-v3-pink-500", "#ff2e94"),
   };
 }
 

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { ReactElement } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -16,11 +16,19 @@ import {
   useEntryExplorationThreeScene,
 } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
+import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import { useEntryExplorationIntro } from "../application/useEntryExplorationIntro";
+import { useEntryExplorationPlacePanel } from "../application/useEntryExplorationPlacePanel";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 
 export type EntryExplorationPageProps = {
+  renderPlacePanel?: (props: {
+    open: boolean;
+    onClose: () => void;
+    placeId: EntryExplorationPlaceId;
+  }) => ReactNode;
   onSubwayStationSelectionChange?: (
     station: Line2Station | null,
     status: EntryExplorationSubwaySelectionStatus
@@ -29,14 +37,19 @@ export type EntryExplorationPageProps = {
 };
 
 export function EntryExplorationPage({
+  renderPlacePanel,
   onSubwayStationSelectionChange,
   subwayStationAvailabilityStatus,
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-  const [startIntro, setStartIntro] = useState<(() => boolean) | null>(null);
-  const [isIntroReady, setIsIntroReady] = useState(false);
-  const [isIntroVisible, setIsIntroVisible] = useState(true);
+  const {
+    isReady,
+    isVisible,
+    handleStart,
+    handleSceneControlsReady: handleIntroControlsReady,
+  } = useEntryExplorationIntro();
+  const { placeVisits, panelProps } = useEntryExplorationPlacePanel();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
   const districtSelection = useEntryExplorationDistrictSelection({
@@ -46,23 +59,17 @@ export function EntryExplorationPage({
   const handleSceneControlsReady = useCallback(
     (controls: EntryExplorationThreeSceneControls | null) => {
       districtSelection.handleSceneControlsReady(controls);
-      setStartIntro(() => controls?.startIntro ?? null);
-      setIsIntroReady(controls?.isIntroReady ?? false);
+      handleIntroControlsReady(controls);
     },
-    [districtSelection]
+    [districtSelection, handleIntroControlsReady]
   );
 
   useEntryExplorationThreeScene({
     containerRef,
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
+    placeVisits,
   });
-
-  const handleStartIntro = (): void => {
-    if (startIntro?.()) {
-      setIsIntroVisible(false);
-    }
-  };
 
   useEffect(() => {
     onSubwayStationSelectionChange?.(subwaySelection.selectedStation, subwaySelection.status);
@@ -83,9 +90,10 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {isIntroVisible ? (
-        <EntryExplorationIntroOverlay disabled={!isIntroReady} onStart={handleStartIntro} />
+      {isVisible ? (
+        <EntryExplorationIntroOverlay disabled={!isReady} onStart={handleStart} />
       ) : null}
+      {!isVisible && renderPlacePanel?.(panelProps)}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}

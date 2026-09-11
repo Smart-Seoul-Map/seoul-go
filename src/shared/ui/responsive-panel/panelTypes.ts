@@ -34,6 +34,7 @@ export type BottomSheetOptions = {
   activeSnapPoint?: PanelSnapPoint | null;
   setActiveSnapPoint?: (point: PanelSnapPoint | null) => void;
   fadeFromIndex?: number;
+  closeOnFinalSnapClick?: boolean;
 };
 
 export type AppResponsivePanelRootProps = {

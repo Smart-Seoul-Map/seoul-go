@@ -5,7 +5,7 @@ import { App } from "@app/App";
 import { PATH } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-import { EntryExplorationPage, getLine2StationById } from "@features/entry-exploration";
+import { getLine2StationById } from "@features/entry-exploration";
 import {
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
@@ -22,22 +22,11 @@ import {
   useStationExplorationRoutePlaces,
 } from "./useExplorationRoutePlaces";
 import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
-import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
+import { EntryExplorationRoute } from "./EntryExplorationRoute";
 
 type ExplorationRouteProps = {
   target?: ExplorationTarget | null;
 };
-
-function EntryExplorationRoute(): ReactElement {
-  const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
-
-  return (
-    <EntryExplorationPage
-      onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
-      subwayStationAvailabilityStatus={availabilityStatus}
-    />
-  );
-}
 
 function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
   if (!target) {

@@ -76,6 +76,20 @@
   line-height: var(--sg-typography-dialog-body-line-height);
 }
 
+.AppText[data-role="detailBody"] {
+  font-family: var(--sg-typography-detail-body-font-family);
+  font-size: var(--sg-typography-detail-body-font-size);
+  font-weight: var(--sg-typography-detail-body-font-weight);
+  line-height: var(--sg-typography-detail-body-line-height);
+}
+
+.AppText[data-role="detailSupporting"] {
+  font-family: var(--sg-typography-detail-supporting-font-family);
+  font-size: var(--sg-typography-detail-supporting-font-size);
+  font-weight: var(--sg-typography-detail-supporting-font-weight);
+  line-height: var(--sg-typography-detail-supporting-line-height);
+}
+
 .AppHeading {
   font-weight: var(--sg-font-weight-bold);
 }
@@ -96,6 +110,13 @@
   font-family: var(--sg-typography-result-title-font-family);
   font-size: var(--sg-typography-result-title-font-size);
   line-height: var(--sg-typography-result-title-line-height);
+}
+
+.AppHeading[data-size="detail"] {
+  font-family: var(--sg-typography-detail-title-font-family);
+  font-size: var(--sg-typography-detail-title-font-size);
+  font-weight: var(--sg-typography-detail-title-font-weight);
+  line-height: var(--sg-typography-detail-title-line-height);
 }
 
 .AppCaption {

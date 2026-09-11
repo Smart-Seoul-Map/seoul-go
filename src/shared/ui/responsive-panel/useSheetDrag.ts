@@ -195,7 +195,8 @@ export function useSheetDrag(
     const points = panel.sheet.snapPoints ?? [];
     const nextIndex = points.findIndex((point) => point === panel.snapPoint) + 1;
     if (nextIndex < points.length) panel.setSnapPoint(points[nextIndex]);
-    else if (panel.dismissible) panel.changeOpen(false, "handleClickOnLastSnapPoint");
+    else if (panel.dismissible && panel.sheet.closeOnFinalSnapClick !== false)
+      panel.changeOpen(false, "handleClickOnLastSnapPoint");
   };
 
   return { handlePointerDown, handleHandleClick };

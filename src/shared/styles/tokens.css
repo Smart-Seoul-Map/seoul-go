@@ -230,6 +230,21 @@
   --sg-typography-result-title-line-height: var(--sg-line-height-8);
   --sg-typography-result-title-font-weight: var(--sg-font-weight-bold);
 
+  --sg-typography-detail-title-font-family: var(--sg-font-alrim);
+  --sg-typography-detail-title-font-size: var(--sg-detail-title-size);
+  --sg-typography-detail-title-line-height: normal;
+  --sg-typography-detail-title-font-weight: var(--sg-font-weight-bold);
+
+  --sg-typography-detail-body-font-family: var(--sg-font-namsan);
+  --sg-typography-detail-body-font-size: var(--sg-font-size-8);
+  --sg-typography-detail-body-line-height: normal;
+  --sg-typography-detail-body-font-weight: var(--sg-font-weight-medium);
+
+  --sg-typography-detail-supporting-font-family: var(--sg-font-hangang);
+  --sg-typography-detail-supporting-font-size: var(--sg-detail-supporting-size);
+  --sg-typography-detail-supporting-line-height: normal;
+  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-medium);
+
   /* Button component tokens */
   --sg-button-primary-bg: var(--sg-color-bg-brand);
   --sg-button-primary-bg-pressed: var(--sg-color-bg-brand-pressed);
@@ -378,11 +393,16 @@
   --sg-stroke-width-surface: 1.2px;
   --sg-shadow-raised: 0 6px 16px #0000001a;
   --sg-detail-width: 500px;
-  --sg-detail-min-height: 660px;
+  --sg-detail-card-min-height: 660px;
+  --sg-detail-max-height: 852px;
+  --sg-detail-sheet-max-height: 600px;
+  --sg-detail-card-radius: var(--sg-radius-7);
+  --sg-detail-card-shadow: var(--sg-shadow-raised);
   --sg-detail-header-min-height: var(--sg-icon-button-size-nav);
   --sg-detail-title-size: 2.125rem;
   --sg-detail-supporting-size: 1.1875rem;
   --sg-detail-title-color: #222222;
+  --sg-detail-image-bg: var(--sg-color-bg-surface);
   --sg-detail-image-ratio: 444 / 247;
   --sg-detail-image-radius: var(--sg-radius-5_5);
   --sg-detail-image-stroke-width: 1.4px;
