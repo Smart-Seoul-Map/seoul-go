@@ -179,7 +179,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
   });
   await test.step("Card clicks and wheel input must not move the scene", async () => {
     const before = await sceneryScreenshot(page);
-    await panel(page).getByText("장소 대표 이미지", { exact: true }).click();
+    await panel(page).getByText("이미지 준비중", { exact: true }).click();
     await page.mouse.wheel(0, 450);
     await waitForCameraToSettle(page);
     expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
