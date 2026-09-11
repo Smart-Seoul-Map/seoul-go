@@ -1,0 +1,14 @@
+{
+  "size": {
+    "width": 222,
+    "height": 328
+  },
+  "frames": {
+    "targetBoard": {
+      "x": 4,
+      "y": 4,
+      "width": 214,
+      "height": 320
+    }
+  }
+}

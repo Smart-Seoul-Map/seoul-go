@@ -226,3 +226,15 @@ export function getCameraFacingFloorOverlayRotationY(): number {
 
   return Math.atan2(cameraOffset.x, cameraOffset.z);
 }
+
+export function getEntryExplorationFacingQuaternion(): THREE.Quaternion {
+  const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
+
+  return new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().lookAt(
+      new THREE.Vector3(cameraOffset.x, cameraOffset.y, cameraOffset.z),
+      new THREE.Vector3(),
+      new THREE.Vector3(0, 1, 0)
+    )
+  );
+}
