@@ -31,6 +31,7 @@ function renderDartArrow(onFlightEnd: () => void) {
       isTargetHovered={false}
       isVisible={isVisible}
       onFlightEnd={onFlightEnd}
+      onThrow={vi.fn()}
       shot={shot}
     />
   );

@@ -1,4 +1,4 @@
-import dartArrowUrl from "../../../assets/entry-exploration/arrow-done.png";
+import dartArrowUrl from "../../../assets/entry-exploration/dart-arrow.png";
 import dartClickHintUrl from "../../../assets/entry-exploration/dart-click-hint.png";
 import dartCrosshairUrl from "../../../assets/entry-exploration/dart-crosshair.png";
 import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.png";

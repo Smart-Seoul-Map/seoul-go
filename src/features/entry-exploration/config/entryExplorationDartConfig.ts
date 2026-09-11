@@ -25,9 +25,9 @@ export const ENTRY_EXPLORATION_DART_CONFIG = {
     width: 300,
   },
   sprite: {
-    aspectRatio: 592 / 600,
-    nockRatio: { x: 0.1133, y: 0.853 },
+    aspectRatio: 599 / 600,
+    nockRatio: { x: 0.0013, y: 0.8697 },
     textureRotationDegrees: -43.6,
-    tipRatio: { x: 0.99, y: 0.0068 },
+    tipRatio: { x: 0.9996, y: 0.0012 },
   },
 } as const;

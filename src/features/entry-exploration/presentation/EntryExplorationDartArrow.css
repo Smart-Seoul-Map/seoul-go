@@ -21,12 +21,24 @@
 }
 
 .entry-exploration-dart-arrow__arrow {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
   filter: drop-shadow(var(--sg-shadow-3));
+  padding: 0;
+  pointer-events: auto;
   transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
+}
+
+.entry-exploration-dart-arrow__arrow img {
+  display: block;
+  width: 100%;
 }
 
 .entry-exploration-dart-arrow__arrow[data-landed="true"] {
   opacity: 0;
+  pointer-events: none;
 }
 
 .entry-exploration-dart-arrow__click-hint,

@@ -25,6 +25,7 @@ import { useEntryExplorationPlacePanel } from "../application/useEntryExploratio
 import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
+import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
@@ -60,11 +61,13 @@ export function EntryExplorationPage({
     useEntryExplorationSubwaySelection();
   const {
     dartShot,
+    onArrowThrow,
     onDartTargetHoverChange,
     onDartThrowResult,
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
+    onRetryThrow,
   } = useEntryExplorationDartShot();
   const districtSelection = useEntryExplorationDistrictSelection({
     createExtraSceneInteractionControllers: createSubwayInteractionControllers,
@@ -124,6 +127,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
+        onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
         shotResult={dartShot.shotResult}
       />
@@ -131,8 +135,10 @@ export function EntryExplorationPage({
         isTargetHovered={dartShot.isTargetHovered}
         isVisible={dartShot.isGuideVisible}
         onFlightEnd={onFlightEnd}
+        onThrow={onArrowThrow}
         shot={dartShot.shotResult}
       />
+      <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {!isVisible && renderPlacePanel?.(panelProps)}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}

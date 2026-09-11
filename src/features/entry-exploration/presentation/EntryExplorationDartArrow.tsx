@@ -21,6 +21,7 @@ export type EntryExplorationDartArrowProps = {
   isTargetHovered: boolean;
   isVisible: boolean;
   onFlightEnd?: () => void;
+  onThrow: () => void;
   shot: EntryExplorationDartThrowResult | null;
 };
 
@@ -108,11 +109,12 @@ export function EntryExplorationDartArrow({
   isTargetHovered,
   isVisible,
   onFlightEnd,
+  onThrow,
   shot,
 }: EntryExplorationDartArrowProps): ReactElement | null {
   const [isLanded, setIsLanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const arrowRef = useRef<HTMLImageElement | null>(null);
+  const arrowRef = useRef<HTMLButtonElement | null>(null);
   const crosshairRef = useRef<HTMLImageElement | null>(null);
   const clickHintRef = useRef<HTMLImageElement | null>(null);
   const pointerRef = useRef<EntryExplorationDartScreenPoint | null>(null);
@@ -193,11 +195,19 @@ export function EntryExplorationDartArrow({
   useEffect(() => {
     const container = containerRef.current;
 
-    if (!shot || !container) {
+    if (!container) {
       return;
     }
 
     setIsLanded(false);
+
+    if (!shot) {
+      flightRef.current = null;
+      landedShotRef.current = null;
+
+      return;
+    }
+
     flightRef.current = {
       from: getTipPoint(rotationRef.current, getArrowMetrics(container)),
       shot,
@@ -216,7 +226,7 @@ export function EntryExplorationDartArrow({
         ref={crosshairRef}
         alt=""
         className="entry-exploration-dart-arrow__crosshair"
-        data-shown={isTargetHovered || shot !== null}
+        data-shown={!isLanded && (isTargetHovered || shot !== null)}
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartCrosshair.src}
       />
 
@@ -228,13 +238,16 @@ export function EntryExplorationDartArrow({
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartClickHint.src}
       />
 
-      <img
+      <button
         ref={arrowRef}
-        alt=""
+        aria-label="화살 쏘기"
         className="entry-exploration-dart-arrow__arrow"
         data-landed={isLanded}
-        src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartArrow.src}
-      />
+        onClick={onThrow}
+        type="button"
+      >
+        <img alt="" src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartArrow.src} />
+      </button>
     </div>
   );
 }
@@ -278,7 +291,7 @@ function drawClickHint(element: HTMLImageElement | null, metrics: DartArrowMetri
 }
 
 function drawArrow(
-  element: HTMLImageElement | null,
+  element: HTMLElement | null,
   activeFlight: DartFlight | null,
   rotationDegrees: number,
   time: number,

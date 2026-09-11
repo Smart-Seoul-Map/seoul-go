@@ -14,11 +14,13 @@ export type EntryExplorationDartShotViewModel = {
 
 type EntryExplorationDartShotHookResult = {
   dartShot: EntryExplorationDartShotViewModel;
+  onArrowThrow: () => void;
   onDartTargetHoverChange: (isTargetHovered: boolean) => void;
   onDartThrowResult: (result: EntryExplorationDartThrowResult) => void;
   onDartViewActiveChange: (isActive: boolean) => void;
   onDartViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onFlightEnd: () => void;
+  onRetryThrow: () => void;
 };
 
 export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResult {
@@ -51,6 +53,17 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     setShotResult(result);
   }, []);
 
+  const onArrowThrow = useCallback(() => {
+    viewControlsRef.current?.throwAtRandomCell();
+  }, []);
+
+  const onRetryThrow = useCallback(() => {
+    shotResultRef.current = null;
+    setShotResult(null);
+    setLandedResult(null);
+    viewControlsRef.current?.resetThrow();
+  }, []);
+
   const onFlightEnd = useCallback(() => {
     const landed = shotResultRef.current;
 
@@ -60,10 +73,12 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
 
   return {
     dartShot: { isGuideVisible, isTargetHovered, landedResult, shotResult },
+    onArrowThrow,
     onDartTargetHoverChange: setIsTargetHovered,
     onDartThrowResult,
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
+    onRetryThrow,
   };
 }
