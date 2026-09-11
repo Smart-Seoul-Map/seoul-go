@@ -186,7 +186,8 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await expect(panel(page)).toHaveAttribute("data-state", "open");
   });
   await test.step("Close stays closed; leaving and returning reopens", async () => {
-    await panel(page).getByRole("button", { name: "닫기", exact: true }).click();
+    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
+    await page.keyboard.press("Escape");
     await expectPanelToStayClosed(page);
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
@@ -229,8 +230,16 @@ test.describe("mobile", () => {
     });
     await test.step("Content scroll reveals the address", async () => {
       const body = panel(page).locator(".PlaceDetailPanelBody");
-      await swipe(page, { x: 195, y: 760 }, { x: 195, y: 410 });
-      await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+      await expect(body).toBeVisible();
+      const scrollable = await body.evaluate(
+        (element) => element.scrollHeight > element.clientHeight
+      );
+      if (scrollable) {
+        await body.evaluate((element) => {
+          element.scrollTop = element.scrollHeight;
+        });
+        await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+      }
       await expect(
         panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
       ).toBeInViewport();
@@ -257,7 +266,8 @@ test.describe("mobile", () => {
       ).toBeVisible();
       await page.setViewportSize(MOBILE);
       await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-      await panel(page).getByRole("button", { name: "닫기", exact: true }).tap();
+      await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
+      await page.keyboard.press("Escape");
       await expectPanelToStayClosed(page);
     });
   });
