@@ -393,12 +393,16 @@
   --sg-stroke-width-surface: 1.2px;
   --sg-shadow-raised: 0 6px 16px #0000001a;
   --sg-detail-width: 500px;
+  --sg-detail-card-min-height: 660px;
   --sg-detail-max-height: 852px;
   --sg-detail-sheet-max-height: 600px;
+  --sg-detail-card-radius: var(--sg-radius-7);
+  --sg-detail-card-shadow: var(--sg-shadow-raised);
   --sg-detail-header-min-height: var(--sg-icon-button-size-nav);
   --sg-detail-title-size: 2.125rem;
   --sg-detail-supporting-size: 1.1875rem;
   --sg-detail-title-color: #222222;
+  --sg-detail-image-bg: var(--sg-color-bg-surface);
   --sg-detail-image-ratio: 444 / 247;
   --sg-detail-image-radius: var(--sg-radius-5_5);
   --sg-detail-image-stroke-width: 1.4px;
