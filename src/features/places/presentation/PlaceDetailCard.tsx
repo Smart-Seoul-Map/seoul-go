@@ -1,5 +1,6 @@
 import { useId, useState, type ReactElement } from "react";
 import { AppBox } from "@shared/ui/box";
+import { AppHeading, AppText } from "@shared/ui/typography";
 import {
   PlaceDetailExternalLink,
   type PlaceDetailExternalLinkProps,
@@ -23,7 +24,12 @@ function PlaceImage({ image }: Pick<PlaceDetailCardProps, "image">): ReactElemen
       {hasImage ? (
         <img src={image.src} alt={image.alt} onError={() => setFailedSrc(image.src)} />
       ) : (
-        <span>장소 대표 이미지</span>
+        <div className="PlaceDetailImageFallback">
+          <img src="/images/seoul-characters/hachi.png" alt="" aria-hidden="true" />
+          <AppText as="span" role="detailSupporting" tone="muted">
+            이미지 준비중
+          </AppText>
+        </div>
       )}
     </div>
   );
@@ -54,8 +60,14 @@ export function PlaceDetailCard({
       px="spacing.5"
     >
       <header className="PlaceDetailCardHeader">
-        <h2 id={titleId}>{title}</h2>
-        {subtitle && <p>{subtitle}</p>}
+        <AppHeading as="h2" id={titleId} size="detail">
+          {title}
+        </AppHeading>
+        {subtitle && (
+          <AppText role="detailSupporting" tone="muted" align="end">
+            {subtitle}
+          </AppText>
+        )}
       </header>
       <PlaceImage image={image} />
       <AppBox
@@ -73,7 +85,9 @@ export function PlaceDetailCard({
         px="spacing.5"
         mb="spacing.3_5"
       >
-        <p>{description}</p>
+        <AppText role="detailBody" tone="muted">
+          {description}
+        </AppText>
       </AppBox>
       {address && (
         <AppBox
@@ -103,7 +117,9 @@ export function PlaceDetailCard({
               d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
             />
           </svg>
-          <p>{address}</p>
+          <AppText role="detailSupporting" tone="muted">
+            {address}
+          </AppText>
         </AppBox>
       )}
       {externalLink && <PlaceDetailExternalLink {...externalLink} />}

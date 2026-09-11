@@ -230,6 +230,21 @@
   --sg-typography-result-title-line-height: var(--sg-line-height-8);
   --sg-typography-result-title-font-weight: var(--sg-font-weight-bold);
 
+  --sg-typography-detail-title-font-family: var(--sg-font-alrim);
+  --sg-typography-detail-title-font-size: var(--sg-detail-title-size);
+  --sg-typography-detail-title-line-height: normal;
+  --sg-typography-detail-title-font-weight: var(--sg-font-weight-bold);
+
+  --sg-typography-detail-body-font-family: var(--sg-font-namsan);
+  --sg-typography-detail-body-font-size: var(--sg-font-size-8);
+  --sg-typography-detail-body-line-height: normal;
+  --sg-typography-detail-body-font-weight: var(--sg-font-weight-medium);
+
+  --sg-typography-detail-supporting-font-family: var(--sg-font-hangang);
+  --sg-typography-detail-supporting-font-size: var(--sg-detail-supporting-size);
+  --sg-typography-detail-supporting-line-height: normal;
+  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-medium);
+
   /* Button component tokens */
   --sg-button-primary-bg: var(--sg-color-bg-brand);
   --sg-button-primary-bg-pressed: var(--sg-color-bg-brand-pressed);

@@ -37,10 +37,10 @@ describe("PlaceDetailCard", () => {
   });
   test("shows a fallback for missing and broken images and retries a new image", () => {
     const { rerender } = render(<PlaceDetailCard {...place} />);
-    expect(screen.getByText("장소 대표 이미지")).toBeTruthy();
+    expect(screen.getByText("이미지 준비중")).toBeTruthy();
     rerender(<PlaceDetailCard {...place} image={{ src: "/broken.jpg", alt: "First" }} />);
     fireEvent.error(screen.getByRole("img", { name: "First" }));
-    expect(screen.getByText("장소 대표 이미지")).toBeTruthy();
+    expect(screen.getByText("이미지 준비중")).toBeTruthy();
     rerender(<PlaceDetailCard {...place} image={{ src: "/new.jpg", alt: "New" }} />);
     expect(screen.getByRole("img", { name: "New" })).toBeTruthy();
   });
