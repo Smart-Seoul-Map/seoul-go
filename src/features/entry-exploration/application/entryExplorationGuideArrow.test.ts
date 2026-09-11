@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { afterEach, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
-import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
+import { createEntryExplorationScenery } from "./entryExplorationScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import {
   createEntryExplorationCamera,
@@ -70,10 +70,10 @@ test.each([
   [390, 844],
 ])("aligns the arrowhead with the visible hanok base at %ix%i", (width, height) => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
-  const scenery = createEntryExplorationAtlasScenery();
+  const scenery = createEntryExplorationScenery();
   onTestFinished(scenery.dispose);
   scenery.positionLandmarksAtEntry(width / height);
-  const hanok = scenery.object.getObjectByName("entry-atlas-hanok");
+  const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
   if (!(hanok instanceof THREE.Mesh)) throw new Error("The hanok is missing.");
   const guide = createEntryExplorationGuideArrow({
     origin,

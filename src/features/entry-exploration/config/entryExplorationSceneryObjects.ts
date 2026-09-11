@@ -1,7 +1,7 @@
 import manifest from "../../../assets/entry-exploration/intro-atlas.json";
 
 export type EntryAtlasKey = keyof typeof manifest.frames;
-type AtlasPlacement = {
+type EntryExplorationSceneryObject = {
   key: EntryAtlasKey;
   offset: { x: number; z: number };
   width: number;
@@ -14,7 +14,7 @@ export const ENTRY_EXPLORATION_LANDMARK_LAYOUT = {
 } as const;
 
 // Offsets are relative to the fixed intro arrival point, not the moving character.
-export const ENTRY_EXPLORATION_ATLAS_OBJECTS = [
+export const ENTRY_EXPLORATION_SCENERY_OBJECTS = [
   { key: "bench", offset: { x: -2, z: 7 }, width: 2.6 },
   { key: "streetlamp", offset: { x: 5, z: -3 }, width: 1.6 },
   { key: "tower", offset: { x: 19, z: 15 }, width: 4.8 },
@@ -34,4 +34,4 @@ export const ENTRY_EXPLORATION_ATLAS_OBJECTS = [
   { key: "cloud", offset: { x: -20, z: -5 }, width: 1.2 },
   { key: "blueStar", offset: { x: 22, z: -23 }, width: 0.7 },
   { key: "pinkSparkles", offset: { x: -5, z: -4 }, width: 0.8 },
-] as const satisfies readonly AtlasPlacement[];
+] as const satisfies readonly EntryExplorationSceneryObject[];

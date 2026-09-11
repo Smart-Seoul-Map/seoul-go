@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, onTestFinished, test, vi } from "vitest"
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { createEntryExplorationGuideRoute } from "../domain/entryExplorationGuideRoute";
-import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
+import { createEntryExplorationScenery } from "./entryExplorationScenery";
 import {
   createEntryExplorationCamera,
   updateEntryExplorationCameraFocus,
@@ -28,11 +28,11 @@ test.each([
 ])(
   "guides to the hanok in 2-3 seconds and reveals the tower while approaching at %ix%i",
   (width, height) => {
-    const scenery = createEntryExplorationAtlasScenery();
+    const scenery = createEntryExplorationScenery();
     onTestFinished(() => scenery.dispose());
     const destination = scenery.positionLandmarksAtEntry(width / height);
-    const hanok = scenery.object.getObjectByName("entry-atlas-hanok");
-    const tower = scenery.object.getObjectByName("entry-atlas-tower");
+    const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
+    const tower = scenery.object.getObjectByName("entry-scenery-tower");
     if (!(hanok instanceof THREE.Mesh) || !(tower instanceof THREE.Mesh)) {
       throw new Error("The entry landmarks are missing.");
     }

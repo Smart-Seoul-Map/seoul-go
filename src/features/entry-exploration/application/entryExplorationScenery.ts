@@ -5,14 +5,14 @@ import { createAtlasScenery } from "@shared/lib/three/atlasScenery";
 import manifest from "../../../assets/entry-exploration/intro-atlas.json";
 import atlasUrl from "../../../assets/entry-exploration/intro-atlas.png";
 import {
-  ENTRY_EXPLORATION_ATLAS_OBJECTS,
   ENTRY_EXPLORATION_LANDMARK_LAYOUT,
-} from "../config/entryExplorationAtlasObjects";
+  ENTRY_EXPLORATION_SCENERY_OBJECTS,
+} from "../config/entryExplorationSceneryObjects";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 
-export function createEntryExplorationAtlasScenery() {
+export function createEntryExplorationScenery() {
   const { intro, cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
   const facing = new THREE.Quaternion().setFromRotationMatrix(
     new THREE.Matrix4().lookAt(
@@ -25,10 +25,10 @@ export function createEntryExplorationAtlasScenery() {
     atlasUrl,
     manifest,
     facing,
-    name: "entry-atlas-scenery",
-    placements: ENTRY_EXPLORATION_ATLAS_OBJECTS.map((placement) => ({
+    name: "entry-scenery",
+    placements: ENTRY_EXPLORATION_SCENERY_OBJECTS.map((placement) => ({
       key: placement.key,
-      name: `entry-atlas-${placement.key}`,
+      name: `entry-scenery-${placement.key}`,
       width: placement.width,
       position: {
         x: intro.targetPosition.x + placement.offset.x,
@@ -43,8 +43,8 @@ export function createEntryExplorationAtlasScenery() {
   return {
     object,
     positionLandmarksAtEntry(viewportAspect: number): EntryExplorationScenePoint | null {
-      const hanok = object.getObjectByName("entry-atlas-hanok");
-      const tower = object.getObjectByName("entry-atlas-tower");
+      const hanok = object.getObjectByName("entry-scenery-hanok");
+      const tower = object.getObjectByName("entry-scenery-tower");
       if (!hanok || !tower) {
         return null;
       }

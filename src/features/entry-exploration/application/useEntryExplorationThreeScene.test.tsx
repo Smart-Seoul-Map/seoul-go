@@ -222,8 +222,8 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
-    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-hanok");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-hanok");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
     if (!hanok || !tower || !containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
@@ -322,7 +322,7 @@ describe("useEntryExplorationThreeScene", () => {
       startIntro?.();
     });
     const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-atlas-tower");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
     if (!head || !tower) throw new Error("The guide head or tower is missing.");
     const guideDestination = { x: head.position.x, z: head.position.z };
     const destination = { x: tower.position.x, z: tower.position.z };

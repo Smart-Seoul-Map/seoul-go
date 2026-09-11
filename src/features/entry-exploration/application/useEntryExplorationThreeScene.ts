@@ -31,7 +31,7 @@ import {
 } from "../domain/entryExplorationSceneMath";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
-import { createEntryExplorationAtlasScenery } from "./entryExplorationAtlasScenery";
+import { createEntryExplorationScenery } from "./entryExplorationScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 import {
@@ -263,10 +263,10 @@ export function useEntryExplorationThreeScene({
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
-    const atlasScenery = createEntryExplorationAtlasScenery();
+    const scenery = createEntryExplorationScenery();
     const landmarks = {
-      hanok: atlasScenery.object.getObjectByName("entry-atlas-hanok"),
-      tower: atlasScenery.object.getObjectByName("entry-atlas-tower"),
+      hanok: scenery.object.getObjectByName("entry-scenery-hanok"),
+      tower: scenery.object.getObjectByName("entry-scenery-tower"),
     };
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
@@ -287,7 +287,7 @@ export function useEntryExplorationThreeScene({
     addEntryExplorationLights(scene);
     scene.add(floor);
     scene.add(introFloor.object);
-    scene.add(atlasScenery.object);
+    scene.add(scenery.object);
     sceneObjectMeshes.forEach((mesh) => {
       scene.add(mesh);
     });
@@ -336,7 +336,7 @@ export function useEntryExplorationThreeScene({
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
       const entryRect = container.getBoundingClientRect();
-      const guideDestination = atlasScenery.positionLandmarksAtEntry(
+      const guideDestination = scenery.positionLandmarksAtEntry(
         Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
       );
       if (guideDestination) {
@@ -550,7 +550,7 @@ export function useEntryExplorationThreeScene({
       introFloor.cancelPendingRefresh();
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
-      atlasScenery.dispose();
+      scenery.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);
       sceneObjectMeshes.forEach(disposeEntryExplorationObject3D);
