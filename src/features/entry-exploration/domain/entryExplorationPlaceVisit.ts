@@ -10,6 +10,18 @@ type PlaceVisitOptions = {
 
 export type EntryExplorationPlaceVisit = ReturnType<typeof createEntryExplorationPlaceVisit>;
 
+function isWithinArrivalRadius({
+  position,
+  destination,
+  radius,
+}: {
+  position: EntryExplorationScenePoint;
+  destination: EntryExplorationScenePoint;
+  radius: number;
+}): boolean {
+  return getEntryExplorationSceneDistance(position, destination) <= radius;
+}
+
 export function createEntryExplorationPlaceVisit({ radius, onOpenChange }: PlaceVisitOptions) {
   let isInside = false;
   let isOpen = false;
@@ -22,8 +34,13 @@ export function createEntryExplorationPlaceVisit({ radius, onOpenChange }: Place
 
   return {
     update(position: EntryExplorationScenePoint, destination: EntryExplorationScenePoint): boolean {
-      const nextInside = getEntryExplorationSceneDistance(position, destination) <= radius;
-      if (nextInside === isInside) return false;
+      const nextInside = isWithinArrivalRadius({ position, destination, radius });
+      const isSameVisitAreaState = nextInside === isInside;
+
+      if (isSameVisitAreaState) {
+        return false;
+      }
+
       isInside = nextInside;
       changeOpen(nextInside);
       return nextInside;
