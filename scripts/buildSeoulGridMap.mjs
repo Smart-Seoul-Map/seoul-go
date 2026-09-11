@@ -8,16 +8,16 @@ const boundaries = JSON.parse(
   fs.readFileSync(path.join(REPO, "src/shared/data/seoulDistrictBoundaries.json"), "utf8")
 );
 
-const GRS80_A = 6378137;
-const GRS80_INV_F = 298.257222101;
-const UTMK = {
-  falseEasting: 1000000,
-  falseNorthing: 2000000,
-  lat0: 38,
-  lon0: 127.5,
-  k0: 0.9996,
-};
-const POINT_NUMBER_ORIGIN = { x: 700000, y: 1300000 };
+const projection = JSON.parse(
+  fs.readFileSync(
+    path.join(REPO, "src/features/entry-exploration/config/seoulGridProjection.json"),
+    "utf8"
+  )
+);
+const UTMK = projection.utmk;
+const GRS80_A = UTMK.semiMajorAxis;
+const GRS80_INV_F = UTMK.inverseFlattening;
+const POINT_NUMBER_ORIGIN = projection.pointNumberOrigin;
 const CELL_PX = 40;
 const SIMPLIFY_TOLERANCE_PX = 0.6;
 const RIVER_WIDTH_KM = 0.95;
@@ -45,7 +45,7 @@ function projectToUtmk(lon, lat) {
   const ep2 = e2 / (1 - e2);
   const phi = toRadians(lat);
   const lam = toRadians(lon);
-  const lam0 = toRadians(UTMK.lon0);
+  const lam0 = toRadians(UTMK.longitudeOrigin);
 
   const n = GRS80_A / Math.sqrt(1 - e2 * Math.sin(phi) ** 2);
   const t = Math.tan(phi) ** 2;
@@ -65,14 +65,14 @@ function projectToUtmk(lon, lat) {
 
   const x =
     UTMK.falseEasting +
-    UTMK.k0 *
+    UTMK.scaleFactor *
       n *
       (a + ((1 - t + c) * a ** 3) / 6 + ((5 - 18 * t + t ** 2 + 72 * c - 58 * ep2) * a ** 5) / 120);
   const y =
     UTMK.falseNorthing +
-    UTMK.k0 *
+    UTMK.scaleFactor *
       (meridional(lat) -
-        meridional(UTMK.lat0) +
+        meridional(UTMK.latitudeOrigin) +
         n *
           Math.tan(phi) *
           (a ** 2 / 2 +
