@@ -2,6 +2,8 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
+const MOBILE_SHEET_COLLAPSED_HEIGHT = MOBILE.height * 0.5;
+const MOBILE_SHEET_EXPANDED_HEIGHT = MOBILE.height * 0.9;
 const HANOK_DESKTOP_POINT = { x: 1242, y: 650 };
 const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 448 };
 const HANOK_MOBILE_POINT = { x: 371, y: 801 };
@@ -217,16 +219,21 @@ test.describe("mobile", () => {
     );
     await expect
       .poll(async () => (await panel(page).boundingBox())?.height)
-      .toBeCloseTo(844 * 0.4, 0);
+      .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
     await page.screenshot({ path: testInfo.outputPath("mobile-initial.png") });
     const before = await sceneryScreenshot(page);
     const handle = panel(page).getByRole("button", { name: "패널 높이 조절", exact: true });
-    await test.step("Handle expands to 600px; final click keeps the sheet open", async () => {
+    await test.step("Handle expands to 90dvh; final click cycles the sheet open", async () => {
       await handle.tap();
-      await expect.poll(async () => (await panel(page).boundingBox())?.height).toBeCloseTo(600, 0);
+      await expect
+        .poll(async () => (await panel(page).boundingBox())?.height)
+        .toBeCloseTo(MOBILE_SHEET_EXPANDED_HEIGHT, 0);
+      await page.screenshot({ path: testInfo.outputPath("mobile-expanded.png") });
       await handle.tap();
       await expect(panel(page)).toHaveAttribute("data-state", "open");
-      await page.screenshot({ path: testInfo.outputPath("mobile-expanded.png") });
+      await expect
+        .poll(async () => (await panel(page).boundingBox())?.height)
+        .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
     });
     await test.step("Content scroll reveals the address", async () => {
       const body = panel(page).locator(".PlaceDetailPanelBody");
@@ -244,7 +251,8 @@ test.describe("mobile", () => {
         panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
       ).toBeInViewport();
     });
-    await test.step("Drag returns to 40dvh without moving the scene", async () => {
+    await test.step("Drag returns to 50dvh without moving the scene", async () => {
+      await handle.tap();
       const box = await handle.boundingBox();
       if (!box) throw new Error("Sheet handle has no visible bounds");
       await swipe(
@@ -254,7 +262,7 @@ test.describe("mobile", () => {
       );
       await expect
         .poll(async () => (await panel(page).boundingBox())?.height)
-        .toBeCloseTo(844 * 0.4, 0);
+        .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
       await waitForCameraToSettle(page);
       expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
     });
