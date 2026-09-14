@@ -2,6 +2,8 @@ import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
+const MOBILE_SHEET_COLLAPSED_HEIGHT = MOBILE.height * 0.5;
+const MOBILE_SHEET_EXPANDED_HEIGHT = MOBILE.height * 0.9;
 const HANOK_DESKTOP_POINT = { x: 1242, y: 650 };
 const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 448 };
 const HANOK_MOBILE_POINT = { x: 371, y: 801 };
@@ -205,9 +207,8 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
 
 test.describe("mobile", () => {
   test.use({ viewport: MOBILE, isMobile: true, hasTouch: true });
-  test("arrival, sheet expansion, scrolling, dragging and responsive switching", async ({
-    page,
-  }, testInfo) => {
+
+  test("arrival and sheet snap point cycling", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     await startExploration(page);
     await arriveAtHanok(page, true);
@@ -217,58 +218,73 @@ test.describe("mobile", () => {
     );
     await expect
       .poll(async () => (await panel(page).boundingBox())?.height)
-      .toBeCloseTo(844 * 0.4, 0);
+      .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
     await page.screenshot({ path: testInfo.outputPath("mobile-initial.png") });
+    const handle = panel(page).getByRole("button", { name: "패널 높이 조절", exact: true });
+
+    await handle.tap();
+    await expect
+      .poll(async () => (await panel(page).boundingBox())?.height)
+      .toBeCloseTo(MOBILE_SHEET_EXPANDED_HEIGHT, 0);
+    await page.screenshot({ path: testInfo.outputPath("mobile-expanded.png") });
+    await handle.tap();
+    await expect(panel(page)).toHaveAttribute("data-state", "open");
+    await expect
+      .poll(async () => (await panel(page).boundingBox())?.height)
+      .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
+  });
+
+  test("content scrolling keeps the fixed external link reachable", async ({ page }) => {
+    test.setTimeout(120_000);
+    await startExploration(page);
+    await arriveAtHanok(page, true);
+
+    const body = panel(page).locator(".PlaceDetailPanelBody");
+    await expect(body).toBeVisible();
+    const scrollable = await body.evaluate(
+      (element) => element.scrollHeight > element.clientHeight
+    );
+    if (scrollable) {
+      await body.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    }
+    await expect(
+      panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
+    ).toBeInViewport();
+  });
+
+  test("dragging and responsive switching keep the sheet behavior stable", async ({ page }) => {
+    test.setTimeout(120_000);
+    await startExploration(page);
+    await arriveAtHanok(page, true);
+
     const before = await sceneryScreenshot(page);
     const handle = panel(page).getByRole("button", { name: "패널 높이 조절", exact: true });
-    await test.step("Handle expands to 600px; final click keeps the sheet open", async () => {
-      await handle.tap();
-      await expect.poll(async () => (await panel(page).boundingBox())?.height).toBeCloseTo(600, 0);
-      await handle.tap();
-      await expect(panel(page)).toHaveAttribute("data-state", "open");
-      await page.screenshot({ path: testInfo.outputPath("mobile-expanded.png") });
-    });
-    await test.step("Content scroll reveals the address", async () => {
-      const body = panel(page).locator(".PlaceDetailPanelBody");
-      await expect(body).toBeVisible();
-      const scrollable = await body.evaluate(
-        (element) => element.scrollHeight > element.clientHeight
-      );
-      if (scrollable) {
-        await body.evaluate((element) => {
-          element.scrollTop = element.scrollHeight;
-        });
-        await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-      }
-      await expect(
-        panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
-      ).toBeInViewport();
-    });
-    await test.step("Drag returns to 40dvh without moving the scene", async () => {
-      const box = await handle.boundingBox();
-      if (!box) throw new Error("Sheet handle has no visible bounds");
-      await swipe(
-        page,
-        { x: box.x + box.width / 2, y: box.y + box.height / 2 },
-        { x: box.x + box.width / 2, y: box.y + box.height / 2 + 260 }
-      );
-      await expect
-        .poll(async () => (await panel(page).boundingBox())?.height)
-        .toBeCloseTo(844 * 0.4, 0);
-      await waitForCameraToSettle(page);
-      expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
-    });
-    await test.step("An open sheet switches to a floating card and back", async () => {
-      await page.setViewportSize(DESKTOP);
-      await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
-      await expect(
-        panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
-      ).toBeVisible();
-      await page.setViewportSize(MOBILE);
-      await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-      await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
-      await page.keyboard.press("Escape");
-      await expectPanelToStayClosed(page);
-    });
+    await handle.tap();
+    const box = await handle.boundingBox();
+    if (!box) throw new Error("Sheet handle has no visible bounds");
+    await swipe(
+      page,
+      { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+      { x: box.x + box.width / 2, y: box.y + box.height / 2 + 260 }
+    );
+    await expect
+      .poll(async () => (await panel(page).boundingBox())?.height)
+      .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
+    await waitForCameraToSettle(page);
+    expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
+
+    await page.setViewportSize(DESKTOP);
+    await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
+    await expect(
+      panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
+    ).toBeVisible();
+    await page.setViewportSize(MOBILE);
+    await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
+    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expectPanelToStayClosed(page);
   });
 });

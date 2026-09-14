@@ -21,6 +21,11 @@ describe("sheet snap points", () => {
     expect(resolveDragDestination({ ...drag, dismissible: true })).toEqual({ close: true });
     expect(resolveDragDestination({ ...drag, dismissible: false })).toEqual({ index: 0 });
   });
+  test("uses a custom close threshold when settling a downward drag", () => {
+    const drag = { heights: [200, 400], startHeight: 200, deltaY: 70, dismissible: true };
+    expect(resolveDragDestination({ ...drag, closeThreshold: 0.5 })).toEqual({ index: 0 });
+    expect(resolveDragDestination({ ...drag, closeThreshold: 0.7 })).toEqual({ close: true });
+  });
   test("does not dismiss for a small downward drag", () => {
     expect(
       resolveDragDestination({ heights: [400], startHeight: 400, deltaY: 25, dismissible: true })

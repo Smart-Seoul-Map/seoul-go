@@ -178,7 +178,10 @@ function CloseButton({
 function Content(props: AppResponsivePanelContentProps): ReactElement | null {
   const panel = usePanelContext();
   const contentRef = useRef<HTMLElement | null>(null);
-  const { present, finishExit } = usePanelPresence(panel.open, panel.skipAnimation, contentRef);
+  const { present, finishExit } = usePanelPresence(panel.open, panel.skipAnimation, contentRef, {
+    lazyMount: panel.sheet.lazyMount,
+    unmountOnExit: panel.sheet.unmountOnExit,
+  });
   if (!present) return null;
   return <MountedContent {...props} contentRef={contentRef} finishExit={finishExit} />;
 }
@@ -214,9 +217,10 @@ function MountedContent({
   usePanelModal({
     id: panel.id,
     parentId: panel.parentId,
-    active: true,
+    active: panel.open,
     modal: panel.modal,
-    dismissible: panel.dismissible && panel.open,
+    dismissible:
+      panel.dismissible && panel.open && (panel.isDesktop || (panel.sheet.closeOnEscape ?? true)),
     contentRef,
     onEscape: () => panel.changeOpen(false, "escapeKeyDown"),
   });
@@ -248,7 +252,12 @@ function MountedContent({
           data-faded={backdropVisible}
           aria-hidden="true"
           onClick={() => {
-            if (panel.dismissible && panel.open) panel.changeOpen(false, "interactOutside");
+            if (
+              panel.dismissible &&
+              panel.open &&
+              (panel.isDesktop || (panel.sheet.closeOnInteractOutside ?? true))
+            )
+              panel.changeOpen(false, "interactOutside");
           }}
         />
       )}

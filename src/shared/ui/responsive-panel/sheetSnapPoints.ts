@@ -14,6 +14,7 @@ type DragDestinationInput = {
   startHeight: number;
   deltaY: number;
   dismissible: boolean;
+  closeThreshold?: number;
 };
 
 export function resolveDragDestination({
@@ -21,10 +22,12 @@ export function resolveDragDestination({
   startHeight,
   deltaY,
   dismissible,
+  closeThreshold = 0.5,
 }: DragDestinationInput): { close: true } | { index: number } {
   const targetHeight = startHeight - deltaY;
   const lowestHeight = Math.min(...heights);
-  if (dismissible && targetHeight < lowestHeight / 2) return { close: true };
+  const closeThresholdRatio = Math.max(0, Math.min(closeThreshold, 1));
+  if (dismissible && targetHeight < lowestHeight * closeThresholdRatio) return { close: true };
   const index = heights.reduce(
     (best, height, current) =>
       Math.abs(height - targetHeight) < Math.abs(heights[best] - targetHeight) ? current : best,

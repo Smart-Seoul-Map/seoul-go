@@ -45,7 +45,7 @@ test("accepts a screen-specific mobile height cap without fixing the sheet heigh
   const dialog = screen.getByRole("dialog");
   expect(dialog.style.getPropertyValue("--place-detail-mobile-max-height")).toBe("40dvh");
   expect(dialog.style.height).toBe("");
-  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("");
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
 });
 
 test("starts a mobile sheet at the first snap point and expands from the handle", () => {
@@ -66,6 +66,45 @@ test("starts a mobile sheet at the first snap point and expands from the handle"
   expect(screen.getByRole("dialog")).toBeTruthy();
 });
 
+test("lets the panel card hug its content while keeping the standalone card height", () => {
+  resize(390);
+  const { unmount } = render(<PlaceDetailPanel place={place} defaultOpen />);
+  const panelCard = screen.getByRole("region", { name: place.title });
+  expect(getComputedStyle(panelCard).minHeight).toBe("auto");
+
+  unmount();
+  cleanup();
+
+  render(<PlaceDetailCard {...place} />);
+  const standaloneCard = screen.getByRole("region", { name: place.title });
+  expect(standaloneCard.closest(".PlaceDetailPanel")).toBeNull();
+  expect(standaloneCard.classList.contains("PlaceDetailCard")).toBe(true);
+});
+
+test("keeps the mobile place title in the fixed panel header", () => {
+  resize(390);
+  render(<PlaceDetailPanel place={place} defaultOpen />);
+  const dialog = screen.getByRole("dialog", { name: place.title });
+  const title = screen.getByRole("heading", { name: place.title });
+
+  expect(title.closest(".AppResponsivePanelHeader")).not.toBeNull();
+  expect(title.closest(".PlaceDetailPanelBody")).toBeNull();
+  expect(screen.getByRole("region", { name: place.title })).toBeTruthy();
+  expect(dialog.dataset.presentation).toBe("bottom-sheet");
+});
+
+test("keeps the desktop place title inside the detail card", () => {
+  resize(1200);
+  render(<PlaceDetailPanel place={place} defaultOpen />);
+  const title = screen
+    .getAllByRole("heading", { name: place.title })
+    .find((heading) => heading.closest(".PlaceDetailCardHeader"));
+
+  expect(title).toBeTruthy();
+  expect(title?.closest(".PlaceDetailCardHeader")).not.toBeNull();
+  expect(title?.closest(".AppResponsivePanelHeader")).toBeNull();
+});
+
 test("leaves the default mobile height cap to the detail tokens", () => {
   resize(390);
   render(<PlaceDetailPanel place={place} defaultOpen />);
@@ -84,6 +123,7 @@ test("omits the subtitle only in the bottom sheet and restores it after resizing
   expect(screen.queryByText(subtitle)).toBeNull();
   expect(screen.getByRole("dialog")).toBeTruthy();
   expect(screen.getByRole("dialog").dataset.appearance).toBeUndefined();
+  expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
   resize(1200);
   expect(screen.getByText(subtitle)).toBeTruthy();
 });

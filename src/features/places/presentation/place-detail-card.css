@@ -111,7 +111,6 @@
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
   --sg-panel-sheet-max-width: 100%;
   --sg-panel-sheet-max-height: min(
-    var(--sg-detail-sheet-max-height),
     var(--place-detail-mobile-max-height, 100dvh),
     calc(100dvh - var(--sg-spacing-6) - env(safe-area-inset-top, 0px))
   );
@@ -130,10 +129,20 @@
 .PlaceDetailPanel .PlaceDetailPanelBody::-webkit-scrollbar {
   display: none;
 }
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  padding: var(--sg-spacing-6) var(--sg-spacing-semantic-screen-gutter-x) var(--sg-spacing-2);
+  background: var(--sg-panel-bg);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelTitle {
+  color: var(--sg-detail-title-color);
+  font-size: var(--sg-typography-detail-title-font-size);
+  line-height: var(--sg-typography-detail-title-line-height);
+}
 .PlaceDetailPanel .PlaceDetailCard {
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  min-height: auto;
   max-height: none;
   overflow: hidden;
   /* Let wheel and touch scrolling reach the panel body instead of this clipped card. */
@@ -152,6 +161,5 @@
 }
 .PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
   width: 100%;
-  min-height: auto;
   padding-top: var(--sg-spacing-1);
 }

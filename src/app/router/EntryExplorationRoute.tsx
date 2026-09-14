@@ -10,7 +10,7 @@ import type { PanelSnapPoint } from "@shared/ui/responsive-panel";
 
 import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
-const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.4, "600px"];
+const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.5, 0.9];
 
 type EntryPlacePanelProps = {
   placeId: EntryExplorationPlaceId;
@@ -34,7 +34,6 @@ function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): Reac
       place={ENTRY_EXPLORATION_PLACES[placeId]}
       open={open}
       modal={false}
-      mobileMaxHeight="var(--sg-detail-sheet-max-height)"
       mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
       mobileActiveSnapPoint={entryPlaceSnapPoint}
       onMobileSnapPointChange={setEntryPlaceSnapPoint}

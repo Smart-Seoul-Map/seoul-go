@@ -14,6 +14,7 @@ export type PlaceDetailCardProps = {
   subtitle?: string;
   image?: { src: string; alt: string };
   externalLink?: PlaceDetailExternalLinkProps;
+  showHeader?: boolean;
 };
 
 function PlaceImage({ image }: Pick<PlaceDetailCardProps, "image">): ReactElement {
@@ -42,13 +43,15 @@ export function PlaceDetailCard({
   subtitle = "탐방중 이런 정보를 만나요!",
   image,
   externalLink,
+  showHeader = true,
 }: PlaceDetailCardProps): ReactElement {
   const titleId = useId();
   return (
     <AppBox
       className="PlaceDetailCard"
       role="region"
-      aria-labelledby={titleId}
+      aria-labelledby={showHeader ? titleId : undefined}
+      aria-label={showHeader ? undefined : title}
       bg="bg.surfacePaper"
       color="text.default"
       borderColor="stroke.weak"
@@ -59,16 +62,18 @@ export function PlaceDetailCard({
       py="spacing.7"
       px="spacing.5"
     >
-      <header className="PlaceDetailCardHeader">
-        <AppHeading as="h2" id={titleId} size="detail">
-          {title}
-        </AppHeading>
-        {subtitle && (
-          <AppText role="detailSupporting" tone="muted" align="end">
-            {subtitle}
-          </AppText>
-        )}
-      </header>
+      {showHeader && (
+        <header className="PlaceDetailCardHeader">
+          <AppHeading as="h2" id={titleId} size="detail">
+            {title}
+          </AppHeading>
+          {subtitle && (
+            <AppText role="detailSupporting" tone="muted" align="end">
+              {subtitle}
+            </AppText>
+          )}
+        </header>
+      )}
       <PlaceImage image={image} />
       <AppBox
         className="PlaceDetailCardDescription"
