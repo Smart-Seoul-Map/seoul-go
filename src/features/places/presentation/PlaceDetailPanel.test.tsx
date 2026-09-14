@@ -66,6 +66,19 @@ test("starts a mobile sheet at the first snap point and expands from the handle"
   expect(screen.getByRole("dialog")).toBeTruthy();
 });
 
+test("lets the panel card hug its content while keeping the standalone card height", () => {
+  resize(390);
+  const { unmount } = render(<PlaceDetailPanel place={place} defaultOpen />);
+  const panelCard = screen.getByRole("region", { name: place.title });
+  expect(getComputedStyle(panelCard).minHeight).toBe("auto");
+
+  unmount();
+
+  render(<PlaceDetailCard {...place} />);
+  const standaloneCard = screen.getByRole("region", { name: place.title });
+  expect(getComputedStyle(standaloneCard).minHeight).toBe("var(--sg-detail-card-min-height)");
+});
+
 test("leaves the default mobile height cap to the detail tokens", () => {
   resize(390);
   render(<PlaceDetailPanel place={place} defaultOpen />);
