@@ -45,7 +45,7 @@ test("accepts a screen-specific mobile height cap without fixing the sheet heigh
   const dialog = screen.getByRole("dialog");
   expect(dialog.style.getPropertyValue("--place-detail-mobile-max-height")).toBe("40dvh");
   expect(dialog.style.height).toBe("");
-  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("");
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
 });
 
 test("starts a mobile sheet at the first snap point and expands from the handle", () => {
@@ -73,10 +73,35 @@ test("lets the panel card hug its content while keeping the standalone card heig
   expect(getComputedStyle(panelCard).minHeight).toBe("auto");
 
   unmount();
+  cleanup();
 
   render(<PlaceDetailCard {...place} />);
   const standaloneCard = screen.getByRole("region", { name: place.title });
   expect(getComputedStyle(standaloneCard).minHeight).toBe("var(--sg-detail-card-min-height)");
+});
+
+test("keeps the mobile place title in the fixed panel header", () => {
+  resize(390);
+  render(<PlaceDetailPanel place={place} defaultOpen />);
+  const dialog = screen.getByRole("dialog", { name: place.title });
+  const title = screen.getByRole("heading", { name: place.title });
+
+  expect(title.closest(".AppResponsivePanelHeader")).not.toBeNull();
+  expect(title.closest(".PlaceDetailPanelBody")).toBeNull();
+  expect(screen.getByRole("region", { name: place.title })).toBeTruthy();
+  expect(dialog.dataset.presentation).toBe("bottom-sheet");
+});
+
+test("keeps the desktop place title inside the detail card", () => {
+  resize(1200);
+  render(<PlaceDetailPanel place={place} defaultOpen />);
+  const title = screen
+    .getAllByRole("heading", { name: place.title })
+    .find((heading) => heading.closest(".PlaceDetailCardHeader"));
+
+  expect(title).toBeTruthy();
+  expect(title?.closest(".PlaceDetailCardHeader")).not.toBeNull();
+  expect(title?.closest(".AppResponsivePanelHeader")).toBeNull();
 });
 
 test("leaves the default mobile height cap to the detail tokens", () => {

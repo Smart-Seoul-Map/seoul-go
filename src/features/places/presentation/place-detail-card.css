@@ -130,6 +130,15 @@
 .PlaceDetailPanel .PlaceDetailPanelBody::-webkit-scrollbar {
   display: none;
 }
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  padding: var(--sg-spacing-6) var(--sg-spacing-semantic-screen-gutter-x) var(--sg-spacing-2);
+  background: var(--sg-panel-bg);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelTitle {
+  color: var(--sg-detail-title-color);
+  font-size: var(--sg-typography-detail-title-font-size);
+  line-height: var(--sg-typography-detail-title-line-height);
+}
 .PlaceDetailPanel .PlaceDetailCard {
   border: 0;
   border-radius: 0;

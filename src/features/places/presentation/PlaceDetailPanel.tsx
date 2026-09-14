@@ -33,8 +33,42 @@ function PanelPlaceCard({ place }: Pick<PlaceDetailPanelProps, "place">): ReactE
     <PlaceDetailCard
       {...place}
       externalLink={undefined}
+      showHeader={presentation !== "bottom-sheet"}
       subtitle={presentation === "bottom-sheet" ? "" : place.subtitle}
     />
+  );
+}
+
+function PlaceDetailPanelContent({
+  place,
+  footer,
+  style,
+}: Pick<PlaceDetailPanelProps, "place" | "footer"> & {
+  style: PlaceDetailPanelStyle;
+}): ReactElement {
+  const presentation = useResponsivePanelPresentation();
+  const isBottomSheet = presentation === "bottom-sheet";
+
+  return (
+    <AppResponsivePanel.Content
+      title={place.title}
+      hideTitle={!isBottomSheet}
+      showCloseButton={false}
+      showHandle
+      width="var(--sg-detail-width)"
+      className="PlaceDetailPanel"
+      style={style}
+    >
+      <AppResponsivePanel.Body className="PlaceDetailPanelBody">
+        <PanelPlaceCard place={place} />
+      </AppResponsivePanel.Body>
+      {(footer || place.externalLink) && (
+        <AppResponsivePanel.Footer className="PlaceDetailPanelFooter">
+          {place.externalLink && <PlaceDetailExternalLink {...place.externalLink} />}
+          {footer}
+        </AppResponsivePanel.Footer>
+      )}
+    </AppResponsivePanel.Content>
   );
 }
 
@@ -70,25 +104,7 @@ export function PlaceDetailPanel({
       }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}
-      <AppResponsivePanel.Content
-        title={place.title}
-        hideTitle
-        showCloseButton={false}
-        showHandle
-        width="var(--sg-detail-width)"
-        className="PlaceDetailPanel"
-        style={style}
-      >
-        <AppResponsivePanel.Body className="PlaceDetailPanelBody">
-          <PanelPlaceCard place={place} />
-        </AppResponsivePanel.Body>
-        {(footer || place.externalLink) && (
-          <AppResponsivePanel.Footer className="PlaceDetailPanelFooter">
-            {place.externalLink && <PlaceDetailExternalLink {...place.externalLink} />}
-            {footer}
-          </AppResponsivePanel.Footer>
-        )}
-      </AppResponsivePanel.Content>
+      <PlaceDetailPanelContent place={place} footer={footer} style={style} />
     </AppResponsivePanel.Root>
   );
 }
