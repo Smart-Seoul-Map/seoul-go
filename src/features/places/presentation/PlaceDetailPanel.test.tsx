@@ -84,6 +84,7 @@ test("omits the subtitle only in the bottom sheet and restores it after resizing
   expect(screen.queryByText(subtitle)).toBeNull();
   expect(screen.getByRole("dialog")).toBeTruthy();
   expect(screen.getByRole("dialog").dataset.appearance).toBeUndefined();
+  expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
   resize(1200);
   expect(screen.getByText(subtitle)).toBeTruthy();
 });

@@ -10,7 +10,7 @@ import type { PanelSnapPoint } from "@shared/ui/responsive-panel";
 
 import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
-const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.4, "600px"];
+const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.5, 0.9];
 
 type EntryPlacePanelProps = {
   placeId: EntryExplorationPlaceId;

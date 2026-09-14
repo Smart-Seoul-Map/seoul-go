@@ -45,9 +45,9 @@ export function useSheetDrag(
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     const content = contentRef.current;
-    if (panel.isDesktop || !panel.dismissible || !content || !event.isPrimary || event.button !== 0)
-      return;
+    if (panel.isDesktop || !content || !event.isPrimary || event.button !== 0) return;
     if (!(event.target instanceof HTMLElement)) return;
+    if (!panel.dismissible && !panel.sheet.snapPoints?.length) return;
     const isHandle = !!event.target.closest("[data-panel-handle]");
     if (panel.sheet.handleOnly && showHandle && !isHandle) return;
     if (!isHandle && event.target.closest(INTERACTIVE_SELECTOR)) return;
@@ -103,10 +103,14 @@ export function useSheetDrag(
           `${Math.max(lowestHeight, Math.min(Math.max(...heights), targetHeight))}px`
         );
       }
+      const height = state.sheet.snapPoints?.length
+        ? Math.max(lowestHeight, Math.min(Math.max(...heights), targetHeight))
+        : drag.startHeight;
       drag.target.style.setProperty(
         "--panel-drag-y",
         `${Math.max(0, lowestHeight - targetHeight)}px`
       );
+      state.sheet.onDrag?.({ deltaY: drag.deltaY, height });
     };
     const finishDrag = (event: Pick<PointerEvent, "pointerId" | "type">) => {
       const drag = session.current;
@@ -129,10 +133,16 @@ export function useSheetDrag(
         startHeight: drag.startHeight,
         deltaY: drag.deltaY,
         dismissible: state.dismissible,
+        closeThreshold: state.sheet.closeThreshold,
       });
-      if ("close" in destination) state.changeOpen(false, "drag");
-      else if (points?.[destination.index] !== undefined)
-        state.setSnapPoint(points[destination.index]);
+      if ("close" in destination) {
+        state.sheet.onRelease?.({ deltaY: drag.deltaY, destination: "close" });
+        state.changeOpen(false, "drag");
+      } else if (points?.[destination.index] !== undefined) {
+        const snapPoint = points[destination.index];
+        state.sheet.onRelease?.({ deltaY: drag.deltaY, destination: snapPoint });
+        state.setSnapPoint(snapPoint);
+      }
     };
     const handleTouchStart = (event: TouchEvent) => {
       const drag = session.current;
@@ -193,10 +203,21 @@ export function useSheetDrag(
       return;
     }
     const points = panel.sheet.snapPoints ?? [];
-    const nextIndex = points.findIndex((point) => point === panel.snapPoint) + 1;
-    if (nextIndex < points.length) panel.setSnapPoint(points[nextIndex]);
-    else if (panel.dismissible && panel.sheet.closeOnFinalSnapClick !== false)
+    if (!points.length) return;
+    const currentIndex = Math.max(
+      0,
+      points.findIndex((point) => point === panel.snapPoint)
+    );
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < points.length) {
+      panel.setSnapPoint(points[nextIndex]);
+      return;
+    }
+    if (panel.dismissible && panel.sheet.closeOnFinalSnapClick !== false) {
       panel.changeOpen(false, "handleClickOnLastSnapPoint");
+      return;
+    }
+    panel.setSnapPoint(points[0]);
   };
 
   return { handlePointerDown, handleHandleClick };

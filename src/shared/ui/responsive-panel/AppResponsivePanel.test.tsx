@@ -260,7 +260,7 @@ describe("AppResponsivePanel", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  test("cycles mobile snap points and dismisses after the final point", () => {
+  test("cycles mobile snap points without dismissing from the handle", () => {
     resize(375);
     const onOpenChange = vi.fn();
     render(
@@ -276,8 +276,38 @@ describe("AppResponsivePanel", () => {
     fireEvent.click(handle);
     expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("100dvh");
     fireEvent.click(handle);
+    expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("200px");
+    expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());
+  });
+
+  test("allows a mobile sheet to opt out of Escape and outside-click dismissal", () => {
+    resize(375);
+    const onOpenChange = vi.fn();
+    render(
+      <Panel
+        defaultOpen
+        onOpenChange={onOpenChange}
+        bottomSheetRootProps={{ closeOnEscape: false, closeOnInteractOutside: false }}
+      />
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.click(document.querySelector(".AppResponsivePanelBackdrop")!);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  test("keeps closed content mounted when unmountOnExit is false after the first open", () => {
+    resize(375);
+    const { rerender } = render(
+      <Panel open={false} bottomSheetRootProps={{ lazyMount: true, unmountOnExit: false }} />
+    );
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(onOpenChange).toHaveBeenLastCalledWith(false, { reason: "handleClickOnLastSnapPoint" });
+    rerender(<Panel open bottomSheetRootProps={{ lazyMount: true, unmountOnExit: false }} />);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    rerender(
+      <Panel open={false} bottomSheetRootProps={{ lazyMount: true, unmountOnExit: false }} />
+    );
+    expect(screen.getByRole("dialog").dataset.state).toBe("closed");
   });
 
   test("keeps a mobile sheet open after the final snap point when final click dismissal is disabled", () => {

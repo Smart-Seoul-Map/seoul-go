@@ -69,7 +69,7 @@ export const Mobile: Story = {
   args: { defaultOpen: true, bottomSheetRootProps: { handleOnly: true } },
 };
 export const SnapPoints: Story = {
-  args: { bottomSheetRootProps: { snapPoints: ["200px", "400px", 0.9], fadeFromIndex: 1 } },
+  args: { bottomSheetRootProps: { snapPoints: [0.5, 0.9], fadeFromIndex: 1 } },
 };
 export const LongContent: Story = {
   render: () => (

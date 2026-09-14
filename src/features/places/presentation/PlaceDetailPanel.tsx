@@ -8,6 +8,8 @@ import {
 import { PlaceDetailCard, type PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailExternalLink } from "./PlaceDetailExternalLink";
 
+const PLACE_DETAIL_SHEET_SNAP_POINTS = [0.5, 0.9] as const;
+
 export type PlaceDetailPanelProps = Pick<
   AppResponsivePanelRootProps,
   "open" | "onOpenChange" | "defaultOpen" | "modal"
@@ -58,9 +60,13 @@ export function PlaceDetailPanel({
       bottomSheetRootProps={{
         handleOnly: true,
         closeOnFinalSnapClick: false,
-        snapPoints: mobileSnapPoints,
+        snapPoints: mobileSnapPoints ?? [...PLACE_DETAIL_SHEET_SNAP_POINTS],
         activeSnapPoint: mobileActiveSnapPoint,
         setActiveSnapPoint: onMobileSnapPointChange,
+        closeOnEscape: true,
+        closeOnInteractOutside: true,
+        lazyMount: true,
+        unmountOnExit: true,
       }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}

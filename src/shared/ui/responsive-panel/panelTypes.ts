@@ -35,6 +35,13 @@ export type BottomSheetOptions = {
   setActiveSnapPoint?: (point: PanelSnapPoint | null) => void;
   fadeFromIndex?: number;
   closeOnFinalSnapClick?: boolean;
+  closeThreshold?: number;
+  onDrag?: (details: { deltaY: number; height: number }) => void;
+  onRelease?: (details: { deltaY: number; destination: "close" | PanelSnapPoint }) => void;
+  closeOnEscape?: boolean;
+  closeOnInteractOutside?: boolean;
+  lazyMount?: boolean;
+  unmountOnExit?: boolean;
 };
 
 export type AppResponsivePanelRootProps = {

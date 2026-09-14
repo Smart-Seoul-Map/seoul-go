@@ -3,13 +3,22 @@ import { useEffect, useState, type RefObject } from "react";
 export function usePanelPresence(
   open: boolean,
   skipAnimation: boolean,
-  contentRef: RefObject<HTMLElement | null>
+  contentRef: RefObject<HTMLElement | null>,
+  options: { lazyMount?: boolean; unmountOnExit?: boolean } = {}
 ) {
-  const [retained, setRetained] = useState(open);
-  const present = open || (retained && !skipAnimation);
+  const { lazyMount = true, unmountOnExit = true } = options;
+  const [hasOpened, setHasOpened] = useState(open);
+  const [retained, setRetained] = useState(open || !lazyMount);
+  const present = open || (unmountOnExit ? retained && !skipAnimation : retained);
   useEffect(() => {
     if (open) {
+      setHasOpened(true);
       setRetained(true);
+      return;
+    }
+    if (!unmountOnExit) return;
+    if (lazyMount && !hasOpened) {
+      setRetained(false);
       return;
     }
     if (!retained) return;
@@ -22,11 +31,11 @@ export function usePanelPresence(
     const duration = Math.max(0, ...durations.filter(Number.isFinite));
     const timer = window.setTimeout(() => setRetained(false), skipAnimation ? 0 : duration);
     return () => window.clearTimeout(timer);
-  }, [open, retained, skipAnimation, contentRef]);
+  }, [contentRef, hasOpened, lazyMount, open, retained, skipAnimation, unmountOnExit]);
   return {
     present,
     finishExit: () => {
-      if (!open) setRetained(false);
+      if (!open && unmountOnExit) setRetained(false);
     },
   };
 }
