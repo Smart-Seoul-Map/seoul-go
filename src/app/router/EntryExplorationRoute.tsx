@@ -34,7 +34,6 @@ function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): Reac
       place={ENTRY_EXPLORATION_PLACES[placeId]}
       open={open}
       modal={false}
-      mobileMaxHeight="var(--sg-detail-sheet-max-height)"
       mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
       mobileActiveSnapPoint={entryPlaceSnapPoint}
       onMobileSnapPointChange={setEntryPlaceSnapPoint}
