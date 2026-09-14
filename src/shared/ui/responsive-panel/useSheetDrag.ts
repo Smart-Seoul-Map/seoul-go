@@ -213,7 +213,7 @@ export function useSheetDrag(
       panel.setSnapPoint(points[nextIndex]);
       return;
     }
-    if (panel.dismissible && panel.sheet.closeOnFinalSnapClick !== false) {
+    if (panel.dismissible && panel.sheet.closeOnFinalSnapClick === true) {
       panel.changeOpen(false, "handleClickOnLastSnapPoint");
       return;
     }

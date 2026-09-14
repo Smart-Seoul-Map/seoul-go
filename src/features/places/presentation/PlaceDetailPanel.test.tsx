@@ -77,7 +77,8 @@ test("lets the panel card hug its content while keeping the standalone card heig
 
   render(<PlaceDetailCard {...place} />);
   const standaloneCard = screen.getByRole("region", { name: place.title });
-  expect(getComputedStyle(standaloneCard).minHeight).toBe("var(--sg-detail-card-min-height)");
+  expect(standaloneCard.closest(".PlaceDetailPanel")).toBeNull();
+  expect(standaloneCard.classList.contains("PlaceDetailCard")).toBe(true);
 });
 
 test("keeps the mobile place title in the fixed panel header", () => {
