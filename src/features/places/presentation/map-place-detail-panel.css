@@ -1,0 +1,158 @@
+.MapPlaceDetailPanel {
+  --place-detail-gutter: var(--sg-spacing-7);
+  --place-detail-gap: var(--sg-spacing-4);
+}
+
+.MapPlaceDetailPanel .AppResponsivePanelHeader {
+  gap: var(--place-detail-gap);
+  padding: var(--sg-spacing-7) var(--place-detail-gutter) var(--place-detail-gap);
+}
+
+.MapPlaceDetailPanel .AppResponsivePanelTitle {
+  font-size: var(--sg-typography-detail-title-font-size);
+  line-height: var(--sg-typography-detail-title-line-height);
+}
+
+.MapPlaceDetailToolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  min-width: 0;
+}
+
+.MapPlaceDetailBadges {
+  --sg-badge-height-md: var(--sg-spacing-7);
+  --sg-badge-padding-x-md: var(--sg-spacing-4);
+  --sg-badge-font-size: var(--sg-font-size-2);
+  --sg-badge-shadow: none;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: var(--sg-spacing-2);
+  min-width: 0;
+}
+
+.MapPlaceDetailBadges .AppBadge[data-tone="positive"] {
+  background: var(--sg-map-detail-visit-badge-bg);
+  color: var(--sg-map-detail-visit-badge-fg);
+}
+
+.MapPlaceDetailSearch,
+.MapPlaceDetailClose {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--sg-icon-button-size-nav);
+  height: var(--sg-icon-button-size-nav);
+  padding: 0;
+  border: 0;
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-color-bg-transparent);
+  cursor: pointer;
+}
+
+.MapPlaceDetailSearch {
+  color: var(--sg-color-text-info);
+}
+
+.MapPlaceDetailClose {
+  color: var(--sg-color-text-muted);
+}
+
+.MapPlaceDetailSearch:hover,
+.MapPlaceDetailClose:hover {
+  background: var(--sg-color-bg-transparent-pressed);
+}
+
+.MapPlaceDetailSearch:focus-visible,
+.MapPlaceDetailClose:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}
+
+.MapPlaceDetailSearchIcon,
+.MapPlaceDetailCloseIcon {
+  width: var(--sg-spacing-7);
+  height: var(--sg-spacing-7);
+  background: currentColor;
+  mask: url("../../../assets/search.svg") center / contain no-repeat;
+}
+
+.MapPlaceDetailCloseIcon {
+  mask-image: url("../../../assets/close.svg");
+}
+
+.MapPlaceDetailPanel[data-presentation] .PlaceDetailPanelBody {
+  padding: 0;
+}
+
+.MapPlaceDetailPanel .PlaceDetailCard {
+  padding: 0 var(--place-detail-gutter);
+}
+
+.MapPlaceDetailPanel .PlaceDetailCardImage {
+  margin: 0 0 var(--place-detail-gap);
+}
+
+.MapPlaceDetailPanel .PlaceDetailCardDescription {
+  min-height: 0;
+  margin: 0 0 var(--place-detail-gap);
+  padding: var(--sg-spacing-4);
+}
+
+.MapPlaceDetailStamp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-spacing-1);
+  margin-inline: var(--place-detail-gutter);
+  overflow-wrap: anywhere;
+}
+
+.MapPlaceDetailPanel .PlaceDetailPanelFooter {
+  padding: var(--place-detail-gap) var(--place-detail-gutter) var(--sg-spacing-7);
+}
+
+.MapPlaceDetailAddButton {
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] {
+  --place-detail-gutter: var(--sg-spacing-4);
+  --place-detail-gap: var(--sg-spacing-3);
+  --sg-typography-detail-body-font-size: var(--sg-font-size-4);
+  --sg-typography-detail-body-line-height: var(--sg-map-detail-mobile-body-line-height);
+  --sg-typography-detail-title-font-size: var(--sg-font-size-7);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  gap: var(--place-detail-gap);
+  padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
+  padding-top: 0;
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardImage {
+  aspect-ratio: var(--sg-map-detail-mobile-image-ratio);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardDescription,
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailStamp {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailStamp {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--sg-spacing-2);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailPanelFooter {
+  padding-bottom: var(--sg-spacing-6);
+}

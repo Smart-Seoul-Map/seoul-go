@@ -18,3 +18,4 @@ export { PlaceDetailCard } from "./presentation/PlaceDetailCard";
 export type { PlaceDetailCardProps } from "./presentation/PlaceDetailCard";
 export { PlaceDetailPanel } from "./presentation/PlaceDetailPanel";
 export type { PlaceDetailPanelProps } from "./presentation/PlaceDetailPanel";
+export { MapPlaceDetailPanel } from "./presentation/MapPlaceDetailPanel";
