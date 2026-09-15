@@ -440,6 +440,9 @@
   /* Main map place detail */
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
+  --sg-map-detail-acquired-button-bg: var(--sg-v3-green-500);
+  --sg-map-detail-acquired-button-bg-pressed: var(--sg-v3-green-500);
+  --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);
   --sg-map-detail-mobile-body-line-height: 1.5;
   --sg-map-detail-mobile-image-ratio: 358 / 136;
 }

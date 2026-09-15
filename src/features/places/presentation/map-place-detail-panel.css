@@ -119,9 +119,9 @@
 }
 
 .MapPlaceDetailAddButton[data-acquired="true"] {
-  --sg-button-primary-bg: var(--sg-v3-green-500);
-  --sg-button-primary-bg-pressed: var(--sg-v3-green-500);
-  --sg-button-primary-fg: var(--sg-color-text-inverted);
+  --sg-button-primary-bg: var(--sg-map-detail-acquired-button-bg);
+  --sg-button-primary-bg-pressed: var(--sg-map-detail-acquired-button-bg-pressed);
+  --sg-button-primary-fg: var(--sg-map-detail-acquired-button-fg);
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] {
