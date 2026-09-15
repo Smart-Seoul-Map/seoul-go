@@ -50,7 +50,7 @@ test.each([390, 1366])("%ipx에서 시트 위 콘텐츠는 모바일에만 표�
     <MapPlaceDetailPanel
       place={place}
       onClose={vi.fn()}
-      mobileAbovePanel={<div>담은 코스 1개</div>}
+      mobileAboveContent={<div>담은 코스 1개</div>}
     />
   );
   if (width === 390) {

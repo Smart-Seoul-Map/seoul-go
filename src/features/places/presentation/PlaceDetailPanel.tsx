@@ -18,7 +18,7 @@ export type PlaceDetailPanelProps = Pick<
   trigger?: ReactElement;
   footer?: ReactNode;
   headerLeading?: ReactNode;
-  mobileAbovePanel?: ReactNode;
+  mobileAboveContent?: ReactNode;
   children?: ReactNode;
   className?: string;
   mobileMaxHeight?: CSSProperties["maxHeight"];
@@ -50,13 +50,13 @@ function PlaceDetailPanelContent({
   place,
   footer,
   headerLeading,
-  mobileAbovePanel,
+  mobileAboveContent,
   children,
   className,
   style,
 }: Pick<
   PlaceDetailPanelProps,
-  "place" | "footer" | "headerLeading" | "mobileAbovePanel" | "children" | "className"
+  "place" | "footer" | "headerLeading" | "mobileAboveContent" | "children" | "className"
 > & {
   style: PlaceDetailPanelStyle;
 }): ReactElement {
@@ -74,8 +74,8 @@ function PlaceDetailPanelContent({
       className={["PlaceDetailPanel", className].filter(Boolean).join(" ")}
       style={style}
     >
-      {isBottomSheet && mobileAbovePanel && (
-        <div className="PlaceDetailPanelAbove">{mobileAbovePanel}</div>
+      {isBottomSheet && mobileAboveContent && (
+        <div className="PlaceDetailPanelAbove">{mobileAboveContent}</div>
       )}
       <AppResponsivePanel.Body className="PlaceDetailPanelBody">
         <PanelPlaceCard place={place} hasPanelHeader={!!headerLeading} />
@@ -96,7 +96,7 @@ export function PlaceDetailPanel({
   trigger,
   footer,
   headerLeading,
-  mobileAbovePanel,
+  mobileAboveContent,
   children,
   className,
   mobileMaxHeight,
@@ -131,7 +131,7 @@ export function PlaceDetailPanel({
         place={place}
         footer={footer}
         headerLeading={headerLeading}
-        mobileAbovePanel={mobileAbovePanel}
+        mobileAboveContent={mobileAboveContent}
         className={className}
         style={style}
       >

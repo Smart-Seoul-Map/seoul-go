@@ -16,7 +16,7 @@ export function ExplorationPlacePanel({
   return (
     <MapPlaceDetailPanel
       isStampAcquired={isStampAcquired}
-      mobileAbovePanel={<StampCourseSummary />}
+      mobileAboveContent={<StampCourseSummary />}
       place={{
         title: place.name,
         image: { src: place.imageUrl, alt: `${place.name} 대표 이미지` },

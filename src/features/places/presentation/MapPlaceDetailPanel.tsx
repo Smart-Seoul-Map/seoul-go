@@ -14,7 +14,7 @@ import "./map-place-detail-panel.css";
 export type MapPlaceDetailPanelProps = {
   place: Pick<PlaceDetailCardProps, "title" | "image">;
   isStampAcquired?: boolean;
-  mobileAbovePanel?: ReactNode;
+  mobileAboveContent?: ReactNode;
   onClose: () => void;
   onAddToCourse?: () => void;
 };
@@ -49,7 +49,7 @@ function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">):
 export function MapPlaceDetailPanel({
   place,
   isStampAcquired = false,
-  mobileAbovePanel,
+  mobileAboveContent,
   onClose,
   onAddToCourse,
 }: MapPlaceDetailPanelProps): ReactElement {
@@ -61,7 +61,7 @@ export function MapPlaceDetailPanel({
         if (!open) onClose();
       }}
       className="MapPlaceDetailPanel"
-      mobileAbovePanel={mobileAbovePanel}
+      mobileAboveContent={mobileAboveContent}
       place={{
         ...place,
         subtitle: "",
