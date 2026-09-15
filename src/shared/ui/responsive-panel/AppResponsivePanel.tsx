@@ -193,6 +193,7 @@ type MountedContentProps = AppResponsivePanelContentProps & {
 
 function MountedContent({
   title,
+  headerLeading,
   description,
   hideTitle = false,
   showCloseButton = true,
@@ -301,6 +302,7 @@ function MountedContent({
           </button>
         )}
         <header className="AppResponsivePanelHeader" data-hidden={hideTitle || undefined}>
+          {headerLeading}
           <h2 id={`${panel.id}-title`} className="AppResponsivePanelTitle">
             {title}
           </h2>
