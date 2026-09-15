@@ -336,6 +336,31 @@
   --sg-dialog-motion-exit-easing: var(--sg-motion-easing-exit);
   --sg-dialog-motion-enter-scale: 1.3;
 
+  /* Toast component tokens */
+  --sg-toast-viewport-bottom: var(--sg-spacing-6);
+  --sg-toast-viewport-padding-x: var(--sg-spacing-4);
+  --sg-toast-z-index: 1100;
+  --sg-toast-bg: var(--sg-color-bg-neutral-strong);
+  --sg-toast-fg: var(--sg-color-text-inverted);
+  --sg-toast-radius: var(--sg-radius-2);
+  --sg-toast-shadow: var(--sg-shadow-3);
+  --sg-toast-content-gap: var(--sg-spacing-3);
+  --sg-toast-max-width: min(100%, 360px);
+  --sg-toast-min-width: 240px;
+  --sg-toast-min-height: var(--sg-spacing-12);
+  --sg-toast-padding-x: var(--sg-spacing-4);
+  --sg-toast-padding-y: var(--sg-spacing-3);
+  --sg-toast-accent-width: var(--sg-spacing-1);
+  --sg-toast-success-accent: var(--sg-color-text-positive);
+  --sg-toast-error-accent: var(--sg-color-text-danger);
+  --sg-toast-message-font-size: var(--sg-typography-supporting-font-size);
+  --sg-toast-message-font-weight: var(--sg-font-weight-medium);
+  --sg-toast-message-line-height: var(--sg-typography-supporting-line-height);
+  --sg-toast-enter-duration: var(--sg-motion-duration-4);
+  --sg-toast-enter-easing: var(--sg-motion-easing-enter);
+  --sg-toast-enter-offset-y: var(--sg-spacing-3);
+  --sg-toast-enter-scale: 0.98;
+
   /* Responsive panel */
   --sg-breakpoint-sm: 480px;
   --sg-breakpoint-md: 768px;
@@ -411,4 +436,13 @@
   --sg-detail-description-min-height: 108px;
   --sg-detail-address-min-height: 96px;
   --sg-detail-location-icon-size: 41px;
+
+  /* Main map place detail */
+  --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
+  --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
+  --sg-map-detail-acquired-button-bg: var(--sg-v3-green-500);
+  --sg-map-detail-acquired-button-bg-pressed: var(--sg-v3-green-500);
+  --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);
+  --sg-map-detail-mobile-body-line-height: 1.5;
+  --sg-map-detail-mobile-image-ratio: 358 / 136;
 }

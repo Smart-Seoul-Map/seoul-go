@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type ReactElement } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 
 import "./ExplorationPage.css";
 
@@ -23,7 +23,15 @@ import { ExplorationMap } from "./ExplorationMap";
 import { ExplorationPlaceCard } from "./ExplorationPlaceCard";
 import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
 
+export type ExplorationPlacePanelProps = {
+  place: ExplorationPlaceMarkerSelection;
+  onClose: () => void;
+  onAddToCourse?: (place: ExplorationPlaceMarkerSelection) => void;
+};
+
 type ExplorationPageProps = {
+  mapFooter?: ReactNode;
+  renderPlacePanel?: (props: ExplorationPlacePanelProps) => ReactNode;
   districtId?: number;
   districtName?: string;
   initialCenter?: Coordinates;
@@ -36,6 +44,8 @@ type ExplorationPageProps = {
 };
 
 export function ExplorationPage({
+  mapFooter,
+  renderPlacePanel,
   districtId,
   districtName,
   initialCenter,
@@ -121,11 +131,18 @@ export function ExplorationPage({
             </li>
           ))}
         </ul>
-        {selectedPlace ? (
+        {mapFooter && <div className="exploration-map-footer">{mapFooter}</div>}
+        {selectedPlace &&
+          renderPlacePanel?.({
+            place: selectedPlace,
+            onAddToCourse: onAddPlaceToCourse ? handleAddPlaceToCourse : undefined,
+            onClose: clearSelectedPlace,
+          })}
+        {selectedPlace && !renderPlacePanel && (
           <div className="exploration-place-card-layer">
             <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
           </div>
-        ) : null}
+        )}
       </section>
     </main>
   );

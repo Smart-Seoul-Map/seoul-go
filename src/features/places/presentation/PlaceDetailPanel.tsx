@@ -17,6 +17,10 @@ export type PlaceDetailPanelProps = Pick<
   place: PlaceDetailCardProps;
   trigger?: ReactElement;
   footer?: ReactNode;
+  headerLeading?: ReactNode;
+  mobileAboveContent?: ReactNode;
+  children?: ReactNode;
+  className?: string;
   mobileMaxHeight?: CSSProperties["maxHeight"];
   mobileSnapPoints?: PanelSnapPoint[];
   mobileActiveSnapPoint?: PanelSnapPoint | null;
@@ -27,13 +31,16 @@ type PlaceDetailPanelStyle = CSSProperties & {
   "--place-detail-mobile-max-height"?: CSSProperties["maxHeight"];
 };
 
-function PanelPlaceCard({ place }: Pick<PlaceDetailPanelProps, "place">): ReactElement {
+function PanelPlaceCard({
+  place,
+  hasPanelHeader,
+}: Pick<PlaceDetailPanelProps, "place"> & { hasPanelHeader: boolean }): ReactElement {
   const presentation = useResponsivePanelPresentation();
   return (
     <PlaceDetailCard
       {...place}
       externalLink={undefined}
-      showHeader={presentation !== "bottom-sheet"}
+      showHeader={!hasPanelHeader && presentation !== "bottom-sheet"}
       subtitle={presentation === "bottom-sheet" ? "" : place.subtitle}
     />
   );
@@ -42,8 +49,15 @@ function PanelPlaceCard({ place }: Pick<PlaceDetailPanelProps, "place">): ReactE
 function PlaceDetailPanelContent({
   place,
   footer,
+  headerLeading,
+  mobileAboveContent,
+  children,
+  className,
   style,
-}: Pick<PlaceDetailPanelProps, "place" | "footer"> & {
+}: Pick<
+  PlaceDetailPanelProps,
+  "place" | "footer" | "headerLeading" | "mobileAboveContent" | "children" | "className"
+> & {
   style: PlaceDetailPanelStyle;
 }): ReactElement {
   const presentation = useResponsivePanelPresentation();
@@ -52,15 +66,20 @@ function PlaceDetailPanelContent({
   return (
     <AppResponsivePanel.Content
       title={place.title}
-      hideTitle={!isBottomSheet}
+      hideTitle={!isBottomSheet && !headerLeading}
+      headerLeading={headerLeading}
       showCloseButton={false}
       showHandle
       width="var(--sg-detail-width)"
-      className="PlaceDetailPanel"
+      className={["PlaceDetailPanel", className].filter(Boolean).join(" ")}
       style={style}
     >
+      {isBottomSheet && mobileAboveContent && (
+        <div className="PlaceDetailPanelAbove">{mobileAboveContent}</div>
+      )}
       <AppResponsivePanel.Body className="PlaceDetailPanelBody">
-        <PanelPlaceCard place={place} />
+        <PanelPlaceCard place={place} hasPanelHeader={!!headerLeading} />
+        {children}
       </AppResponsivePanel.Body>
       {(footer || place.externalLink) && (
         <AppResponsivePanel.Footer className="PlaceDetailPanelFooter">
@@ -76,6 +95,10 @@ export function PlaceDetailPanel({
   place,
   trigger,
   footer,
+  headerLeading,
+  mobileAboveContent,
+  children,
+  className,
   mobileMaxHeight,
   mobileSnapPoints,
   mobileActiveSnapPoint,
@@ -104,7 +127,16 @@ export function PlaceDetailPanel({
       }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}
-      <PlaceDetailPanelContent place={place} footer={footer} style={style} />
+      <PlaceDetailPanelContent
+        place={place}
+        footer={footer}
+        headerLeading={headerLeading}
+        mobileAboveContent={mobileAboveContent}
+        className={className}
+        style={style}
+      >
+        {children}
+      </PlaceDetailPanelContent>
     </AppResponsivePanel.Root>
   );
 }

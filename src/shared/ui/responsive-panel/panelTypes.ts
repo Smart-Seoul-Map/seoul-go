@@ -62,6 +62,7 @@ export type AppResponsivePanelTriggerProps = ComponentPropsWithRef<"button"> & {
 export type AppResponsivePanelCloseButtonProps = ComponentPropsWithRef<"button">;
 export type AppResponsivePanelContentProps = Omit<ComponentPropsWithoutRef<"section">, "title"> & {
   title: ReactNode;
+  headerLeading?: ReactNode;
   description?: ReactNode;
   hideTitle?: boolean;
   showCloseButton?: boolean;
