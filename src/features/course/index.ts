@@ -52,3 +52,4 @@ export {
   type StampCourseStoreState,
 } from "./application/stampCourseStore";
 export { stampCourseStore, useStampCourseStore } from "./application/useStampCourseStore";
+export { StampCourseSummary } from "./presentation/StampCourseSummary";
