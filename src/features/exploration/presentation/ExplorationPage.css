@@ -11,6 +11,18 @@
   position: relative;
 }
 
+.exploration-map-footer {
+  position: absolute;
+  left: var(--sg-spacing-6);
+  bottom: calc(var(--sg-spacing-6) + var(--sg-safe-area-bottom));
+  max-width: calc(100% - var(--sg-spacing-12));
+  z-index: 4;
+}
+
+body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-map-footer {
+  visibility: hidden;
+}
+
 .exploration-district-status {
   left: 50%;
   pointer-events: none;
@@ -158,6 +170,15 @@
 }
 
 @media (max-width: 860px) {
+  .exploration-map-footer {
+    left: var(--sg-spacing-4);
+    bottom: calc(
+      var(--sg-spacing-6) + var(--sg-spacing-16) + var(--sg-spacing-8) + var(--sg-spacing-4) +
+        var(--sg-safe-area-bottom)
+    );
+    max-width: calc(100% - var(--sg-spacing-8));
+  }
+
   .exploration-district-status {
     max-width: calc(100% - var(--sg-spacing-6));
     top: var(--sg-spacing-4);

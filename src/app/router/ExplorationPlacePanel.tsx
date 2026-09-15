@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { useStampCourseStore } from "@features/course";
+import { StampCourseSummary, useStampCourseStore } from "@features/course";
 import type { ExplorationPlacePanelProps } from "@features/exploration";
 import { MapPlaceDetailPanel } from "@features/places";
 
@@ -16,6 +16,7 @@ export function ExplorationPlacePanel({
   return (
     <MapPlaceDetailPanel
       isStampAcquired={isStampAcquired}
+      mobileAbovePanel={<StampCourseSummary />}
       place={{
         title: place.name,
         image: { src: place.imageUrl, alt: `${place.name} 대표 이미지` },

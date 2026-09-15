@@ -30,6 +30,7 @@ export type ExplorationPlacePanelProps = {
 };
 
 type ExplorationPageProps = {
+  mapFooter?: ReactNode;
   renderPlacePanel?: (props: ExplorationPlacePanelProps) => ReactNode;
   districtId?: number;
   districtName?: string;
@@ -43,6 +44,7 @@ type ExplorationPageProps = {
 };
 
 export function ExplorationPage({
+  mapFooter,
   renderPlacePanel,
   districtId,
   districtName,
@@ -129,6 +131,7 @@ export function ExplorationPage({
             </li>
           ))}
         </ul>
+        {mapFooter && <div className="exploration-map-footer">{mapFooter}</div>}
         {selectedPlace &&
           renderPlacePanel?.({
             place: selectedPlace,

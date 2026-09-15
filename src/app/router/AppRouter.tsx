@@ -12,6 +12,7 @@ import { PATH, parseExplorationSpawnCenter } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
 import { getLine2StationById } from "@features/entry-exploration";
+import { StampCourseSummary } from "@features/course";
 import {
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
@@ -69,6 +70,7 @@ function DistrictExplorationRouteContent({
   return (
     <ExplorationPage
       districtId={target?.districtId}
+      mapFooter={<StampCourseSummary />}
       districtName={target?.districtName}
       initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
@@ -92,6 +94,7 @@ function StationExplorationRouteContent({
   return (
     <ExplorationPage
       initialCenter={target.center}
+      mapFooter={<StampCourseSummary />}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       renderPlacePanel={(props) => <ExplorationPlacePanel key={props.place.id} {...props} />}
