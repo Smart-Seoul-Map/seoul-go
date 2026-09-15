@@ -118,7 +118,14 @@
   overflow-wrap: anywhere;
 }
 
+.MapPlaceDetailAddButton[data-acquired="true"] {
+  --sg-button-primary-bg: var(--sg-v3-green-500);
+  --sg-button-primary-bg-pressed: var(--sg-v3-green-500);
+  --sg-button-primary-fg: var(--sg-color-text-inverted);
+}
+
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] {
+  overflow: visible;
   --place-detail-gutter: var(--sg-spacing-4);
   --place-detail-gap: var(--sg-spacing-3);
   --sg-typography-detail-body-font-size: var(--sg-font-size-4);
@@ -126,7 +133,22 @@
   --sg-typography-detail-title-font-size: var(--sg-font-size-7);
 }
 
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"]:has(.PlaceDetailPanelAbove) {
+  max-height: min(
+    var(--sg-panel-sheet-max-height),
+    calc(100dvh - var(--sg-spacing-16) - var(--sg-safe-area-top))
+  );
+}
+
+.MapPlaceDetailPanel .PlaceDetailPanelAbove {
+  position: absolute;
+  bottom: calc(100% + var(--sg-spacing-2));
+  left: var(--sg-spacing-4);
+  max-width: calc(100% - var(--sg-spacing-8));
+}
+
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
   gap: var(--place-detail-gap);
   padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
 }

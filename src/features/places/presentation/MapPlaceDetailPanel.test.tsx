@@ -44,6 +44,23 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(onClose).toHaveBeenCalledOnce();
 });
 
+test.each([390, 1366])("%ipx에서 시트 위 콘텐츠는 모바일에만 표시한다", (width) => {
+  resize(width);
+  render(
+    <MapPlaceDetailPanel
+      place={place}
+      onClose={vi.fn()}
+      mobileAbovePanel={<div>담은 코스 1개</div>}
+    />
+  );
+  if (width === 390) {
+    expect(screen.getByText("담은 코스 1개").closest(".PlaceDetailPanelAbove")).not.toBeNull();
+    expect(screen.getByText("담은 코스 1개").closest(".AppResponsivePanelBody")).toBeNull();
+  } else {
+    expect(screen.queryByText("담은 코스 1개")).not.toBeInTheDocument();
+  }
+});
+
 test("모바일에서 50%, 90%를 순환하고 이미지 오류 시 대체 이미지를 표시한다", () => {
   resize(390);
   render(<MapPlaceDetailPanel place={place} onClose={vi.fn()} />);

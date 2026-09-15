@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 import { buildExternalSearchUrl } from "@shared/lib/externalSearch/externalSearchUrl";
 import { AppBadge } from "@shared/ui/badge";
@@ -14,6 +14,7 @@ import "./map-place-detail-panel.css";
 export type MapPlaceDetailPanelProps = {
   place: Pick<PlaceDetailCardProps, "title" | "image">;
   isStampAcquired?: boolean;
+  mobileAbovePanel?: ReactNode;
   onClose: () => void;
   onAddToCourse?: () => void;
 };
@@ -48,6 +49,7 @@ function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">):
 export function MapPlaceDetailPanel({
   place,
   isStampAcquired = false,
+  mobileAbovePanel,
   onClose,
   onAddToCourse,
 }: MapPlaceDetailPanelProps): ReactElement {
@@ -59,6 +61,7 @@ export function MapPlaceDetailPanel({
         if (!open) onClose();
       }}
       className="MapPlaceDetailPanel"
+      mobileAbovePanel={mobileAbovePanel}
       place={{
         ...place,
         subtitle: "",
@@ -68,12 +71,13 @@ export function MapPlaceDetailPanel({
       footer={
         <AppButton
           className="MapPlaceDetailAddButton"
+          data-acquired={isStampAcquired}
           variant="primary"
           size="lg"
           disabled={!onAddToCourse}
           onClick={onAddToCourse}
         >
-          스탬프/코스 추가
+          {isStampAcquired ? "스탬프/코스 완료" : "스탬프/코스 추가"}
         </AppButton>
       }
     >
