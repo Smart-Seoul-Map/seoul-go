@@ -29,6 +29,7 @@ import {
 } from "./useExplorationRoutePlaces";
 import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
+import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
 
 type ExplorationRouteProps = {
   target?: ExplorationTarget | null;
@@ -72,6 +73,7 @@ function DistrictExplorationRouteContent({
       initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      renderPlacePanel={(props) => <ExplorationPlacePanel key={props.place.id} {...props} />}
       themeProgressItems={themeProgressItems}
     />
   );
@@ -92,6 +94,7 @@ function StationExplorationRouteContent({
       initialCenter={target.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      renderPlacePanel={(props) => <ExplorationPlacePanel key={props.place.id} {...props} />}
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />

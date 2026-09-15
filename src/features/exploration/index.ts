@@ -1,4 +1,5 @@
 export { ExplorationPage } from "./presentation/ExplorationPage";
+export type { ExplorationPlacePanelProps } from "./presentation/ExplorationPage";
 export { ExplorationMap } from "./presentation/ExplorationMap";
 export { CharacterModelOverlay } from "./presentation/CharacterModelOverlay";
 export {

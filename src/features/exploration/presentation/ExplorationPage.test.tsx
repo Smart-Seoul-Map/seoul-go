@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import type { ReactElement } from "react";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
@@ -116,6 +116,31 @@ describe("ExplorationPage", () => {
 
     expect(screen.getByText("1/3")).toBeInTheDocument();
     expect(screen.getByText("1/2")).toBeInTheDocument();
+  });
+
+  test("도착한 장소와 코스 추가, 닫기 콜백을 주입된 패널에 전달한다", () => {
+    const onAddPlaceToCourse = vi.fn(() => "added" as const);
+    renderExplorationPage(
+      <ExplorationPage
+        onAddPlaceToCourse={onAddPlaceToCourse}
+        renderPlacePanel={({ place, onAddToCourse, onClose }) => (
+          <section role="dialog" aria-label={place.name}>
+            <button onClick={() => onAddToCourse?.(place)}>스탬프/코스 추가</button>
+            <button onClick={onClose}>닫기</button>
+          </section>
+        )}
+        themeProgressItems={themeProgressItems}
+      />
+    );
+    const place = { ...createPlaceMarkerSelection(), name: "해방촌 신흥시장" };
+    act(() => explorationMapMock.latestProps?.onPlaceMarkerSelect?.(place));
+
+    const panel = screen.getByRole("dialog", { name: place.name });
+    fireEvent.click(within(panel).getByRole("button", { name: "스탬프/코스 추가" }));
+    expect(onAddPlaceToCourse).toHaveBeenCalledWith(place);
+    fireEvent.click(within(panel).getByRole("button", { name: "닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(visitedPlaceStore.getState().placeIds).toContain(place.id);
   });
 });
 
