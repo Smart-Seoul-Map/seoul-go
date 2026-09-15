@@ -20,6 +20,7 @@ import {
   createStationExplorationTarget,
   parseDistrictExplorationTargetIdParam,
   type DistrictExplorationTarget,
+  type ExplorationPlacePanelProps as ExplorationPlacePanelRenderProps,
   type ExplorationTarget,
   type StationExplorationTarget,
 } from "@features/exploration";
@@ -31,6 +32,13 @@ import {
 import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
+
+const explorationPageSlots = {
+  mapFooter: <StampCourseSummary />,
+  renderPlacePanel: (props: ExplorationPlacePanelRenderProps) => (
+    <ExplorationPlacePanel key={props.place.id} {...props} />
+  ),
+};
 
 type ExplorationRouteProps = {
   target?: ExplorationTarget | null;
@@ -70,12 +78,11 @@ function DistrictExplorationRouteContent({
   return (
     <ExplorationPage
       districtId={target?.districtId}
-      mapFooter={<StampCourseSummary />}
+      {...explorationPageSlots}
       districtName={target?.districtName}
       initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
-      renderPlacePanel={(props) => <ExplorationPlacePanel key={props.place.id} {...props} />}
       themeProgressItems={themeProgressItems}
     />
   );
@@ -94,10 +101,9 @@ function StationExplorationRouteContent({
   return (
     <ExplorationPage
       initialCenter={target.center}
-      mapFooter={<StampCourseSummary />}
+      {...explorationPageSlots}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
-      renderPlacePanel={(props) => <ExplorationPlacePanel key={props.place.id} {...props} />}
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />
