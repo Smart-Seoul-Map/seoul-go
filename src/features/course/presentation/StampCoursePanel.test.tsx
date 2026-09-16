@@ -74,11 +74,11 @@ test("복원한 코스로 시작하고 사용자가 높이를 바꾼 후에도 �
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
 });
 
-test("닫기는 저장 내용을 유지하고 푸터 동작은 아직 비활성 상태다", () => {
+test("닫기는 저장 내용을 유지하고 미연결 푸터 동작은 아직 비활성 상태다", () => {
   savePlaces(1);
   const onClose = vi.fn();
   render(<StampCoursePanel onClose={onClose} />);
-  for (const name of ["카카오 도보길찾기", "네이버 도보길찾기", "이미지 저장", "링크 공유"]) {
+  for (const name of ["네이버 도보길찾기", "이미지 저장", "링크 공유"]) {
     expect(screen.getByRole("button", { name })).toHaveAttribute("aria-disabled", "true");
   }
   fireEvent.click(screen.getByRole("button", { name: "닫기" }));
@@ -86,9 +86,10 @@ test("닫기는 저장 내용을 유지하고 푸터 동작은 아직 비활성 
   expect(stampCourseStore.getState().places).toHaveLength(1);
 });
 
-test("빈 코스는 안내 문구 없이 푸터 전체를 비활성화하고 저장 개수 변경을 반영한다", () => {
+test("빈 코스는 안내 문구 없이 미연결 푸터를 비활성화하고 저장 개수 변경을 반영한다", () => {
   render(<StampCoursePanel onClose={vi.fn()} />);
-  const footerButtons = () => document.querySelectorAll(".StampCourseFooter button");
+  const footerButtons = () =>
+    document.querySelectorAll('.StampCourseFooter button:not([data-action="kakao"])');
   for (const button of footerButtons()) expect(button).toBeDisabled();
   expect(screen.getByRole("button", { name: "편집" })).toBeDisabled();
   expect(screen.queryByText("아직 담은 코스가 없어요.")).not.toBeInTheDocument();
@@ -183,7 +184,9 @@ test("마지막 장소 개별 삭제 후에도 실행 취소가 가능하고 높
   fireEvent.click(screen.getByRole("button", { name: "저장된 장소 1 삭제" }));
   expect(screen.getByRole("button", { name: "전체 삭제" })).toBeDisabled();
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
-  for (const button of document.querySelectorAll(".StampCourseFooter button"))
+  for (const button of document.querySelectorAll(
+    '.StampCourseFooter button:not([data-action="kakao"])'
+  ))
     expect(button).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "실행 취소" }));
   expect(screen.getByRole("button", { name: "저장된 장소 1 삭제" })).toBeInTheDocument();
@@ -208,6 +211,33 @@ test("실행 취소 전에 코스가 가득 차면 기존 제한을 유지하고
   expect(
     screen.getByText("이미 담긴 장소이거나 코스가 가득 차 복구할 수 없어요")
   ).toBeInTheDocument();
+});
+
+test.each([0, 1])("코스가 %i개면 카카오 이동 대신 최소 개수 안내를 표시한다", (count) => {
+  savePlaces(count);
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  render(<StampCoursePanel onClose={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "카카오 도보길찾기" }));
+  expect(screen.getByText("도보길찾기는 장소를 2개 이상 담아주세요")).toBeInTheDocument();
+  expect(open).not.toHaveBeenCalled();
+});
+
+test("카카오 길찾기는 변경된 코스 순서대로 새 탭에서 연다", () => {
+  savePlaces(3);
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  render(<StampCoursePanel onClose={vi.fn()} />);
+  act(() => stampCourseStore.getState().reorderPlaces({ fromIndex: 0, toIndex: 2 }));
+  const button = screen.getByRole("button", { name: "카카오 도보길찾기" });
+  expect(button).not.toHaveAttribute("aria-disabled", "true");
+  fireEvent.click(button);
+  const points = [2, 3, 1].map(
+    (number) => `${encodeURIComponent(`저장된 장소 ${number}`)},37.5,127`
+  );
+  expect(open).toHaveBeenCalledWith(
+    `https://map.kakao.com/link/by/walk/${points.join("/")}`,
+    "_blank",
+    "noopener,noreferrer"
+  );
 });
 
 function prepareDrag() {

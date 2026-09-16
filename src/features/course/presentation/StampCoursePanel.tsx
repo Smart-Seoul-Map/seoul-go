@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from "react";
 
 import { AppButton, AppTextButton } from "@shared/ui/button";
+import { useAppToast } from "@shared/ui/toast";
 import {
   AppResponsivePanel,
   FLOATING_PANEL_SIDE_OPTIONS,
@@ -11,6 +12,7 @@ import {
 
 import { useStampCourseStore } from "../application/useStampCourseStore";
 import { MAX_STAMP_COURSE_PLACES } from "../domain/stampCourse";
+import { createKakaoWalkRouteUrl } from "../domain/stampCourseKakaoWalkUrl";
 import { StampCourseBoard } from "./StampCourseBoard";
 import { useStampCourseEditing } from "./useStampCourseEditing";
 import "./stamp-course-panel.css";
@@ -25,18 +27,18 @@ type StampCoursePanelProps = Pick<
 
 type StampCourseFooterProps = {
   isEmpty: boolean;
+  onKakaoWalk: () => void;
 };
 
-function StampCourseFooter({ isEmpty }: StampCourseFooterProps): ReactElement {
+function StampCourseFooter({ isEmpty, onKakaoWalk }: StampCourseFooterProps): ReactElement {
   return (
     <AppResponsivePanel.Footer className="StampCourseFooter">
       <AppButton
         className="StampCourseAction"
         data-action="kakao"
-        disabled={isEmpty}
+        onClick={onKakaoWalk}
         aria-label="카카오 도보길찾기"
         title="카카오 도보길찾기"
-        aria-disabled="true"
       >
         <span className="StampCourseActionIcon" data-icon="external" aria-hidden="true" />
       </AppButton>
@@ -81,10 +83,24 @@ export function StampCoursePanel({
   returnFocus,
 }: StampCoursePanelProps): ReactElement {
   const places = useStampCourseStore((state) => state.places);
+  const { showToast } = useAppToast();
   const editing = useStampCourseEditing(open, onClose);
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(
     () => FLOATING_PANEL_SHEET_OPTIONS.snapPoints[places.length <= 2 ? 0 : 1]
   );
+
+  const handleKakaoWalk = () => {
+    const result = createKakaoWalkRouteUrl(places);
+    if (result.status === "not-enough-places") {
+      showToast({ message: "도보길찾기는 장소를 2개 이상 담아주세요" });
+      return;
+    }
+    if (result.status !== "created") {
+      showToast({ message: "코스 정보를 확인해 주세요. 길찾기를 열 수 없어요" });
+      return;
+    }
+    window.open(result.url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <AppResponsivePanel.Root
@@ -134,7 +150,7 @@ export function StampCoursePanel({
             onReorder={editing.handleReorderPlaces}
           />
         </AppResponsivePanel.Body>
-        <StampCourseFooter isEmpty={places.length === 0} />
+        <StampCourseFooter isEmpty={places.length === 0} onKakaoWalk={handleKakaoWalk} />
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>
   );
