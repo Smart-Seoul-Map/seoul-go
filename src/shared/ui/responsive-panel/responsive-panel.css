@@ -74,7 +74,11 @@
   max-width: var(--sg-panel-sheet-max-width);
   margin-inline: auto;
   height: var(--panel-drag-height, var(--panel-snap-height, auto));
-  max-height: var(--sg-panel-sheet-max-height);
+  max-height: min(
+    var(--sg-panel-sheet-max-height),
+    var(--panel-custom-sheet-max-height, 100dvh),
+    calc(100dvh - var(--sg-panel-floating-gap) - env(safe-area-inset-top, 0px))
+  );
   border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
 }
 .AppResponsivePanelLayer[data-appearance="floating"] {
@@ -115,6 +119,33 @@
   min-height: var(--sg-panel-header-min-height);
   padding: calc(var(--sg-panel-header-padding-top) + env(safe-area-inset-top, 0px))
     var(--sg-panel-padding-x) var(--sg-panel-header-padding-bottom);
+}
+.AppResponsivePanelIconClose {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--sg-icon-button-size-nav);
+  height: var(--sg-icon-button-size-nav);
+  padding: 0;
+  border: 0;
+  border-radius: var(--sg-radius-full);
+  color: var(--sg-color-text-muted);
+  background: var(--sg-color-bg-transparent);
+  cursor: pointer;
+}
+.AppResponsivePanelIconClose:hover {
+  background: var(--sg-color-bg-transparent-pressed);
+}
+.AppResponsivePanelIconClose:focus-visible,
+.AppResponsivePanelBody:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: calc(-1 * var(--sg-focus-ring-offset));
+}
+.AppResponsivePanelCloseIcon {
+  width: var(--sg-spacing-7);
+  height: var(--sg-spacing-7);
+  background: currentColor;
+  mask: url("../../../assets/close.svg") center / contain no-repeat;
 }
 .AppResponsivePanelContent[data-has-close] .AppResponsivePanelHeader {
   padding-right: calc(var(--sg-panel-padding-x) + var(--sg-panel-close-size));

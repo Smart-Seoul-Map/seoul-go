@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { AppButton } from "../button";
@@ -38,6 +38,43 @@ afterEach(() => {
 });
 
 describe("AppResponsivePanel", () => {
+  test("retains closing content until exit completes and restores explicit focus", async () => {
+    const onExitComplete = vi.fn();
+    const target = document.createElement("button");
+    document.body.append(target);
+    target.focus();
+    const returnFocus = vi.fn(() => target);
+    const panel = (open: boolean) => (
+      <AppResponsivePanel.Root open={open} modal={false}>
+        <AppResponsivePanel.Content
+          title="Retained panel"
+          style={{ animationDuration: "0.2s" }}
+          onExitComplete={onExitComplete}
+          returnFocus={returnFocus}
+        />
+      </AppResponsivePanel.Root>
+    );
+    const { rerender } = render(panel(true));
+    rerender(panel(false));
+    const closing = document.querySelector('.AppResponsivePanelContent[data-state="closed"]');
+    expect(closing).not.toBeNull();
+    expect(onExitComplete).not.toHaveBeenCalled();
+    expect(returnFocus).toHaveBeenCalledOnce();
+    expect(document.activeElement).toBe(target);
+    fireEvent.animationEnd(closing!);
+    await waitFor(() => expect(onExitComplete).toHaveBeenCalledOnce());
+    expect(document.querySelector(".AppResponsivePanelContent")).toBeNull();
+    target.remove();
+  });
+
+  test.each([767, 768, 859, 860, 861])("uses the joystick boundary at width %i", (width) => {
+    resize(width);
+    render(<Panel defaultOpen />);
+    expect(screen.getByRole("dialog").dataset.presentation).toBe(
+      width <= 860 ? "bottom-sheet" : "side-panel"
+    );
+  });
+
   test("floating appearance preserves modal behavior and content across mobile resizing", () => {
     const { container } = render(<Panel sidePanelRootProps={{ presentation: "floating" }} />);
     const trigger = screen.getByRole("button", { name: "Open panel" });
