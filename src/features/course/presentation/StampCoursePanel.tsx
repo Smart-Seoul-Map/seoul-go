@@ -1,0 +1,156 @@
+import { useState, type ReactElement } from "react";
+
+import { AppButton } from "@shared/ui/button";
+import {
+  AppResponsivePanel,
+  FLOATING_PANEL_SIDE_OPTIONS,
+  FLOATING_PANEL_SHEET_OPTIONS,
+  type AppResponsivePanelContentProps,
+  type PanelSnapPoint,
+} from "@shared/ui/responsive-panel";
+
+import { useStampCourseStore } from "../application/useStampCourseStore";
+import { MAX_STAMP_COURSE_PLACES } from "../domain/stampCourse";
+import { createStampCourseSlots } from "../domain/stampCourseSlots";
+import "./stamp-course-panel.css";
+
+type StampCoursePanelProps = Pick<
+  AppResponsivePanelContentProps,
+  "onExitComplete" | "returnFocus"
+> & {
+  open?: boolean;
+  onClose: () => void;
+};
+
+type StampCourseFooterProps = {
+  isEmpty: boolean;
+};
+
+function StampCourseFooter({ isEmpty }: StampCourseFooterProps): ReactElement {
+  return (
+    <AppResponsivePanel.Footer className="StampCourseFooter">
+      <AppButton
+        className="StampCourseAction"
+        data-action="kakao"
+        disabled={isEmpty}
+        aria-label="카카오 도보길찾기"
+        title="카카오 도보길찾기"
+        aria-disabled="true"
+      >
+        <span className="StampCourseActionIcon" data-icon="external" aria-hidden="true" />
+      </AppButton>
+      <AppButton
+        className="StampCourseAction"
+        data-action="naver"
+        disabled={isEmpty}
+        aria-label="네이버 도보길찾기"
+        title="네이버 도보길찾기"
+        aria-disabled="true"
+      >
+        <span className="StampCourseActionIcon" data-icon="external" aria-hidden="true" />
+      </AppButton>
+      <AppButton
+        className="StampCourseAction"
+        data-action="save"
+        disabled={isEmpty}
+        aria-label="코스 이미지 저장"
+        aria-disabled="true"
+      >
+        <span className="StampCourseActionIcon" data-icon="download" aria-hidden="true" />
+        <span>
+          코스 이미지
+          <br />
+          저장
+        </span>
+      </AppButton>
+      <AppButton
+        className="StampCourseAction"
+        data-action="share"
+        disabled={isEmpty}
+        aria-label="코스 링크 공유"
+        aria-disabled="true"
+      >
+        <span className="StampCourseActionIcon" data-icon="link" aria-hidden="true" />
+        <span>
+          코스 링크
+          <br />
+          공유
+        </span>
+      </AppButton>
+    </AppResponsivePanel.Footer>
+  );
+}
+
+export function StampCoursePanel({
+  onClose,
+  open = true,
+  onExitComplete,
+  returnFocus,
+}: StampCoursePanelProps): ReactElement {
+  const places = useStampCourseStore((state) => state.places);
+  const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(
+    () => FLOATING_PANEL_SHEET_OPTIONS.snapPoints[places.length <= 2 ? 0 : 1]
+  );
+  const slots = createStampCourseSlots(places);
+
+  return (
+    <AppResponsivePanel.Root
+      open={open}
+      modal={false}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      sidePanelRootProps={FLOATING_PANEL_SIDE_OPTIONS}
+      bottomSheetRootProps={{
+        ...FLOATING_PANEL_SHEET_OPTIONS,
+        activeSnapPoint,
+        setActiveSnapPoint,
+      }}
+    >
+      <AppResponsivePanel.Content
+        title="담긴 코스"
+        onExitComplete={onExitComplete}
+        returnFocus={returnFocus}
+        headerClassName="StampCourseHeader"
+        headerTrailing={
+          <>
+            <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
+              {places.length}/{MAX_STAMP_COURSE_PLACES}
+            </span>
+            <AppResponsivePanel.CloseButton iconOnly />
+          </>
+        }
+        showCloseButton={false}
+        showHandle
+        className="StampCoursePanel"
+        width="var(--sg-detail-width)"
+      >
+        <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
+          <ol className="StampCourseBoard" aria-label="스탬프 코스">
+            {slots.map((slot) => (
+              <li
+                key={slot.index}
+                className="StampCourseSlot"
+                data-filled={slot.status === "filled"}
+                aria-label={
+                  slot.place
+                    ? `${slot.index + 1}번 ${slot.place.name}`
+                    : `${slot.index + 1}번 빈 스탬프`
+                }
+              >
+                <span className="StampCourseSeal" aria-hidden="true">
+                  <span>GO</span>
+                  <small>STAMP</small>
+                </span>
+                <span className="StampCoursePlaceName" title={slot.place?.name}>
+                  {slot.place?.name ?? ""}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </AppResponsivePanel.Body>
+        <StampCourseFooter isEmpty={places.length === 0} />
+      </AppResponsivePanel.Content>
+    </AppResponsivePanel.Root>
+  );
+}
