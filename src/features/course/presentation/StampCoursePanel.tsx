@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from "react";
 
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppTextButton } from "@shared/ui/button";
 import {
   AppResponsivePanel,
   FLOATING_PANEL_SIDE_OPTIONS,
@@ -11,7 +11,8 @@ import {
 
 import { useStampCourseStore } from "../application/useStampCourseStore";
 import { MAX_STAMP_COURSE_PLACES } from "../domain/stampCourse";
-import { createStampCourseSlots } from "../domain/stampCourseSlots";
+import { StampCourseBoard } from "./StampCourseBoard";
+import { useStampCourseEditing } from "./useStampCourseEditing";
 import "./stamp-course-panel.css";
 
 type StampCoursePanelProps = Pick<
@@ -53,29 +54,21 @@ function StampCourseFooter({ isEmpty }: StampCourseFooterProps): ReactElement {
         className="StampCourseAction"
         data-action="save"
         disabled={isEmpty}
-        aria-label="코스 이미지 저장"
+        aria-label="이미지 저장"
         aria-disabled="true"
       >
         <span className="StampCourseActionIcon" data-icon="download" aria-hidden="true" />
-        <span>
-          코스 이미지
-          <br />
-          저장
-        </span>
+        <span>이미지 저장</span>
       </AppButton>
       <AppButton
         className="StampCourseAction"
         data-action="share"
         disabled={isEmpty}
-        aria-label="코스 링크 공유"
+        aria-label="링크 공유"
         aria-disabled="true"
       >
         <span className="StampCourseActionIcon" data-icon="link" aria-hidden="true" />
-        <span>
-          코스 링크
-          <br />
-          공유
-        </span>
+        <span>링크 공유</span>
       </AppButton>
     </AppResponsivePanel.Footer>
   );
@@ -88,10 +81,10 @@ export function StampCoursePanel({
   returnFocus,
 }: StampCoursePanelProps): ReactElement {
   const places = useStampCourseStore((state) => state.places);
+  const editing = useStampCourseEditing(open, onClose);
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(
     () => FLOATING_PANEL_SHEET_OPTIONS.snapPoints[places.length <= 2 ? 0 : 1]
   );
-  const slots = createStampCourseSlots(places);
 
   return (
     <AppResponsivePanel.Root
@@ -117,6 +110,14 @@ export function StampCoursePanel({
             <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
               {places.length}/{MAX_STAMP_COURSE_PLACES}
             </span>
+            <AppTextButton
+              size="sm"
+              variant={editing.isEditing ? "danger" : "neutral"}
+              disabled={places.length === 0}
+              onClick={editing.isEditing ? editing.handleClearPlaces : editing.startEditing}
+            >
+              {editing.isEditing ? "전체 삭제" : "편집"}
+            </AppTextButton>
             <AppResponsivePanel.CloseButton iconOnly />
           </>
         }
@@ -126,28 +127,12 @@ export function StampCoursePanel({
         width="var(--sg-detail-width)"
       >
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
-          <ol className="StampCourseBoard" aria-label="스탬프 코스">
-            {slots.map((slot) => (
-              <li
-                key={slot.index}
-                className="StampCourseSlot"
-                data-filled={slot.status === "filled"}
-                aria-label={
-                  slot.place
-                    ? `${slot.index + 1}번 ${slot.place.name}`
-                    : `${slot.index + 1}번 빈 스탬프`
-                }
-              >
-                <span className="StampCourseSeal" aria-hidden="true">
-                  <span>GO</span>
-                  <small>STAMP</small>
-                </span>
-                <span className="StampCoursePlaceName" title={slot.place?.name}>
-                  {slot.place?.name ?? ""}
-                </span>
-              </li>
-            ))}
-          </ol>
+          <StampCourseBoard
+            places={places}
+            isEditing={open && editing.isEditing}
+            onRemove={editing.handleRemovePlace}
+            onReorder={editing.handleReorderPlaces}
+          />
         </AppResponsivePanel.Body>
         <StampCourseFooter isEmpty={places.length === 0} />
       </AppResponsivePanel.Content>

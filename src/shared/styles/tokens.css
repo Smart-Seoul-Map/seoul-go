@@ -449,11 +449,25 @@
 
   /* Stamp course panel */
   --sg-course-action-size: var(--sg-spacing-12);
+  --sg-course-title-size: var(--sg-font-size-9);
+  --sg-course-count-size: var(--sg-font-size-6);
+  --sg-course-action-label-size: var(--sg-font-size-4);
+  --sg-course-action-padding-y: var(--sg-spacing-0_5);
+  --sg-course-action-padding-x: var(--sg-spacing-1);
+  --sg-course-content-gap: var(--sg-spacing-3);
+  --sg-course-footer-group-gap: var(--sg-spacing-4);
   --sg-course-kakao-bg: var(--sg-v3-yellow-500);
   --sg-course-naver-bg: var(--sg-v3-green-500);
   --sg-course-save-bg: var(--sg-color-bg-brand);
   --sg-course-share-bg: var(--sg-v3-blue-600);
   --sg-course-seal-bg: var(--sg-color-bg-brand);
+  --sg-course-seal-empty-bg: var(--sg-color-bg-floating);
+  --sg-course-seal-empty-fg: var(--sg-color-text-info);
+  --sg-course-seal-stroke: var(--sg-color-text-muted);
+  --sg-course-place-name-size: var(--sg-font-size-2);
+  --sg-course-remove-bg: var(--sg-color-bg-neutral-strong);
+  --sg-course-remove-bg-pressed: var(--sg-v3-ink-700);
+  --sg-course-remove-fg: var(--sg-color-text-inverted);
   --sg-course-route-color: var(--sg-v3-blue-500);
   --sg-course-board-top: color-mix(in srgb, var(--sg-v3-pink-500) 25%, var(--sg-color-bg-floating));
   --sg-course-board-bottom: color-mix(
