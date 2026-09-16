@@ -19,7 +19,10 @@ export type MapPlaceDetailPanelProps = Pick<
   "onExitComplete" | "returnFocus"
 > & {
   open?: boolean;
-  place: Pick<PlaceDetailCardProps, "title" | "image"> & { selectionYear?: number | string };
+  place: Pick<PlaceDetailCardProps, "title" | "image"> & {
+    description?: string;
+    selectionYear?: number | string;
+  };
   isStampAcquired?: boolean;
   mobileAboveContent?: ReactNode;
   onClose: () => void;
@@ -29,7 +32,12 @@ export type MapPlaceDetailPanelProps = Pick<
 function PlaceDetailHeaderMeta({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
   return (
     <div className="MapPlaceDetailMeta">
-      <AppBadge tone="positive">{place.selectionYear ?? "방문 완료"}</AppBadge>
+      {place.selectionYear !== undefined && (
+        <span className="MapPlaceDetailYear" data-year={place.selectionYear}>
+          <AppBadge>{place.selectionYear}</AppBadge>
+        </span>
+      )}
+      <AppBadge tone="positive">방문 완료</AppBadge>
     </div>
   );
 }
@@ -76,7 +84,7 @@ export function MapPlaceDetailPanel({
       place={{
         ...place,
         subtitle: "",
-        description: MAP_PLACE_DESCRIPTION,
+        description: place.description ?? MAP_PLACE_DESCRIPTION,
       }}
       headerTrailing={
         <>

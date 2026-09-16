@@ -76,3 +76,23 @@ test("코스가 가득 차서 추가에 실패하면 아직 획득 전을 유지
   );
   expect(stampCourseStore.getState().places).toHaveLength(MAX_STAMP_COURSE_PLACES);
 });
+
+test("서울에디션25 패널은 API 설명과 선정연도를 표시한다", () => {
+  render(
+    <ExplorationPlacePanel
+      place={{
+        ...place,
+        themeId: "1786321258890",
+        themeName: "서울에디션25",
+        description: "API에서 받은 장소별 설명",
+        selectionYear: 2026,
+      }}
+      onClose={() => {}}
+    />
+  );
+
+  expect(screen.getByText("API에서 받은 장소별 설명")).toBeInTheDocument();
+  expect(screen.getByText("2026")).toBeInTheDocument();
+  expect(screen.getByText("방문 완료")).toBeInTheDocument();
+  expect(screen.getByText("아직 획득 전")).toBeInTheDocument();
+});

@@ -27,12 +27,17 @@
   --sg-badge-shadow: none;
   display: flex;
   flex: none;
+  align-items: center;
+  gap: var(--sg-spacing-2);
   min-width: 0;
 }
 
-.MapPlaceDetailMeta .AppBadge[data-tone="positive"] {
+.MapPlaceDetailMeta .AppBadge {
   width: var(--sg-map-detail-header-badge-width);
   justify-content: center;
+}
+
+.MapPlaceDetailMeta .AppBadge[data-tone="positive"] {
   background: var(--sg-map-detail-visit-badge-bg);
   color: var(--sg-map-detail-visit-badge-fg);
 }
@@ -44,6 +49,23 @@
   flex: none;
   min-width: 0;
   margin-left: auto;
+}
+
+.MapPlaceDetailYear {
+  --edition-color: var(--sg-color-text-default);
+}
+
+.MapPlaceDetailYear[data-year="2025"] {
+  --edition-color: var(--sg-edition-year-2025);
+}
+
+.MapPlaceDetailYear[data-year="2026"] {
+  --edition-color: var(--sg-edition-year-2026);
+}
+
+.MapPlaceDetailYear .AppBadge {
+  background: var(--edition-color);
+  color: var(--sg-color-text-inverted);
 }
 
 .MapPlaceDetailSearch {
