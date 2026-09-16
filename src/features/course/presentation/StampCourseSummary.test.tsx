@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { stampCourseStore } from "../application/useStampCourseStore";
 import { createStampCourseStore } from "../application/stampCourseStore";
@@ -46,4 +46,13 @@ test("저장소에서 복원한 코스 개수를 표시한다", () => {
   stampCourseStore.setState({ places: restoredStore.getState().places });
   render(<StampCourseSummary />);
   expect(screen.getByRole("status")).toHaveTextContent("담은 코스 1개");
+});
+
+test("연결된 코스 보기 버튼으로 패널을 연다", () => {
+  const onOpen = vi.fn();
+  render(<StampCourseSummary onOpen={onOpen} />);
+  const button = screen.getByRole("button", { name: "코스 보기" });
+  expect(button).not.toHaveAttribute("aria-disabled");
+  fireEvent.click(button);
+  expect(onOpen).toHaveBeenCalledOnce();
 });
