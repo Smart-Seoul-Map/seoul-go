@@ -6,13 +6,14 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppToastProvider } from "@shared/ui/toast";
+import { AppResponsivePanel } from "@shared/ui/responsive-panel";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
 import { ExplorationPage } from "./ExplorationPage";
 
 type MockExplorationMapProps = {
-  onPlaceMarkerClear?: () => void;
+  onMapMoveRequest?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
 };
 
@@ -123,11 +124,17 @@ describe("ExplorationPage", () => {
     renderExplorationPage(
       <ExplorationPage
         onAddPlaceToCourse={onAddPlaceToCourse}
-        renderPlacePanel={({ place, onAddToCourse, onClose }) => (
-          <section role="dialog" aria-label={place.name}>
-            <button onClick={() => onAddToCourse?.(place)}>스탬프/코스 추가</button>
-            <button onClick={onClose}>닫기</button>
-          </section>
+        renderPlacePanel={({ place, onAddToCourse, onClose, open, onExitComplete }) => (
+          <AppResponsivePanel.Root open={open} skipAnimation>
+            <AppResponsivePanel.Content
+              title={place.name}
+              showCloseButton={false}
+              onExitComplete={onExitComplete}
+            >
+              <button onClick={() => onAddToCourse?.(place)}>스탬프/코스 추가</button>
+              <button onClick={onClose}>닫기</button>
+            </AppResponsivePanel.Content>
+          </AppResponsivePanel.Root>
         )}
         themeProgressItems={themeProgressItems}
       />
@@ -141,6 +148,51 @@ describe("ExplorationPage", () => {
     fireEvent.click(within(panel).getByRole("button", { name: "닫기" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(visitedPlaceStore.getState().placeIds).toContain(place.id);
+  });
+
+  test("지도와 장소 패널에서 코스를 열고 두 패널을 동시에 표시하지 않는다", () => {
+    renderExplorationPage(
+      <ExplorationPage
+        themeProgressItems={themeProgressItems}
+        renderMapFooter={(onOpen) => <button onClick={onOpen}>코스 보기</button>}
+        renderCoursePanel={({ onClose, open, onExitComplete }) => (
+          <AppResponsivePanel.Root open={open} skipAnimation>
+            <AppResponsivePanel.Content
+              title="담긴 코스"
+              showCloseButton={false}
+              onExitComplete={onExitComplete}
+            >
+              <button onClick={onClose}>코스 닫기</button>
+            </AppResponsivePanel.Content>
+          </AppResponsivePanel.Root>
+        )}
+        renderPlacePanel={({ onOpenCourse, open, onExitComplete }) => (
+          <AppResponsivePanel.Root open={open} skipAnimation>
+            <AppResponsivePanel.Content
+              title="장소 상세"
+              showCloseButton={false}
+              onExitComplete={onExitComplete}
+            >
+              <button onClick={onOpenCourse}>장소에서 코스 보기</button>
+            </AppResponsivePanel.Content>
+          </AppResponsivePanel.Root>
+        )}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "코스 보기" }));
+    expect(screen.getByRole("dialog", { name: "담긴 코스" })).toBeInTheDocument();
+    act(() => explorationMapMock.latestProps?.onPlaceMarkerSelect?.(createPlaceMarkerSelection()));
+    expect(screen.queryByRole("dialog", { name: "담긴 코스" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "장소 상세" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "장소에서 코스 보기" }));
+    expect(screen.queryByRole("dialog", { name: "장소 상세" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "담긴 코스" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "코스 닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "코스 보기" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "코스 보기" }));
+    act(() => explorationMapMock.latestProps?.onMapMoveRequest?.());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
 

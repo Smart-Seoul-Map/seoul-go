@@ -8,6 +8,10 @@ export function ExplorationPlacePanel({
   place,
   onAddToCourse,
   onClose,
+  onOpenCourse,
+  open,
+  onExitComplete,
+  returnFocus,
 }: ExplorationPlacePanelProps): ReactElement {
   const isStampAcquired = useStampCourseStore((state) =>
     state.places.some((savedPlace) => savedPlace.id === place.id)
@@ -15,8 +19,11 @@ export function ExplorationPlacePanel({
 
   return (
     <MapPlaceDetailPanel
+      open={open}
+      onExitComplete={onExitComplete}
+      returnFocus={returnFocus}
       isStampAcquired={isStampAcquired}
-      mobileAboveContent={<StampCourseSummary />}
+      mobileAboveContent={<StampCourseSummary onOpen={onOpenCourse} />}
       place={{
         title: place.name,
         image: { src: place.imageUrl, alt: `${place.name} 대표 이미지` },

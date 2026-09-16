@@ -1,4 +1,12 @@
-import { useCallback, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 import "./ExplorationPage.css";
 
@@ -22,15 +30,25 @@ import { ExplorationDistrictStatusBadge } from "./ExplorationDistrictStatusBadge
 import { ExplorationMap } from "./ExplorationMap";
 import { ExplorationPlaceCard } from "./ExplorationPlaceCard";
 import { ExplorationThemePlaceCountBadge } from "./ExplorationThemePlaceCountBadge";
+import { useExplorationPanel } from "./useExplorationPanel";
 
-export type ExplorationPlacePanelProps = {
-  place: ExplorationPlaceMarkerSelection;
+export type ExplorationPanelLifecycleProps = {
+  open?: boolean;
+  onExitComplete?: () => void;
+  returnFocus?: () => HTMLElement | null;
   onClose: () => void;
+};
+
+export type ExplorationPlacePanelProps = ExplorationPanelLifecycleProps & {
+  place: ExplorationPlaceMarkerSelection;
+  onOpenCourse?: () => void;
   onAddToCourse?: (place: ExplorationPlaceMarkerSelection) => void;
 };
 
 type ExplorationPageProps = {
   mapFooter?: ReactNode;
+  renderMapFooter?: (onOpenCourse: () => void) => ReactNode;
+  renderCoursePanel?: (props: ExplorationPanelLifecycleProps) => ReactNode;
   renderPlacePanel?: (props: ExplorationPlacePanelProps) => ReactNode;
   districtId?: number;
   districtName?: string;
@@ -45,6 +63,8 @@ type ExplorationPageProps = {
 
 export function ExplorationPage({
   mapFooter,
+  renderMapFooter,
+  renderCoursePanel,
   renderPlacePanel,
   districtId,
   districtName,
@@ -55,25 +75,46 @@ export function ExplorationPage({
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const { showToast } = useAppToast();
-  const [selectedPlace, setSelectedPlace] = useState<ExplorationPlaceMarkerSelection | null>(null);
+  const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
+  const mapStageRef = useRef<HTMLElement | null>(null);
+  const content = panel.status === "closed" ? null : panel.content;
+  const selectedPlace = content?.type === "place" ? content.place : null;
+  const isCoursePanelOpen = content?.type === "course";
+  const isPanelOpen = panel.status === "open";
+  const isSwitching = panel.status === "closing" && panel.next !== null;
+  useEffect(() => {
+    if (panel.status === "closing" && content?.type === "place" && !renderPlacePanel) finishExit();
+  }, [panel.status, content?.type, renderPlacePanel, finishExit]);
   const visitedPlaceIds = useVisitedPlaceStore((state) => state.placeIds);
   const visitPlace = useVisitedPlaceStore((state) => state.visitPlace);
-  const selectedPlaceRef = useRef<ExplorationPlaceMarkerSelection | null>(null);
   const revealedPlaceIds = useMemo(() => new Set(visitedPlaceIds), [visitedPlaceIds]);
 
   const selectPlace = useCallback(
     (place: ExplorationPlaceMarkerSelection) => {
       visitPlace(place.id);
-      selectedPlaceRef.current = place;
-      setSelectedPlace(place);
+      openPanel({ type: "place", place });
     },
-    [visitPlace]
+    [visitPlace, openPanel]
   );
 
-  const clearSelectedPlace = useCallback(() => {
-    selectedPlaceRef.current = null;
-    setSelectedPlace(null);
-  }, []);
+  const openCoursePanel = () => {
+    if (!renderCoursePanel) return;
+    openPanel({ type: "course" });
+  };
+  const returnFocus = () => {
+    if (isSwitching) return null;
+    const stage = mapStageRef.current;
+    if (isCoursePanelOpen) {
+      return stage?.querySelector<HTMLElement>(".exploration-map-footer button") ?? stage;
+    }
+    return stage?.querySelector<HTMLElement>(".maplibregl-canvas") ?? stage;
+  };
+  const lifecycle = {
+    open: isPanelOpen,
+    onClose: closePanel,
+    onExitComplete: finishExit,
+    returnFocus,
+  };
 
   const displayedPlaceMarkers = useMemo(
     () => createRevealedPlaceMarkers({ placeMarkers, revealedPlaceIds }),
@@ -102,12 +143,12 @@ export function ExplorationPage({
 
   return (
     <main className="exploration-page" aria-label="서울 지도 탐색">
-      <section className="map-stage" aria-label="서울 지도">
+      <section className="map-stage" aria-label="서울 지도" ref={mapStageRef} tabIndex={-1}>
         <ExplorationMap
           districtId={districtId}
-          hasActivePlaceCard={selectedPlace !== null}
+          hasActivePanel={isPanelOpen || isSwitching}
           initialCenter={initialCenter}
-          onPlaceMarkerClear={clearSelectedPlace}
+          onMapMoveRequest={closePanel}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
           revealedPlaceIds={revealedPlaceIds}
@@ -131,18 +172,29 @@ export function ExplorationPage({
             </li>
           ))}
         </ul>
-        {mapFooter && <div className="exploration-map-footer">{mapFooter}</div>}
-        {selectedPlace &&
-          renderPlacePanel?.({
-            place: selectedPlace,
-            onAddToCourse: onAddPlaceToCourse ? handleAddPlaceToCourse : undefined,
-            onClose: clearSelectedPlace,
-          })}
-        {selectedPlace && !renderPlacePanel && (
-          <div className="exploration-place-card-layer">
-            <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
+        {(renderMapFooter || mapFooter) && (
+          <div
+            className="exploration-map-footer"
+            hidden={isCoursePanelOpen && (isPanelOpen || isSwitching)}
+          >
+            {renderMapFooter ? renderMapFooter(openCoursePanel) : mapFooter}
           </div>
         )}
+        <Fragment key={content?.instance}>
+          {isCoursePanelOpen && renderCoursePanel?.(lifecycle)}
+          {selectedPlace &&
+            renderPlacePanel?.({
+              ...lifecycle,
+              place: selectedPlace,
+              onAddToCourse: onAddPlaceToCourse ? handleAddPlaceToCourse : undefined,
+              onOpenCourse: renderCoursePanel ? openCoursePanel : undefined,
+            })}
+          {selectedPlace && isPanelOpen && !renderPlacePanel && (
+            <div className="exploration-place-card-layer">
+              <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
+            </div>
+          )}
+        </Fragment>
       </section>
     </main>
   );
