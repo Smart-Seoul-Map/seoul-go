@@ -37,8 +37,7 @@
   color: var(--sg-map-detail-visit-badge-fg);
 }
 
-.MapPlaceDetailSearch,
-.MapPlaceDetailClose {
+.MapPlaceDetailSearch {
   display: grid;
   place-items: center;
   flex: none;
@@ -55,31 +54,20 @@
   color: var(--sg-color-text-info);
 }
 
-.MapPlaceDetailClose {
-  color: var(--sg-color-text-muted);
-}
-
-.MapPlaceDetailSearch:hover,
-.MapPlaceDetailClose:hover {
+.MapPlaceDetailSearch:hover {
   background: var(--sg-color-bg-transparent-pressed);
 }
 
-.MapPlaceDetailSearch:focus-visible,
-.MapPlaceDetailClose:focus-visible {
+.MapPlaceDetailSearch:focus-visible {
   outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
   outline-offset: var(--sg-focus-ring-offset);
 }
 
-.MapPlaceDetailSearchIcon,
-.MapPlaceDetailCloseIcon {
+.MapPlaceDetailSearchIcon {
   width: var(--sg-spacing-7);
   height: var(--sg-spacing-7);
   background: currentColor;
   mask: url("../../../assets/search.svg") center / contain no-repeat;
-}
-
-.MapPlaceDetailCloseIcon {
-  mask-image: url("../../../assets/close.svg");
 }
 
 .MapPlaceDetailPanel[data-presentation] .PlaceDetailPanelBody {
@@ -134,8 +122,8 @@
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"]:has(.PlaceDetailPanelAbove) {
-  max-height: min(
-    var(--sg-panel-sheet-max-height),
+  --panel-custom-sheet-max-height: min(
+    var(--place-detail-mobile-max-height, 100dvh),
     calc(100dvh - var(--sg-spacing-16) - var(--sg-safe-area-top))
   );
 }

@@ -4,14 +4,21 @@ import { buildExternalSearchUrl } from "@shared/lib/externalSearch/externalSearc
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
-import { AppResponsivePanel } from "@shared/ui/responsive-panel";
+import {
+  AppResponsivePanel,
+  type AppResponsivePanelContentProps,
+} from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
 import { MAP_PLACE_DESCRIPTION } from "../config/mapPlaceDetail";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
 import "./map-place-detail-panel.css";
 
-export type MapPlaceDetailPanelProps = {
+export type MapPlaceDetailPanelProps = Pick<
+  AppResponsivePanelContentProps,
+  "onExitComplete" | "returnFocus"
+> & {
+  open?: boolean;
   place: Pick<PlaceDetailCardProps, "title" | "image">;
   isStampAcquired?: boolean;
   mobileAboveContent?: ReactNode;
@@ -35,13 +42,7 @@ function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">):
       >
         <span aria-hidden="true" className="MapPlaceDetailSearchIcon" />
       </a>
-      <AppResponsivePanel.CloseButton
-        className="MapPlaceDetailClose"
-        aria-label="닫기"
-        title="닫기"
-      >
-        <span aria-hidden="true" className="MapPlaceDetailCloseIcon" />
-      </AppResponsivePanel.CloseButton>
+      <AppResponsivePanel.CloseButton iconOnly />
     </div>
   );
 }
@@ -52,10 +53,15 @@ export function MapPlaceDetailPanel({
   mobileAboveContent,
   onClose,
   onAddToCourse,
+  open = true,
+  onExitComplete,
+  returnFocus,
 }: MapPlaceDetailPanelProps): ReactElement {
   return (
     <PlaceDetailPanel
-      open
+      open={open}
+      onExitComplete={onExitComplete}
+      returnFocus={returnFocus}
       modal={false}
       onOpenChange={(open) => {
         if (!open) onClose();
