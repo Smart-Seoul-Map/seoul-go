@@ -261,6 +261,7 @@ function createPlaceMarkers(): MapMarkerFeatureCollection {
 
 function createPlaceMarkerSelection(): ExplorationPlaceMarkerSelection {
   return {
+    description: "",
     id: "place-1",
     imageUrl: "",
     markerColor: "#1971c2",

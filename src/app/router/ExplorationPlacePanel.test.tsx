@@ -10,6 +10,7 @@ import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse
 const place: ExplorationPlaceMarkerSelection = {
   id: "market",
   name: "해방촌 신흥시장",
+  description: "시장 골목의 공방과 가게를 만나는 장소",
   imageUrl: "",
   markerColor: "#08b2f0",
   themeId: "100032",
@@ -21,6 +22,19 @@ function Panel() {
   const onAddToCourse = useAddExplorationPlaceToCourse();
   return <ExplorationPlacePanel place={place} onAddToCourse={onAddToCourse} onClose={() => {}} />;
 }
+
+test.each(["100032", "100575", "1786321258890"])(
+  "테마 %s의 장소 설명을 그대로 표시한다",
+  (themeId) => {
+    render(<ExplorationPlacePanel place={{ ...place, themeId }} onClose={() => {}} />);
+    expect(screen.getByText("시장 골목의 공방과 가게를 만나는 장소")).toBeInTheDocument();
+  }
+);
+
+test("설명이 비어 있으면 임시 공통 문구를 표시하지 않는다", () => {
+  render(<ExplorationPlacePanel place={{ ...place, description: "" }} onClose={() => {}} />);
+  expect(document.querySelector(".PlaceDetailCardDescription")?.textContent).toBe("");
+});
 
 beforeEach(() => stampCourseStore.getState().clearPlaces());
 afterEach(() => {

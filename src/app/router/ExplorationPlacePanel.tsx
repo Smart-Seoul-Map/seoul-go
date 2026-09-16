@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { StampCourseSummary, useStampCourseStore } from "@features/course";
 import type { ExplorationPlacePanelProps } from "@features/exploration";
-import { MapPlaceDetailPanel, SEOUL_EDITION25_THEME_ID } from "@features/places";
+import { MapPlaceDetailPanel } from "@features/places";
 
 export function ExplorationPlacePanel({
   place,
@@ -26,8 +26,7 @@ export function ExplorationPlacePanel({
       mobileAboveContent={<StampCourseSummary onOpen={onOpenCourse} />}
       place={{
         title: place.name,
-        description:
-          place.themeId === SEOUL_EDITION25_THEME_ID ? (place.description ?? "") : undefined,
+        description: place.description,
         selectionYear: place.selectionYear,
         image: { src: place.imageUrl, alt: `${place.name} 대표 이미지` },
       }}

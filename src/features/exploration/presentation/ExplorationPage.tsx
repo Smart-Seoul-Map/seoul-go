@@ -204,7 +204,10 @@ export function ExplorationPage({
             })}
           {selectedPlace && isPanelOpen && !renderPlacePanel && (
             <div className="exploration-place-card-layer">
-              <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
+              <ExplorationPlaceCard
+                onAddToCourse={() => handleAddPlaceToCourse(selectedPlace)}
+                place={selectedPlace}
+              />
             </div>
           )}
         </Fragment>

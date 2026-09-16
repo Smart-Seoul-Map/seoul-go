@@ -8,6 +8,7 @@ const originalWidth = window.innerWidth;
 const place = {
   title: "해방촌 신흥시장",
   selectionYear: 2025,
+  description: "시장 골목의 공방과 가게를 만나는 장소",
   image: { src: "/market.jpg", alt: "시장 대표 이미지" },
 };
 

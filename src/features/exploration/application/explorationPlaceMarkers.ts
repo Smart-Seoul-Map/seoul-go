@@ -46,7 +46,7 @@ type FeatureWithPlaceMarkerSelection = {
 export type ExplorationPlaceMarkerSelection = {
   id: string;
   imageUrl: string;
-  description?: string;
+  description: string;
   selectionYear?: number;
   markerColor: string;
   name: string;

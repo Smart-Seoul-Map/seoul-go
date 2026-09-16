@@ -9,7 +9,6 @@ import {
   type AppResponsivePanelContentProps,
 } from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
-import { MAP_PLACE_DESCRIPTION } from "../config/mapPlaceDetail";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
 import "./map-place-detail-panel.css";
@@ -19,8 +18,7 @@ export type MapPlaceDetailPanelProps = Pick<
   "onExitComplete" | "returnFocus"
 > & {
   open?: boolean;
-  place: Pick<PlaceDetailCardProps, "title" | "image"> & {
-    description?: string;
+  place: Pick<PlaceDetailCardProps, "title" | "image" | "description"> & {
     selectionYear?: number | string;
   };
   isStampAcquired?: boolean;
@@ -84,7 +82,6 @@ export function MapPlaceDetailPanel({
       place={{
         ...place,
         subtitle: "",
-        description: place.description ?? MAP_PLACE_DESCRIPTION,
       }}
       headerTrailing={
         <>
