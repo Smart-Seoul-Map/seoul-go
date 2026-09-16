@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type KeyboardEvent, type ReactElement } from "react";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactElement } from "react";
 
 import { AppBadge } from "@shared/ui/badge";
 import { AppButton } from "@shared/ui/button";
@@ -13,6 +13,29 @@ type StampCourseBoardProps = {
   onRemove: (placeId: string) => void;
   onReorder: (placeId: string, targetPlaceId: string) => void;
 };
+
+function StampCourseSealContent({ imageUrl }: { imageUrl?: string }): ReactElement {
+  const [failedUrl, setFailedUrl] = useState<string>();
+
+  if (imageUrl && imageUrl !== failedUrl) {
+    return (
+      <img
+        className="StampCourseSealImage"
+        src={imageUrl}
+        alt=""
+        draggable={false}
+        onError={() => setFailedUrl(imageUrl)}
+      />
+    );
+  }
+
+  return (
+    <>
+      <span aria-hidden="true">GO</span>
+      <small aria-hidden="true">STAMP</small>
+    </>
+  );
+}
 
 export function StampCourseBoard({
   places,
@@ -83,8 +106,7 @@ export function StampCourseBoard({
                   onPointerDown={(event) => drag.handlePointerDown(event, slot.place.id)}
                   onKeyDown={(event) => handleKeyDown(event, slot.index)}
                 >
-                  <span aria-hidden="true">GO</span>
-                  <small aria-hidden="true">STAMP</small>
+                  <StampCourseSealContent imageUrl={slot.place.imageUrl} />
                 </AppButton>
                 <AppButton
                   className="StampCourseRemoveButton"
@@ -102,8 +124,7 @@ export function StampCourseBoard({
               </>
             ) : (
               <span className="StampCourseSeal" aria-hidden="true">
-                <span>GO</span>
-                <small>STAMP</small>
+                <StampCourseSealContent imageUrl={slot.place?.imageUrl} />
               </span>
             )}
           </div>

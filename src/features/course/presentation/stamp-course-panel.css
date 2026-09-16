@@ -131,9 +131,12 @@
   font-size: var(--sg-font-size-1);
 }
 
-.StampCourseSlot[data-filled="true"] .StampCourseSeal {
-  background: var(--sg-course-seal-bg);
-  color: var(--sg-color-text-inverted);
+.StampCourseSealImage {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  pointer-events: none;
 }
 
 .StampCourseSealWrapper {
@@ -146,8 +149,8 @@
 .StampCourseSeal.StampCourseDragHandle {
   padding: 0;
   gap: 0;
-  background: var(--sg-course-seal-bg);
-  color: var(--sg-color-text-inverted);
+  background: var(--sg-course-seal-empty-bg);
+  color: var(--sg-course-seal-empty-fg);
   font-weight: var(--sg-font-weight-regular);
   line-height: normal;
   cursor: grab;
@@ -166,7 +169,7 @@
   outline-offset: var(--sg-focus-ring-offset);
 }
 
-.StampCourseSlot[data-dragging="true"] {
+.StampCourseSlot[data-dragging="true"] .StampCourseSealWrapper {
   z-index: 2;
 }
 
@@ -233,6 +236,13 @@
 .StampCoursePlaceName .AppBadge {
   width: 100%;
   justify-content: center;
+  white-space: normal;
+}
+
+.StampCoursePlaceName .AppBadge-content {
+  max-height: 2lh;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
 }
 
 .StampCoursePanel[data-presentation] .StampCourseFooter {

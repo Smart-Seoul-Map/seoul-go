@@ -125,6 +125,58 @@ test("편집에서 개별 삭제를 즉시 저장하고 실행 취소로 원래 
   ).toEqual(["place-0", "place-1", "place-2"]);
 });
 
+test("편집 중 푸터를 비활성화하고 완료하면 저장한 내용을 유지하며 일반 모드로 돌아온다", () => {
+  savePlaces(3);
+  const onClose = vi.fn();
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  render(<StampCoursePanel onClose={onClose} />);
+  fireEvent.click(screen.getByRole("button", { name: "편집" }));
+  for (const button of document.querySelectorAll(".StampCourseFooter button")) {
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+  }
+  expect(open).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "저장된 장소 1 삭제" }));
+  fireEvent.click(screen.getByRole("button", { name: "완료" }));
+  expect(onClose).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "편집" })).toBeEnabled();
+  expect(screen.queryByRole("button", { name: /순서 변경/ })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "카카오 도보길찾기" })).toBeEnabled();
+  expect(
+    createStampCourseStore()
+      .getState()
+      .places.map((place) => place.id)
+  ).toEqual(["place-1", "place-2"]);
+});
+
+test("모든 장소를 개별 삭제한 뒤에도 완료로 편집을 종료할 수 있다", () => {
+  savePlaces(1);
+  render(<StampCoursePanel onClose={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "편집" }));
+  fireEvent.click(screen.getByRole("button", { name: "저장된 장소 1 삭제" }));
+  expect(screen.getByRole("button", { name: "완료" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "완료" }));
+  expect(screen.getByRole("button", { name: "편집" })).toBeDisabled();
+});
+
+test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에서 표시된다", () => {
+  savePlaces(1);
+  const places = stampCourseStore.getState().places.map((place) => ({
+    ...place,
+    imageUrl: "https://example.com/place.jpg",
+  }));
+  localStorage.setItem("seoul-go:stamp-course:v1", JSON.stringify({ version: 1, places }));
+  stampCourseStore.setState({ places: createStampCourseStore().getState().places });
+  render(<StampCoursePanel onClose={vi.fn()} />);
+  const image = () => document.querySelector(".StampCourseSealImage");
+  expect(image()).toHaveAttribute("src", "https://example.com/place.jpg");
+  fireEvent.click(screen.getByRole("button", { name: "편집" }));
+  expect(image()).toHaveAttribute("src", "https://example.com/place.jpg");
+  fireEvent.error(image()!);
+  expect(image()).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "저장된 장소 1 순서 변경" })).toHaveTextContent("GO");
+});
+
 test("연속 삭제의 실행 취소는 마지막 삭제만 복구한다", () => {
   savePlaces(3);
   render(<StampCoursePanel onClose={vi.fn()} />);

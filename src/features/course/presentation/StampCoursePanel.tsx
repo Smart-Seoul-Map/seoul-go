@@ -27,15 +27,21 @@ type StampCoursePanelProps = Pick<
 
 type StampCourseFooterProps = {
   isEmpty: boolean;
+  isEditing: boolean;
   onKakaoWalk: () => void;
 };
 
-function StampCourseFooter({ isEmpty, onKakaoWalk }: StampCourseFooterProps): ReactElement {
+function StampCourseFooter({
+  isEmpty,
+  isEditing,
+  onKakaoWalk,
+}: StampCourseFooterProps): ReactElement {
   return (
     <AppResponsivePanel.Footer className="StampCourseFooter">
       <AppButton
         className="StampCourseAction"
         data-action="kakao"
+        disabled={isEditing}
         onClick={onKakaoWalk}
         aria-label="카카오 도보길찾기"
         title="카카오 도보길찾기"
@@ -45,7 +51,7 @@ function StampCourseFooter({ isEmpty, onKakaoWalk }: StampCourseFooterProps): Re
       <AppButton
         className="StampCourseAction"
         data-action="naver"
-        disabled={isEmpty}
+        disabled={isEmpty || isEditing}
         aria-label="네이버 도보길찾기"
         title="네이버 도보길찾기"
         aria-disabled="true"
@@ -55,7 +61,7 @@ function StampCourseFooter({ isEmpty, onKakaoWalk }: StampCourseFooterProps): Re
       <AppButton
         className="StampCourseAction"
         data-action="save"
-        disabled={isEmpty}
+        disabled={isEmpty || isEditing}
         aria-label="이미지 저장"
         aria-disabled="true"
       >
@@ -65,7 +71,7 @@ function StampCourseFooter({ isEmpty, onKakaoWalk }: StampCourseFooterProps): Re
       <AppButton
         className="StampCourseAction"
         data-action="share"
-        disabled={isEmpty}
+        disabled={isEmpty || isEditing}
         aria-label="링크 공유"
         aria-disabled="true"
       >
@@ -134,6 +140,11 @@ export function StampCoursePanel({
             >
               {editing.isEditing ? "전체 삭제" : "편집"}
             </AppTextButton>
+            {editing.isEditing && (
+              <AppTextButton size="sm" variant="neutral" onClick={editing.finishEditing}>
+                완료
+              </AppTextButton>
+            )}
             <AppResponsivePanel.CloseButton iconOnly />
           </>
         }
@@ -150,7 +161,11 @@ export function StampCoursePanel({
             onReorder={editing.handleReorderPlaces}
           />
         </AppResponsivePanel.Body>
-        <StampCourseFooter isEmpty={places.length === 0} onKakaoWalk={handleKakaoWalk} />
+        <StampCourseFooter
+          isEmpty={places.length === 0}
+          isEditing={editing.isEditing}
+          onKakaoWalk={handleKakaoWalk}
+        />
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>
   );

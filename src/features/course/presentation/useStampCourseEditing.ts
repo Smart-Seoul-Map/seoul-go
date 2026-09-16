@@ -49,6 +49,7 @@ export function useStampCourseEditing(open: boolean, onClose: () => void) {
   return {
     isEditing,
     startEditing: () => setIsEditing(true),
+    finishEditing: () => setIsEditing(false),
     handleRemovePlace,
     handleClearPlaces,
     handleReorderPlaces,
