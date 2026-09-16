@@ -1,0 +1,44 @@
+.ExplorationImageYearMarker {
+  --edition-color: var(--sg-color-text-default);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--sg-edition-marker-width);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--edition-color);
+  cursor: pointer;
+  font-family: var(--sg-edition-marker-font-family);
+  font-weight: var(--sg-font-weight-regular);
+  letter-spacing: 0;
+}
+
+.ExplorationImageYearMarker[data-year="2025"] {
+  --edition-color: var(--sg-edition-year-2025);
+}
+
+.ExplorationImageYearMarker[data-year="2026"] {
+  --edition-color: var(--sg-edition-year-2026);
+}
+
+.ExplorationImageYearMarkerImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--sg-edition-marker-image-ratio);
+  object-fit: cover;
+  border-radius: var(--sg-radius-2);
+  box-shadow: var(--sg-shadow-raised);
+}
+
+.ExplorationImageYearMarkerYear {
+  --sg-badge-fg: var(--edition-color);
+  --sg-badge-stroke: var(--edition-color);
+  --sg-badge-outline-bg: var(--sg-color-bg-floating);
+  margin-top: var(--sg-spacing-1);
+}
+
+.ExplorationImageYearMarker:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}

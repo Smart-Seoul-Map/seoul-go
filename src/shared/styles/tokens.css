@@ -439,6 +439,11 @@
   --sg-detail-location-icon-size: 41px;
 
   /* Main map place detail */
+  --sg-edition-year-2025: var(--sg-v3-blue-600);
+  --sg-edition-year-2026: var(--sg-v3-pink-500);
+  --sg-edition-marker-width: 144px;
+  --sg-edition-marker-image-ratio: 4 / 3;
+  --sg-edition-marker-font-family: var(--sg-font-namsan);
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
   --sg-map-detail-header-badge-width: var(--sg-spacing-16);

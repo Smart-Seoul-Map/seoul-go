@@ -171,6 +171,7 @@ describe("getExplorationPlaceMarkerSelection", () => {
       })
     ).toEqual({
       id: "place-1",
+      description: "",
       imageUrl: "https://example.com/place.jpg",
       markerColor: "#c92a2a",
       name: "Place",

@@ -34,6 +34,8 @@ type FeatureWithPlaceMarkerSelection = {
   properties?: {
     id?: unknown;
     imageUrl?: unknown;
+    description?: unknown;
+    selectionYear?: unknown;
     markerColor?: unknown;
     name?: unknown;
     themeId?: unknown;
@@ -44,6 +46,8 @@ type FeatureWithPlaceMarkerSelection = {
 export type ExplorationPlaceMarkerSelection = {
   id: string;
   imageUrl: string;
+  description?: string;
+  selectionYear?: number;
   markerColor: string;
   name: string;
   position: {
@@ -163,6 +167,11 @@ export function getExplorationPlaceMarkerSelection(
   return {
     id,
     imageUrl,
+    description: readString(feature?.properties?.description),
+    selectionYear:
+      typeof feature?.properties?.selectionYear === "number"
+        ? feature.properties.selectionYear
+        : undefined,
     markerColor,
     name,
     position: {
