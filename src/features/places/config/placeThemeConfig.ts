@@ -1,5 +1,7 @@
 import { PLACE_THEME_MARKERS } from "@shared/constants/placeThemeMarker";
 
+export const SEOUL_EDITION25_THEME_ID = "1786321258890";
+
 export const SMART_SEOUL_PLACE_THEMES = [
   {
     id: "100032",
@@ -25,6 +27,11 @@ export const SMART_SEOUL_PLACE_THEMES = [
     id: "100575",
     name: "오래가게",
     ...PLACE_THEME_MARKERS.YELLOW,
+  },
+  {
+    id: SEOUL_EDITION25_THEME_ID,
+    name: "서울에디션25",
+    ...PLACE_THEME_MARKERS.BLUE,
   },
 ] as const;
 
