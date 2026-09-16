@@ -34,7 +34,7 @@ export function ExplorationThemePlaceCountBadge({
       size="lg"
       variant="solid"
     >
-      <span>{name}</span>
+      <span>{name}</span>{" "}
       <span>
         {visitedCount}/{totalCount}
       </span>

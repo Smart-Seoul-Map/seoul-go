@@ -13,6 +13,7 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
+import { AppBadge } from "@shared/ui/badge";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
@@ -57,6 +58,8 @@ type ExplorationPageProps = {
     place: ExplorationPlaceMarkerSelection
   ) => AddExplorationPlaceToCourseResultStatus;
   placeMarkers?: MapMarkerFeatureCollection;
+  placeMarkerPresentation?: "treasure" | "image-year";
+  selectionYearLabel?: string;
   stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
 };
@@ -71,6 +74,8 @@ export function ExplorationPage({
   initialCenter,
   onAddPlaceToCourse,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  placeMarkerPresentation,
+  selectionYearLabel,
   stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
@@ -151,6 +156,7 @@ export function ExplorationPage({
           onMapMoveRequest={closePanel}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
+          placeMarkerPresentation={placeMarkerPresentation}
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
@@ -160,6 +166,13 @@ export function ExplorationPage({
           </div>
         ) : null}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
+          {selectionYearLabel && (
+            <li className="exploration-theme-place-count-item">
+              <AppBadge size="lg" variant="solid">
+                {selectionYearLabel}
+              </AppBadge>
+            </li>
+          )}
           {displayedThemeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge

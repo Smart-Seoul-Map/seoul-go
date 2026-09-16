@@ -49,6 +49,41 @@ const themeProgressItems = [
 ] as const;
 
 describe("ExplorationPage", () => {
+  test("서울에디션25 방문만으로 진행률을 올리고 다시 표시해도 유지한다", () => {
+    const markers = createPlaceMarkers();
+    markers.features[0].properties.themeId = "1786321258890";
+    const progress = [
+      {
+        id: "1786321258890",
+        name: "서울에디션25",
+        totalCount: 2,
+        visitedCount: 0,
+        markerColor: null,
+        markerColorToken: "--sg-color-text-info",
+      },
+    ];
+    const view = renderExplorationPage(
+      <ExplorationPage
+        placeMarkers={markers}
+        themeProgressItems={progress}
+        selectionYearLabel="서울에디션25 · 25 · 26"
+      />
+    );
+
+    expect(screen.getByText("서울에디션25 · 25 · 26")).toBeInTheDocument();
+    expect(screen.getByLabelText("서울에디션25 장소 0/2")).toBeInTheDocument();
+    act(() =>
+      explorationMapMock.latestProps?.onPlaceMarkerSelect?.({
+        ...createPlaceMarkerSelection(),
+        themeId: "1786321258890",
+      })
+    );
+    expect(screen.getByLabelText("서울에디션25 장소 1/2")).toBeInTheDocument();
+    view.unmount();
+    renderExplorationPage(<ExplorationPage placeMarkers={markers} themeProgressItems={progress} />);
+    expect(screen.getByLabelText("서울에디션25 장소 1/2")).toBeInTheDocument();
+  });
+
   afterEach(() => {
     cleanup();
     visitedPlaceStore.setState({ placeIds: [] });

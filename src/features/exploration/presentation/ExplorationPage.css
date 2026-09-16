@@ -56,6 +56,7 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
 
 .exploration-theme-place-count-item {
   display: flex;
+  flex-shrink: 0;
   min-width: 0;
 }
 
