@@ -453,7 +453,7 @@
   --sg-course-count-size: var(--sg-font-size-6);
   --sg-course-action-label-size: var(--sg-font-size-4);
   --sg-course-action-padding-y: var(--sg-spacing-0_5);
-  --sg-course-action-padding-x: var(--sg-spacing-1);
+  --sg-course-action-padding-x: var(--sg-spacing-3);
   --sg-course-content-gap: var(--sg-spacing-3);
   --sg-course-footer-group-gap: var(--sg-spacing-4);
   --sg-course-kakao-bg: var(--sg-v3-yellow-500);
