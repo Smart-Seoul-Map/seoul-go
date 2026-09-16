@@ -364,6 +364,7 @@
   /* Responsive panel */
   --sg-breakpoint-sm: 480px;
   --sg-breakpoint-md: 768px;
+  --sg-breakpoint-mobile-max: 860px;
   --sg-breakpoint-lg: 1280px;
   --sg-breakpoint-xl: 1440px;
   --sg-safe-area-top: env(safe-area-inset-top, 0px);
@@ -396,7 +397,7 @@
   --sg-panel-enter-easing: var(--sg-motion-easing-enter-expressive);
   --sg-panel-exit-easing: var(--sg-motion-easing-exit-expressive);
   --sg-panel-sheet-max-height: 90dvh;
-  --sg-panel-sheet-max-width: var(--sg-panel-width-small);
+  --sg-panel-sheet-max-width: 100%;
   --sg-panel-sheet-radius: var(--sg-radius-6);
   --sg-panel-sheet-exit-duration: var(--sg-motion-duration-4);
   --sg-panel-sheet-exit-easing: var(--sg-motion-easing-exit);
@@ -445,4 +446,19 @@
   --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);
   --sg-map-detail-mobile-body-line-height: 1.5;
   --sg-map-detail-mobile-image-ratio: 358 / 136;
+
+  /* Stamp course panel */
+  --sg-course-action-size: var(--sg-spacing-12);
+  --sg-course-kakao-bg: var(--sg-v3-yellow-500);
+  --sg-course-naver-bg: var(--sg-v3-green-500);
+  --sg-course-save-bg: var(--sg-color-bg-brand);
+  --sg-course-share-bg: var(--sg-v3-blue-600);
+  --sg-course-seal-bg: var(--sg-color-bg-brand);
+  --sg-course-route-color: var(--sg-v3-blue-500);
+  --sg-course-board-top: color-mix(in srgb, var(--sg-v3-pink-500) 25%, var(--sg-color-bg-floating));
+  --sg-course-board-bottom: color-mix(
+    in srgb,
+    var(--sg-v3-blue-500) 20%,
+    var(--sg-color-bg-floating)
+  );
 }
