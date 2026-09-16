@@ -32,6 +32,7 @@ function createPlace({
 }): SmartSeoulThemePlace {
   return {
     address: "Seoul",
+    description: "",
     districtName,
     id,
     imageUrl: "/images/test.jpg",
