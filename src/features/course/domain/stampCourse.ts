@@ -7,6 +7,7 @@ export type StampCoursePlacePosition = {
 
 export type StampCoursePlaceInput = {
   id: string;
+  imageUrl?: string;
   name: string;
   position: StampCoursePlacePosition;
   themeId: string;

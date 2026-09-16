@@ -82,6 +82,7 @@ function isSavedStampCoursePlace(value: unknown): value is SavedStampCoursePlace
     value.id.trim().length > 0 &&
     typeof value.name === "string" &&
     value.name.trim().length > 0 &&
+    (value.imageUrl === undefined || typeof value.imageUrl === "string") &&
     typeof value.themeId === "string" &&
     value.themeId.trim().length > 0 &&
     typeof value.addedAt === "string" &&
