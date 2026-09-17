@@ -225,7 +225,8 @@ describe("ExplorationMap", () => {
 
   test("moves the character when a place marker is clicked", () => {
     vi.stubGlobal("WebGLRenderingContext", class {});
-    render(<ExplorationMap />);
+    const onMapMoveRequest = vi.fn();
+    render(<ExplorationMap onMapMoveRequest={onMapMoveRequest} />);
     const map = maplibreMock.instances.at(-1);
     map?.getLayer.mockReturnValue(true);
     map?.queryRenderedFeatures.mockReturnValue([{ properties: { id: "place-1" } }]);
@@ -241,6 +242,7 @@ describe("ExplorationMap", () => {
       lat: 37.532326,
       lng: 126.990703,
     });
+    expect(onMapMoveRequest).toHaveBeenCalledOnce();
   });
 
   test("starts directional movement from keyboard input", () => {
@@ -269,7 +271,7 @@ describe("ExplorationMap", () => {
 
   test("disables keyboard and joystick input while a place card is active", () => {
     vi.stubGlobal("WebGLRenderingContext", class {});
-    const { getByTestId } = render(<ExplorationMap hasActivePlaceCard />);
+    const { getByTestId } = render(<ExplorationMap hasActivePanel />);
 
     expect(keyboardDirectionMock.disabled).toBe(true);
     expect(getByTestId("exploration-map-joystick").getAttribute("data-disabled")).toBe("true");

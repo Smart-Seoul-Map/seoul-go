@@ -5,7 +5,11 @@ import { AppButton } from "@shared/ui/button";
 import { useStampCourseStore } from "../application/useStampCourseStore";
 import "./stamp-course-summary.css";
 
-export function StampCourseSummary(): ReactElement {
+type StampCourseSummaryProps = {
+  onOpen?: () => void;
+};
+
+export function StampCourseSummary({ onOpen }: StampCourseSummaryProps): ReactElement {
   const count = useStampCourseStore((state) => state.places.length);
 
   return (
@@ -28,7 +32,9 @@ export function StampCourseSummary(): ReactElement {
         className="StampCourseSummaryButton"
         variant="secondary"
         aria-label="코스 보기"
-        aria-disabled="true"
+        aria-disabled={!onOpen || undefined}
+        aria-haspopup="dialog"
+        onClick={onOpen}
         title="코스 보기"
       >
         <span className="StampCourseSummaryIcon" aria-hidden="true" />

@@ -22,6 +22,7 @@ describe("explorationStampCourse", () => {
   test("creates stamp course place input from selected place", () => {
     expect(createStampCoursePlaceInputFromSelection(place)).toEqual({
       id: "place-1",
+      imageUrl: place.imageUrl,
       name: "Namsan Tower",
       position: {
         lat: 37.5,

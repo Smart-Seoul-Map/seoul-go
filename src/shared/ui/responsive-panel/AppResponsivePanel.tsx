@@ -5,14 +5,15 @@ import {
   useCallback,
   useContext,
   useId,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type CSSProperties,
   type ReactElement,
 } from "react";
 import { createPortal } from "react-dom";
+import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import { PanelContext, usePanelContext } from "./panelContext";
 import type {
@@ -31,17 +32,6 @@ import { usePanelPresence } from "./usePanelPresence";
 import { useSheetDrag } from "./useSheetDrag";
 import "./responsive-panel.css";
 
-const subscribeViewport = (callback: () => void) => {
-  window.addEventListener("resize", callback);
-  return () => window.removeEventListener("resize", callback);
-};
-const getDesktopSnapshot = () => {
-  const breakpoint =
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sg-breakpoint-md")) ||
-    768;
-  return window.innerWidth >= breakpoint;
-};
-
 function Root({
   children,
   open: controlledOpen,
@@ -59,7 +49,7 @@ function Root({
   const [internalSnap, setInternalSnap] = useState<PanelSnapPoint | null>(
     bottomSheetRootProps.snapPoints?.[0] ?? null
   );
-  const isDesktop = useSyncExternalStore(subscribeViewport, getDesktopSnapshot, () => true);
+  const isDesktop = !useIsMobileViewport();
   const open = controlledOpen ?? internalOpen;
   const options = isDesktop ? sidePanelRootProps : bottomSheetRootProps;
   const activeSnap =
@@ -158,6 +148,8 @@ function Trigger({
 function CloseButton({
   onClick,
   children,
+  iconOnly = false,
+  className,
   ...props
 }: AppResponsivePanelCloseButtonProps): ReactElement {
   const panel = usePanelContext();
@@ -165,25 +157,37 @@ function CloseButton({
     <button
       type="button"
       {...props}
+      aria-label={props["aria-label"] ?? (iconOnly ? "닫기" : undefined)}
+      title={props.title ?? (iconOnly ? "닫기" : undefined)}
+      className={
+        [iconOnly && "AppResponsivePanelIconClose", className].filter(Boolean).join(" ") ||
+        undefined
+      }
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) panel.changeOpen(false, "closeButton");
       }}
     >
-      {children}
+      {iconOnly ? <span className="AppResponsivePanelCloseIcon" aria-hidden="true" /> : children}
     </button>
   );
 }
 
 function Content(props: AppResponsivePanelContentProps): ReactElement | null {
+  const { onExitComplete, ...contentProps } = props;
   const panel = usePanelContext();
   const contentRef = useRef<HTMLElement | null>(null);
   const { present, finishExit } = usePanelPresence(panel.open, panel.skipAnimation, contentRef, {
     lazyMount: panel.sheet.lazyMount,
     unmountOnExit: panel.sheet.unmountOnExit,
   });
+  const wasPresent = useRef(present);
+  useEffect(() => {
+    if (wasPresent.current && !present && !panel.open) onExitComplete?.();
+    wasPresent.current = present;
+  }, [present, panel.open, onExitComplete]);
   if (!present) return null;
-  return <MountedContent {...props} contentRef={contentRef} finishExit={finishExit} />;
+  return <MountedContent {...contentProps} contentRef={contentRef} finishExit={finishExit} />;
 }
 
 type MountedContentProps = AppResponsivePanelContentProps & {
@@ -194,6 +198,9 @@ type MountedContentProps = AppResponsivePanelContentProps & {
 function MountedContent({
   title,
   headerLeading,
+  headerTrailing,
+  headerClassName,
+  returnFocus,
   description,
   hideTitle = false,
   showCloseButton = true,
@@ -224,6 +231,7 @@ function MountedContent({
       panel.dismissible && panel.open && (panel.isDesktop || (panel.sheet.closeOnEscape ?? true)),
     contentRef,
     onEscape: () => panel.changeOpen(false, "escapeKeyDown"),
+    returnFocus,
   });
   const drag = useSheetDrag(contentRef, panel, showHandle);
   const presentation = panel.isDesktop ? "side-panel" : "bottom-sheet";
@@ -267,6 +275,7 @@ function MountedContent({
         id={panel.id}
         ref={contentRef}
         role="dialog"
+        inert={!panel.open || undefined}
         aria-modal={panel.modal || undefined}
         aria-labelledby={`${panel.id}-title`}
         aria-describedby={description ? `${panel.id}-description` : undefined}
@@ -301,11 +310,15 @@ function MountedContent({
             <span />
           </button>
         )}
-        <header className="AppResponsivePanelHeader" data-hidden={hideTitle || undefined}>
+        <header
+          className={["AppResponsivePanelHeader", headerClassName].filter(Boolean).join(" ")}
+          data-hidden={hideTitle || undefined}
+        >
           {headerLeading}
           <h2 id={`${panel.id}-title`} className="AppResponsivePanelTitle">
             {title}
           </h2>
+          {headerTrailing}
           {description && (
             <div id={`${panel.id}-description`} className="AppResponsivePanelDescription">
               {description}
@@ -329,12 +342,14 @@ function Body({
   maxHeight,
   style,
   onScroll,
+  tabIndex = 0,
   ...props
 }: AppResponsivePanelBodyProps): ReactElement {
   const [scrolled, setScrolled] = useState(false);
   return (
     <div
       {...props}
+      tabIndex={tabIndex}
       className={["AppResponsivePanelBody", className].filter(Boolean).join(" ")}
       style={{ maxHeight, ...style }}
       data-scrolled={scrolled || undefined}

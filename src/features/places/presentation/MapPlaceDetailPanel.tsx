@@ -4,27 +4,39 @@ import { buildExternalSearchUrl } from "@shared/lib/externalSearch/externalSearc
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
-import { AppResponsivePanel } from "@shared/ui/responsive-panel";
+import {
+  AppResponsivePanel,
+  type AppResponsivePanelContentProps,
+} from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
 import { MAP_PLACE_DESCRIPTION } from "../config/mapPlaceDetail";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
 import "./map-place-detail-panel.css";
 
-export type MapPlaceDetailPanelProps = {
-  place: Pick<PlaceDetailCardProps, "title" | "image">;
+export type MapPlaceDetailPanelProps = Pick<
+  AppResponsivePanelContentProps,
+  "onExitComplete" | "returnFocus"
+> & {
+  open?: boolean;
+  place: Pick<PlaceDetailCardProps, "title" | "image"> & { selectionYear?: number | string };
   isStampAcquired?: boolean;
   mobileAboveContent?: ReactNode;
   onClose: () => void;
   onAddToCourse?: () => void;
 };
 
+function PlaceDetailHeaderMeta({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
+  return (
+    <div className="MapPlaceDetailMeta">
+      <AppBadge tone="positive">{place.selectionYear ?? "방문 완료"}</AppBadge>
+    </div>
+  );
+}
+
 function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
   return (
     <div className="MapPlaceDetailToolbar">
-      <div className="MapPlaceDetailBadges">
-        <AppBadge tone="positive">방문 완료</AppBadge>
-      </div>
       <a
         className="MapPlaceDetailSearch"
         href={buildExternalSearchUrl("NAVER", place.title)}
@@ -35,13 +47,7 @@ function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">):
       >
         <span aria-hidden="true" className="MapPlaceDetailSearchIcon" />
       </a>
-      <AppResponsivePanel.CloseButton
-        className="MapPlaceDetailClose"
-        aria-label="닫기"
-        title="닫기"
-      >
-        <span aria-hidden="true" className="MapPlaceDetailCloseIcon" />
-      </AppResponsivePanel.CloseButton>
+      <AppResponsivePanel.CloseButton iconOnly />
     </div>
   );
 }
@@ -52,10 +58,15 @@ export function MapPlaceDetailPanel({
   mobileAboveContent,
   onClose,
   onAddToCourse,
+  open = true,
+  onExitComplete,
+  returnFocus,
 }: MapPlaceDetailPanelProps): ReactElement {
   return (
     <PlaceDetailPanel
-      open
+      open={open}
+      onExitComplete={onExitComplete}
+      returnFocus={returnFocus}
       modal={false}
       onOpenChange={(open) => {
         if (!open) onClose();
@@ -67,7 +78,12 @@ export function MapPlaceDetailPanel({
         subtitle: "",
         description: MAP_PLACE_DESCRIPTION,
       }}
-      headerLeading={<PlaceDetailActions place={place} />}
+      headerTrailing={
+        <>
+          <PlaceDetailHeaderMeta place={place} />
+          <PlaceDetailActions place={place} />
+        </>
+      }
       footer={
         <AppButton
           className="MapPlaceDetailAddButton"

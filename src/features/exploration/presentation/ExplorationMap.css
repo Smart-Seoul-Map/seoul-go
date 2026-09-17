@@ -38,12 +38,10 @@
   z-index: 5;
 }
 
-@media (max-width: 860px) {
-  .map-canvas-stack {
-    min-height: 100vh;
-  }
+.map-canvas-stack[data-mobile="true"] {
+  min-height: 100vh;
+}
 
-  .app-virtual-joystick.exploration-map-joystick {
-    display: flex;
-  }
+.map-canvas-stack[data-mobile="true"] .app-virtual-joystick.exploration-map-joystick {
+  display: flex;
 }
