@@ -441,6 +441,10 @@
   /* Main map place detail */
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
+  --sg-map-detail-header-badge-width: var(--sg-spacing-16);
+  --sg-map-detail-header-badge-height: var(--sg-spacing-8);
+  --sg-map-detail-header-badge-mobile-width: var(--sg-spacing-14);
+  --sg-map-detail-header-badge-mobile-height: var(--sg-spacing-7);
   --sg-map-detail-acquired-button-bg: var(--sg-v3-green-500);
   --sg-map-detail-acquired-button-bg-pressed: var(--sg-v3-green-500);
   --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);

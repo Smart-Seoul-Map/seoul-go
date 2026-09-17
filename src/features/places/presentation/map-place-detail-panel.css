@@ -4,37 +4,46 @@
 }
 
 .MapPlaceDetailPanel .AppResponsivePanelHeader {
+  flex-direction: row;
+  align-items: center;
   gap: var(--place-detail-gap);
   padding: var(--sg-spacing-7) var(--place-detail-gutter) var(--place-detail-gap);
 }
 
 .MapPlaceDetailPanel .AppResponsivePanelTitle {
-  font-size: var(--sg-typography-detail-title-font-size);
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--sg-font-size-11);
   line-height: var(--sg-typography-detail-title-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.MapPlaceDetailMeta {
+  --sg-badge-height-md: var(--sg-map-detail-header-badge-height);
+  --sg-badge-padding-x-md: 0;
+  --sg-badge-font-size: var(--sg-font-size-2);
+  --sg-badge-shadow: none;
+  display: flex;
+  flex: none;
+  min-width: 0;
+}
+
+.MapPlaceDetailMeta .AppBadge[data-tone="positive"] {
+  width: var(--sg-map-detail-header-badge-width);
+  justify-content: center;
+  background: var(--sg-map-detail-visit-badge-bg);
+  color: var(--sg-map-detail-visit-badge-fg);
 }
 
 .MapPlaceDetailToolbar {
   display: flex;
   align-items: center;
   gap: var(--sg-spacing-2);
+  flex: none;
   min-width: 0;
-}
-
-.MapPlaceDetailBadges {
-  --sg-badge-height-md: var(--sg-spacing-7);
-  --sg-badge-padding-x-md: var(--sg-spacing-4);
-  --sg-badge-font-size: var(--sg-font-size-2);
-  --sg-badge-shadow: none;
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  gap: var(--sg-spacing-2);
-  min-width: 0;
-}
-
-.MapPlaceDetailBadges .AppBadge[data-tone="positive"] {
-  background: var(--sg-map-detail-visit-badge-bg);
-  color: var(--sg-map-detail-visit-badge-fg);
+  margin-left: auto;
 }
 
 .MapPlaceDetailSearch {
@@ -139,6 +148,18 @@
   border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
   gap: var(--place-detail-gap);
   padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailMeta {
+  --sg-badge-height-md: var(--sg-map-detail-header-badge-mobile-height);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailMeta .AppBadge {
+  width: var(--sg-map-detail-header-badge-mobile-width);
+}
+
+.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailSearch {
+  display: none;
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {

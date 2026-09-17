@@ -19,19 +19,24 @@ export type MapPlaceDetailPanelProps = Pick<
   "onExitComplete" | "returnFocus"
 > & {
   open?: boolean;
-  place: Pick<PlaceDetailCardProps, "title" | "image">;
+  place: Pick<PlaceDetailCardProps, "title" | "image"> & { selectionYear?: number | string };
   isStampAcquired?: boolean;
   mobileAboveContent?: ReactNode;
   onClose: () => void;
   onAddToCourse?: () => void;
 };
 
+function PlaceDetailHeaderMeta({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
+  return (
+    <div className="MapPlaceDetailMeta">
+      <AppBadge tone="positive">{place.selectionYear ?? "방문 완료"}</AppBadge>
+    </div>
+  );
+}
+
 function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
   return (
     <div className="MapPlaceDetailToolbar">
-      <div className="MapPlaceDetailBadges">
-        <AppBadge tone="positive">방문 완료</AppBadge>
-      </div>
       <a
         className="MapPlaceDetailSearch"
         href={buildExternalSearchUrl("NAVER", place.title)}
@@ -73,7 +78,12 @@ export function MapPlaceDetailPanel({
         subtitle: "",
         description: MAP_PLACE_DESCRIPTION,
       }}
-      headerLeading={<PlaceDetailActions place={place} />}
+      headerTrailing={
+        <>
+          <PlaceDetailHeaderMeta place={place} />
+          <PlaceDetailActions place={place} />
+        </>
+      }
       footer={
         <AppButton
           className="MapPlaceDetailAddButton"

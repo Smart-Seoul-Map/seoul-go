@@ -20,6 +20,7 @@ export type PlaceDetailPanelProps = Pick<
     trigger?: ReactElement;
     footer?: ReactNode;
     headerLeading?: ReactNode;
+    headerTrailing?: ReactNode;
     mobileAboveContent?: ReactNode;
     children?: ReactNode;
     className?: string;
@@ -52,6 +53,7 @@ function PlaceDetailPanelContent({
   place,
   footer,
   headerLeading,
+  headerTrailing,
   mobileAboveContent,
   children,
   className,
@@ -63,6 +65,7 @@ function PlaceDetailPanelContent({
   | "place"
   | "footer"
   | "headerLeading"
+  | "headerTrailing"
   | "mobileAboveContent"
   | "children"
   | "className"
@@ -73,14 +76,16 @@ function PlaceDetailPanelContent({
 }): ReactElement {
   const presentation = useResponsivePanelPresentation();
   const isBottomSheet = presentation === "bottom-sheet";
+  const hasPanelHeader = !!headerLeading || !!headerTrailing;
 
   return (
     <AppResponsivePanel.Content
       onExitComplete={onExitComplete}
       returnFocus={returnFocus}
       title={place.title}
-      hideTitle={!isBottomSheet && !headerLeading}
+      hideTitle={!isBottomSheet && !hasPanelHeader}
       headerLeading={headerLeading}
+      headerTrailing={headerTrailing}
       showCloseButton={false}
       showHandle
       width="var(--sg-detail-width)"
@@ -91,7 +96,7 @@ function PlaceDetailPanelContent({
         <div className="PlaceDetailPanelAbove">{mobileAboveContent}</div>
       )}
       <AppResponsivePanel.Body className="PlaceDetailPanelBody" aria-label="장소 상세 정보">
-        <PanelPlaceCard place={place} hasPanelHeader={!!headerLeading} />
+        <PanelPlaceCard place={place} hasPanelHeader={hasPanelHeader} />
         {children}
       </AppResponsivePanel.Body>
       {(footer || place.externalLink) && (
@@ -109,6 +114,7 @@ export function PlaceDetailPanel({
   trigger,
   footer,
   headerLeading,
+  headerTrailing,
   mobileAboveContent,
   children,
   className,
@@ -143,6 +149,7 @@ export function PlaceDetailPanel({
         place={place}
         footer={footer}
         headerLeading={headerLeading}
+        headerTrailing={headerTrailing}
         mobileAboveContent={mobileAboveContent}
         className={className}
         style={style}
