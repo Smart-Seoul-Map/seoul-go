@@ -74,22 +74,25 @@ test("복원한 코스로 시작하고 사용자가 높이를 바꾼 후에도 �
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
 });
 
-test("닫기는 저장 내용을 유지하고 미연결 푸터 동작은 아직 비활성 상태다", () => {
+test("닫기는 저장 내용을 유지하고 미연결 푸터 동작은 아직 비활성 상태다", async () => {
   savePlaces(1);
   const onClose = vi.fn();
   render(<StampCoursePanel onClose={onClose} />);
-  for (const name of ["네이버 도보길찾기", "이미지 저장", "링크 공유"]) {
+  for (const name of ["네이버 도보길찾기", "링크 공유"]) {
     expect(screen.getByRole("button", { name })).toHaveAttribute("aria-disabled", "true");
   }
+  expect(await screen.findByRole("button", { name: "이미지 저장" })).toBeEnabled();
   fireEvent.click(screen.getByRole("button", { name: "닫기" }));
   expect(onClose).toHaveBeenCalledOnce();
   expect(stampCourseStore.getState().places).toHaveLength(1);
 });
 
-test("빈 코스는 안내 문구 없이 미연결 푸터를 비활성화하고 저장 개수 변경을 반영한다", () => {
+test("빈 코스는 안내 문구 없이 미연결 푸터를 비활성화하고 저장 개수 변경을 반영한다", async () => {
   render(<StampCoursePanel onClose={vi.fn()} />);
   const footerButtons = () =>
-    document.querySelectorAll('.StampCourseFooter button:not([data-action="kakao"])');
+    document.querySelectorAll(
+      '.StampCourseFooter button:not([data-action="kakao"]):not([data-action="save"])'
+    );
   for (const button of footerButtons()) expect(button).toBeDisabled();
   expect(screen.getByRole("button", { name: "편집" })).toBeDisabled();
   expect(screen.queryByText("아직 담은 코스가 없어요.")).not.toBeInTheDocument();
@@ -98,8 +101,10 @@ test("빈 코스는 안내 문구 없이 미연결 푸터를 비활성화하고 
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute("aria-disabled", "true");
   }
+  expect(await screen.findByRole("button", { name: "이미지 저장" })).toBeEnabled();
   act(() => stampCourseStore.getState().clearPlaces());
   for (const button of footerButtons()) expect(button).toBeDisabled();
+  expect(screen.getByRole("button", { name: "이미지 저장" })).toBeDisabled();
 });
 
 test("편집에서 개별 삭제를 즉시 저장하고 실행 취소로 원래 위치에 복구한다", () => {
