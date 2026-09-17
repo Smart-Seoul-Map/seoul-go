@@ -5,7 +5,11 @@ import { afterEach, expect, test, vi } from "vitest";
 import { MapPlaceDetailPanel } from "./MapPlaceDetailPanel";
 
 const originalWidth = window.innerWidth;
-const place = { title: "해방촌 신흥시장", image: { src: "/market.jpg", alt: "시장 대표 이미지" } };
+const place = {
+  title: "해방촌 신흥시장",
+  selectionYear: 2025,
+  image: { src: "/market.jpg", alt: "시장 대표 이미지" },
+};
 
 function resize(width: number) {
   act(() => {
@@ -29,6 +33,9 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(title.closest(".AppResponsivePanelHeader")).not.toBeNull();
   expect(within(dialog).getAllByRole("heading", { name: place.title })).toHaveLength(1);
   const search = within(dialog).getByRole("link", { name: `${place.title} 네이버 검색` });
+  expect(within(title.closest(".AppResponsivePanelHeader")!).getByText("2025")).toHaveClass(
+    "AppBadge-content"
+  );
   const url = new URL(search.getAttribute("href")!);
   expect(url.hostname).toBe("search.naver.com");
   expect(url.searchParams.get("query")).toBe(place.title);

@@ -12,7 +12,7 @@ import { PATH, parseExplorationSpawnCenter } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
 import { getLine2StationById } from "@features/entry-exploration";
-import { StampCourseSummary } from "@features/course";
+import { StampCoursePanel, StampCourseSummary } from "@features/course";
 import {
   ExplorationPage,
   STATION_EXPLORATION_RADIUS_METERS,
@@ -21,6 +21,7 @@ import {
   parseDistrictExplorationTargetIdParam,
   type DistrictExplorationTarget,
   type ExplorationPlacePanelProps as ExplorationPlacePanelRenderProps,
+  type ExplorationPanelLifecycleProps,
   type ExplorationTarget,
   type StationExplorationTarget,
 } from "@features/exploration";
@@ -34,7 +35,8 @@ import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
 
 const explorationPageSlots = {
-  mapFooter: <StampCourseSummary />,
+  renderMapFooter: (onOpenCourse: () => void) => <StampCourseSummary onOpen={onOpenCourse} />,
+  renderCoursePanel: (props: ExplorationPanelLifecycleProps) => <StampCoursePanel {...props} />,
   renderPlacePanel: (props: ExplorationPlacePanelRenderProps) => (
     <ExplorationPlacePanel key={props.place.id} {...props} />
   ),

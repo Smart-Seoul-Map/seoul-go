@@ -53,3 +53,4 @@ export {
 } from "./application/stampCourseStore";
 export { stampCourseStore, useStampCourseStore } from "./application/useStampCourseStore";
 export { StampCourseSummary } from "./presentation/StampCourseSummary";
+export { StampCoursePanel } from "./presentation/StampCoursePanel";

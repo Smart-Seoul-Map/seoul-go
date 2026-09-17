@@ -1,6 +1,9 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import {
   AppResponsivePanel,
+  FLOATING_PANEL_SIDE_OPTIONS,
+  FLOATING_PANEL_SHEET_OPTIONS,
+  type AppResponsivePanelContentProps,
   useResponsivePanelPresentation,
   type AppResponsivePanelRootProps,
   type PanelSnapPoint,
@@ -8,24 +11,24 @@ import {
 import { PlaceDetailCard, type PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailExternalLink } from "./PlaceDetailExternalLink";
 
-const PLACE_DETAIL_SHEET_SNAP_POINTS = [0.5, 0.9] as const;
-
 export type PlaceDetailPanelProps = Pick<
   AppResponsivePanelRootProps,
   "open" | "onOpenChange" | "defaultOpen" | "modal"
-> & {
-  place: PlaceDetailCardProps;
-  trigger?: ReactElement;
-  footer?: ReactNode;
-  headerLeading?: ReactNode;
-  mobileAboveContent?: ReactNode;
-  children?: ReactNode;
-  className?: string;
-  mobileMaxHeight?: CSSProperties["maxHeight"];
-  mobileSnapPoints?: PanelSnapPoint[];
-  mobileActiveSnapPoint?: PanelSnapPoint | null;
-  onMobileSnapPointChange?: (point: PanelSnapPoint | null) => void;
-};
+> &
+  Pick<AppResponsivePanelContentProps, "onExitComplete" | "returnFocus"> & {
+    place: PlaceDetailCardProps;
+    trigger?: ReactElement;
+    footer?: ReactNode;
+    headerLeading?: ReactNode;
+    headerTrailing?: ReactNode;
+    mobileAboveContent?: ReactNode;
+    children?: ReactNode;
+    className?: string;
+    mobileMaxHeight?: CSSProperties["maxHeight"];
+    mobileSnapPoints?: PanelSnapPoint[];
+    mobileActiveSnapPoint?: PanelSnapPoint | null;
+    onMobileSnapPointChange?: (point: PanelSnapPoint | null) => void;
+  };
 
 type PlaceDetailPanelStyle = CSSProperties & {
   "--place-detail-mobile-max-height"?: CSSProperties["maxHeight"];
@@ -50,24 +53,39 @@ function PlaceDetailPanelContent({
   place,
   footer,
   headerLeading,
+  headerTrailing,
   mobileAboveContent,
   children,
   className,
   style,
+  onExitComplete,
+  returnFocus,
 }: Pick<
   PlaceDetailPanelProps,
-  "place" | "footer" | "headerLeading" | "mobileAboveContent" | "children" | "className"
+  | "place"
+  | "footer"
+  | "headerLeading"
+  | "headerTrailing"
+  | "mobileAboveContent"
+  | "children"
+  | "className"
+  | "onExitComplete"
+  | "returnFocus"
 > & {
   style: PlaceDetailPanelStyle;
 }): ReactElement {
   const presentation = useResponsivePanelPresentation();
   const isBottomSheet = presentation === "bottom-sheet";
+  const hasPanelHeader = !!headerLeading || !!headerTrailing;
 
   return (
     <AppResponsivePanel.Content
+      onExitComplete={onExitComplete}
+      returnFocus={returnFocus}
       title={place.title}
-      hideTitle={!isBottomSheet && !headerLeading}
+      hideTitle={!isBottomSheet && !hasPanelHeader}
       headerLeading={headerLeading}
+      headerTrailing={headerTrailing}
       showCloseButton={false}
       showHandle
       width="var(--sg-detail-width)"
@@ -77,8 +95,8 @@ function PlaceDetailPanelContent({
       {isBottomSheet && mobileAboveContent && (
         <div className="PlaceDetailPanelAbove">{mobileAboveContent}</div>
       )}
-      <AppResponsivePanel.Body className="PlaceDetailPanelBody">
-        <PanelPlaceCard place={place} hasPanelHeader={!!headerLeading} />
+      <AppResponsivePanel.Body className="PlaceDetailPanelBody" aria-label="장소 상세 정보">
+        <PanelPlaceCard place={place} hasPanelHeader={hasPanelHeader} />
         {children}
       </AppResponsivePanel.Body>
       {(footer || place.externalLink) && (
@@ -96,6 +114,7 @@ export function PlaceDetailPanel({
   trigger,
   footer,
   headerLeading,
+  headerTrailing,
   mobileAboveContent,
   children,
   className,
@@ -103,6 +122,8 @@ export function PlaceDetailPanel({
   mobileSnapPoints,
   mobileActiveSnapPoint,
   onMobileSnapPointChange,
+  onExitComplete,
+  returnFocus,
   ...rootProps
 }: PlaceDetailPanelProps): ReactElement {
   const style: PlaceDetailPanelStyle = {
@@ -113,24 +134,22 @@ export function PlaceDetailPanel({
   return (
     <AppResponsivePanel.Root
       {...rootProps}
-      sidePanelRootProps={{ presentation: "floating", direction: "right", size: "small" }}
+      sidePanelRootProps={FLOATING_PANEL_SIDE_OPTIONS}
       bottomSheetRootProps={{
-        handleOnly: true,
-        closeOnFinalSnapClick: false,
-        snapPoints: mobileSnapPoints ?? [...PLACE_DETAIL_SHEET_SNAP_POINTS],
+        ...FLOATING_PANEL_SHEET_OPTIONS,
+        snapPoints: mobileSnapPoints ?? FLOATING_PANEL_SHEET_OPTIONS.snapPoints,
         activeSnapPoint: mobileActiveSnapPoint,
         setActiveSnapPoint: onMobileSnapPointChange,
-        closeOnEscape: true,
-        closeOnInteractOutside: true,
-        lazyMount: true,
-        unmountOnExit: true,
       }}
     >
       {trigger && <AppResponsivePanel.Trigger asChild>{trigger}</AppResponsivePanel.Trigger>}
       <PlaceDetailPanelContent
+        onExitComplete={onExitComplete}
+        returnFocus={returnFocus}
         place={place}
         footer={footer}
         headerLeading={headerLeading}
+        headerTrailing={headerTrailing}
         mobileAboveContent={mobileAboveContent}
         className={className}
         style={style}

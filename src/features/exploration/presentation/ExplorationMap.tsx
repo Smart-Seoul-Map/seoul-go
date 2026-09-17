@@ -10,6 +10,7 @@ import { useKeyboardCharacterDirection } from "@shared/lib/character/useKeyboard
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppVirtualJoystick } from "@shared/ui/virtual-joystick";
+import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import {
   disableExplorationMapDragInteractions,
@@ -41,9 +42,9 @@ import { CharacterModelOverlay } from "./CharacterModelOverlay";
 
 type ExplorationMapProps = {
   districtId?: number;
-  hasActivePlaceCard?: boolean;
+  hasActivePanel?: boolean;
   initialCenter?: Coordinates;
-  onPlaceMarkerClear?: () => void;
+  onMapMoveRequest?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
   revealedPlaceIds?: ReadonlySet<string>;
@@ -62,23 +63,24 @@ function formatMapZoomLevel(zoomLevel: number): string {
 
 export function ExplorationMap({
   districtId,
-  hasActivePlaceCard = false,
+  hasActivePanel = false,
   initialCenter,
-  onPlaceMarkerClear,
+  onMapMoveRequest,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   revealedPlaceIds = new Set(),
   stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const isMobileViewport = useIsMobileViewport();
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const placeMarkersRef = useRef(placeMarkers);
   placeMarkersRef.current = placeMarkers;
-  const hasActivePlaceCardRef = useRef(hasActivePlaceCard);
-  hasActivePlaceCardRef.current = hasActivePlaceCard;
+  const hasActivePanelRef = useRef(hasActivePanel);
+  hasActivePanelRef.current = hasActivePanel;
   const onPlaceMarkerSelectRef = useRef(onPlaceMarkerSelect);
   onPlaceMarkerSelectRef.current = onPlaceMarkerSelect;
   const revealedPlaceIdsRef = useRef(revealedPlaceIds);
@@ -96,7 +98,7 @@ export function ExplorationMap({
     onFrame: ({ position }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
 
-      if (hasActivePlaceCardRef.current) {
+      if (hasActivePanelRef.current) {
         return;
       }
 
@@ -108,7 +110,7 @@ export function ExplorationMap({
       });
 
       if (arrivedPlace) {
-        hasActivePlaceCardRef.current = true;
+        hasActivePanelRef.current = true;
         characterMovementRef.current.stop();
         onPlaceMarkerSelectRef.current?.(arrivedPlace);
       }
@@ -119,7 +121,7 @@ export function ExplorationMap({
   characterMovementRef.current = characterMovement;
 
   const handleCharacterDirectionChange = useCallback((direction: CharacterDirection) => {
-    if (hasActivePlaceCardRef.current || (direction.x === 0 && direction.y === 0)) {
+    if (hasActivePanelRef.current || (direction.x === 0 && direction.y === 0)) {
       characterMovementRef.current.stop();
       return;
     }
@@ -137,15 +139,15 @@ export function ExplorationMap({
   }, []);
 
   useKeyboardCharacterDirection({
-    disabled: hasActivePlaceCard,
+    disabled: hasActivePanel,
     onDirectionChange: handleCharacterDirectionChange,
   });
 
   useEffect(() => {
-    if (hasActivePlaceCard) {
+    if (hasActivePanel) {
       characterMovementRef.current.stop();
     }
-  }, [hasActivePlaceCard]);
+  }, [hasActivePanel]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -198,7 +200,7 @@ export function ExplorationMap({
     });
 
     map.on("click", (event) => {
-      onPlaceMarkerClear?.();
+      onMapMoveRequest?.();
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
       characterMovementRef.current.moveTo(target);
     });
@@ -208,7 +210,7 @@ export function ExplorationMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [districtBoundary, initialPosition, onPlaceMarkerClear, stationRadiusMeters]);
+  }, [districtBoundary, initialPosition, onMapMoveRequest, stationRadiusMeters]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -230,7 +232,7 @@ export function ExplorationMap({
   const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
 
   return (
-    <div className="map-canvas-stack">
+    <div className="map-canvas-stack" data-mobile={isMobileViewport}>
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
       {zoomLevelLabel ? (
         <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
@@ -245,7 +247,7 @@ export function ExplorationMap({
       <AppVirtualJoystick
         ariaLabel="캐릭터 이동"
         className="exploration-map-joystick"
-        disabled={hasActivePlaceCard}
+        disabled={hasActivePanel}
         onDirectionChange={handleCharacterDirectionChange}
       />
     </div>

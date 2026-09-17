@@ -13,6 +13,7 @@ export type ExplorationStampCourseToastMessage = {
 
 export type ExplorationStampCoursePlaceInput = {
   id: string;
+  imageUrl: string;
   name: string;
   position: {
     lat: number;
@@ -26,6 +27,7 @@ export function createStampCoursePlaceInputFromSelection(
 ): ExplorationStampCoursePlaceInput {
   return {
     id: place.id,
+    imageUrl: place.imageUrl,
     name: place.name,
     position: { ...place.position },
     themeId: place.themeId,

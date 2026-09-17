@@ -71,6 +71,7 @@ type PanelModalOptions = {
   dismissible: boolean;
   contentRef: RefObject<HTMLElement | null>;
   onEscape: () => void;
+  returnFocus?: () => HTMLElement | null;
 };
 
 export function usePanelModal({
@@ -81,10 +82,12 @@ export function usePanelModal({
   dismissible,
   contentRef,
   onEscape,
+  returnFocus,
 }: PanelModalOptions): void {
-  const callbacks = useRef({ dismissible, onEscape });
+  const callbacks = useRef({ dismissible, onEscape, returnFocus });
+  const pendingFocus = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
-    callbacks.current = { dismissible, onEscape };
+    callbacks.current = { dismissible, onEscape, returnFocus };
   });
 
   useLayoutEffect(() => {
@@ -143,8 +146,21 @@ export function usePanelModal({
       const wasTop = layers.at(-1)?.id === id;
       layers.splice(layers.indexOf(layer), 1);
       syncModalEnvironment();
-      if (wasTop && previousFocus?.isConnected && !previousFocus.closest("[inert]"))
-        previousFocus.focus({ preventScroll: true });
+      const target = callbacks.current.returnFocus
+        ? callbacks.current.returnFocus()
+        : previousFocus;
+      if (wasTop && target?.isConnected && !target.closest("[inert], [hidden]")) {
+        pendingFocus.current = target;
+        target.focus({ preventScroll: true });
+      }
     };
   }, [active, contentRef, id, modal, parentId]);
+  // React can restore the old selection after effect cleanup while exit content is retained.
+  useLayoutEffect(() => {
+    const target = pendingFocus.current;
+    pendingFocus.current = null;
+    if (!active && target?.isConnected && !target.closest("[inert], [hidden]")) {
+      target.focus({ preventScroll: true });
+    }
+  }, [active]);
 }
