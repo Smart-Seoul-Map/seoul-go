@@ -14,7 +14,13 @@ type StampCourseBoardProps = {
   onReorder: (placeId: string, targetPlaceId: string) => void;
 };
 
-function StampCourseSealContent({ imageUrl }: { imageUrl?: string }): ReactElement {
+function StampCourseSealContent({
+  imageUrl,
+  isFilled,
+}: {
+  imageUrl?: string;
+  isFilled: boolean;
+}): ReactElement {
   const [failedUrl, setFailedUrl] = useState<string>();
 
   if (imageUrl && imageUrl !== failedUrl) {
@@ -25,6 +31,17 @@ function StampCourseSealContent({ imageUrl }: { imageUrl?: string }): ReactEleme
         alt=""
         draggable={false}
         onError={() => setFailedUrl(imageUrl)}
+      />
+    );
+  }
+
+  if (isFilled) {
+    return (
+      <img
+        className="StampCourseSealImage"
+        src="/images/seoul-characters/hachi.png"
+        alt=""
+        draggable={false}
       />
     );
   }
@@ -106,7 +123,7 @@ export function StampCourseBoard({
                   onPointerDown={(event) => drag.handlePointerDown(event, slot.place.id)}
                   onKeyDown={(event) => handleKeyDown(event, slot.index)}
                 >
-                  <StampCourseSealContent imageUrl={slot.place.imageUrl} />
+                  <StampCourseSealContent imageUrl={slot.place.imageUrl} isFilled />
                 </AppButton>
                 <AppButton
                   className="StampCourseRemoveButton"
@@ -124,7 +141,7 @@ export function StampCourseBoard({
               </>
             ) : (
               <span className="StampCourseSeal" aria-hidden="true">
-                <StampCourseSealContent imageUrl={slot.place?.imageUrl} />
+                <StampCourseSealContent imageUrl={slot.place?.imageUrl} isFilled={!!slot.place} />
               </span>
             )}
           </div>
