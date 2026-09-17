@@ -159,7 +159,7 @@ test("모든 장소를 개별 삭제한 뒤에도 완료로 편집을 종료할 
   expect(screen.getByRole("button", { name: "편집" })).toBeDisabled();
 });
 
-test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에서 표시된다", () => {
+test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에서 표시되고 실패하면 대체 이미지를 표시한다", () => {
   savePlaces(1);
   const places = stampCourseStore.getState().places.map((place) => ({
     ...place,
@@ -173,8 +173,10 @@ test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에
   fireEvent.click(screen.getByRole("button", { name: "편집" }));
   expect(image()).toHaveAttribute("src", "https://example.com/place.jpg");
   fireEvent.error(image()!);
-  expect(image()).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "저장된 장소 1 순서 변경" })).toHaveTextContent("GO");
+  expect(image()).toHaveAttribute("src", "/images/seoul-characters/hachi.png");
+  expect(screen.getByRole("button", { name: "저장된 장소 1 순서 변경" })).not.toHaveTextContent(
+    "GO"
+  );
 });
 
 test("연속 삭제의 실행 취소는 마지막 삭제만 복구한다", () => {
@@ -265,12 +267,11 @@ test("실행 취소 전에 코스가 가득 차면 기존 제한을 유지하고
   ).toBeInTheDocument();
 });
 
-test.each([0, 1])("코스가 %i개면 카카오 이동 대신 최소 개수 안내를 표시한다", (count) => {
+test.each([0, 1])("코스가 %i개면 카카오 도보길찾기를 비활성화한다", (count) => {
   savePlaces(count);
   const open = vi.spyOn(window, "open").mockReturnValue(null);
   render(<StampCoursePanel onClose={vi.fn()} />);
-  fireEvent.click(screen.getByRole("button", { name: "카카오 도보길찾기" }));
-  expect(screen.getByText("도보길찾기는 장소를 2개 이상 담아주세요")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "카카오 도보길찾기" })).toBeDisabled();
   expect(open).not.toHaveBeenCalled();
 });
 

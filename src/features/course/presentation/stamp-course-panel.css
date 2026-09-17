@@ -30,7 +30,7 @@
 }
 
 .StampCourseHeader .AppResponsivePanelTitle {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   font-family: var(--sg-font-alrim);
   font-size: var(--sg-course-title-size);
@@ -41,6 +41,14 @@
   flex: none;
   font-size: var(--sg-course-count-size);
   font-variant-numeric: tabular-nums;
+}
+
+.StampCourseHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-course-content-gap);
+  flex: none;
+  margin-left: auto;
 }
 
 .StampCoursePanel[data-presentation] .StampCourseBody {

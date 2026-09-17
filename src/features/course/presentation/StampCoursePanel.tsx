@@ -28,12 +28,14 @@ type StampCoursePanelProps = Pick<
 type StampCourseFooterProps = {
   isEmpty: boolean;
   isEditing: boolean;
+  hasEnoughPlacesForWalkRoute: boolean;
   onKakaoWalk: () => void;
 };
 
 function StampCourseFooter({
   isEmpty,
   isEditing,
+  hasEnoughPlacesForWalkRoute,
   onKakaoWalk,
 }: StampCourseFooterProps): ReactElement {
   return (
@@ -41,7 +43,7 @@ function StampCourseFooter({
       <AppButton
         className="StampCourseAction"
         data-action="kakao"
-        disabled={isEditing}
+        disabled={!hasEnoughPlacesForWalkRoute || isEditing}
         onClick={onKakaoWalk}
         aria-label="카카오 도보길찾기"
         title="카카오 도보길찾기"
@@ -132,20 +134,22 @@ export function StampCoursePanel({
             <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
               {places.length}/{MAX_STAMP_COURSE_PLACES}
             </span>
-            <AppTextButton
-              size="sm"
-              variant={editing.isEditing ? "danger" : "neutral"}
-              disabled={places.length === 0}
-              onClick={editing.isEditing ? editing.handleClearPlaces : editing.startEditing}
-            >
-              {editing.isEditing ? "전체 삭제" : "편집"}
-            </AppTextButton>
-            {editing.isEditing && (
-              <AppTextButton size="sm" variant="neutral" onClick={editing.finishEditing}>
-                완료
+            <div className="StampCourseHeaderActions">
+              <AppTextButton
+                size="sm"
+                variant={editing.isEditing ? "danger" : "neutral"}
+                disabled={places.length === 0}
+                onClick={editing.isEditing ? editing.handleClearPlaces : editing.startEditing}
+              >
+                {editing.isEditing ? "전체 삭제" : "편집"}
               </AppTextButton>
-            )}
-            <AppResponsivePanel.CloseButton iconOnly />
+              {editing.isEditing && (
+                <AppTextButton size="sm" variant="neutral" onClick={editing.finishEditing}>
+                  완료
+                </AppTextButton>
+              )}
+              <AppResponsivePanel.CloseButton iconOnly />
+            </div>
           </>
         }
         showCloseButton={false}
@@ -164,6 +168,7 @@ export function StampCoursePanel({
         <StampCourseFooter
           isEmpty={places.length === 0}
           isEditing={editing.isEditing}
+          hasEnoughPlacesForWalkRoute={places.length >= 2}
           onKakaoWalk={handleKakaoWalk}
         />
       </AppResponsivePanel.Content>
