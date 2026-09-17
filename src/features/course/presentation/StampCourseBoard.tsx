@@ -27,6 +27,7 @@ function StampCourseSealContent({
     return (
       <img
         className="StampCourseSealImage"
+        crossOrigin="anonymous"
         src={imageUrl}
         alt=""
         draggable={false}

@@ -1,0 +1,22 @@
+.StampCourseCapture {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  pointer-events: none;
+}
+
+.StampCourseCaptureCard {
+  --course-seal-size: calc(var(--sg-spacing-16) * 2);
+  --course-row-pitch: calc(var(--course-seal-size) + var(--sg-spacing-16));
+  width: calc(var(--course-seal-size) * 2 + var(--sg-spacing-16) * 2);
+  padding: var(--sg-spacing-4);
+  background: linear-gradient(var(--sg-course-board-top), var(--sg-course-board-bottom));
+}
+
+.StampCourseCaptureCard .StampCourseBoard {
+  padding: var(--sg-spacing-6) var(--sg-spacing-4);
+}
+
+.StampCourseCaptureCard .StampCoursePlaceName {
+  --sg-course-place-name-size: var(--sg-font-size-3);
+}

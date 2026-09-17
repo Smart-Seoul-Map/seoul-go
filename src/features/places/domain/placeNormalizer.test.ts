@@ -14,7 +14,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
       COT_COORD_X: "126.97842",
       COT_COORD_Y: "37.56668",
       COT_GU_NAME: "district-a",
-      COT_IMG_MAIN_URL: "https://example.com/library.jpg",
+      COT_IMG_MAIN_URL: "https://map.seoul.go.kr/library.jpg",
       COT_THEME_ID: "100032",
     });
 
@@ -22,7 +22,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
       address: "Seoul Jung-gu",
       districtName: "district-a",
       id: "smart-seoul:100032:heritage-1",
-      imageUrl: "https://example.com/library.jpg",
+      imageUrl: "/api/place-image?url=https%3A%2F%2Fmap.seoul.go.kr%2Flibrary.jpg",
       name: "Library",
       position: {
         lat: 37.56668,
@@ -33,7 +33,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
     });
   });
 
-  test("normalizes Smart Seoul relative image paths to absolute URLs", () => {
+  test("normalizes Smart Seoul relative image paths to proxied absolute URLs", () => {
     const slashRelativePlace = normalizeSmartSeoulThemeContent({
       COT_CONTS_ID: "soulspot-1",
       COT_CONTS_NAME: "Soul spot",
@@ -52,10 +52,10 @@ describe("normalizeSmartSeoulThemeContent", () => {
     });
 
     expect(slashRelativePlace?.imageUrl).toBe(
-      "https://map.seoul.go.kr/smgis2/file/ucimgs/conts/100575/%EC%95%84%EB%8B%A4%EB%AA%A8%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4%20(1).jpg"
+      "/api/place-image?url=https%3A%2F%2Fmap.seoul.go.kr%2Fsmgis2%2Ffile%2Fucimgs%2Fconts%2F100575%2F%25EC%2595%2584%25EB%258B%25A4%25EB%25AA%25A8%25EC%258A%25A4%25ED%258A%259C%25EB%2594%2594%25EC%2598%25A4%2520(1).jpg"
     );
     expect(pathRelativePlace?.imageUrl).toBe(
-      "https://map.seoul.go.kr/smgis/ucimgs/conts/1777251935025/place.jpg"
+      "/api/place-image?url=https%3A%2F%2Fmap.seoul.go.kr%2Fsmgis%2Fucimgs%2Fconts%2F1777251935025%2Fplace.jpg"
     );
   });
 
