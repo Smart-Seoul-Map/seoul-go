@@ -4,6 +4,7 @@ import maplibregl from "maplibre-gl";
 
 import type { MapMarkerFeature } from "@shared/lib/maplibre/mapMarkerFeature";
 import { AppBadge } from "@shared/ui/badge";
+import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
 import type { Coordinates } from "../domain/explorationGeo";
 import "./ExplorationImageYearMarker.css";
 
@@ -55,7 +56,14 @@ export function ExplorationImageYearMarker({
       />
       {selectionYear !== undefined && (
         <span className="ExplorationImageYearMarkerYear">
-          <AppBadge variant="outline">{selectionYear}</AppBadge>
+          <AppBadge
+            size="number-lg"
+            tone={getSelectionYearBadgeTone(selectionYear)}
+            variant="outline"
+            textPolicy="singleLine"
+          >
+            {selectionYear}
+          </AppBadge>
         </span>
       )}
     </button>,
