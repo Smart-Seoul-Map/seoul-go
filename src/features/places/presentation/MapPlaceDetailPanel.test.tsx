@@ -37,6 +37,10 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(within(title.closest(".AppResponsivePanelHeader")!).getByText("2025")).toHaveClass(
     "AppBadge-content"
   );
+  const yearBadge = within(dialog).getByText("2025").closest(".AppBadge");
+  expect(yearBadge).toHaveAttribute("data-size", width === 390 ? "number-sm" : "number-md");
+  expect(yearBadge).toHaveAttribute("data-tone", "info");
+  expect(yearBadge).toHaveAttribute("data-variant", "solid");
   const url = new URL(search.getAttribute("href")!);
   expect(url.hostname).toBe("search.naver.com");
   expect(url.searchParams.get("query")).toBe(place.title);

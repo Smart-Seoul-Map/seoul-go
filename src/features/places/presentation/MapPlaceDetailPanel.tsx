@@ -6,11 +6,13 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 import {
   AppResponsivePanel,
+  useResponsivePanelPresentation,
   type AppResponsivePanelContentProps,
 } from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
+import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
 import "./map-place-detail-panel.css";
 
 export type MapPlaceDetailPanelProps = Pick<
@@ -30,13 +32,19 @@ export type MapPlaceDetailPanelProps = Pick<
 function PlaceDetailHeaderMeta({
   place,
 }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement | null {
+  const presentation = useResponsivePanelPresentation();
   if (place.selectionYear === undefined) return null;
 
   return (
     <div className="MapPlaceDetailMeta">
-      <span className="MapPlaceDetailYear" data-year={place.selectionYear}>
-        <AppBadge>{place.selectionYear}</AppBadge>
-      </span>
+      <AppBadge
+        size={presentation === "bottom-sheet" ? "number-sm" : "number-md"}
+        tone={getSelectionYearBadgeTone(place.selectionYear)}
+        variant="solid"
+        textPolicy="singleLine"
+      >
+        {place.selectionYear}
+      </AppBadge>
     </div>
   );
 }
