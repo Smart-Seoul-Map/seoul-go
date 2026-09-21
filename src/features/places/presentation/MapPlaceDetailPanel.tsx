@@ -27,15 +27,16 @@ export type MapPlaceDetailPanelProps = Pick<
   onAddToCourse?: () => void;
 };
 
-function PlaceDetailHeaderMeta({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
+function PlaceDetailHeaderMeta({
+  place,
+}: Pick<MapPlaceDetailPanelProps, "place">): ReactElement | null {
+  if (place.selectionYear === undefined) return null;
+
   return (
     <div className="MapPlaceDetailMeta">
-      {place.selectionYear !== undefined && (
-        <span className="MapPlaceDetailYear" data-year={place.selectionYear}>
-          <AppBadge>{place.selectionYear}</AppBadge>
-        </span>
-      )}
-      <AppBadge tone="positive">방문 완료</AppBadge>
+      <span className="MapPlaceDetailYear" data-year={place.selectionYear}>
+        <AppBadge>{place.selectionYear}</AppBadge>
+      </span>
     </div>
   );
 }
