@@ -118,7 +118,7 @@ describe("ExplorationPage", () => {
     );
 
     expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
-    expect(screen.getByText("용산구 탐방중")).toBeInTheDocument();
+    expect(screen.getByText("용산구")).toBeInTheDocument();
   });
 
   test("저장된 방문 장소 수를 방문지와 테마별 배지에 반영한다", () => {

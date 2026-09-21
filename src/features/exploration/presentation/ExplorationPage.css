@@ -32,14 +32,6 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
   z-index: 4;
 }
 
-.exploration-district-status-badge-dot {
-  background: var(--sg-place-theme-yellow);
-  border-radius: var(--sg-radius-full);
-  display: block;
-  height: var(--sg-badge-dot-size);
-  width: var(--sg-badge-dot-size);
-}
-
 .exploration-theme-place-count-list {
   display: flex;
   flex-wrap: wrap;
@@ -58,13 +50,6 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
   display: flex;
   flex-shrink: 0;
   min-width: 0;
-}
-
-.exploration-theme-place-count-badge-dot {
-  border-radius: var(--sg-radius-full);
-  flex: none;
-  height: var(--sg-badge-dot-size);
-  width: var(--sg-badge-dot-size);
 }
 
 .exploration-place-card-layer {

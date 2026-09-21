@@ -168,7 +168,7 @@ export function ExplorationPage({
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {selectionYearLabel && (
             <li className="exploration-theme-place-count-item">
-              <AppBadge size="lg" variant="solid">
+              <AppBadge size="lg" variant="surface">
                 {selectionYearLabel}
               </AppBadge>
             </li>
@@ -176,8 +176,6 @@ export function ExplorationPage({
           {displayedThemeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge
-                markerColor={item.markerColor}
-                markerColorToken={item.markerColorToken}
                 name={item.name}
                 totalCount={item.totalCount}
                 visitedCount={item.visitedCount}
