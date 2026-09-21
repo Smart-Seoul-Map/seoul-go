@@ -107,6 +107,6 @@ test("서울에디션25 패널은 API 설명과 선정연도를 표시한다", (
 
   expect(screen.getByText("API에서 받은 장소별 설명")).toBeInTheDocument();
   expect(screen.getByText("2026")).toBeInTheDocument();
-  expect(screen.getByText("방문 완료")).toBeInTheDocument();
+  expect(screen.queryByText("방문 완료")).not.toBeInTheDocument();
   expect(screen.getByText("아직 획득 전")).toBeInTheDocument();
 });
