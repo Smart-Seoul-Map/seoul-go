@@ -223,13 +223,6 @@
 }
 
 .StampCoursePlaceName {
-  --sg-badge-outline-bg: var(--sg-color-bg-floating);
-  --sg-badge-stroke: var(--sg-course-seal-stroke);
-  --sg-badge-font-size: var(--sg-course-place-name-size);
-  --sg-badge-font-weight: var(--sg-font-weight-regular);
-  --sg-badge-line-height: var(--sg-line-height-4);
-  --sg-badge-height-md: var(--sg-spacing-5);
-  --sg-badge-padding-x-md: var(--sg-spacing-2);
   position: relative;
   z-index: 1;
   display: flex;
@@ -237,20 +230,6 @@
   width: var(--course-seal-size);
   max-width: 100%;
   margin-top: calc(-1 * var(--sg-spacing-3));
-  font-family: var(--sg-font-namsan);
-  text-align: center;
-}
-
-.StampCoursePlaceName .AppBadge {
-  width: 100%;
-  justify-content: center;
-  white-space: normal;
-}
-
-.StampCoursePlaceName .AppBadge-content {
-  max-height: 2lh;
-  overflow-wrap: anywhere;
-  text-overflow: clip;
 }
 
 .StampCoursePanel[data-presentation] .StampCourseFooter {

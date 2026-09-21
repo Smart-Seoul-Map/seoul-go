@@ -147,7 +147,9 @@ export function StampCourseBoard({
           </div>
           {slot.place ? (
             <span className="StampCoursePlaceName" title={slot.place.name}>
-              <AppBadge variant="outline">{slot.place.name}</AppBadge>
+              <AppBadge size="xs" variant="outline" width="fill" textPolicy="twoLines">
+                {slot.place.name}
+              </AppBadge>
             </span>
           ) : null}
         </li>
