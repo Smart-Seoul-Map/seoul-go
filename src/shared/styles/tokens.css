@@ -450,6 +450,11 @@
   --sg-map-detail-header-badge-height: var(--sg-spacing-8);
   --sg-map-detail-header-badge-mobile-width: var(--sg-spacing-14);
   --sg-map-detail-header-badge-mobile-height: var(--sg-spacing-7);
+  --sg-map-detail-header-action-size: var(--sg-spacing-10);
+  --sg-map-detail-header-icon-size: var(--sg-spacing-10);
+  --sg-map-detail-header-icon-mobile-size: var(--sg-spacing-5);
+  --sg-map-detail-header-line-height: var(--sg-spacing-10);
+  --sg-map-detail-header-title-mobile-line-height: var(--sg-spacing-8);
   --sg-map-detail-acquired-button-bg: var(--sg-v3-green-500);
   --sg-map-detail-acquired-button-bg-pressed: var(--sg-v3-green-500);
   --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);
