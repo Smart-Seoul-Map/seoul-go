@@ -290,24 +290,35 @@
   --sg-icon-button-state-disabled: var(--sg-color-text-disabled);
 
   /* Badge component tokens */
-  --sg-badge-solid-bg: color-mix(in srgb, var(--sg-color-bg-floating) 92%, transparent);
-  --sg-badge-weak-bg: var(--sg-color-bg-neutral-weak);
-  --sg-badge-outline-bg: var(--sg-color-bg-transparent);
-  --sg-badge-stroke: var(--sg-color-stroke-weak);
-  --sg-badge-fg: var(--sg-color-text-default);
-  --sg-badge-muted-fg: var(--sg-color-text-muted);
-  --sg-badge-brand-fg: var(--sg-color-text-brand);
-  --sg-badge-info-fg: var(--sg-color-text-info);
-  --sg-badge-warning-fg: var(--sg-color-text-warning);
-  --sg-badge-positive-fg: var(--sg-color-text-positive);
+  --sg-badge-surface-bg: color-mix(in srgb, var(--sg-color-bg-floating) 92%, transparent);
+  --sg-badge-outline-bg: var(--sg-color-bg-floating);
+  --sg-badge-neutral-color: var(--sg-v3-ink-700);
+  --sg-badge-brand-color: var(--sg-v3-pink-500);
+  --sg-badge-info-color: var(--sg-v3-blue-600);
+  --sg-badge-warning-color: var(--sg-place-theme-yellow);
+  --sg-badge-positive-color: var(--sg-color-text-positive);
+  --sg-badge-font-size: var(--sg-typography-body-font-size);
+  --sg-badge-font-weight: var(--sg-font-weight-regular);
+  --sg-badge-line-height: var(--sg-typography-body-line-height);
   --sg-badge-radius: var(--sg-pill-radius);
   --sg-badge-shadow: var(--sg-panel-shadow);
+  --sg-badge-height-xs: var(--sg-spacing-5);
+  --sg-badge-height-sm: var(--sg-spacing-7);
+  --sg-badge-padding-x-xs: var(--sg-spacing-2);
+  --sg-badge-padding-x-sm: var(--sg-spacing-3_5);
   --sg-badge-height-md: var(--sg-icon-button-size-nav);
   --sg-badge-height-lg: var(--sg-spacing-13);
   --sg-badge-padding-x-md: var(--sg-spacing-5);
   --sg-badge-padding-x-lg: var(--sg-spacing-6);
   --sg-badge-gap: var(--sg-spacing-2);
-  --sg-badge-dot-size: var(--sg-spacing-3_5);
+  --sg-badge-number-width-sm: var(--sg-spacing-14);
+  --sg-badge-number-width-md: var(--sg-spacing-16);
+  --sg-badge-number-width-lg: 72px;
+  --sg-badge-number-height-sm: var(--sg-spacing-7);
+  --sg-badge-number-height-md: var(--sg-spacing-8);
+  --sg-badge-number-height-lg: 30px;
+  --sg-badge-number-padding-x-lg: var(--sg-spacing-3);
+  --sg-badge-number-stroke-lg: var(--sg-spacing-0_5);
 
   /* Dialog component tokens */
   --sg-dialog-backdrop-bg: var(--sg-color-bg-overlay);
@@ -439,17 +450,11 @@
   --sg-detail-location-icon-size: 41px;
 
   /* Main map place detail */
-  --sg-edition-year-2025: var(--sg-v3-blue-600);
-  --sg-edition-year-2026: var(--sg-v3-pink-500);
   --sg-edition-marker-width: 144px;
   --sg-edition-marker-image-ratio: 4 / 3;
   --sg-edition-marker-font-family: var(--sg-font-namsan);
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
-  --sg-map-detail-header-badge-width: var(--sg-spacing-16);
-  --sg-map-detail-header-badge-height: var(--sg-spacing-8);
-  --sg-map-detail-header-badge-mobile-width: var(--sg-spacing-14);
-  --sg-map-detail-header-badge-mobile-height: var(--sg-spacing-7);
   --sg-map-detail-header-action-size: var(--sg-spacing-10);
   --sg-map-detail-header-icon-size: var(--sg-spacing-10);
   --sg-map-detail-header-icon-mobile-size: var(--sg-spacing-5);
@@ -478,7 +483,6 @@
   --sg-course-seal-empty-bg: var(--sg-color-bg-floating);
   --sg-course-seal-empty-fg: var(--sg-color-text-info);
   --sg-course-seal-stroke: var(--sg-color-text-muted);
-  --sg-course-place-name-size: var(--sg-font-size-2);
   --sg-course-remove-bg: var(--sg-color-bg-neutral-strong);
   --sg-course-remove-bg-pressed: var(--sg-v3-ink-700);
   --sg-course-remove-fg: var(--sg-color-text-inverted);

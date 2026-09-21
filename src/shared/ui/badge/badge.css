@@ -1,16 +1,37 @@
 .AppBadge {
+  --badge-color: var(--sg-badge-neutral-color);
+  --badge-contrast: var(--sg-color-text-inverted);
+  --badge-stroke: var(--sg-color-stroke-strong);
   align-items: center;
+  box-sizing: border-box;
+  border: 1px solid transparent;
   border-radius: var(--sg-badge-radius);
-  color: var(--sg-badge-fg);
   display: inline-flex;
   flex: none;
+  font-family: var(--sg-font-namsan);
   font-size: var(--sg-badge-font-size);
   font-weight: var(--sg-badge-font-weight);
   gap: var(--sg-badge-gap);
+  justify-content: center;
   line-height: var(--sg-badge-line-height);
   max-width: 100%;
   min-width: 0;
+  text-align: center;
   white-space: nowrap;
+}
+
+.AppBadge[data-size="xs"] {
+  min-height: var(--sg-badge-height-xs);
+  padding-inline: var(--sg-badge-padding-x-xs);
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-regular);
+  line-height: var(--sg-line-height-4);
+}
+
+.AppBadge[data-size="sm"] {
+  min-height: var(--sg-badge-height-sm);
+  padding-inline: var(--sg-badge-padding-x-sm);
+  font-size: var(--sg-font-size-3);
 }
 
 .AppBadge[data-size="md"] {
@@ -23,36 +44,83 @@
   padding-inline: var(--sg-badge-padding-x-lg);
 }
 
+.AppBadge[data-size="number-sm"],
+.AppBadge[data-size="number-md"],
+.AppBadge[data-size="number-lg"] {
+  font-size: var(--sg-font-size-2);
+  line-height: 1;
+  padding: 0;
+}
+
+.AppBadge[data-size="number-sm"] {
+  width: var(--sg-badge-number-width-sm);
+  height: var(--sg-badge-number-height-sm);
+}
+
+.AppBadge[data-size="number-md"] {
+  width: var(--sg-badge-number-width-md);
+  height: var(--sg-badge-number-height-md);
+}
+
+.AppBadge[data-size="number-lg"] {
+  width: var(--sg-badge-number-width-lg);
+  height: var(--sg-badge-number-height-lg);
+  padding-inline: var(--sg-badge-number-padding-x-lg);
+  font-size: var(--sg-font-size-6);
+  font-weight: var(--sg-font-weight-regular);
+}
+
 .AppBadge[data-variant="solid"] {
-  background: var(--sg-badge-solid-bg);
-  border: 1px solid var(--sg-badge-stroke);
+  background: var(--badge-color);
+  color: var(--badge-contrast);
+}
+
+.AppBadge[data-variant="surface"] {
+  background: var(--sg-badge-surface-bg);
+  border-color: var(--sg-color-stroke-weak);
   box-shadow: var(--sg-badge-shadow);
+  color: var(--badge-color);
 }
 
 .AppBadge[data-variant="weak"] {
-  background: var(--sg-badge-weak-bg);
-  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--badge-color) 12%, var(--sg-color-bg-floating));
+  color: var(--badge-color);
 }
 
 .AppBadge[data-variant="outline"] {
   background: var(--sg-badge-outline-bg);
-  border: 1px solid var(--sg-badge-stroke);
+  border-color: var(--badge-stroke);
+  color: var(--badge-color);
 }
 
 .AppBadge[data-tone="brand"] {
-  color: var(--sg-badge-brand-fg);
+  --badge-color: var(--sg-badge-brand-color);
+  --badge-stroke: var(--sg-badge-brand-color);
 }
 
 .AppBadge[data-tone="info"] {
-  color: var(--sg-badge-info-fg);
+  --badge-color: var(--sg-badge-info-color);
+  --badge-stroke: var(--sg-badge-info-color);
 }
 
 .AppBadge[data-tone="warning"] {
-  color: var(--sg-badge-warning-fg);
+  --badge-color: var(--sg-badge-warning-color);
+  --badge-stroke: var(--sg-badge-warning-color);
+  --badge-contrast: var(--sg-color-text-default);
 }
 
 .AppBadge[data-tone="positive"] {
-  color: var(--sg-badge-positive-fg);
+  --badge-color: var(--sg-badge-positive-color);
+  --badge-stroke: var(--sg-badge-positive-color);
+}
+
+.AppBadge[data-size="number-lg"][data-variant="outline"] {
+  border-width: var(--sg-badge-number-stroke-lg);
+  background: var(--sg-color-bg-surface);
+}
+
+.AppBadge[data-width="fill"] {
+  width: 100%;
 }
 
 .AppBadge-leading {
@@ -66,4 +134,26 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Complete labels retain their intrinsic width; the surrounding layout must make room. */
+.AppBadge[data-text-policy="singleLine"] {
+  max-width: none;
+  min-width: max-content;
+}
+
+.AppBadge[data-text-policy="singleLine"] .AppBadge-content {
+  flex: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.AppBadge[data-text-policy="twoLines"] {
+  white-space: normal;
+}
+
+.AppBadge[data-text-policy="twoLines"] .AppBadge-content {
+  max-height: 2lh;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
 }
