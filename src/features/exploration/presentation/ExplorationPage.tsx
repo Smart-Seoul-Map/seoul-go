@@ -14,6 +14,7 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
 import { AppBadge } from "@shared/ui/badge";
+import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
@@ -80,6 +81,8 @@ export function ExplorationPage({
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const { showToast } = useAppToast();
+  const isMobileViewport = useIsMobileViewport();
+  const mapBadgeSize = isMobileViewport ? "sm" : "md";
   const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
   const mapStageRef = useRef<HTMLElement | null>(null);
   const content = panel.status === "closed" ? null : panel.content;
@@ -160,15 +163,15 @@ export function ExplorationPage({
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
-        {districtName ? (
-          <div className="exploration-district-status">
-            <ExplorationDistrictStatusBadge districtName={districtName} />
-          </div>
-        ) : null}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
+          {districtName ? (
+            <li className="exploration-theme-place-count-item">
+              <ExplorationDistrictStatusBadge districtName={districtName} size={mapBadgeSize} />
+            </li>
+          ) : null}
           {selectionYearLabel && (
             <li className="exploration-theme-place-count-item">
-              <AppBadge size="lg" variant="surface">
+              <AppBadge size={mapBadgeSize} variant="surface" textPolicy="singleLine">
                 {selectionYearLabel}
               </AppBadge>
             </li>
@@ -177,6 +180,7 @@ export function ExplorationPage({
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge
                 name={item.name}
+                size={mapBadgeSize}
                 totalCount={item.totalCount}
                 visitedCount={item.visitedCount}
               />
