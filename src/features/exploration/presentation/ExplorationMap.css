@@ -1,5 +1,6 @@
 .map-canvas-stack {
   height: 100vh;
+  height: 100dvh;
   min-height: 560px;
   overflow: hidden;
   position: relative;
@@ -30,7 +31,7 @@
 }
 
 .app-virtual-joystick.exploration-map-joystick {
-  bottom: var(--sg-spacing-6);
+  bottom: calc(var(--sg-spacing-6) + var(--sg-safe-area-bottom));
   display: none;
   left: 50%; /* 왼쪽 50% 지점으로 이동 */
   transform: translateX(-50%);
@@ -39,7 +40,7 @@
 }
 
 .map-canvas-stack[data-mobile="true"] {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .map-canvas-stack[data-mobile="true"] .app-virtual-joystick.exploration-map-joystick {

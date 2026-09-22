@@ -35,8 +35,13 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
   overflow-x: auto;
   padding: 0 0 var(--sg-spacing-2);
   position: absolute;
+  scrollbar-width: none;
   top: var(--sg-spacing-7);
   z-index: 4;
+}
+
+.exploration-theme-place-count-list::-webkit-scrollbar {
+  display: none;
 }
 
 .exploration-theme-place-count-item {
