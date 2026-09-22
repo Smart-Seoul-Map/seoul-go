@@ -4,6 +4,50 @@ import { SMART_SEOUL_PLACE_THEME_IDS } from "../config/placeThemeConfig";
 import { buildSmartSeoulThemeContentsUrl, fetchSmartSeoulThemePlaces } from "./smartSeoulThemeApi";
 
 describe("Smart Seoul theme API", () => {
+  test("loads later edition years across pages without merging different year IDs", async () => {
+    const requestedPages: string[] = [];
+    const rows = [
+      { COT_CONTS_ID: "26_edition25_24", COT_VALUE_01: "Selected in 2026" },
+      { COT_CONTS_ID: "27_edition25_24", COT_VALUE_01: "Selected in 2027" },
+    ];
+    const places = await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      themeIds: ["1786321258890"],
+      requestJson: async (url) => {
+        const pageNo = url.searchParams.get("page_no") ?? "1";
+        requestedPages.push(pageNo);
+
+        return {
+          header: { PAGE_COUNT: "2", TOTAL_COUNT: "2", resultCode: "200" },
+          body: [
+            {
+              ...rows[Number(pageNo) - 1],
+              COT_CONTS_NAME: "Edition place",
+              COT_THEME_ID: "1786321258890",
+              COT_COORD_X: 126.991821159,
+              COT_COORD_Y: 37.566987659,
+              COT_IMG_MAIN_URL: "https://example.com/edition.png",
+            },
+          ],
+        };
+      },
+    });
+
+    expect(requestedPages).toEqual(["1", "2"]);
+    expect(places).toMatchObject([
+      {
+        id: "smart-seoul:1786321258890:26_edition25_24",
+        selectionYear: 2026,
+        description: "Selected in 2026",
+      },
+      {
+        id: "smart-seoul:1786321258890:27_edition25_24",
+        selectionYear: 2027,
+        description: "Selected in 2027",
+      },
+    ]);
+  });
+
   test("builds theme contents request URL with required params", () => {
     const url = buildSmartSeoulThemeContentsUrl({
       apiKey: "KEY 123",
@@ -130,7 +174,7 @@ describe("Smart Seoul theme API", () => {
     expect(requestedUrls[0]?.searchParams.get("distance")).toBe("500");
   });
 
-  test("requests all five themes for a selected station search area", async () => {
+  test("requests all supported themes for a selected station search area", async () => {
     const requestedUrls: URL[] = [];
 
     await fetchSmartSeoulThemePlaces({
@@ -152,7 +196,8 @@ describe("Smart Seoul theme API", () => {
       },
     });
 
-    expect(requestedUrls).toHaveLength(5);
+    expect(requestedUrls).toHaveLength(6);
+    expect(requestedUrls.map((url) => url.searchParams.get("theme_id"))).toContain("1786321258890");
     expect(requestedUrls.map((url) => url.searchParams.get("theme_id"))).toEqual(
       SMART_SEOUL_PLACE_THEME_IDS
     );

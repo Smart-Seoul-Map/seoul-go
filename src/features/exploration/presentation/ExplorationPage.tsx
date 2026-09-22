@@ -13,6 +13,8 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
+import { AppBadge } from "@shared/ui/badge";
+import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { createRevealedPlaceMarkers } from "../application/explorationPlaceMarkerReveal";
@@ -57,6 +59,8 @@ type ExplorationPageProps = {
     place: ExplorationPlaceMarkerSelection
   ) => AddExplorationPlaceToCourseResultStatus;
   placeMarkers?: MapMarkerFeatureCollection;
+  placeMarkerPresentation?: "treasure" | "image-year";
+  selectionYearLabel?: string;
   stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
 };
@@ -71,10 +75,14 @@ export function ExplorationPage({
   initialCenter,
   onAddPlaceToCourse,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  placeMarkerPresentation,
+  selectionYearLabel,
   stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const { showToast } = useAppToast();
+  const isMobileViewport = useIsMobileViewport();
+  const mapBadgeSize = isMobileViewport ? "sm" : "md";
   const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
   const mapStageRef = useRef<HTMLElement | null>(null);
   const content = panel.status === "closed" ? null : panel.content;
@@ -151,21 +159,28 @@ export function ExplorationPage({
           onMapMoveRequest={closePanel}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
+          placeMarkerPresentation={placeMarkerPresentation}
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
-        {districtName ? (
-          <div className="exploration-district-status">
-            <ExplorationDistrictStatusBadge districtName={districtName} />
-          </div>
-        ) : null}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
+          {districtName ? (
+            <li className="exploration-theme-place-count-item">
+              <ExplorationDistrictStatusBadge districtName={districtName} size={mapBadgeSize} />
+            </li>
+          ) : null}
+          {selectionYearLabel && (
+            <li className="exploration-theme-place-count-item">
+              <AppBadge size={mapBadgeSize} variant="surface" textPolicy="singleLine">
+                {selectionYearLabel}
+              </AppBadge>
+            </li>
+          )}
           {displayedThemeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge
-                markerColor={item.markerColor}
-                markerColorToken={item.markerColorToken}
                 name={item.name}
+                size={mapBadgeSize}
                 totalCount={item.totalCount}
                 visitedCount={item.visitedCount}
               />
@@ -191,7 +206,10 @@ export function ExplorationPage({
             })}
           {selectedPlace && isPanelOpen && !renderPlacePanel && (
             <div className="exploration-place-card-layer">
-              <ExplorationPlaceCard onAddToCourse={handleAddPlaceToCourse} place={selectedPlace} />
+              <ExplorationPlaceCard
+                onAddToCourse={() => handleAddPlaceToCourse(selectedPlace)}
+                place={selectedPlace}
+              />
             </div>
           )}
         </Fragment>

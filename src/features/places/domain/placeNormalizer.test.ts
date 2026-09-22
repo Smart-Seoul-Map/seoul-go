@@ -6,6 +6,93 @@ import {
 } from "./placeNormalizer";
 
 describe("normalizeSmartSeoulThemeContent", () => {
+  test.each(["100032", "100575", "1786321258890"])(
+    "normalizes the description for theme %s",
+    (themeId) => {
+      const place = normalizeSmartSeoulThemeContent({
+        COT_CONTS_ID: "26_edition25_24",
+        COT_CONTS_NAME: "Place",
+        COT_COORD_X: 126.991821159,
+        COT_COORD_Y: 37.566987659,
+        COT_THEME_ID: themeId,
+        COT_VALUE_01: " <p>Historic alley</p>&nbsp;with shops &amp; cafes. ",
+      });
+
+      expect(place).toMatchObject({ description: "Historic alley with shops & cafes." });
+    }
+  );
+
+  test.each([undefined, null, "", "null", "  "])(
+    "normalizes an empty description (%s) without inserting UI copy",
+    (description) => {
+      const place = normalizeSmartSeoulThemeContent({
+        COT_CONTS_ID: "old-store-1",
+        COT_CONTS_NAME: "Old store",
+        COT_COORD_X: 126.9,
+        COT_COORD_Y: 37.5,
+        COT_THEME_ID: "100575",
+        COT_VALUE_01: description,
+      });
+
+      expect(place).toMatchObject({ description: "" });
+    }
+  );
+
+  test.each([
+    ["25_edition25_1", 2025],
+    ["26_edition25_24", 2026],
+    ["27_edition25_9", 2027],
+  ])("reads the selection year from %s", (sourceContentId, selectionYear) => {
+    const place = normalizeSmartSeoulThemeContent({
+      COT_CONTS_ID: sourceContentId,
+      COT_CONTS_NAME: "Edition place",
+      COT_COORD_X: 126.991821159,
+      COT_COORD_Y: 37.566987659,
+      COT_THEME_ID: "1786321258890",
+      THM_THEME_NAME: "서울에디션25(등록중)",
+      COT_IMG_MAIN_URL: "https://example.com/edition-place.png",
+    });
+
+    expect(place).toMatchObject({
+      id: `smart-seoul:1786321258890:${sourceContentId}`,
+      sourceContentId,
+      themeName: "서울에디션25",
+      selectionYear,
+      imageUrl: "https://example.com/edition-place.png",
+      address: "",
+    });
+  });
+
+  test("does not assign an edition year to another theme", () => {
+    const place = normalizeSmartSeoulThemeContent({
+      COT_CONTS_ID: "26_edition25_24",
+      COT_CONTS_NAME: "Old store",
+      COT_COORD_X: 126.9,
+      COT_COORD_Y: 37.5,
+      COT_THEME_ID: "100575",
+    });
+
+    expect(place).not.toBeNull();
+    expect(place).not.toHaveProperty("selectionYear", 2026);
+  });
+
+  test.each(["edition25_24", "2026_edition25_24", "26_other_24", "26_edition25_24_extra"])(
+    "does not invent a selection year for malformed ID %s",
+    (sourceContentId) => {
+      const place = normalizeSmartSeoulThemeContent({
+        COT_CONTS_ID: sourceContentId,
+        COT_CONTS_NAME: "Edition place",
+        COT_COORD_X: 126.9,
+        COT_COORD_Y: 37.5,
+        COT_THEME_ID: "1786321258890",
+        COT_REG_DATE: "2026-08-14 15:50:51",
+      });
+
+      expect(place).not.toBeNull();
+      expect(place).toMatchObject({ selectionYear: undefined });
+    }
+  );
+
   test("normalizes a valid Smart Seoul theme content row", () => {
     const place = normalizeSmartSeoulThemeContent({
       COT_ADDR_FULL_NEW: "Seoul Jung-gu",

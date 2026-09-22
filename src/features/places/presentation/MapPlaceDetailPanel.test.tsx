@@ -8,6 +8,7 @@ const originalWidth = window.innerWidth;
 const place = {
   title: "해방촌 신흥시장",
   selectionYear: 2025,
+  description: "시장 골목의 공방과 가게를 만나는 장소",
   image: { src: "/market.jpg", alt: "시장 대표 이미지" },
 };
 
@@ -36,6 +37,10 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(within(title.closest(".AppResponsivePanelHeader")!).getByText("2025")).toHaveClass(
     "AppBadge-content"
   );
+  const yearBadge = within(dialog).getByText("2025").closest(".AppBadge");
+  expect(yearBadge).toHaveAttribute("data-size", width === 390 ? "number-sm" : "number-md");
+  expect(yearBadge).toHaveAttribute("data-tone", "info");
+  expect(yearBadge).toHaveAttribute("data-variant", "solid");
   const url = new URL(search.getAttribute("href")!);
   expect(url.hostname).toBe("search.naver.com");
   expect(url.searchParams.get("query")).toBe(place.title);

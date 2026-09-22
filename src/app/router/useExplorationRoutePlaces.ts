@@ -2,9 +2,7 @@ import { useMemo } from "react";
 
 import type { DistrictExplorationTarget, StationExplorationTarget } from "@features/exploration";
 import {
-  SMART_SEOUL_PLACE_THEMES,
-  createPlaceThemeProgressItems,
-  createPlacesFeatureCollection,
+  createSeoulEdition25MapContent,
   filterSmartSeoulPlacesByDistrict,
   useNearbySmartSeoulThemePlacesQuery,
   useSmartSeoulThemePlacesQuery,
@@ -18,6 +16,7 @@ export type ExplorationRoutePlacesResult = {
   isLoading: boolean;
   placeMarkers: MapMarkerFeatureCollection;
   places: SmartSeoulThemePlace[];
+  selectionYearLabel: string;
   themeProgressItems: PlaceThemeProgressItem[];
 };
 
@@ -33,22 +32,13 @@ export function useDistrictExplorationRoutePlaces(
         : [...sourcePlaces],
     [sourcePlaces, target]
   );
-  const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
-  const themeProgressItems = useMemo(
-    () =>
-      createPlaceThemeProgressItems({
-        places,
-        themes: SMART_SEOUL_PLACE_THEMES,
-      }),
-    [places]
-  );
+  const mapContent = useMemo(() => createSeoulEdition25MapContent(places), [places]);
 
   return {
     isError: placesQuery.isError,
     isLoading: placesQuery.isLoading,
-    placeMarkers,
+    ...mapContent,
     places,
-    themeProgressItems,
   };
 }
 
@@ -60,21 +50,12 @@ export function useStationExplorationRoutePlaces(
     distanceMeters: target.radiusMeters,
   });
   const places = placesQuery.data ?? [];
-  const placeMarkers = useMemo(() => createPlacesFeatureCollection(places), [places]);
-  const themeProgressItems = useMemo(
-    () =>
-      createPlaceThemeProgressItems({
-        places,
-        themes: SMART_SEOUL_PLACE_THEMES,
-      }),
-    [places]
-  );
+  const mapContent = useMemo(() => createSeoulEdition25MapContent(places), [places]);
 
   return {
     isError: placesQuery.isError,
     isLoading: placesQuery.isLoading,
-    placeMarkers,
+    ...mapContent,
     places,
-    themeProgressItems,
   };
 }

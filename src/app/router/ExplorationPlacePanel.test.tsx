@@ -10,6 +10,7 @@ import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse
 const place: ExplorationPlaceMarkerSelection = {
   id: "market",
   name: "해방촌 신흥시장",
+  description: "시장 골목의 공방과 가게를 만나는 장소",
   imageUrl: "",
   markerColor: "#08b2f0",
   themeId: "100032",
@@ -21,6 +22,19 @@ function Panel() {
   const onAddToCourse = useAddExplorationPlaceToCourse();
   return <ExplorationPlacePanel place={place} onAddToCourse={onAddToCourse} onClose={() => {}} />;
 }
+
+test.each(["100032", "100575", "1786321258890"])(
+  "테마 %s의 장소 설명을 그대로 표시한다",
+  (themeId) => {
+    render(<ExplorationPlacePanel place={{ ...place, themeId }} onClose={() => {}} />);
+    expect(screen.getByText("시장 골목의 공방과 가게를 만나는 장소")).toBeInTheDocument();
+  }
+);
+
+test("설명이 비어 있으면 임시 공통 문구를 표시하지 않는다", () => {
+  render(<ExplorationPlacePanel place={{ ...place, description: "" }} onClose={() => {}} />);
+  expect(document.querySelector(".PlaceDetailCardDescription")?.textContent).toBe("");
+});
 
 beforeEach(() => stampCourseStore.getState().clearPlaces());
 afterEach(() => {
@@ -75,4 +89,24 @@ test("코스가 가득 차서 추가에 실패하면 아직 획득 전을 유지
     "false"
   );
   expect(stampCourseStore.getState().places).toHaveLength(MAX_STAMP_COURSE_PLACES);
+});
+
+test("서울에디션25 패널은 API 설명과 선정연도를 표시한다", () => {
+  render(
+    <ExplorationPlacePanel
+      place={{
+        ...place,
+        themeId: "1786321258890",
+        themeName: "서울에디션25",
+        description: "API에서 받은 장소별 설명",
+        selectionYear: 2026,
+      }}
+      onClose={() => {}}
+    />
+  );
+
+  expect(screen.getByText("API에서 받은 장소별 설명")).toBeInTheDocument();
+  expect(screen.getByText("2026")).toBeInTheDocument();
+  expect(screen.queryByText("방문 완료")).not.toBeInTheDocument();
+  expect(screen.getByText("아직 획득 전")).toBeInTheDocument();
 });

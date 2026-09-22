@@ -7,6 +7,7 @@ describe("createPlacesFeatureCollection", () => {
     const collection = createPlacesFeatureCollection([
       {
         address: "Seoul",
+        description: "",
         districtName: "district-a",
         id: "smart-seoul:100032:place-1",
         imageUrl: "https://example.com/library.jpg",
@@ -31,6 +32,7 @@ describe("createPlacesFeatureCollection", () => {
       },
       properties: {
         closedMarkerImage: "red_closed_box",
+        description: "",
         id: "smart-seoul:100032:place-1",
         imageUrl: "https://example.com/library.jpg",
         markerColor: "#c92a2a",

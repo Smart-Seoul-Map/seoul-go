@@ -6,12 +6,13 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 import {
   AppResponsivePanel,
+  useResponsivePanelPresentation,
   type AppResponsivePanelContentProps,
 } from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
-import { MAP_PLACE_DESCRIPTION } from "../config/mapPlaceDetail";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
+import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
 import "./map-place-detail-panel.css";
 
 export type MapPlaceDetailPanelProps = Pick<
@@ -19,17 +20,31 @@ export type MapPlaceDetailPanelProps = Pick<
   "onExitComplete" | "returnFocus"
 > & {
   open?: boolean;
-  place: Pick<PlaceDetailCardProps, "title" | "image"> & { selectionYear?: number | string };
+  place: Pick<PlaceDetailCardProps, "title" | "image" | "description"> & {
+    selectionYear?: number | string;
+  };
   isStampAcquired?: boolean;
   mobileAboveContent?: ReactNode;
   onClose: () => void;
   onAddToCourse?: () => void;
 };
 
-function PlaceDetailHeaderMeta({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
+function PlaceDetailHeaderMeta({
+  place,
+}: Pick<MapPlaceDetailPanelProps, "place">): ReactElement | null {
+  const presentation = useResponsivePanelPresentation();
+  if (place.selectionYear === undefined) return null;
+
   return (
     <div className="MapPlaceDetailMeta">
-      <AppBadge tone="positive">{place.selectionYear ?? "방문 완료"}</AppBadge>
+      <AppBadge
+        size={presentation === "bottom-sheet" ? "number-sm" : "number-md"}
+        tone={getSelectionYearBadgeTone(place.selectionYear)}
+        variant="solid"
+        textPolicy="singleLine"
+      >
+        {place.selectionYear}
+      </AppBadge>
     </div>
   );
 }
@@ -76,7 +91,6 @@ export function MapPlaceDetailPanel({
       place={{
         ...place,
         subtitle: "",
-        description: MAP_PLACE_DESCRIPTION,
       }}
       headerTrailing={
         <>

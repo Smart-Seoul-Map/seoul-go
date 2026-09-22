@@ -75,7 +75,8 @@ function DistrictExplorationRouteContent({
 }: DistrictExplorationRouteContentProps): ReactElement {
   const [searchParams] = useSearchParams();
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, selectionYearLabel } =
+    useDistrictExplorationRoutePlaces(target);
 
   return (
     <ExplorationPage
@@ -85,6 +86,8 @@ function DistrictExplorationRouteContent({
       initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      selectionYearLabel={selectionYearLabel}
+      placeMarkerPresentation="image-year"
       themeProgressItems={themeProgressItems}
     />
   );
@@ -98,7 +101,8 @@ function StationExplorationRouteContent({
   target,
 }: StationExplorationRouteContentProps): ReactElement {
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems } = useStationExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, selectionYearLabel } =
+    useStationExplorationRoutePlaces(target);
 
   return (
     <ExplorationPage
@@ -106,6 +110,8 @@ function StationExplorationRouteContent({
       {...explorationPageSlots}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      selectionYearLabel={selectionYearLabel}
+      placeMarkerPresentation="image-year"
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />

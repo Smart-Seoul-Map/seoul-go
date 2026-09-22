@@ -10,7 +10,10 @@ describe("ExplorationDistrictStatusBadge", () => {
     render(<ExplorationDistrictStatusBadge districtName="용산구" />);
 
     expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
-    expect(screen.getByText("용산구 탐방중")).toBeInTheDocument();
+    const badge = screen.getByLabelText("현재 용산구 탐방중");
+    expect(badge).toHaveTextContent(/^용산구$/);
+    expect(badge).toHaveAttribute("data-tone", "neutral");
+    expect(badge.querySelector(".AppBadge-leading")).toBeNull();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
