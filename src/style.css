@@ -34,7 +34,7 @@ body {
 
 .entry-exploration-scene {
   height: 100vh;
-  min-height: 560px;
+  min-height: 0;
   position: relative;
 }
 
