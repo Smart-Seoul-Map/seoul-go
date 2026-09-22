@@ -12,6 +12,9 @@ export function loadCharacterGltf(path: string): Promise<GLTF> {
 
   const gltf = new Promise<GLTF>((resolve, reject) => {
     gltfLoader.load(path, resolve, undefined, reject);
+  }).catch((error: unknown) => {
+    if (gltfCache.get(path) === gltf) gltfCache.delete(path);
+    throw error;
   });
 
   gltfCache.set(path, gltf);

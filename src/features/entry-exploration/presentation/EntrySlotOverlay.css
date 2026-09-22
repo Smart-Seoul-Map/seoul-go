@@ -1,0 +1,43 @@
+.entry-slot-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.entry-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-4);
+  pointer-events: auto;
+}
+
+.entry-slot-controls,
+.entry-slot-error {
+  position: absolute;
+  bottom: calc(var(--sg-spacing-4) + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, calc(100% - var(--sg-spacing-4) * 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-3);
+  pointer-events: auto;
+}
+
+.entry-slot-result {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  flex-shrink: 0;
+}
+
+.entry-slot-controls > .AppButton {
+  min-width: 0;
+  flex: 1;
+}
+
+.entry-slot-error {
+  flex-wrap: wrap;
+}

@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
+import * as THREE from "three";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -12,6 +13,32 @@ import type {
 } from "../application/useEntryExplorationThreeScene";
 import { EntryExplorationPage } from "./EntryExplorationPage";
 import { ENTRY_EXPLORATION_PLACES } from "../config/entryExplorationPlace";
+import type { EntrySlotState } from "../application/entrySlotInteraction";
+
+let slotStateChange: ((state: EntrySlotState) => void) | undefined;
+const slotSpin = vi.fn();
+const slotClose = vi.fn();
+const createSubwayControllers = () => [];
+
+vi.mock("../application/entrySlotInteraction", () => ({
+  createEntrySlotInteraction: ({
+    onStateChange,
+  }: {
+    onStateChange: (state: EntrySlotState) => void;
+  }) => {
+    slotStateChange = onStateChange;
+    return {
+      object: new THREE.Group(),
+      spin: slotSpin,
+      setViewportBounds: vi.fn(),
+      deactivate: () => {
+        slotClose();
+        onStateChange({ status: "closed" });
+      },
+      dispose: vi.fn(),
+    };
+  },
+}));
 
 const sceneControls = {
   deactivateActiveInteraction: vi.fn(),
@@ -47,7 +74,10 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     placeVisits: visits,
   }: UseEntryExplorationThreeSceneOptions) => {
     placeVisits = visits;
-    createSceneInteractionControllers();
+    useEffect(() => {
+      const controllers = createSceneInteractionControllers();
+      return () => controllers.forEach((controller) => controller.dispose());
+    }, [createSceneInteractionControllers]);
     useEffect(() => {
       onSceneControlsReady?.(sceneControls);
     }, [onSceneControlsReady]);
@@ -56,13 +86,35 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
 
 vi.mock("../application/useEntryExplorationSubwaySelection", () => ({
   useEntryExplorationSubwaySelection: () => ({
-    createSubwayInteractionControllers: () => [],
+    createSubwayInteractionControllers: createSubwayControllers,
     subwaySelection: subwaySelectionViewModel,
   }),
 }));
 
 describe("EntryExplorationPage", () => {
+  test("connects slot arrival, result, retry and close without navigating away", () => {
+    const { router } = renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => {
+      slotStateChange?.({ status: "ready" });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "돌리기" }));
+    expect(slotSpin).toHaveBeenCalled();
+    act(() => {
+      slotStateChange?.({ status: "result", result: "09" });
+    });
+    expect(screen.getByRole("status", { name: "뽑힌 숫자" }).textContent).toBe("09");
+    fireEvent.click(screen.getByRole("button", { name: "다시 돌리기" }));
+    expect(slotSpin).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    expect(slotClose).toHaveBeenCalled();
+    expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
+    expect(router.state.location.pathname).toBe("/");
+  });
   beforeEach(() => {
+    slotSpin.mockClear();
+    slotClose.mockClear();
+    slotStateChange = undefined;
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       arc: vi.fn(),
       beginPath: vi.fn(),

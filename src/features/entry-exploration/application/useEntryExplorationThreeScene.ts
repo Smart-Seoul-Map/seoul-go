@@ -96,6 +96,7 @@ export function useEntryExplorationThreeScene({
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,
@@ -295,7 +296,7 @@ export function useEntryExplorationThreeScene({
       scene.add(mesh);
     });
     registerSceneInteractionControllers(sceneInteractionControllers);
-    addSceneInteractionObjects(scene);
+    addSceneInteractionObjects(scene, renderer);
     updateEntryExplorationCameraView(
       camera,
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
@@ -399,6 +400,13 @@ export function useEntryExplorationThreeScene({
 
       if (hasActiveSceneInteraction()) {
         deactivateActiveInteraction();
+        return;
+      }
+
+      const approachDestination = getSceneInteractionPointerDestination(raycaster);
+      if (approachDestination) {
+        Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
+        movementRef.current.moveTo(approachDestination);
         return;
       }
 
@@ -573,6 +581,7 @@ export function useEntryExplorationThreeScene({
     createSceneInteractionControllers,
     deactivateActiveInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,

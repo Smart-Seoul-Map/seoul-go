@@ -28,6 +28,38 @@ function createSceneInteractionController(
 }
 
 describe("useEntryExplorationSceneInteractionRegistry", () => {
+  test("uses an interaction approach point only when no interaction is active", () => {
+    const destination = { x: -3, z: 5 };
+    const controller = createSceneInteractionController({
+      canActivate: () => true,
+      getPointerDestination: () => destination,
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([
+      createSceneInteractionController(),
+      controller,
+    ]);
+    expect(result.current.getSceneInteractionPointerDestination(new THREE.Raycaster())).toEqual(
+      destination
+    );
+    result.current.activateReadySceneInteraction(0);
+    expect(result.current.getSceneInteractionPointerDestination(new THREE.Raycaster())).toBeNull();
+  });
+
+  test("prepares renderer-dependent resources only for controllers that request it", () => {
+    const prepare = vi.fn();
+    const controller = createSceneInteractionController({ prepare });
+    const scene = new THREE.Scene();
+    const renderer = {} as THREE.WebGLRenderer;
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([
+      controller,
+      createSceneInteractionController(),
+    ]);
+    result.current.addSceneInteractionObjects(scene, renderer);
+    expect(prepare).toHaveBeenCalledWith(renderer);
+    expect(scene.children).toHaveLength(2);
+  });
   test("registers interaction controllers and activates the first ready one", () => {
     const inactiveController = createSceneInteractionController();
     const readyController = createSceneInteractionController({
