@@ -42,4 +42,17 @@ describe("loadCharacterGltf", () => {
     expect(secondGltf).toBe(firstGltf);
     expect(gltfLoaderMock.load).toHaveBeenCalledTimes(1);
   });
+
+  test("retries a failed load without clearing successfully cached models", async () => {
+    const cached = await loadCharacterGltf("/models/haechi_v1.glb");
+    gltfLoaderMock.load.mockImplementationOnce((_path, _onLoad, _progress, onError) => {
+      onError(new Error("offline"));
+    });
+    await expect(loadCharacterGltf("/models/slot_v1.glb")).rejects.toThrow("offline");
+    expect((await loadCharacterGltf("/models/slot_v1.glb")).scene).toEqual({
+      path: "/models/slot_v1.glb",
+    });
+    expect(await loadCharacterGltf("/models/haechi_v1.glb")).toBe(cached);
+    expect(gltfLoaderMock.load).toHaveBeenCalledTimes(3);
+  });
 });
