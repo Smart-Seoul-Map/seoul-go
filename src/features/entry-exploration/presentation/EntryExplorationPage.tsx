@@ -29,6 +29,8 @@ import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
+import { useEntrySlot } from "../application/useEntrySlot";
+import { EntrySlotOverlay } from "./EntrySlotOverlay";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -59,6 +61,11 @@ export function EntryExplorationPage({
   const { placeVisits, panelProps } = useEntryExplorationPlacePanel();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
+  const { createSlotInteractionControllers, ...slot } = useEntrySlot();
+  const createExtraSceneInteractionControllers = useCallback(
+    () => [...createSubwayInteractionControllers(), ...createSlotInteractionControllers()],
+    [createSubwayInteractionControllers, createSlotInteractionControllers]
+  );
   const {
     dartShot,
     onArrowThrow,
@@ -70,7 +77,7 @@ export function EntryExplorationPage({
     onRetryThrow,
   } = useEntryExplorationDartShot();
   const districtSelection = useEntryExplorationDistrictSelection({
-    createExtraSceneInteractionControllers: createSubwayInteractionControllers,
+    createExtraSceneInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,
     onDartViewActiveChange,
@@ -140,6 +147,7 @@ export function EntryExplorationPage({
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {!isVisible && renderPlacePanel?.(panelProps)}
+      {!isVisible && <EntrySlotOverlay {...slot} />}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}

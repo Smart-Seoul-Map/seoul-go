@@ -9,12 +9,14 @@ export type EntryExplorationSceneInteractionController = {
   deactivate?: () => void;
   dispose: () => void;
   getActivationCharacterDestination?: () => EntryExplorationScenePoint;
+  getPointerDestination?: (raycaster: THREE.Raycaster) => EntryExplorationScenePoint | null;
   handlePointerDown: (raycaster: THREE.Raycaster, time: number) => boolean;
   handlePointerMove: (raycaster: THREE.Raycaster) => boolean;
   handlePointerUp: (raycaster: THREE.Raycaster, time: number) => boolean;
   isActive: () => boolean;
   object: THREE.Object3D;
   priority?: number;
+  prepare?: (renderer: THREE.WebGLRenderer) => void;
   retrySelection?: () => void;
   setCharacter?: (character: THREE.Object3D | null) => void;
   update: (time: number) => void;
@@ -78,10 +80,24 @@ export function useEntryExplorationSceneInteractionRegistry() {
     return true;
   }, []);
 
-  const addSceneInteractionObjects = useCallback((scene: THREE.Scene) => {
-    sceneInteractionControllersRef.current.forEach((controller) => {
-      scene.add(controller.object);
-    });
+  const addSceneInteractionObjects = useCallback(
+    (scene: THREE.Scene, renderer?: THREE.WebGLRenderer) => {
+      sceneInteractionControllersRef.current.forEach((controller) => {
+        if (renderer) controller.prepare?.(renderer);
+        scene.add(controller.object);
+      });
+    },
+    []
+  );
+
+  const getSceneInteractionPointerDestination = useCallback((raycaster: THREE.Raycaster) => {
+    if (activeSceneInteractionRef.current) return null;
+    for (const controller of sceneInteractionControllersRef.current) {
+      const destination = controller.getPointerDestination?.(raycaster);
+      if (destination) return destination;
+    }
+
+    return null;
   }, []);
 
   const setSceneInteractionCharacter = useCallback((character: THREE.Object3D | null) => {
@@ -191,6 +207,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,

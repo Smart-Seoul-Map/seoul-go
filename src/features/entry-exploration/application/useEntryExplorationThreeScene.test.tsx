@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => {
     clearSceneInteractionControllers: vi.fn(),
     deactivateActiveSceneInteraction: vi.fn(() => true),
     disposeSceneInteractionControllers: vi.fn(),
+    getSceneInteractionPointerDestination: vi.fn<() => { x: number; z: number } | null>(() => null),
     handleSceneInteractionPointerDown: vi.fn(() => false),
     handleSceneInteractionPointerMove: vi.fn(() => false),
     handleSceneInteractionPointerUp: vi.fn(() => false),
@@ -162,6 +163,35 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
+  test("moves to a clicked model's approach point instead of the floor behind it", async () => {
+    let startIntro: (() => boolean) | undefined;
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro?.();
+    });
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    mocks.registry.getSceneInteractionPointerDestination.mockReturnValueOnce({ x: -3, z: 5 });
+    act(() => {
+      mocks.domElement.dispatchEvent(new MouseEvent("pointerdown", { clientX: 50, clientY: 50 }));
+    });
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.movement.getCurrentPosition.mockReturnValue({ x: 4, z: 5 });
