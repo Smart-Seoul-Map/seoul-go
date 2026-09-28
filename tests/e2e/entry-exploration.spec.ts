@@ -98,6 +98,9 @@ async function startExploration(page: Page): Promise<void> {
   await start.click();
   await expect(start).toHaveCount(0);
   await expect(scene(page)).toBeVisible({ timeout: 20_000 });
+  // The canvas is visible while the intro movement still blocks input.
+  await expect(scene(page)).not.toHaveAttribute("aria-busy", "true", { timeout: 45_000 });
+  await expect(scene(page)).toBeEnabled();
   await expect(openPlacePanel(page)).toHaveCount(0);
 }
 
@@ -167,7 +170,8 @@ async function swipe(
 test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", async ({
   page,
 }, testInfo) => {
-  test.setTimeout(120_000);
+  // Allow for intro loading and repeated WebGL screenshots across all four steps.
+  test.setTimeout(180_000);
   await page.setViewportSize(DESKTOP);
   await test.step("Start and arrive through the visible scene", async () => {
     await startExploration(page);

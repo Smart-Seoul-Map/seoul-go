@@ -47,6 +47,9 @@ for (const viewport of [
       await start.click();
       const canvas = page.getByLabel("서울 탐방 공간", { exact: true });
       await expect(canvas).toBeVisible({ timeout: 20000 });
+      // Wait for intro movement to finish before clicking a scene object.
+      await expect(canvas).not.toHaveAttribute("aria-busy", "true", { timeout: 45000 });
+      await expect(canvas).toBeEnabled();
       if (viewport.touch) await canvas.tap({ position: { x: viewport.x, y: viewport.y } });
       else await canvas.click({ position: { x: viewport.x, y: viewport.y } });
       const spin = page.getByRole("button", { name: "돌리기", exact: true });
