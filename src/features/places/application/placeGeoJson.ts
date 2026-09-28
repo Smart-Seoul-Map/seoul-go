@@ -26,6 +26,8 @@ export function createPlacesFeatureCollection(
         properties: {
           id: place.id,
           imageUrl: place.imageUrl,
+          description: place.description,
+          selectionYear: place.selectionYear,
           name: place.name,
           themeId: place.themeId,
           themeName: place.themeName,

@@ -1,0 +1,31 @@
+.ExplorationImageYearMarker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--sg-edition-marker-width);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--sg-edition-marker-font-family);
+  font-weight: var(--sg-font-weight-regular);
+  letter-spacing: 0;
+}
+
+.ExplorationImageYearMarkerImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--sg-edition-marker-image-ratio);
+  object-fit: cover;
+  border-radius: var(--sg-radius-2);
+  box-shadow: var(--sg-shadow-raised);
+}
+
+.ExplorationImageYearMarkerYear {
+  margin-top: var(--sg-spacing-1);
+}
+
+.ExplorationImageYearMarker:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}

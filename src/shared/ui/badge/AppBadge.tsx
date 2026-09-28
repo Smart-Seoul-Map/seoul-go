@@ -2,9 +2,11 @@ import type { ReactNode } from "react";
 
 import "./badge.css";
 
-export type AppBadgeSize = "md" | "lg";
+export type AppBadgeSize = "xs" | "sm" | "md" | "lg" | "number-sm" | "number-md" | "number-lg";
 export type AppBadgeTone = "neutral" | "brand" | "info" | "warning" | "positive";
-export type AppBadgeVariant = "solid" | "weak" | "outline";
+export type AppBadgeVariant = "solid" | "weak" | "outline" | "surface";
+export type AppBadgeTextPolicy = "truncate" | "singleLine" | "twoLines";
+export type AppBadgeWidth = "content" | "fill";
 
 export type AppBadgeProps = {
   ariaLabel?: string;
@@ -13,6 +15,8 @@ export type AppBadgeProps = {
   size?: AppBadgeSize;
   tone?: AppBadgeTone;
   variant?: AppBadgeVariant;
+  textPolicy?: AppBadgeTextPolicy;
+  width?: AppBadgeWidth;
 };
 
 export function AppBadge({
@@ -21,7 +25,9 @@ export function AppBadge({
   leading,
   size = "md",
   tone = "neutral",
-  variant = "solid",
+  variant = "surface",
+  textPolicy = "truncate",
+  width = "content",
 }: AppBadgeProps) {
   return (
     <span
@@ -30,6 +36,8 @@ export function AppBadge({
       data-size={size}
       data-tone={tone}
       data-variant={variant}
+      data-text-policy={textPolicy}
+      data-width={width}
     >
       {leading ? (
         <span aria-hidden="true" className="AppBadge-leading">

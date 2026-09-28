@@ -15,6 +15,7 @@ const SMART_SEOUL_THEME_IDS = [
   "1777251935025",
   "1725252918740",
   "100575",
+  "1786321258890",
 ] as const;
 const SMART_SEOUL_THEME_PAGE_COUNTS = {
   "100032": 5,
@@ -22,6 +23,7 @@ const SMART_SEOUL_THEME_PAGE_COUNTS = {
   "1725252918740": 1,
   "1741228380725": 1,
   "1777251935025": 1,
+  "1786321258890": 1,
 } as const satisfies Record<(typeof SMART_SEOUL_THEME_IDS)[number], number>;
 const EXPECTED_SOURCE_REQUEST_COUNT = Object.values(SMART_SEOUL_THEME_PAGE_COUNTS).reduce(
   (sum, pageCount) => sum + pageCount,

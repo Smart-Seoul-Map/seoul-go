@@ -85,6 +85,7 @@ function DistrictExplorationRouteContent({
       initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      placeMarkerPresentation="image-year"
       themeProgressItems={themeProgressItems}
     />
   );
@@ -106,6 +107,7 @@ function StationExplorationRouteContent({
       {...explorationPageSlots}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
+      placeMarkerPresentation="image-year"
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />

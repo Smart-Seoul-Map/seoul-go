@@ -7,13 +7,14 @@ import {
 } from "./placeThemeConfig";
 
 describe("Smart Seoul 장소 테마 설정", () => {
-  test("승인된 5개 테마와 마커 색상을 순서대로 제공한다", () => {
+  test("지원하는 6개 테마와 공통 마커 색상을 순서대로 제공한다", () => {
     expect(SMART_SEOUL_PLACE_THEME_IDS).toEqual([
       "100032",
       "1741228380725",
       "1777251935025",
       "1725252918740",
       "100575",
+      "1786321258890",
     ]);
     expect(
       SMART_SEOUL_PLACE_THEMES.map(
@@ -54,6 +55,12 @@ describe("Smart Seoul 장소 테마 설정", () => {
         markerColorToken: "--sg-place-theme-yellow",
         closedBoxImage: "yellow_closed_box",
         openBoxImage: "yellow_open_box",
+      },
+      {
+        markerColor: "#1971c2",
+        markerColorToken: "--sg-place-theme-blue",
+        closedBoxImage: "blue_closed_box",
+        openBoxImage: "blue_open_box",
       },
     ]);
   });
