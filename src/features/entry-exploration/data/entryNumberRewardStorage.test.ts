@@ -1,0 +1,72 @@
+import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import {
+  ENTRY_NUMBER_REWARD_STORAGE_KEY,
+  loadEntryNumberRewards,
+  saveEntryNumberRewards,
+} from "./entryNumberRewardStorage";
+
+const rewards = [
+  { placeId: "hanok", number: 40, revealed: true },
+  { placeId: "tower", number: 57, revealed: false },
+];
+
+beforeEach(() => {
+  sessionStorage.clear();
+  localStorage.clear();
+});
+
+describe("entry reward session storage", () => {
+  test("round trips pending and revealed rewards only through sessionStorage", () => {
+    expect(saveEntryNumberRewards(rewards)).toBe(true);
+    expect(loadEntryNumberRewards()).toEqual(rewards);
+    expect(localStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)).toBeNull();
+  });
+
+  test.each(["not json", "null", '{"version":2,"rewards":[]}', '{"version":1,"rewards":{}}'])(
+    "ignores malformed data: %s",
+    (raw) => {
+      sessionStorage.setItem(ENTRY_NUMBER_REWARD_STORAGE_KEY, raw);
+      expect(loadEntryNumberRewards()).toEqual([]);
+    }
+  );
+
+  test("filters invalid values and duplicate places or numbers without losing valid rewards", () => {
+    sessionStorage.setItem(
+      ENTRY_NUMBER_REWARD_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        rewards: [
+          rewards[0],
+          { placeId: "tower", number: 40, revealed: false },
+          { placeId: "hanok", number: 55, revealed: false },
+          { placeId: "tower", number: 72, revealed: false },
+          { placeId: "tower", number: 36.5, revealed: false },
+          { placeId: "tower", number: 57, revealed: "false" },
+          { placeId: "missing", number: 58, revealed: true },
+          rewards[1],
+        ],
+      })
+    );
+    expect(loadEntryNumberRewards()).toEqual(rewards);
+  });
+
+  test("handles storage permission and quota errors", () => {
+    const storage = {
+      getItem: () => {
+        throw new Error("denied");
+      },
+      setItem: () => {
+        throw new Error("quota");
+      },
+    };
+    expect(loadEntryNumberRewards(storage)).toEqual([]);
+    expect(saveEntryNumberRewards(rewards, storage)).toBe(false);
+    const getter = vi.spyOn(window, "sessionStorage", "get").mockImplementation(() => {
+      throw new Error("denied");
+    });
+    expect(loadEntryNumberRewards()).toEqual([]);
+    expect(saveEntryNumberRewards(rewards)).toBe(false);
+    getter.mockRestore();
+  });
+});
