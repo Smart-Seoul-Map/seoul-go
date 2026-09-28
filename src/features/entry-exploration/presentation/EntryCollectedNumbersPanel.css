@@ -1,0 +1,105 @@
+.entry-collected-numbers {
+  --entry-numbers-gutter: var(--sg-spacing-4);
+  position: absolute;
+  z-index: 10;
+  top: calc(var(--entry-numbers-gutter) + var(--sg-safe-area-top));
+  left: calc(var(--entry-numbers-gutter) + env(safe-area-inset-left, 0px));
+  max-width: calc(
+    100% - var(--entry-numbers-gutter) * 2 - env(safe-area-inset-left, 0px) -
+      env(safe-area-inset-right, 0px)
+  );
+  max-height: calc(
+    100% - var(--entry-numbers-gutter) * 2 - var(--sg-safe-area-top) - var(--sg-safe-area-bottom)
+  );
+  display: flex;
+  font-family: var(--sg-typography-body-font-family);
+  color: var(--sg-color-text-default);
+  touch-action: pan-y;
+}
+
+.entry-collected-numbers[data-open="true"] {
+  width: 352px;
+}
+
+.entry-collected-numbers-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  outline: none;
+}
+
+.entry-collected-numbers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-2);
+  flex: none;
+  border-bottom: 1px solid var(--sg-color-stroke-default);
+}
+
+.entry-collected-numbers-trigger {
+  --sg-button-radius: var(--sg-radius-4_5);
+  --sg-button-padding-x: var(--sg-spacing-4);
+}
+
+.entry-collected-numbers-trigger-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+}
+
+.entry-collected-numbers-icon {
+  display: block;
+  flex: none;
+  width: var(--sg-spacing-6);
+  height: var(--sg-spacing-6);
+  background: var(--sg-badge-info-color);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.entry-collected-numbers-list {
+  list-style: none;
+  margin: 0;
+  min-height: 0;
+  max-height: calc(var(--sg-spacing-12) * 4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.entry-collected-numbers-list:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: calc(-1 * var(--sg-focus-ring-width));
+}
+
+.entry-collected-numbers-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-4);
+  min-height: var(--sg-spacing-12);
+  border-bottom: 1px solid var(--sg-color-stroke-default);
+}
+
+.entry-collected-numbers-row:last-child {
+  border-bottom: 0;
+}
+
+.entry-collected-numbers-empty {
+  overflow-y: auto;
+}
+
+@media (max-width: 860px) {
+  .entry-collected-numbers-trigger {
+    width: var(--sg-spacing-13);
+    height: var(--sg-spacing-14);
+    padding-inline: 0;
+  }
+
+  .entry-collected-numbers-trigger-label {
+    display: none;
+  }
+}
