@@ -1,41 +1,31 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
-import {
-  createSceneCameraTransition,
-  updateSceneCameraTransition,
-  type SceneCameraTransition,
-} from "@shared/lib/three/sceneCameraTransition";
-import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
+import { easeInOutCubic, easeOutCubic } from "@shared/lib/animation/easing";
 
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import {
   createEntrySlotSpin,
   getEntrySlotSpinFrame,
-  pickSlotDigits,
   type EntrySlotSpin,
   type SlotDigits,
   type SlotReelAngles,
 } from "../domain/entrySlotSpin";
-import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntrySlotModel } from "./entrySlotModel";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
 export type EntrySlotState =
-  | { status: "loading" | "closed" | "focusing" | "ready" | "spinning" | "error" }
-  | { status: "result"; result: string };
+  | { status: "loading" | "closed" | "covering" | "focusing" | "lever" | "spinning" }
+  | { status: "result"; result: string; isFallback?: boolean };
 
 export type EntrySlotViewportBounds = { top: number; bottom: number };
 
 export type EntrySlotInteraction = EntryExplorationSceneInteractionController & {
+  requestReward: (digits: SlotDigits) => boolean;
   deactivate: () => void;
-  getActivationCharacterDestination: () => EntryExplorationScenePoint;
-  getPointerDestination: (raycaster: THREE.Raycaster) => EntryExplorationScenePoint | null;
   prepare: (renderer: THREE.WebGLRenderer) => void;
-  retryLoad: () => void;
   setViewportBounds: (bounds: EntrySlotViewportBounds | null) => void;
-  spin: (time: number, digits?: SlotDigits) => boolean;
 };
 
 export function createEntrySlotInteraction({
@@ -45,36 +35,42 @@ export function createEntrySlotInteraction({
 }): EntrySlotInteraction {
   const object = new THREE.Group();
   object.name = "entry-slot-machine";
+  object.visible = false;
   object.position.set(ENTRY_SLOT_CONFIG.position.x, 0, ENTRY_SLOT_CONFIG.position.z);
   const front = new THREE.Vector3(
     Math.cos(ENTRY_SLOT_CONFIG.rotationY),
     0,
     -Math.sin(ENTRY_SLOT_CONFIG.rotationY)
   );
-  let state: EntrySlotState = { status: "loading" };
+  let state: EntrySlotState = { status: "closed" };
   let model: ReturnType<typeof createEntrySlotModel> | null = null;
   let renderer: THREE.WebGLRenderer | null = null;
   let environment: THREE.WebGLRenderTarget | null = null;
   let character: THREE.Object3D | null = null;
   let characterWasVisible = true;
-  let isInside = false;
-  let waitsForExit = false;
+  let requestedDigits: SlotDigits | null = null;
+  let loadFailed = false;
   let disposed = false;
   let spinAnimation: EntrySlotSpin | null = null;
   let angles: SlotReelAngles = [0, 0, 0];
-  let transition: SceneCameraTransition | null = null;
   let activatedAt = 0;
+  let phaseStartedAt = 0;
+  let originalCanvasOpacity = "";
+  let cameraBounds: THREE.Box3 | null = null;
   let viewportBounds: EntrySlotViewportBounds | null = null;
 
   const setState = (next: EntrySlotState) => {
     state = next;
     onStateChange(next);
   };
-  const isActive = () => ["focusing", "ready", "spinning", "result"].includes(state.status);
-  const getActivationCharacterDestination = () => ({
-    x: object.position.x + front.x * ENTRY_SLOT_CONFIG.approachOffset,
-    z: object.position.z + front.z * ENTRY_SLOT_CONFIG.approachOffset,
-  });
+  const isActive = () => state.status !== "closed";
+  const setCanvasOpacity = (opacity: number) => {
+    if (!renderer) return;
+    renderer.domElement.style.opacity = String(opacity);
+  };
+  const restoreCanvasOpacity = () => {
+    if (renderer) renderer.domElement.style.opacity = originalCanvasOpacity;
+  };
   const prepareEnvironment = () => {
     if (!renderer || !model || environment) return;
     const room = new RoomEnvironment();
@@ -91,70 +87,75 @@ export function createEntrySlotInteraction({
       model = createEntrySlotModel(gltf.scene);
       object.add(model.object);
       object.updateMatrixWorld(true);
+      // Framing must not zoom in and out as the lever moves.
+      cameraBounds = new THREE.Box3().setFromObject(object);
       prepareEnvironment();
-      setState({ status: "closed" });
     } catch {
-      if (!disposed) setState({ status: "error" });
+      loadFailed = true;
     }
   };
   void load();
 
-  const spin = (time: number, digits?: SlotDigits): boolean => {
-    if (!model || (state.status !== "ready" && state.status !== "result")) return false;
+  const spin = (time: number) => {
+    if (!model || !requestedDigits) return;
     spinAnimation = createEntrySlotSpin({
-      digits: digits ?? pickSlotDigits(),
+      digits: requestedDigits,
       from: angles,
       startedAt: time,
     });
+    phaseStartedAt = time;
     setState({ status: "spinning" });
-
-    return true;
+  };
+  const showFallback = () => {
+    if (!requestedDigits) return;
+    spinAnimation = null;
+    object.visible = false;
+    model?.setLeverAngle(0);
+    model?.setSelectionVisible(false);
+    restoreCanvasOpacity();
+    setState({ status: "result", result: requestedDigits.join(""), isFallback: true });
+  };
+  const beginFocus = (time: number) => {
+    phaseStartedAt = time;
+    object.visible = true;
+    model?.setLeverAngle(0);
+    model?.setSelectionVisible(true);
+    setState({ status: "focusing" });
   };
   const deactivate = () => {
-    if (!isActive()) return;
+    if (state.status !== "result") return;
     spinAnimation = null;
-    transition = null;
-    waitsForExit = true;
+    requestedDigits = null;
+    object.visible = false;
+    model?.setLeverAngle(0);
     model?.setSelectionVisible(false);
+    restoreCanvasOpacity();
     if (character) character.visible = characterWasVisible;
     setState({ status: "closed" });
   };
-  const hitsModel = (raycaster: THREE.Raycaster) =>
-    Boolean(
-      model &&
-      raycaster.intersectObject(model.object, true).some((hit) => hit.object instanceof THREE.Mesh)
-    );
 
   return {
     object,
+    requestReward(digits) {
+      if (disposed || requestedDigits || isActive()) return false;
+      requestedDigits = digits;
+      return true;
+    },
     priority: 20,
     isActive,
-    canActivate: () => Boolean(model && state.status === "closed" && isInside && !waitsForExit),
+    canActivate: () => Boolean(requestedDigits && !isActive()),
     activate(time) {
-      if (!model || !isInside || isActive() || waitsForExit) return;
+      if (!requestedDigits || isActive()) return;
       activatedAt = time;
-      transition = null;
+      phaseStartedAt = time;
       if (character) {
         characterWasVisible = character.visible;
         character.visible = false;
       }
-      model.setSelectionVisible(true);
-      setState({ status: "focusing" });
+      setState({ status: "covering" });
     },
     deactivate,
-    getActivationCharacterDestination,
-    getPointerDestination(raycaster) {
-      if (isActive() || !hitsModel(raycaster)) return null;
-      waitsForExit = false;
-
-      return getActivationCharacterDestination();
-    },
-    handlePointerDown(raycaster, time) {
-      if (!isActive()) return false;
-      if (hitsModel(raycaster)) spin(time);
-
-      return true;
-    },
+    handlePointerDown: () => isActive(),
     handlePointerMove: () => isActive(),
     handlePointerUp: () => isActive(),
     setCharacter(value) {
@@ -162,64 +163,80 @@ export function createEntrySlotInteraction({
     },
     prepare(value) {
       renderer = value;
+      originalCanvasOpacity = renderer.domElement.style.opacity;
       prepareEnvironment();
     },
-    retryLoad() {
-      if (disposed || state.status !== "error") return;
-      setState({ status: "loading" });
-      void load();
-    },
-    spin,
     setViewportBounds(bounds) {
       viewportBounds = bounds;
     },
     update(time) {
-      if (!spinAnimation || !model) return;
-      const frame = getEntrySlotSpinFrame(spinAnimation, time);
-      angles = frame.angles;
-      model.setAngles(angles);
-      if (frame.done && frame.result !== null) {
-        spinAnimation = null;
-        setState({ status: "result", result: frame.result });
-      }
-    },
-    updateCamera(camera, time) {
-      if (!isActive()) return;
-      const view = getSlotCameraView(camera, object, front, viewportBounds);
-      if (state.status !== "focusing") {
-        camera.position.copy(view.position);
-        camera.zoom = view.zoom;
-        camera.lookAt(view.focus);
-        camera.updateProjectionMatrix();
-        camera.updateMatrixWorld();
+      const elapsed = time - phaseStartedAt;
+      const { presentation, lever } = ENTRY_SLOT_CONFIG;
+      if (state.status === "covering") {
+        setCanvasOpacity(1 - easeInOutCubic(elapsed / presentation.coverMs));
+        if (elapsed < presentation.coverMs) return;
+        if (loadFailed) showFallback();
+        else if (model) beginFocus(time);
+        else setState({ status: "loading" });
         return;
       }
-      transition ??= createSceneCameraTransition({
-        camera,
-        durationMs: ENTRY_SLOT_CONFIG.camera.transitionMs,
-        now: activatedAt,
-        toLookAt: view.focus,
-        toPosition: view.position,
-        toZoom: view.zoom,
-      });
-      if (updateSceneCameraTransition(transition, time).done) {
-        transition = null;
-        setState({ status: "ready" });
+      if (state.status === "loading") {
+        if (loadFailed || time - activatedAt >= ENTRY_SLOT_CONFIG.loadTimeoutMs) showFallback();
+        else if (model) beginFocus(time);
+        return;
+      }
+      if (state.status === "focusing") {
+        setCanvasOpacity(easeInOutCubic(elapsed / presentation.revealMs));
+        if (elapsed >= presentation.revealMs) {
+          restoreCanvasOpacity();
+          phaseStartedAt = time;
+          setState({ status: "lever" });
+        }
+        return;
+      }
+      if (state.status === "lever") {
+        model?.setLeverAngle(lever.pullAngle * easeOutCubic(elapsed / lever.pullMs));
+        if (elapsed >= lever.pullMs + lever.holdMs) spin(time);
+        return;
+      }
+      if (!spinAnimation || !model) return;
+      try {
+        model.setLeverAngle(lever.pullAngle * (1 - easeInOutCubic(elapsed / lever.returnMs)));
+        const frame = getEntrySlotSpinFrame(spinAnimation, time);
+        angles = frame.angles;
+        model.setAngles(angles);
+        if (frame.done && frame.result !== null) {
+          spinAnimation = null;
+          setState({ status: "result", result: frame.result });
+        }
+      } catch {
+        showFallback();
       }
     },
-    updateTriggerState(position) {
-      isInside = isInsideSceneTriggerRadius({
-        position,
-        triggerPoint: getActivationCharacterDestination(),
-        radius: ENTRY_SLOT_CONFIG.triggerRadius,
-      });
-      if (!isInside) waitsForExit = false;
+    updateCamera(camera) {
+      if (
+        !isActive() ||
+        !model ||
+        !cameraBounds ||
+        state.status === "covering" ||
+        state.status === "loading" ||
+        (state.status === "result" && state.isFallback)
+      )
+        return;
+      // Switch directly to the front while the canvas is covered, then fade it in.
+      const view = getSlotCameraView(camera, cameraBounds, front, viewportBounds);
+      camera.position.copy(view.position);
+      camera.zoom = view.zoom;
+      camera.lookAt(view.focus);
+      camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
     },
+    updateTriggerState() {},
     dispose() {
       if (disposed) return;
       disposed = true;
       spinAnimation = null;
-      transition = null;
+      restoreCanvasOpacity();
       if (character && isActive()) character.visible = characterWasVisible;
       model?.dispose();
       environment?.dispose();
@@ -230,11 +247,10 @@ export function createEntrySlotInteraction({
 
 function getSlotCameraView(
   camera: THREE.OrthographicCamera,
-  object: THREE.Object3D,
+  bounds: THREE.Box3,
   front: THREE.Vector3,
   viewportBounds: EntrySlotViewportBounds | null
 ) {
-  const bounds = new THREE.Box3().setFromObject(object);
   const size = bounds.getSize(new THREE.Vector3());
   const focus = bounds.getCenter(new THREE.Vector3());
   const width = size.x * Math.abs(front.z) + size.z * Math.abs(front.x);

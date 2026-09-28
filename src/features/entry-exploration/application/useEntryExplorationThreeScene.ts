@@ -23,6 +23,7 @@ import {
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import { ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID } from "../config/entryExplorationPlace";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -66,6 +67,8 @@ export type UseEntryExplorationThreeSceneOptions = {
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
+  onPlacePanelDismiss?: () => boolean;
+  resumePlaceId?: EntryExplorationPlaceId;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -80,13 +83,20 @@ export function useEntryExplorationThreeScene({
   createSceneInteractionControllers,
   onSceneControlsReady,
   placeVisits,
+  onPlacePanelDismiss,
+  resumePlaceId,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
+  const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
+  onPlacePanelDismissRef.current = onPlacePanelDismiss;
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
   const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
+  const introTargetRef = useRef<EntryExplorationScenePoint>(
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
+  );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
   const startIntroRef = useRef<((time: number) => boolean) | null>(null);
@@ -140,10 +150,8 @@ export function useEntryExplorationThreeScene({
     onArrive: ({ position }) => {
       if (
         introStatusRef.current !== "entering" ||
-        getEntryExplorationSceneDistance(
-          position,
-          ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
-        ) > ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
+        getEntryExplorationSceneDistance(position, introTargetRef.current) >
+          ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
       ) {
         return;
       }
@@ -163,7 +171,7 @@ export function useEntryExplorationThreeScene({
       handles.renderer.domElement.tabIndex = -1;
       updateEntryExplorationCameraView(
         handles.camera,
-        ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
+        introTargetRef.current,
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
       );
@@ -327,8 +335,28 @@ export function useEntryExplorationThreeScene({
         return false;
       }
 
+      const entryRect = container.getBoundingClientRect();
+      const guideDestination = scenery.positionLandmarksAtEntry(
+        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
+      );
       const characterStart = movementRef.current.getCurrentPosition();
-      const cameraTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      let cameraTarget: EntryExplorationScenePoint =
+        ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      const resumeLandmark = resumePlaceId ? landmarks[resumePlaceId]?.position : null;
+      if (resumePlaceId && resumeLandmark) {
+        const distance = getEntryExplorationSceneDistance(resumeLandmark, cameraTarget);
+        cameraTarget = interpolateEntryExplorationScenePoint(
+          resumeLandmark,
+          cameraTarget,
+          distance === 0
+            ? 0
+            : (ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID[resumePlaceId] * 0.75) / distance
+        );
+        // Prime the visit so returning from the restored slot does not reopen the card.
+        placeVisits?.[resumePlaceId].update(cameraTarget, resumeLandmark);
+        placeVisits?.[resumePlaceId].dismiss();
+      }
+      introTargetRef.current = cameraTarget;
       const characterDistance = getEntryExplorationSceneDistance(characterStart, cameraTarget);
       const characterTarget = interpolateEntryExplorationScenePoint(
         characterStart,
@@ -339,10 +367,6 @@ export function useEntryExplorationThreeScene({
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
-      const entryRect = container.getBoundingClientRect();
-      const guideDestination = scenery.positionLandmarksAtEntry(
-        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
-      );
       if (guideDestination) {
         const guide = createEntryExplorationGuideArrow({
           origin: cameraTarget,
@@ -389,6 +413,11 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "entering") {
+        return;
+      }
+
+      if (!hasActiveSceneInteraction() && onPlacePanelDismissRef.current?.()) {
+        movementRef.current.stop();
         return;
       }
 
@@ -588,6 +617,7 @@ export function useEntryExplorationThreeScene({
     hasActiveSceneInteraction,
     playAnimation,
     placeVisits,
+    resumePlaceId,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,

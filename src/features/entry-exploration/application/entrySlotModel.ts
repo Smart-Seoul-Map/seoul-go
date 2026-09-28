@@ -12,6 +12,9 @@ export function createEntrySlotModel(source: THREE.Object3D) {
 
     return { object: reel, initialQuaternion: reel.quaternion.clone() };
   });
+  const lever = model.getObjectByName(ENTRY_SLOT_CONFIG.lever.name);
+  if (!lever) throw new Error(`Slot lever is missing: ${ENTRY_SLOT_CONFIG.lever.name}`);
+  const initialLeverQuaternion = lever.quaternion.clone();
   const ownedMaterials: THREE.Material[] = [];
   model.traverse((child) => {
     if (!(child instanceof THREE.Mesh)) return;
@@ -67,6 +70,10 @@ export function createEntrySlotModel(source: THREE.Object3D) {
 
   return {
     object,
+    setLeverAngle(angle: number): void {
+      rotation.setFromAxisAngle(axis, angle);
+      lever.quaternion.copy(initialLeverQuaternion).multiply(rotation);
+    },
     setAngles(angles: SlotReelAngles): void {
       reels.forEach((reel, index) => {
         rotation.setFromAxisAngle(axis, angles[index]);

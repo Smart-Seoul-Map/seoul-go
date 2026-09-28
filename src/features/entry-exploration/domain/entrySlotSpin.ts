@@ -11,7 +11,7 @@ export type EntrySlotSpin = {
 };
 
 const FULL_TURN = Math.PI * 2;
-const REEL_DURATIONS_MS = [2200, 2600, 3000] as const;
+const REEL_DURATIONS_MS = [1600, 1800, 2000] as const;
 const REEL_TURNS = [4, 5, 6] as const;
 
 export function getSlotDigitAngle(digit: number): number {

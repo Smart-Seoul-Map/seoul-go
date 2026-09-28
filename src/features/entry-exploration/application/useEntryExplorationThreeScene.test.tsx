@@ -163,6 +163,87 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
+  test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
+    let startIntro: (() => boolean) | undefined;
+    const dismiss = vi.fn(() => true);
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+        onPlacePanelDismiss: dismiss,
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro?.();
+    });
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    mocks.registry.getSceneInteractionPointerDestination.mockReturnValue({ x: -3, z: 5 });
+    mocks.movement.moveTo.mockClear();
+    mocks.registry.handleSceneInteractionPointerDown.mockClear();
+    act(() => {
+      mocks.domElement.dispatchEvent(new MouseEvent("pointerdown", { clientX: 50, clientY: 50 }));
+    });
+    expect(dismiss).toHaveBeenCalledOnce();
+    expect(mocks.movement.moveTo).not.toHaveBeenCalled();
+    expect(mocks.registry.handleSceneInteractionPointerDown).not.toHaveBeenCalled();
+    dismiss.mockReturnValue(false);
+    act(() => {
+      mocks.domElement.dispatchEvent(new MouseEvent("pointerdown", { clientX: 50, clientY: 50 }));
+    });
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
+  });
+  test("resumes a pending reward near its landmark without reopening the information card", async () => {
+    let startIntro: (() => boolean) | undefined;
+    const onOpenChange = vi.fn();
+    const placeVisits = {
+      tower: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
+      hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: vi.fn() }),
+    };
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+        placeVisits,
+        resumePlaceId: "tower",
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro?.();
+    });
+    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    const target = mocks.movement.moveTo.mock.calls[0]?.[0] as { x: number; z: number };
+    if (!tower || !target) throw new Error("The resume destination is missing.");
+    const distance = Math.hypot(target.x - tower.position.x, target.z - tower.position.z);
+    expect(distance).toBeLessThanOrEqual(2.4);
+    expect(distance).toBeGreaterThan(0);
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: target, target });
+    });
+    expect(mocks.domElement.hasAttribute("aria-busy")).toBe(false);
+    const callsBeforeReturn = onOpenChange.mock.calls.length;
+    act(() => {
+      placeVisits.tower.update(target, tower.position);
+    });
+    expect(onOpenChange).toHaveBeenCalledTimes(callsBeforeReturn);
+  });
   test("moves to a clicked model's approach point instead of the floor behind it", async () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>

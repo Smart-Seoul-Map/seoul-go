@@ -194,9 +194,13 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await expect(panel(page)).toHaveAttribute("data-state", "open");
   });
   await test.step("Close stays closed; leaving and returning reopens", async () => {
-    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
-    await page.keyboard.press("Escape");
+    await panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true }).click();
     await expectPanelToStayClosed(page);
+    // The first explicit dismissal now presents its one-time number reward.
+    const slotClose = page.getByRole("button", { name: "슬롯 닫기" });
+    await expect(slotClose).toBeEnabled({ timeout: 15000 });
+    await slotClose.click();
+    await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
@@ -289,7 +293,9 @@ test.describe("mobile", () => {
     ).toBeVisible();
     await page.setViewportSize(MOBILE);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
+    await expect(
+      panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true })
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     await expectPanelToStayClosed(page);
   });

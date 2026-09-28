@@ -12,11 +12,14 @@ import type {
   UseEntryExplorationThreeSceneOptions,
 } from "../application/useEntryExplorationThreeScene";
 import { EntryExplorationPage } from "./EntryExplorationPage";
+import { AppToastProvider } from "@shared/ui/toast";
+import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore";
+import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_EXPLORATION_PLACES } from "../config/entryExplorationPlace";
 import type { EntrySlotState } from "../application/entrySlotInteraction";
 
 let slotStateChange: ((state: EntrySlotState) => void) | undefined;
-const slotSpin = vi.fn();
+const slotRequestReward = vi.fn();
 const slotClose = vi.fn();
 const createSubwayControllers = () => [];
 
@@ -29,7 +32,11 @@ vi.mock("../application/entrySlotInteraction", () => ({
     slotStateChange = onStateChange;
     return {
       object: new THREE.Group(),
-      spin: slotSpin,
+      requestReward: (digits: readonly number[]) => {
+        slotRequestReward(digits);
+        onStateChange({ status: "focusing" });
+        return true;
+      },
       setViewportBounds: vi.fn(),
       deactivate: () => {
         slotClose();
@@ -50,6 +57,7 @@ const sceneControls = {
 let districtSelectionResultHandler:
   ((result: EntryExplorationDistrictSelectionResult) => void) | null = null;
 let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
+let dismissPlaceFromBackground: UseEntryExplorationThreeSceneOptions["onPlacePanelDismiss"];
 const subwaySelectionViewModel: EntryExplorationSubwaySelectionViewModel = {
   handleClose: vi.fn(),
   handleStationSelection: vi.fn(),
@@ -72,8 +80,10 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     createSceneInteractionControllers,
     onSceneControlsReady,
     placeVisits: visits,
+    onPlacePanelDismiss,
   }: UseEntryExplorationThreeSceneOptions) => {
     placeVisits = visits;
+    dismissPlaceFromBackground = onPlacePanelDismiss;
     useEffect(() => {
       const controllers = createSceneInteractionControllers();
       return () => controllers.forEach((controller) => controller.dispose());
@@ -102,29 +112,103 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByText("아직 획득한 번호가 없어요.")).toBeTruthy();
   });
 
-  test("connects slot arrival, result, retry and close without navigating away", () => {
+  test("saves on first visit, spins after card dismissal, and reveals the saved number without retry", () => {
     const { router } = renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
-      slotStateChange?.({ status: "ready" });
+      placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
+    const reward = entryNumberRewardStore.getState().rewards[0];
+    expect(reward.revealed).toBe(false);
+    expect(loadEntryNumberRewards()).toEqual([reward]);
+    expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).toHaveBeenCalledWith([
+      Math.floor(reward.number / 10),
+      reward.number % 10,
+    ]);
     expect(screen.queryByRole("button", { name: /내 번호 열기/ })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "돌리기" }));
-    expect(slotSpin).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "돌리기" })).toBeNull();
     act(() => {
-      slotStateChange?.({ status: "result", result: "09" });
+      slotStateChange?.({ status: "result", result: String(reward.number) });
     });
-    expect(screen.getByRole("status", { name: "뽑힌 숫자" }).textContent).toBe("09");
-    fireEvent.click(screen.getByRole("button", { name: "다시 돌리기" }));
-    expect(slotSpin).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("status", { name: "뽑힌 숫자" }).textContent).toBe(
+      String(reward.number)
+    );
+    expect(screen.queryByRole("button", { name: "다시 돌리기" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
     expect(slotClose).toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
-    expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
+    expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toContain(
+      String(reward.number)
+    );
+    expect(loadEntryNumberRewards()[0].revealed).toBe(true);
     expect(router.state.location.pathname).toBe("/");
   });
+  test("revisiting a revealed place only opens its information card", () => {
+    entryNumberRewardStore.setState({
+      rewards: [{ placeId: "hanok", number: 40, revealed: true }],
+    });
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => {
+      placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    expect(screen.getByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    expect(entryNumberRewardStore.getState().rewards).toEqual([
+      { placeId: "hanok", number: 40, revealed: true },
+    ]);
+  });
+
+  test("background dismissal presents the saved reward once, while revisits do not spin", () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => {
+      placeVisits?.hanok.update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    const reward = entryNumberRewardStore.getState().rewards[0];
+    act(() => {
+      expect(dismissPlaceFromBackground?.()).toBe(true);
+      expect(dismissPlaceFromBackground?.()).toBe(false);
+    });
+    expect(screen.queryByRole("dialog", { name: "한옥체험" })).toBeNull();
+    expect(slotRequestReward).toHaveBeenCalledExactlyOnceWith([
+      Math.floor(reward.number / 10),
+      reward.number % 10,
+    ]);
+    act(() => {
+      slotStateChange?.({ status: "result", result: String(reward.number) });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    act(() => {
+      placeVisits?.hanok.update({ x: 30, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.hanok.update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    act(() => {
+      expect(dismissPlaceFromBackground?.()).toBe(true);
+    });
+    expect(slotRequestReward).toHaveBeenCalledOnce();
+    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
+  });
+
+  test("resumes an unrevealed saved reward after starting instead of drawing again", () => {
+    entryNumberRewardStore.setState({
+      rewards: [{ placeId: "tower", number: 65, revealed: false }],
+    });
+    renderEntryExplorationPage();
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    expect(slotRequestReward).toHaveBeenCalledWith([6, 5]);
+    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
+  });
   beforeEach(() => {
-    slotSpin.mockClear();
+    sessionStorage.clear();
+    entryNumberRewardStore.setState({ rewards: [] });
+    slotRequestReward.mockClear();
     slotClose.mockClear();
     slotStateChange = undefined;
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
@@ -376,7 +460,11 @@ function renderEntryExplorationPage({
   ]);
 
   return {
-    ...render(<RouterProvider router={router} />),
+    ...render(
+      <AppToastProvider>
+        <RouterProvider router={router} />
+      </AppToastProvider>
+    ),
     router,
   };
 }

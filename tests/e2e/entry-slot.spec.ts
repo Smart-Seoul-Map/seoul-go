@@ -1,4 +1,25 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+const REWARD_STORAGE_KEY = "seoul-go:entry-number-rewards:v1";
+
+async function startExploration(page: Page) {
+  const start = page.getByRole("button", { name: "탐방 시작", exact: true });
+  await expect(start).toBeEnabled({ timeout: 45000 });
+  await start.click();
+  const canvas = page.getByLabel("서울 탐방 공간", { exact: true });
+  await expect(canvas).not.toHaveAttribute("aria-busy", "true", { timeout: 45000 });
+  await expect(canvas).toBeEnabled();
+  return canvas;
+}
+
+async function readRewards(
+  page: Page
+): Promise<{ placeId: string; number: number; revealed: boolean }[]> {
+  return page.evaluate(
+    (key) => JSON.parse(sessionStorage.getItem(key) ?? "{}").rewards ?? [],
+    REWARD_STORAGE_KEY
+  );
+}
 
 test.use({ launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
@@ -24,17 +45,19 @@ test("keeps the entry canvas inside the viewport after rotating to landscape", a
 });
 
 for (const viewport of [
-  { name: "desktop", width: 1366, height: 900, x: 543, y: 450, touch: false },
-  { name: "mobile", width: 390, height: 844, x: 64, y: 410, touch: true },
-  { name: "narrow", width: 320, height: 640, x: 60, y: 311, touch: true },
+  { name: "desktop", width: 1366, height: 900, x: 1242, y: 650, touch: false },
+  { name: "mobile", width: 390, height: 844, x: 371, y: 801, touch: true },
+  { name: "narrow", width: 320, height: 640, x: 304, y: 608, touch: true },
 ]) {
   test.describe(viewport.name, () => {
     test.use({
       viewport: { width: viewport.width, height: viewport.height },
       hasTouch: viewport.touch,
     });
-    test("approaches, spins the real model, retries, and exits", async ({ page }, testInfo) => {
-      test.setTimeout(90000);
+    test("visits a place, automatically spins once, and keeps the number after reload", async ({
+      page,
+    }, testInfo) => {
+      test.setTimeout(150000);
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("response", (response) => {
@@ -42,18 +65,38 @@ for (const viewport of [
           errors.push(`${response.status()} model`);
       });
       await page.goto("/");
-      const start = page.getByRole("button", { name: "탐방 시작", exact: true });
-      await expect(start).toBeEnabled({ timeout: 45000 });
-      await start.click();
-      const canvas = page.getByLabel("서울 탐방 공간", { exact: true });
-      await expect(canvas).toBeVisible({ timeout: 20000 });
-      // Wait for intro movement to finish before clicking a scene object.
-      await expect(canvas).not.toHaveAttribute("aria-busy", "true", { timeout: 45000 });
-      await expect(canvas).toBeEnabled();
+      const canvas = await startExploration(page);
       if (viewport.touch) await canvas.tap({ position: { x: viewport.x, y: viewport.y } });
       else await canvas.click({ position: { x: viewport.x, y: viewport.y } });
-      const spin = page.getByRole("button", { name: "돌리기", exact: true });
-      await expect(spin).toBeEnabled({ timeout: 15000 });
+      const panel = page.getByRole("dialog", { name: "한옥체험", exact: true });
+      await expect(panel).toBeVisible({ timeout: 20000 });
+      const titleBounds = await panel
+        .getByRole("heading", { name: "한옥체험", exact: true })
+        .boundingBox();
+      const closeBounds = await panel.getByRole("button", { name: "장소 정보 닫기" }).boundingBox();
+      expect(titleBounds && closeBounds).toBeTruthy();
+      expect(
+        Math.abs(
+          closeBounds!.y + closeBounds!.height / 2 - titleBounds!.y - titleBounds!.height / 2
+        )
+      ).toBeLessThan(2);
+      const awarded = await readRewards(page);
+      expect(awarded).toHaveLength(1);
+      expect(awarded[0].revealed).toBe(false);
+      expect(awarded[0].number).toBeGreaterThanOrEqual(36);
+      expect(awarded[0].number).toBeLessThanOrEqual(71);
+      if (viewport.touch) {
+        await canvas.tap({ position: { x: viewport.width / 2, y: 100 } });
+      } else {
+        await panel.getByRole("button", { name: "장소 정보 닫기" }).click();
+      }
+      await expect(panel).toHaveCount(0);
+      const result = page.getByRole("status", { name: "뽑힌 숫자" });
+      const close = page.getByRole("button", { name: "슬롯 닫기" });
+      await expect(result).toHaveAttribute("aria-busy", "true");
+      await expect(close).toBeDisabled();
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("region", { name: "숫자 슬롯" })).toBeVisible();
       const clip = {
         x: viewport.width * 0.4,
         y: viewport.height * 0.28,
@@ -61,15 +104,16 @@ for (const viewport of [
         height: viewport.height * 0.16,
       };
       const before = await page.screenshot({ clip });
-      if (viewport.touch)
-        await canvas.tap({ position: { x: viewport.width / 2, y: viewport.height * 0.4 } });
-      else await canvas.click({ position: { x: viewport.width / 2, y: viewport.height * 0.4 } });
-      await expect(page.getByRole("button", { name: "돌아가는 중" })).toBeDisabled();
-      const during = await page.screenshot({ clip });
-      expect(during.equals(before), "Reel pixels change while spinning").toBe(false);
-      const retry = page.getByRole("button", { name: "다시 돌리기" });
-      await expect(retry).toBeEnabled({ timeout: 10000 });
-      await expect(page.getByRole("status", { name: "뽑힌 숫자" })).toHaveText(/^\d{2}$/);
+      await canvas.click({ position: { x: viewport.width / 2, y: viewport.height * 0.4 } });
+      await expect(close).toBeEnabled({ timeout: 15000 });
+      expect(
+        (await page.screenshot({ clip })).equals(before),
+        "Slot pixels change during the automatic presentation"
+      ).toBe(false);
+      await expect(canvas).toHaveCSS("opacity", "1");
+      await expect(result).toHaveText(String(awarded[0].number));
+      await expect(page.getByRole("button", { name: /돌리기/ })).toHaveCount(0);
+      await expect(page.getByRole("alert")).toHaveCount(0);
       const pixels = await canvas.evaluate(
         (element: HTMLCanvasElement) =>
           new Promise<number>((resolve) => {
@@ -103,16 +147,73 @@ for (const viewport of [
         body: await page.screenshot(),
         contentType: "image/png",
       });
-      await retry.click();
-      await expect(page.getByRole("button", { name: "돌아가는 중" })).toBeDisabled();
-      await page.getByRole("button", { name: "슬롯 닫기" }).click();
+      await close.click();
       await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
-      await page.waitForTimeout(1000);
+      await expect(canvas).toHaveCSS("opacity", "1");
+      await expect(panel).toHaveCount(0);
+      await page.getByRole("button", { name: "내 번호 열기, 1개 획득" }).click();
+      await expect(page.getByRole("list", { name: "획득한 숫자" })).toHaveText(
+        `추첨 번호${awarded[0].number}`
+      );
+      expect(await readRewards(page)).toEqual([{ ...awarded[0], revealed: true }]);
+      await page.reload();
+      await startExploration(page);
       await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
+      await page.getByRole("button", { name: "내 번호 열기, 1개 획득" }).click();
+      await expect(page.getByRole("list", { name: "획득한 숫자" })).toHaveText(
+        `추첨 번호${awarded[0].number}`
+      );
       expect(errors).toEqual([]);
     });
   });
 }
+
+test("refreshing before closing a visited place restores the same pending reward", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(150000);
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.goto("/");
+  const canvas = await startExploration(page);
+  await canvas.click({ position: { x: 1242, y: 650 } });
+  await expect(page.getByRole("dialog", { name: "한옥체험", exact: true })).toBeVisible({
+    timeout: 20000,
+  });
+  const [reward] = await readRewards(page);
+  expect(reward.revealed).toBe(false);
+  await page.reload();
+  await startExploration(page);
+  const result = page.getByRole("status", { name: "뽑힌 숫자" });
+  await expect(result).toHaveText(String(reward.number), { timeout: 20000 });
+  await page.getByRole("button", { name: "슬롯 닫기" }).click();
+  await expect(page.locator('.PlaceDetailPanel[data-state="open"]')).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeVisible();
+  expect(await readRewards(page)).toEqual([{ ...reward, revealed: true }]);
+  await testInfo.attach("restored-place", {
+    body: await page.screenshot(),
+    contentType: "image/png",
+  });
+});
+
+test("model loading failure still reveals the earned number and allows closing", async ({
+  page,
+}) => {
+  test.setTimeout(90000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/models/slot_v1.glb", (route) => route.abort());
+  await page.goto("/");
+  const canvas = await startExploration(page);
+  await canvas.click({ position: { x: 371, y: 801 } });
+  await expect(page.getByRole("dialog", { name: "한옥체험", exact: true })).toBeVisible({
+    timeout: 20000,
+  });
+  const [reward] = await readRewards(page);
+  await page.getByRole("button", { name: "장소 정보 닫기" }).click();
+  await expect(page.getByRole("alert")).toContainText("번호는 받았어요");
+  await expect(page.getByRole("status", { name: "뽑힌 숫자" })).toHaveText(String(reward.number));
+  await page.getByRole("button", { name: "슬롯 닫기" }).click();
+  await expect(page.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeVisible();
+});
 
 test("shipped slot GLB has separate reels and embedded resources", async ({ request }) => {
   const response = await request.get("/models/slot_v1.glb");

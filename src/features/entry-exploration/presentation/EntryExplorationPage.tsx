@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -32,6 +32,11 @@ import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
+import {
+  entryNumberRewardStore,
+  useEntryNumberRewardStore,
+} from "../application/useEntryNumberRewardStore";
+import { isEntryNumberRewardPlaceId } from "../config/entryNumberRewardConfig";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -53,16 +58,36 @@ export function EntryExplorationPage({
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const rewards = useEntryNumberRewardStore((state) => state.rewards);
+  const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
+  const revealReward = useEntryNumberRewardStore((state) => state.revealReward);
+  const [restoredReward] = useState(() => rewards.find((reward) => !reward.revealed));
   const {
     isReady,
     isVisible,
     handleStart,
     handleSceneControlsReady: handleIntroControlsReady,
   } = useEntryExplorationIntro();
-  const { placeVisits, panelProps } = useEntryExplorationPlacePanel();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
-  const { createSlotInteractionControllers, ...slot } = useEntrySlot();
+  const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot({
+    onRewardRevealed: revealReward,
+  });
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel({
+    onVisit: visitPlace,
+    onDismiss: (placeId) => {
+      const reward = entryNumberRewardStore
+        .getState()
+        .rewards.find((item) => item.placeId === placeId);
+      if (reward) showReward(reward);
+    },
+  });
+  useEffect(() => {
+    if (!isVisible && restoredReward) showReward(restoredReward);
+  }, [isVisible, restoredReward, showReward]);
+  const collectedNumbers = rewards
+    .filter((reward) => reward.revealed)
+    .map((reward) => reward.number);
   const createExtraSceneInteractionControllers = useCallback(
     () => [...createSubwayInteractionControllers(), ...createSlotInteractionControllers()],
     [createSubwayInteractionControllers, createSlotInteractionControllers]
@@ -98,6 +123,10 @@ export function EntryExplorationPage({
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
     placeVisits,
+    onPlacePanelDismiss: dismissOpenPanel,
+    resumePlaceId: isEntryNumberRewardPlaceId(restoredReward?.placeId)
+      ? restoredReward.placeId
+      : undefined,
   });
 
   useEffect(() => {
@@ -147,7 +176,9 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
-      {!isVisible && slot.state.status === "closed" && <EntryCollectedNumbersPanel numbers={[]} />}
+      {!isVisible && slot.state.status === "closed" && (
+        <EntryCollectedNumbersPanel numbers={collectedNumbers} />
+      )}
       {!isVisible && renderPlacePanel?.(panelProps)}
       {!isVisible && <EntrySlotOverlay {...slot} />}
       <SubwaySelectionDialog

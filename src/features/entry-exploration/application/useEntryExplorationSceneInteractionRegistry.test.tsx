@@ -182,9 +182,13 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
   });
 
   test("deactivates the active controller and clears the active interaction", () => {
+    let isActive = true;
     const controller = createSceneInteractionController({
       canActivate: vi.fn(() => true),
-      deactivate: vi.fn(),
+      isActive: () => isActive,
+      deactivate: vi.fn(() => {
+        isActive = false;
+      }),
     });
     const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
 
@@ -221,5 +225,50 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
 
     expect(controller.retrySelection).toHaveBeenCalledTimes(1);
     expect(result.current.hasActiveSceneInteraction()).toBe(true);
+  });
+
+  test("does not release an interaction that rejects closing until its result", () => {
+    let locked = true;
+    let active = true;
+    const controller = createSceneInteractionController({
+      canActivate: () => true,
+      isActive: () => active,
+      deactivate: () => {
+        if (!locked) active = false;
+      },
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([controller]);
+    result.current.activateReadySceneInteraction(0);
+    expect(result.current.deactivateActiveSceneInteraction()).toBe(false);
+    expect(result.current.hasActiveSceneInteraction()).toBe(true);
+    expect(result.current.activateReadySceneInteraction(1)).toBe(false);
+    locked = false;
+    expect(result.current.deactivateActiveSceneInteraction()).toBe(true);
+    expect(result.current.hasActiveSceneInteraction()).toBe(false);
+  });
+
+  test("sends pointer input only to the active interaction", () => {
+    let backgroundHits = 0;
+    let activeHits = 0;
+    const background = createSceneInteractionController({
+      handlePointerDown: () => {
+        backgroundHits++;
+        return true;
+      },
+    });
+    const active = createSceneInteractionController({
+      canActivate: () => true,
+      handlePointerDown: () => {
+        activeHits++;
+        return true;
+      },
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([background, active]);
+    result.current.activateReadySceneInteraction(0);
+    result.current.handleSceneInteractionPointerDown(new THREE.Raycaster(), 1);
+    expect(activeHits).toBe(1);
+    expect(backgroundHits).toBe(0);
   });
 });

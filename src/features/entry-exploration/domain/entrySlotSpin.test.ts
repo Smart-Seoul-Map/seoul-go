@@ -38,10 +38,11 @@ describe("entry slot spin", () => {
     const moving = getEntrySlotSpinFrame(spin, 600);
     expect(moving.angles.every((angle) => angle > 0)).toBe(true);
     expect(moving.result).toBeNull();
-    const leftStopped = getEntrySlotSpinFrame(spin, 2300);
+    const leftStopped = getEntrySlotSpinFrame(spin, 1700);
     expect(leftStopped.angles[0] % (Math.PI * 2)).toBeCloseTo(Math.PI / 2);
     expect(leftStopped.done).toBe(false);
-    const stopped = getEntrySlotSpinFrame(spin, 3100);
+    expect(getEntrySlotSpinFrame(spin, 2099).done).toBe(false);
+    const stopped = getEntrySlotSpinFrame(spin, 2100);
     expect(stopped.done).toBe(true);
     expect(stopped.result).toBe("09");
     expect(stopped.angles[2] % (Math.PI * 2)).toBeCloseTo((54 * Math.PI) / 180);

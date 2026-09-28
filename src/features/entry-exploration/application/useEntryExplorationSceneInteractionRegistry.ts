@@ -63,6 +63,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     }
 
     activeController.deactivate?.();
+    if (activeController.isActive()) return false;
     activeSceneInteractionRef.current = null;
 
     return true;
@@ -108,25 +109,28 @@ export function useEntryExplorationSceneInteractionRegistry() {
 
   const handleSceneInteractionPointerDown = useCallback(
     (raycaster: THREE.Raycaster, time: number) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerDown(raycaster, time)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerDown(raycaster, time)),
     []
   );
 
   const handleSceneInteractionPointerMove = useCallback(
     (raycaster: THREE.Raycaster) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerMove(raycaster)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerMove(raycaster)),
     []
   );
 
   const handleSceneInteractionPointerUp = useCallback(
     (raycaster: THREE.Raycaster, time: number) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerUp(raycaster, time)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerUp(raycaster, time)),
     []
   );
 

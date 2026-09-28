@@ -22,6 +22,27 @@ function sourceModel() {
 }
 
 describe("entry slot model", () => {
+  test("pulls only the lever downward around its existing pivot and can reset it", () => {
+    const source = sourceModel();
+    const model = createEntrySlotModel(source);
+    const lever = model.object.getObjectByName("slot_lever")!;
+    const initial = lever.quaternion.clone();
+    const pivot = lever.position.clone();
+    const tip = new THREE.Vector3(-5, 6, 0);
+    const restTip = tip.clone().applyQuaternion(initial);
+    model.setLeverAngle(-Math.PI / 3);
+    expect(tip.clone().applyQuaternion(lever.quaternion).y).toBeLessThan(restTip.y);
+    expect(lever.position.equals(pivot)).toBe(true);
+    for (const name of ["slot", "slot_number_1", "slot_number_2", "slot_logo"]) {
+      expect(model.object.getObjectByName(name)?.quaternion.toArray()).toEqual(
+        source.getObjectByName(name)?.quaternion.toArray()
+      );
+    }
+    expect(source.getObjectByName("slot_lever")?.quaternion.equals(initial)).toBe(true);
+    model.setLeverAngle(0);
+    expect(lever.quaternion.equals(initial)).toBe(true);
+    model.dispose();
+  });
   test("uses the existing intro accent token for the selection line", () => {
     document.documentElement.style.setProperty("--sg-v3-pink-500", "#123456");
     const model = createEntrySlotModel(sourceModel());
