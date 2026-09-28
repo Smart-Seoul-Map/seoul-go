@@ -16,7 +16,6 @@ export type ExplorationRoutePlacesResult = {
   isLoading: boolean;
   placeMarkers: MapMarkerFeatureCollection;
   places: SmartSeoulThemePlace[];
-  selectionYearLabel: string;
   themeProgressItems: PlaceThemeProgressItem[];
 };
 

@@ -13,7 +13,6 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
-import { AppBadge } from "@shared/ui/badge";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
@@ -60,7 +59,6 @@ type ExplorationPageProps = {
   ) => AddExplorationPlaceToCourseResultStatus;
   placeMarkers?: MapMarkerFeatureCollection;
   placeMarkerPresentation?: "treasure" | "image-year";
-  selectionYearLabel?: string;
   stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
 };
@@ -76,7 +74,6 @@ export function ExplorationPage({
   onAddPlaceToCourse,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   placeMarkerPresentation,
-  selectionYearLabel,
   stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
@@ -169,13 +166,6 @@ export function ExplorationPage({
               <ExplorationDistrictStatusBadge districtName={districtName} size={mapBadgeSize} />
             </li>
           ) : null}
-          {selectionYearLabel && (
-            <li className="exploration-theme-place-count-item">
-              <AppBadge size={mapBadgeSize} variant="surface" textPolicy="singleLine">
-                {selectionYearLabel}
-              </AppBadge>
-            </li>
-          )}
           {displayedThemeProgressItems.map((item) => (
             <li key={item.id} className="exploration-theme-place-count-item">
               <ExplorationThemePlaceCountBadge

@@ -63,14 +63,14 @@ describe("ExplorationPage", () => {
       },
     ];
     const view = renderExplorationPage(
-      <ExplorationPage
-        placeMarkers={markers}
-        themeProgressItems={progress}
-        selectionYearLabel="서울에디션25 · 25 · 26"
-      />
+      <ExplorationPage placeMarkers={markers} themeProgressItems={progress} districtName="용산구" />
     );
 
-    expect(screen.getByText("서울에디션25 · 25 · 26")).toBeInTheDocument();
+    expect(screen.queryByText("서울에디션25 · 25 · 26")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("현재 용산구 탐방중")).toBeInTheDocument();
+    expect(within(screen.getByLabelText("테마별 장소 개수")).getAllByRole("listitem")).toHaveLength(
+      2
+    );
     expect(screen.getByLabelText("서울에디션25 장소 0/2")).toBeInTheDocument();
     act(() =>
       explorationMapMock.latestProps?.onPlaceMarkerSelect?.({

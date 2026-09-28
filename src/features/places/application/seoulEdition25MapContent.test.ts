@@ -5,7 +5,7 @@ import { filterSmartSeoulPlacesByDistrict } from "./placeDistrictFilter";
 import { createSeoulEdition25MapContent } from "./seoulEdition25MapContent";
 
 describe("createSeoulEdition25MapContent", () => {
-  test("shows only edition places in the current district and lists their selection years", () => {
+  test("shows only edition places in the current district and preserves marker selection years", () => {
     const places = normalizeSmartSeoulThemeContentsResponse({
       body: [
         { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "26_edition25_24", COT_GU_NAME: "용산구" },
@@ -28,7 +28,10 @@ describe("createSeoulEdition25MapContent", () => {
       "smart-seoul:1786321258890:26_edition25_24",
       "smart-seoul:1786321258890:25_edition25_24",
     ]);
-    expect(content.selectionYearLabel).toBe("서울에디션25 · 25 · 26");
+    expect(content).not.toHaveProperty("selectionYearLabel");
+    expect(
+      content.placeMarkers.features.map((feature) => feature.properties.selectionYear)
+    ).toEqual([2026, 2025]);
     expect(content.themeProgressItems).toMatchObject([
       { id: "1786321258890", name: "서울에디션25", totalCount: 2, visitedCount: 0 },
     ]);
@@ -38,7 +41,6 @@ describe("createSeoulEdition25MapContent", () => {
   test("keeps a zero-count edition badge when the area has no edition places", () => {
     const content = createSeoulEdition25MapContent([]);
 
-    expect(content.selectionYearLabel).toBe("서울에디션25");
     expect(content.placeMarkers.features).toEqual([]);
     expect(content.themeProgressItems).toMatchObject([{ totalCount: 0 }]);
   });
