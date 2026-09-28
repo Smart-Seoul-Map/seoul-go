@@ -3,23 +3,40 @@
   --course-footer-height: calc(
     var(--sg-course-action-size) + var(--sg-spacing-3) + var(--sg-spacing-4)
   );
-  --course-peek-height: calc(
-    50dvh - var(--course-header-height) - var(--course-footer-height) -
-      env(safe-area-inset-bottom, 0px)
-  );
-  --course-seal-size: clamp(
-    var(--sg-spacing-14),
-    calc(var(--course-peek-height) * 0.42),
-    calc(var(--sg-spacing-13) * 2)
-  );
-  --course-row-pitch: max(
-    calc(var(--course-seal-size) + var(--sg-spacing-12)),
-    calc(var(--course-peek-height) - var(--sg-spacing-4) - var(--course-seal-size) / 2)
-  );
+  --course-seal-size: calc(var(--sg-spacing-12) * 2);
+  --course-row-pitch: calc(var(--sg-spacing-12) * 3);
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
+  --sg-panel-floating-stroke: var(--sg-v3-pink-500);
+  --sg-panel-floating-radius: var(--sg-radius-7);
+}
+
+.StampCoursePanel[data-presentation] .StampCourseBanner {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: none;
+  gap: var(--sg-spacing-3);
+  padding: var(--sg-spacing-4) var(--sg-spacing-4) 0;
+}
+
+.StampCourseBannerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-3);
+  width: 100%;
+}
+
+.StampCourseBannerImage {
+  width: 100%;
+  aspect-ratio: 568 / 140;
+  border-radius: var(--sg-radius-4);
+  background: var(--sg-color-bg-neutral-weak);
 }
 
 .StampCoursePanel[data-presentation] .StampCourseHeader {
+  order: 2;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -30,7 +47,7 @@
 }
 
 .StampCourseHeader .AppResponsivePanelTitle {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
   font-family: var(--sg-font-alrim);
   font-size: var(--sg-course-title-size);
@@ -51,7 +68,16 @@
   margin-left: auto;
 }
 
+.StampCourseHeaderActions .AppTextButton[data-variant="neutral"] {
+  background: var(--sg-color-bg-overlay);
+  border-radius: var(--sg-radius-full);
+  color: var(--sg-color-text-inverted);
+  padding-inline: var(--sg-spacing-3_5);
+}
+
 .StampCoursePanel[data-presentation] .StampCourseBody {
+  order: 3;
+  flex: 0 1 auto;
   position: relative;
   margin-inline: var(--sg-spacing-4);
   padding: 0;
@@ -69,6 +95,12 @@
   margin: 0;
   padding: var(--sg-spacing-4) var(--sg-spacing-3);
   list-style: none;
+  overflow: hidden;
+  border-radius: var(--sg-radius-4);
+  background-repeat: no-repeat;
+  background-image: url("../../../assets/course/stamp-board-decoration.png");
+  background-position: center;
+  background-size: cover;
 }
 
 .StampCourseSlot {
@@ -123,26 +155,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   flex: none;
   width: var(--course-seal-size);
   height: var(--course-seal-size);
   border-radius: var(--sg-radius-full);
-  border: var(--sg-stroke-width-surface) solid var(--sg-course-seal-stroke);
+  border: var(--sg-stroke-width-surface) solid var(--sg-course-seal-empty-fg);
   background: var(--sg-course-seal-empty-bg);
-  color: var(--sg-course-seal-empty-fg);
   box-shadow: var(--sg-shadow-2);
-  font-size: var(--sg-font-size-7);
 }
 
-.StampCourseSeal small {
-  color: var(--sg-color-text-muted);
-  font-size: var(--sg-font-size-1);
+.StampCourseSlot[data-filled="false"] .StampCourseSeal {
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .StampCourseSealImage {
   width: 100%;
   height: 100%;
-  border-radius: inherit;
   object-fit: cover;
   pointer-events: none;
 }
@@ -235,6 +266,7 @@
 }
 
 .StampCoursePanel[data-presentation] .StampCourseFooter {
+  order: 5;
   display: grid;
   grid-template-columns:
     repeat(2, var(--sg-course-action-size)) minmax(var(--sg-course-footer-group-gap), 1fr)
@@ -292,10 +324,27 @@
   mask-image: url("../../../assets/link.svg");
 }
 
+.StampCourseMaxNote {
+  margin-top: var(--sg-spacing-3);
+  padding: var(--sg-spacing-3) var(--sg-spacing-4);
+  border-radius: var(--sg-radius-4);
+  background: var(--sg-color-bg-brand-weak);
+  color: var(--sg-color-text-muted);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-3);
+}
+
+.StampCourseMaxNote[data-visible="false"] {
+  visibility: hidden;
+}
+
+.StampCoursePanel[data-presentation] > .StampCourseMaxNote {
+  order: 4;
+  margin: var(--sg-spacing-3) var(--sg-spacing-4) var(--sg-spacing-4);
+}
+
 .StampCoursePanel[data-presentation="side-panel"] {
   --course-header-height: var(--sg-spacing-16);
-  --course-seal-size: calc(var(--sg-spacing-12) * 2);
-  --course-row-pitch: calc(var(--sg-spacing-12) * 3);
 }
 
 .StampCoursePanel[data-presentation="side-panel"] .StampCourseHeader {

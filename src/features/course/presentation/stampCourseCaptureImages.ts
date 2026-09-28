@@ -1,8 +1,7 @@
 import type { SavedStampCoursePlace } from "../domain/stampCourse";
 
 const STAMP_COURSE_CAPTURE_SEAL_SIZE = 384;
-const STAMP_COURSE_CAPTURE_IMAGE_TYPE = "image/jpeg";
-const STAMP_COURSE_CAPTURE_IMAGE_QUALITY = 0.85;
+const STAMP_COURSE_CAPTURE_IMAGE_TYPE = "image/png";
 
 function loadCrossOriginImage(source: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
@@ -29,6 +28,12 @@ function createSquareThumbnail(image: HTMLImageElement): string | null {
   const cropSize = Math.min(image.naturalWidth, image.naturalHeight);
   const cropX = (image.naturalWidth - cropSize) / 2;
   const cropY = (image.naturalHeight - cropSize) / 2;
+  const radius = STAMP_COURSE_CAPTURE_SEAL_SIZE / 2;
+
+  context.beginPath();
+  context.arc(radius, radius, radius, 0, Math.PI * 2);
+  context.closePath();
+  context.clip();
 
   context.drawImage(
     image,
@@ -43,7 +48,7 @@ function createSquareThumbnail(image: HTMLImageElement): string | null {
   );
 
   try {
-    return canvas.toDataURL(STAMP_COURSE_CAPTURE_IMAGE_TYPE, STAMP_COURSE_CAPTURE_IMAGE_QUALITY);
+    return canvas.toDataURL(STAMP_COURSE_CAPTURE_IMAGE_TYPE);
   } catch {
     return null;
   }

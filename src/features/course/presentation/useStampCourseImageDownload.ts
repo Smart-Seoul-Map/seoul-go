@@ -8,7 +8,7 @@ import type { SavedStampCoursePlace } from "../domain/stampCourse";
 import { createStampCourseImageFileName } from "../domain/stampCourseImageFileName";
 import { createStampCourseCapturePlaces } from "./stampCourseCaptureImages";
 
-const STAMP_COURSE_IMAGE_PIXEL_RATIO = 3;
+const STAMP_COURSE_IMAGE_PIXEL_RATIO = 2;
 
 type StampCourseImageDownload = {
   captureRef: RefObject<HTMLDivElement | null>;

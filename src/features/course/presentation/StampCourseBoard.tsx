@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactElemen
 import { AppBadge } from "@shared/ui/badge";
 import { AppButton } from "@shared/ui/button";
 
+import stampSealEmptyImage from "../../../assets/course/stamp-seal-empty.png";
 import type { SavedStampCoursePlace } from "../domain/stampCourse";
 import { createStampCourseSlots } from "../domain/stampCourseSlots";
 import { useStampCourseDrag } from "./useStampCourseDrag";
@@ -48,10 +49,7 @@ function StampCourseSealContent({
   }
 
   return (
-    <>
-      <span aria-hidden="true">GO</span>
-      <small aria-hidden="true">STAMP</small>
-    </>
+    <img className="StampCourseSealImage" src={stampSealEmptyImage} alt="" draggable={false} />
   );
 }
 

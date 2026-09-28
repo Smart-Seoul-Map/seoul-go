@@ -1,6 +1,6 @@
 import type { ReactElement, Ref } from "react";
 
-import type { SavedStampCoursePlace } from "../domain/stampCourse";
+import { MAX_STAMP_COURSE_PLACES, type SavedStampCoursePlace } from "../domain/stampCourse";
 import { StampCourseBoard } from "./StampCourseBoard";
 import "./stamp-course-capture-card.css";
 
@@ -21,6 +21,11 @@ export function StampCourseCaptureCard({ places, ref }: StampCourseCaptureCardPr
           onRemove={ignoreCaptureInteraction}
           onReorder={ignoreCaptureInteraction}
         />
+        {places.length === MAX_STAMP_COURSE_PLACES && (
+          <div className="StampCourseMaxNote">
+            {MAX_STAMP_COURSE_PLACES}개 코스가 모두 담겼어요. 삭제 후 다른 장소를 추가할 수 있어요.
+          </div>
+        )}
       </div>
     </div>
   );
