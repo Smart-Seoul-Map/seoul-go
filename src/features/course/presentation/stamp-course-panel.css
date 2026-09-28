@@ -191,8 +191,9 @@
   --sg-button-ghost-fg: var(--sg-course-remove-fg);
   position: absolute;
   z-index: 2;
-  top: calc(-1 * var(--sg-spacing-4));
-  right: calc(-1 * var(--sg-spacing-4));
+  /* Place the button center near the circle's 45-degree edge, keeping a 40px hit area. */
+  top: calc(15% - var(--sg-spacing-5));
+  right: calc(15% - var(--sg-spacing-5));
   width: var(--sg-spacing-10);
   height: var(--sg-spacing-10);
   padding: 0;
@@ -202,8 +203,9 @@
 .StampCourseRemoveButton::before {
   content: "";
   position: absolute;
-  width: var(--sg-spacing-6);
-  height: var(--sg-spacing-6);
+  box-sizing: border-box;
+  width: var(--sg-spacing-4_5);
+  height: var(--sg-spacing-4_5);
   border: var(--sg-focus-ring-width) solid var(--sg-course-remove-fg);
   border-radius: var(--sg-radius-full);
   background: var(--sg-course-remove-bg);
@@ -216,8 +218,8 @@
 
 .StampCourseRemoveIcon {
   z-index: 1;
-  width: var(--sg-spacing-4);
-  height: var(--sg-spacing-4);
+  width: var(--sg-spacing-3);
+  height: var(--sg-spacing-3);
   background: currentColor;
   mask: url("../../../assets/minus.svg") center / contain no-repeat;
 }
