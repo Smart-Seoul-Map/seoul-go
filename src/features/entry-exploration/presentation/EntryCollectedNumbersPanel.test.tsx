@@ -10,6 +10,56 @@ vi.mock("../../../assets/dices.svg", () => ({
 afterEach(cleanup);
 
 describe("EntryCollectedNumbersPanel", () => {
+  test("expands the existing header without replacing its button, icon, or title", () => {
+    render(<EntryCollectedNumbersPanel numbers={[40]} />);
+    const trigger = getTrigger(1);
+    const icon = trigger.querySelector(".entry-collected-numbers-icon");
+    const title = within(trigger).getByText("내 번호");
+
+    fireEvent.click(trigger);
+    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBe(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(trigger.querySelector(".entry-collected-numbers-icon")).toBe(icon);
+    expect(within(trigger).getByText("내 번호")).toBe(title);
+
+    fireEvent.click(trigger);
+    expect(getTrigger(1)).toBe(trigger);
+    expect(document.activeElement).toBe(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("retains the animating content but excludes it from interaction while collapsed", () => {
+    const { container } = render(<EntryCollectedNumbersPanel numbers={[40]} />);
+    const body = container.querySelector(".entry-collected-numbers-body");
+    expect(body?.getAttribute("aria-hidden")).toBe("true");
+    expect(body?.hasAttribute("inert")).toBe(true);
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.queryByRole("button", { name: "내 번호 접기" })).toBeNull();
+
+    fireEvent.click(getTrigger(1));
+    expect(container.querySelector(".entry-collected-numbers-body")).toBe(body);
+    expect(body?.hasAttribute("inert")).toBe(false);
+    expect(screen.getByRole("list", { name: "획득한 숫자" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 접기" }));
+    expect(body?.hasAttribute("inert")).toBe(true);
+    expect(screen.queryByRole("list")).toBeNull();
+  });
+
+  test("uses supporting text for the title in both collapsed and expanded states", () => {
+    render(<EntryCollectedNumbersPanel numbers={[40]} />);
+    const collapsedTitle = within(getTrigger(1)).getByText("내 번호");
+    expect(collapsedTitle.classList.contains("AppText")).toBe(true);
+    expect(collapsedTitle.getAttribute("data-role")).toBe("supporting");
+
+    fireEvent.click(getTrigger(1));
+    const panel = screen.getByRole("region", { name: "내 번호" });
+    const expandedTitle = within(panel).getByText("내 번호");
+    expect(expandedTitle.classList.contains("AppText")).toBe(true);
+    expect(expandedTitle.getAttribute("data-role")).toBe("supporting");
+    expect(panel.getAttribute("aria-labelledby")).toBe(expandedTitle.id);
+  });
+
   test("keeps the dice mask valid when Vite inlines the SVG", () => {
     render(<EntryCollectedNumbersPanel numbers={[]} />);
     const icon = getTrigger(0).querySelector<HTMLElement>(".entry-collected-numbers-icon");
