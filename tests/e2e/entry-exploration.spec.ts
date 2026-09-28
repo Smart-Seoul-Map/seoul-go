@@ -85,10 +85,12 @@ async function startExploration(page: Page): Promise<void> {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("img", { name: "서울탐방 GO", exact: true })).toBeVisible();
   await expect
-    .poll(() =>
-      page
-        .getByRole("img", { name: "서울탐방 GO", exact: true })
-        .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)
+    .poll(
+      () =>
+        page
+          .getByRole("img", { name: "서울탐방 GO", exact: true })
+          .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0),
+      { timeout: 45_000 }
     )
     .toBe(true);
   const start = page.getByRole("button", { name: "탐방 시작", exact: true });

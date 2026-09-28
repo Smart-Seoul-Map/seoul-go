@@ -354,7 +354,7 @@ export function useEntryExplorationThreeScene({
       }
       introStatusRef.current = "entering";
       renderer.domElement.style.cursor = "default";
-      renderer.domElement.setAttribute("aria-label", "서울 탐방을 시작하는 중");
+      renderer.domElement.setAttribute("aria-label", "서울 탐방 공간");
       renderer.domElement.setAttribute("aria-busy", "true");
       renderer.domElement.setAttribute("aria-disabled", "true");
       introCameraTransitionRef.current = createSceneCameraTransition({
