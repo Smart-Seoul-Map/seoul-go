@@ -6,6 +6,30 @@ import { describe, expect, test } from "vitest";
 import { AppBadge } from ".";
 
 describe("AppBadge", () => {
+  test("keeps numeric labels complete without introducing interactive semantics", () => {
+    render(
+      <AppBadge size="number-lg" tone="brand" variant="outline" textPolicy="singleLine">
+        2026
+      </AppBadge>
+    );
+    const badge = screen.getByText("2026").closest(".AppBadge");
+    expect(badge).toHaveAttribute("data-text-policy", "singleLine");
+    expect(badge).toHaveAttribute("data-size", "number-lg");
+    expect(badge?.tagName).toBe("SPAN");
+    expect(badge).not.toHaveAttribute("tabindex");
+  });
+
+  test("supports two-line place labels filling their layout container", () => {
+    render(
+      <AppBadge size="xs" variant="outline" width="fill" textPolicy="twoLines">
+        서대문형무소 역사관
+      </AppBadge>
+    );
+    const badge = screen.getByText("서대문형무소 역사관").closest(".AppBadge");
+    expect(badge).toHaveAttribute("data-text-policy", "twoLines");
+    expect(badge).toHaveAttribute("data-width", "fill");
+  });
+
   test("renders readonly status content without button semantics", () => {
     render(<AppBadge ariaLabel="현재 탐방 상태">용산구 탐방중</AppBadge>);
 

@@ -1,4 +1,4 @@
-import { getSmartSeoulPlaceTheme } from "../config/placeThemeConfig";
+import { getSmartSeoulPlaceTheme, SEOUL_EDITION25_THEME_ID } from "../config/placeThemeConfig";
 import type { SmartSeoulThemePlace } from "./place";
 
 type RawSmartSeoulThemeContent = Record<string, unknown>;
@@ -58,6 +58,13 @@ function normalizeSmartSeoulImageUrl(value: string): string {
   }
 }
 
+function parseSeoulEdition25SelectionYear(sourceContentId: string): number | undefined {
+  const match = /^(\d{2})_edition25_\d+$/.exec(sourceContentId);
+
+  // The API contract uses a two-digit selection year, not the trailing place sequence.
+  return match ? Number(`20${match[1]}`) : undefined;
+}
+
 export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePlace | null {
   if (!raw || typeof raw !== "object") {
     return null;
@@ -84,6 +91,11 @@ export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePl
     id: `smart-seoul:${themeId}:${sourceContentId}`,
     sourceContentId,
     name,
+    description: field(source, ["COT_VALUE_01"]),
+    selectionYear:
+      themeId === SEOUL_EDITION25_THEME_ID
+        ? parseSeoulEdition25SelectionYear(sourceContentId)
+        : undefined,
     districtName: field(source, ["COT_GU_NAME", "GU_NAME"]),
     themeId,
     themeName: theme.name,
