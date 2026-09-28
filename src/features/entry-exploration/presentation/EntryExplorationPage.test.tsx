@@ -92,12 +92,23 @@ vi.mock("../application/useEntryExplorationSubwaySelection", () => ({
 }));
 
 describe("EntryExplorationPage", () => {
+  test("shows an empty number panel only after starting exploration", () => {
+    renderEntryExplorationPage();
+    expect(screen.queryByRole("button", { name: /내 번호 열기/ })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" }));
+
+    expect(screen.getByText("아직 획득한 번호가 없어요.")).toBeTruthy();
+  });
+
   test("connects slot arrival, result, retry and close without navigating away", () => {
     const { router } = renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
       slotStateChange?.({ status: "ready" });
     });
+    expect(screen.queryByRole("button", { name: /내 번호 열기/ })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "돌리기" }));
     expect(slotSpin).toHaveBeenCalled();
     act(() => {
@@ -109,6 +120,7 @@ describe("EntryExplorationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
     expect(slotClose).toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
+    expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
     expect(router.state.location.pathname).toBe("/");
   });
   beforeEach(() => {

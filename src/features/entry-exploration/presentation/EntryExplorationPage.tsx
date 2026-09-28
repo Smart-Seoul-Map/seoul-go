@@ -31,6 +31,7 @@ import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
+import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -146,6 +147,7 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
+      {!isVisible && slot.state.status === "closed" && <EntryCollectedNumbersPanel numbers={[]} />}
       {!isVisible && renderPlacePanel?.(panelProps)}
       {!isVisible && <EntrySlotOverlay {...slot} />}
       <SubwaySelectionDialog
