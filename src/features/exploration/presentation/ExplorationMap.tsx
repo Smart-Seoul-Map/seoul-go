@@ -39,6 +39,7 @@ import { distanceMeters, type Coordinates } from "../domain/explorationGeo";
 import { advanceCoordinatesByScreenDirection } from "../domain/explorationDirectionalMovement";
 import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
+import { ExplorationImageYearMarker } from "./ExplorationImageYearMarker";
 
 type ExplorationMapProps = {
   districtId?: number;
@@ -47,6 +48,7 @@ type ExplorationMapProps = {
   onMapMoveRequest?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
+  placeMarkerPresentation?: "treasure" | "image-year";
   revealedPlaceIds?: ReadonlySet<string>;
   stationRadiusMeters?: number;
 };
@@ -68,12 +70,14 @@ export function ExplorationMap({
   onMapMoveRequest,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  placeMarkerPresentation = "treasure",
   revealedPlaceIds = new Set(),
   stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isMobileViewport = useIsMobileViewport();
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [markerMap, setMarkerMap] = useState<maplibregl.Map | null>(null);
   const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
@@ -119,6 +123,14 @@ export function ExplorationMap({
   });
   const characterMovementRef = useRef(characterMovement);
   characterMovementRef.current = characterMovement;
+
+  const handleMoveToPlace = useCallback(
+    (position: Coordinates) => {
+      onMapMoveRequest?.();
+      characterMovementRef.current.moveTo(position);
+    },
+    [onMapMoveRequest]
+  );
 
   const handleCharacterDirectionChange = useCallback((direction: CharacterDirection) => {
     if (hasActivePanelRef.current || (direction.x === 0 && direction.y === 0)) {
@@ -176,6 +188,7 @@ export function ExplorationMap({
       })
     );
     mapRef.current = map;
+    setMarkerMap(map);
 
     disableExplorationMapDragInteractions(map);
     setExplorationMapZoomEnabled(map, !characterMovementRef.current.getIsMoving());
@@ -194,9 +207,11 @@ export function ExplorationMap({
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
       addExplorationStationRadiusLayers(map, initialPosition, stationRadiusMeters);
-      void addExplorationPlaceMarkersLayer(map, {
-        getPlaceMarkers: () => placeMarkersRef.current,
-      });
+      if (placeMarkerPresentation === "treasure") {
+        void addExplorationPlaceMarkersLayer(map, {
+          getPlaceMarkers: () => placeMarkersRef.current,
+        });
+      }
     });
 
     map.on("click", (event) => {
@@ -209,13 +224,20 @@ export function ExplorationMap({
       map.off("zoom", updateMapZoomLevel);
       map.remove();
       mapRef.current = null;
+      setMarkerMap(null);
     };
-  }, [districtBoundary, initialPosition, onMapMoveRequest, stationRadiusMeters]);
+  }, [
+    districtBoundary,
+    initialPosition,
+    onMapMoveRequest,
+    placeMarkerPresentation,
+    stationRadiusMeters,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!map) {
+    if (!map || placeMarkerPresentation !== "treasure") {
       return;
     }
 
@@ -227,13 +249,23 @@ export function ExplorationMap({
     }
 
     map.once("load", updateSource);
-  }, [placeMarkers]);
+  }, [placeMarkers, placeMarkerPresentation]);
 
   const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
 
   return (
     <div className="map-canvas-stack" data-mobile={isMobileViewport}>
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
+      {markerMap &&
+        placeMarkerPresentation === "image-year" &&
+        placeMarkers.features.map((feature) => (
+          <ExplorationImageYearMarker
+            key={feature.id}
+            feature={feature}
+            map={markerMap}
+            onMoveToPlace={handleMoveToPlace}
+          />
+        ))}
       {zoomLevelLabel ? (
         <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
           zoom: {zoomLevelLabel}

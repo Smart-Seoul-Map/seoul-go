@@ -26,6 +26,8 @@ export function ExplorationPlacePanel({
       mobileAboveContent={<StampCourseSummary onOpen={onOpenCourse} />}
       place={{
         title: place.name,
+        description: place.description,
+        selectionYear: place.selectionYear,
         image: { src: place.imageUrl, alt: `${place.name} 대표 이미지` },
       }}
       onAddToCourse={onAddToCourse ? () => onAddToCourse(place) : undefined}

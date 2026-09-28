@@ -132,7 +132,7 @@ function DartResultPanel({
         py="spacing.4"
       >
         <AppStack align="start" gap="md">
-          <AppBadge tone="neutral" variant="outline">
+          <AppBadge size="sm" tone="neutral" variant="outline">
             오늘의 시작점
           </AppBadge>
           <AppText role="supporting">격자 → 자치구</AppText>

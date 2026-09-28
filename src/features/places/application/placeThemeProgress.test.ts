@@ -66,6 +66,7 @@ function createPlace({
 }) {
   return {
     address: "Seoul",
+    description: "",
     districtName: "district-a",
     id,
     imageUrl: "/images/test.jpg",
