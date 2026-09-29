@@ -14,13 +14,13 @@ describe("EntryCollectedNumbersPanel", () => {
     render(<EntryCollectedNumbersPanel numbers={[40]} />);
     const trigger = getTrigger(1);
     const icon = trigger.querySelector(".entry-collected-numbers-icon");
-    const title = within(trigger).getByText("내 번호");
+    const title = within(trigger).getByText("번호");
 
     fireEvent.click(trigger);
     expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBe(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     expect(trigger.querySelector(".entry-collected-numbers-icon")).toBe(icon);
-    expect(within(trigger).getByText("내 번호")).toBe(title);
+    expect(within(trigger).getByText("번호")).toBe(title);
 
     fireEvent.click(trigger);
     expect(getTrigger(1)).toBe(trigger);
@@ -46,15 +46,15 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(screen.queryByRole("list")).toBeNull();
   });
 
-  test("uses supporting text for the title in both collapsed and expanded states", () => {
+  test("uses supporting text for the visible number title in both collapsed and expanded states", () => {
     render(<EntryCollectedNumbersPanel numbers={[40]} />);
-    const collapsedTitle = within(getTrigger(1)).getByText("내 번호");
+    const collapsedTitle = within(getTrigger(1)).getByText("번호");
     expect(collapsedTitle.classList.contains("AppText")).toBe(true);
     expect(collapsedTitle.getAttribute("data-role")).toBe("supporting");
 
     fireEvent.click(getTrigger(1));
-    const panel = screen.getByRole("region", { name: "내 번호" });
-    const expandedTitle = within(panel).getByText("내 번호");
+    const panel = screen.getByRole("region", { name: "번호" });
+    const expandedTitle = within(panel).getByText("번호");
     expect(expandedTitle.classList.contains("AppText")).toBe(true);
     expect(expandedTitle.getAttribute("data-role")).toBe("supporting");
     expect(panel.getAttribute("aria-labelledby")).toBe(expandedTitle.id);
@@ -81,14 +81,14 @@ describe("EntryCollectedNumbersPanel", () => {
 
     expect(document.activeElement).toBe(scene);
     expect(getTrigger(0).getAttribute("aria-expanded")).toBe("false");
-    expect(screen.queryByRole("region", { name: "내 번호" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "번호" })).toBeNull();
   });
 
   test("shows an empty state without placeholder numbers", () => {
     render(<EntryCollectedNumbersPanel numbers={[]} />);
     fireEvent.click(getTrigger(0));
 
-    expect(screen.getByRole("region", { name: "내 번호" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(screen.getByText("아직 획득한 번호가 없어요.")).toBeTruthy();
     expect(screen.queryByRole("list")).toBeNull();
   });
@@ -97,7 +97,7 @@ describe("EntryCollectedNumbersPanel", () => {
     render(<EntryCollectedNumbersPanel numbers={[40, 57, 65]} />);
     fireEvent.click(getTrigger(3));
 
-    const panel = screen.getByRole("region", { name: "내 번호" });
+    const panel = screen.getByRole("region", { name: "번호" });
     const list = within(panel).getByRole("list", { name: "획득한 숫자" });
     expect(
       within(list)
@@ -105,7 +105,7 @@ describe("EntryCollectedNumbersPanel", () => {
         .map((row) => row.textContent)
     ).toEqual(["추첨 번호40", "추첨 번호57", "추첨 번호65"]);
     expect(within(list).queryByRole("button")).toBeNull();
-    expect(within(panel).getByLabelText("3개 획득")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "내 번호 접기, 3개 획득" })).toBeTruthy();
     expect(panel.getAttribute("aria-modal")).toBeNull();
   });
 
@@ -126,7 +126,7 @@ describe("EntryCollectedNumbersPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "내 번호 접기" }));
 
     expect(document.activeElement).toBe(getTrigger(1));
-    expect(screen.queryByRole("region", { name: "내 번호" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "번호" })).toBeNull();
     fireEvent.click(getTrigger(1));
     expect(screen.getByText("40")).toBeTruthy();
   });
@@ -134,9 +134,9 @@ describe("EntryCollectedNumbersPanel", () => {
   test("closes with Escape from the panel and returns focus", () => {
     render(<EntryCollectedNumbersPanel numbers={[40]} />);
     fireEvent.click(getTrigger(1));
-    fireEvent.keyDown(screen.getByRole("region", { name: "내 번호" }), { key: "Escape" });
+    fireEvent.keyDown(screen.getByRole("region", { name: "번호" }), { key: "Escape" });
 
-    expect(screen.queryByRole("region", { name: "내 번호" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "번호" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(1));
   });
 
@@ -152,7 +152,7 @@ describe("EntryCollectedNumbersPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "탐방 화면" }));
 
     expect(onBackgroundClick).toHaveBeenCalledOnce();
-    expect(screen.getByRole("region", { name: "내 번호" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
   });
 
   test("isolates panel input but lets key releases reach movement cleanup", () => {

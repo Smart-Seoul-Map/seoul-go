@@ -93,11 +93,8 @@ export function EntryCollectedNumbersPanel({
           <NumbersIcon />
           <span className="entry-collected-numbers-trigger-label">
             <AppText as="span" role="supporting" id={`${id}-title`}>
-              내 번호
+              번호
             </AppText>
-            <AppBadge size="xs" tone="neutral" variant="weak" ariaLabel={countLabel}>
-              {numbers.length}
-            </AppBadge>
           </span>
         </AppButton>
         <div className="entry-collected-numbers-close" aria-hidden={!isOpen} inert={!isOpen}>
