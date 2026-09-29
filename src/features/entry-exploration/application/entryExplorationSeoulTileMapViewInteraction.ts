@@ -61,6 +61,8 @@ export type EntryExplorationDartViewControls = {
 };
 
 export type EntryExplorationSeoulTileMapViewInteractionOptions = {
+  getCollectedNumbers?: () => readonly number[];
+  onEntryBlocked?: () => void;
   onActiveChange?: (isActive: boolean) => void;
   onControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
@@ -86,6 +88,8 @@ const mapSize = {
 };
 
 export function createEntryExplorationSeoulTileMapViewInteractionController({
+  getCollectedNumbers = () => [],
+  onEntryBlocked,
   onActiveChange,
   onControlsReady,
   onDartThrowResult,
@@ -195,7 +199,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   onControlsReady?.({ resetThrow, setHitCell, throwAtRandomCell });
 
   const activate = (time: number): void => {
-    if (isEngaged) {
+    if (isEngaged || getCollectedNumbers().length === 0) {
       return;
     }
 
@@ -342,12 +346,22 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     if (!isCharacterInTrigger) {
       waitsForTriggerExit = false;
+      return;
+    }
+
+    if (!isEngaged && !waitsForTriggerExit && getCollectedNumbers().length === 0) {
+      waitsForTriggerExit = true;
+      onEntryBlocked?.();
     }
   };
 
   return {
     activate,
-    canActivate: () => !isEngaged && isCharacterInTrigger && !waitsForTriggerExit,
+    canActivate: () =>
+      !isEngaged &&
+      isCharacterInTrigger &&
+      !waitsForTriggerExit &&
+      getCollectedNumbers().length > 0,
     deactivate,
     dispose: () => {
       disposeEntryExplorationObject3D(mapMesh);

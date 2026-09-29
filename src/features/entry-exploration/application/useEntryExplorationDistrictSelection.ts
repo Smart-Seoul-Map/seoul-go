@@ -10,6 +10,8 @@ import type { EntryExplorationSceneInteractionController } from "./useEntryExplo
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
 export type UseEntryExplorationDistrictSelectionOptions = {
+  collectedNumbers?: readonly number[];
+  onDartEntryBlocked?: () => void;
   createExtraSceneInteractionControllers?: () => readonly EntryExplorationSceneInteractionController[];
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
@@ -21,12 +23,21 @@ const createNoExtraSceneInteractionControllers =
   (): readonly EntryExplorationSceneInteractionController[] => [];
 
 export function useEntryExplorationDistrictSelection({
+  collectedNumbers = [],
+  onDartEntryBlocked,
   createExtraSceneInteractionControllers = createNoExtraSceneInteractionControllers,
   onDartThrowResult,
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
 }: UseEntryExplorationDistrictSelectionOptions = {}) {
+  const collectedNumbersRef = useRef(collectedNumbers);
+  collectedNumbersRef.current = collectedNumbers;
+  const onDartEntryBlockedRef = useRef(onDartEntryBlocked);
+  onDartEntryBlockedRef.current = onDartEntryBlocked;
+  // Scene controllers outlive renders; read current rewards without rebuilding the scene.
+  const getCollectedNumbers = useCallback(() => collectedNumbersRef.current, []);
+  const handleDartEntryBlocked = useCallback(() => onDartEntryBlockedRef.current?.(), []);
   const sceneControlsRef = useRef<EntryExplorationThreeSceneControls | null>(null);
   const [selectionResult, setSelectionResult] =
     useState<EntryExplorationDistrictSelectionResult | null>(null);
@@ -34,6 +45,8 @@ export function useEntryExplorationDistrictSelection({
   const createSceneInteractionControllers = useCallback(
     () =>
       createEntryExplorationSceneInteractionControllers({
+        getCollectedNumbers,
+        onDartEntryBlocked: handleDartEntryBlocked,
         extraControllers: createExtraSceneInteractionControllers(),
         onDartTargetHoverChange,
         onDartThrowResult,
@@ -42,6 +55,8 @@ export function useEntryExplorationDistrictSelection({
         onDistrictSelectionResult: setSelectionResult,
       }),
     [
+      getCollectedNumbers,
+      handleDartEntryBlocked,
       createExtraSceneInteractionControllers,
       onDartTargetHoverChange,
       onDartThrowResult,

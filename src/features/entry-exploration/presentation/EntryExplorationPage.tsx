@@ -7,6 +7,7 @@ import {
   createSubwayStationExplorationPath,
 } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+import { useAppToast } from "@shared/ui/toast";
 
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
@@ -34,6 +35,7 @@ import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import type { EntryNumberReward } from "../domain/entryNumberReward";
+import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardConfig";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -55,6 +57,7 @@ export function EntryExplorationPage({
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const { showToast } = useAppToast();
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
@@ -103,6 +106,8 @@ export function EntryExplorationPage({
     onRetryThrow,
   } = useEntryExplorationDartShot();
   const districtSelection = useEntryExplorationDistrictSelection({
+    collectedNumbers,
+    onDartEntryBlocked: () => showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE }),
     createExtraSceneInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,

@@ -18,8 +18,52 @@ const MAP_POSITION = ENTRY_EXPLORATION_SCENE_OBJECTS.find(
 const TRIGGER_POSITION = ENTRY_EXPLORATION_ARCHERY_RANGE.position;
 
 describe("entry exploration seoul tile map view interaction", () => {
+  test("rejects empty rewards without moving the camera and notifies once per arrival", () => {
+    const onEntryBlocked = vi.fn();
+    const onActiveChange = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [],
+      onEntryBlocked,
+      onActiveChange,
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1000);
+    const originalPosition = camera.position.clone();
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(controller.canActivate()).toBe(false);
+    controller.updateCamera(camera, 1000, TRIGGER_POSITION);
+    expect(controller.isActive()).toBe(false);
+    expect(camera.position.equals(originalPosition)).toBe(true);
+    expect(onActiveChange).not.toHaveBeenCalled();
+    expect(onEntryBlocked).toHaveBeenCalledTimes(1);
+
+    controller.updateTriggerState({ x: 100, z: 100 });
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(onEntryBlocked).toHaveBeenCalledTimes(2);
+    controller.dispose();
+  });
+
+  test("reads newly collected numbers on reentry without replacing the controller", () => {
+    let numbers: readonly number[] = [];
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => numbers,
+    });
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(controller.canActivate()).toBe(false);
+    controller.updateTriggerState({ x: 100, z: 100 });
+    numbers = [40];
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(controller.canActivate()).toBe(true);
+    controller.activate(0);
+    expect(controller.isActive()).toBe(true);
+    controller.dispose();
+  });
+
   test("activates on arrival and waits for a trigger exit before reactivating", () => {
-    const controller = createEntryExplorationSeoulTileMapViewInteractionController();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [40],
+    });
 
     expect(controller.canActivate()).toBe(false);
 
@@ -47,6 +91,7 @@ describe("entry exploration seoul tile map view interaction", () => {
     const controller = createEntryExplorationSeoulTileMapViewInteractionController({
       onDartThrowResult,
       onTargetHoverChange,
+      getCollectedNumbers: () => [40],
     });
     const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
     const raycaster = new THREE.Raycaster();
@@ -75,6 +120,7 @@ describe("entry exploration seoul tile map view interaction", () => {
     const onDartThrowResult = vi.fn();
     const controller = createEntryExplorationSeoulTileMapViewInteractionController({
       onDartThrowResult,
+      getCollectedNumbers: () => [40],
     });
     const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
     const raycaster = new THREE.Raycaster();
@@ -100,6 +146,7 @@ describe("entry exploration seoul tile map view interaction", () => {
         viewControls = controls;
       },
       onDartThrowResult,
+      getCollectedNumbers: () => [40],
     });
     const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
     const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
@@ -120,7 +167,9 @@ describe("entry exploration seoul tile map view interaction", () => {
   });
 
   test("moves the camera to the intro entry view", () => {
-    const controller = createEntryExplorationSeoulTileMapViewInteractionController();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [40],
+    });
     const camera = new THREE.OrthographicCamera(-20, 20, 10, -10, 0.1, 1_000);
     const { cameraFocusOffset, cameraOffset, cameraTransitionDurationMs, cameraZoom } =
       ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
@@ -137,7 +186,9 @@ describe("entry exploration seoul tile map view interaction", () => {
   });
 
   test("zooms the camera out until the tile map fits a narrow viewport", () => {
-    const controller = createEntryExplorationSeoulTileMapViewInteractionController();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [40],
+    });
     const camera = new THREE.OrthographicCamera(-4.39, 4.39, 9.5, -9.5, 0.1, 1_000);
     const { cameraTransitionDurationMs, cameraZoom } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 

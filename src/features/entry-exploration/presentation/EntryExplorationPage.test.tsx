@@ -17,6 +17,10 @@ import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_EXPLORATION_PLACES } from "../config/entryExplorationPlace";
 import type { EntrySlotState } from "../application/entrySlotInteraction";
+import type { CreateEntryExplorationSceneInteractionControllersOptions } from "../application/createEntryExplorationSceneInteractionControllers";
+import { createEntryNumberRewardStore } from "../application/entryNumberRewardStore";
+
+let gridOptions: CreateEntryExplorationSceneInteractionControllersOptions;
 
 let slotStateChange: ((state: EntrySlotState) => void) | undefined;
 const slotRequestReward = vi.fn();
@@ -68,8 +72,9 @@ const subwaySelectionViewModel: EntryExplorationSubwaySelectionViewModel = {
 };
 
 vi.mock("../application/createEntryExplorationSceneInteractionControllers", () => ({
-  createEntryExplorationSceneInteractionControllers: vi.fn(({ onDistrictSelectionResult }) => {
-    districtSelectionResultHandler = onDistrictSelectionResult;
+  createEntryExplorationSceneInteractionControllers: vi.fn((options) => {
+    gridOptions = options;
+    districtSelectionResultHandler = options.onDistrictSelectionResult;
 
     return [];
   }),
@@ -102,6 +107,46 @@ vi.mock("../application/useEntryExplorationSubwaySelection", () => ({
 }));
 
 describe("EntryExplorationPage", () => {
+  test("explains how to unlock the grid when entry is rejected", () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
+    act(() => gridOptions.onDartEntryBlocked?.());
+    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+  });
+
+  test("passes restored numbers and adds new numbers only after the slot result", () => {
+    entryNumberRewardStore.setState({ rewards: [{ placeId: "hanok", number: 40 }] });
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    const getNumbers = gridOptions.getCollectedNumbers;
+    expect(getNumbers?.()).toEqual([40]);
+    act(() => placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 }));
+    expect(getNumbers?.()).toEqual([40]);
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    const reward = entryNumberRewardStore.getState().rewards[1];
+    act(() => slotStateChange?.({ status: "result", result: String(reward.number) }));
+    expect(getNumbers?.()).toEqual([40, reward.number]);
+    expect(gridOptions.getCollectedNumbers).toBe(getNumbers);
+  });
+
+  test("restores an interrupted reward from session storage for grid entry without replaying", () => {
+    const { unmount } = renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 }));
+    const savedNumber = loadEntryNumberRewards()[0].number;
+    expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
+    unmount();
+
+    const restoredStore = createEntryNumberRewardStore();
+    entryNumberRewardStore.setState({ rewards: restoredStore.getState().rewards });
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    expect(gridOptions.getCollectedNumbers?.()).toEqual([savedNumber]);
+    expect(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeTruthy();
+    expect(slotRequestReward).not.toHaveBeenCalled();
+  });
+
   test("shows an empty number panel only after starting exploration", () => {
     renderEntryExplorationPage();
     expect(screen.queryByRole("button", { name: /내 번호 열기/ })).toBeNull();

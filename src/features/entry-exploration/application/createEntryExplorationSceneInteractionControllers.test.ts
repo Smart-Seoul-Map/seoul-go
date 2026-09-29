@@ -1,9 +1,12 @@
 import * as THREE from "three";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG } from "../config/entryExplorationDistrictSelectionEvent";
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
+import { useEntryExplorationDistrictSelection } from "./useEntryExplorationDistrictSelection";
+import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
 
 describe("createEntryExplorationSceneInteractionControllers", () => {
   beforeEach(() => {
@@ -31,6 +34,34 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
     controllers.forEach((controller) => {
       controller.dispose();
     });
+  });
+
+  test("the existing grid controller unlocks after the parent receives a number", () => {
+    const onDartEntryBlocked = vi.fn();
+    const { result, rerender, unmount } = renderHook(
+      ({ numbers }: { numbers: readonly number[] }) =>
+        useEntryExplorationDistrictSelection({ collectedNumbers: numbers, onDartEntryBlocked }),
+      { initialProps: { numbers: [] as readonly number[] } }
+    );
+    const createControllers = result.current.createSceneInteractionControllers;
+    const controllers = createControllers();
+    const grid = controllers[1];
+    const position = ENTRY_EXPLORATION_ARCHERY_RANGE.position;
+    act(() => grid.updateTriggerState(position));
+    expect(grid.canActivate()).toBe(false);
+    expect(onDartEntryBlocked).toHaveBeenCalledTimes(1);
+
+    grid.updateTriggerState({ x: 100, z: 100 });
+    rerender({ numbers: [40, 57] });
+    expect(result.current.createSceneInteractionControllers).toBe(createControllers);
+    act(() => grid.updateTriggerState(position));
+    expect(grid.canActivate()).toBe(true);
+    grid.activate(0);
+    expect(grid.isActive()).toBe(true);
+    expect(onDartEntryBlocked).toHaveBeenCalledTimes(1);
+
+    controllers.forEach((controller) => controller.dispose());
+    unmount();
   });
 
   test("appends extra interaction controllers", () => {
