@@ -33,6 +33,8 @@
 
 .entry-collected-numbers[data-open="true"] {
   width: var(--entry-numbers-expanded-width);
+  border: var(--sg-stroke-width-surface) solid var(--sg-color-stroke-brand);
+  background: var(--sg-color-bg-surface-paper);
 }
 
 .entry-collected-numbers[data-open="false"] {
