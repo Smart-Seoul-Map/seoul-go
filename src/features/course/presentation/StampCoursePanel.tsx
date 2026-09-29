@@ -102,7 +102,7 @@ export function StampCoursePanel({
   const editing = useStampCourseEditing(open, onClose);
   const imageDownload = useStampCourseImageDownload(places);
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(() =>
-    places.length <= 2 ? 0.6 : FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]
+    places.length <= 2 ? 0.5 : FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]
   );
 
   const handleKakaoWalk = () => {
@@ -128,7 +128,7 @@ export function StampCoursePanel({
       sidePanelRootProps={FLOATING_PANEL_SIDE_OPTIONS}
       bottomSheetRootProps={{
         ...FLOATING_PANEL_SHEET_OPTIONS,
-        snapPoints: [0.55, FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]],
+        snapPoints: [0.5, FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]],
         activeSnapPoint,
         setActiveSnapPoint,
       }}
@@ -172,7 +172,6 @@ export function StampCoursePanel({
             </AppBadge>
             <AppResponsivePanel.CloseButton iconOnly />
           </div>
-          <div className="StampCourseBannerImage" aria-hidden="true" />
         </div>
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
           <StampCourseBoard

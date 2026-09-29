@@ -28,13 +28,6 @@
   width: 100%;
 }
 
-.StampCourseBannerImage {
-  width: 100%;
-  aspect-ratio: 568 / 140;
-  border-radius: var(--sg-radius-4);
-  background: var(--sg-color-bg-neutral-weak);
-}
-
 .StampCoursePanel[data-presentation] .StampCourseHeader {
   order: 2;
   display: flex;
