@@ -7,7 +7,7 @@ export const FLOATING_PANEL_SIDE_OPTIONS = {
 } satisfies SidePanelOptions;
 
 export const FLOATING_PANEL_SHEET_OPTIONS = {
-  snapPoints: [0.5, 0.8],
+  snapPoints: [0.5, 0.9],
   handleOnly: true,
   closeOnFinalSnapClick: false,
 } satisfies BottomSheetOptions;

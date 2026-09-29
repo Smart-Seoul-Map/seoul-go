@@ -1,6 +1,5 @@
 import { useState, type ReactElement } from "react";
 
-import { AppBadge } from "@shared/ui/badge";
 import { AppButton, AppTextButton } from "@shared/ui/button";
 import { useAppToast } from "@shared/ui/toast";
 import {
@@ -128,7 +127,6 @@ export function StampCoursePanel({
       sidePanelRootProps={FLOATING_PANEL_SIDE_OPTIONS}
       bottomSheetRootProps={{
         ...FLOATING_PANEL_SHEET_OPTIONS,
-        snapPoints: [0.5, FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]],
         activeSnapPoint,
         setActiveSnapPoint,
       }}
@@ -140,6 +138,9 @@ export function StampCoursePanel({
         headerClassName="StampCourseHeader"
         headerTrailing={
           <>
+            <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
+              {places.length}/{MAX_STAMP_COURSE_PLACES}
+            </span>
             <div className="StampCourseHeaderActions">
               <AppTextButton
                 size="sm"
@@ -154,10 +155,8 @@ export function StampCoursePanel({
                   완료
                 </AppTextButton>
               )}
+              <AppResponsivePanel.CloseButton iconOnly />
             </div>
-            <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
-              {places.length}/{MAX_STAMP_COURSE_PLACES}
-            </span>
           </>
         }
         showCloseButton={false}
@@ -165,14 +164,6 @@ export function StampCoursePanel({
         className="StampCoursePanel"
         width="var(--sg-detail-width)"
       >
-        <div className="StampCourseBanner">
-          <div className="StampCourseBannerTop">
-            <AppBadge variant="solid" tone="brand" size="sm" leading="✦">
-              탐방 완료하고 공유 하자!
-            </AppBadge>
-            <AppResponsivePanel.CloseButton iconOnly />
-          </div>
-        </div>
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
           <StampCourseBoard
             places={places}
@@ -189,13 +180,6 @@ export function StampCoursePanel({
           onKakaoWalk={handleKakaoWalk}
           onDownloadImage={imageDownload.handleDownloadImage}
         />
-        <div
-          className="StampCourseMaxNote"
-          data-visible={places.length === MAX_STAMP_COURSE_PLACES}
-          aria-hidden={places.length !== MAX_STAMP_COURSE_PLACES}
-        >
-          {MAX_STAMP_COURSE_PLACES}개 코스가 모두 담겼어요. 삭제 후 다른 장소를 추가할 수 있어요.
-        </div>
         <StampCourseCaptureCard
           places={imageDownload.capturePlaces}
           ref={imageDownload.captureRef}

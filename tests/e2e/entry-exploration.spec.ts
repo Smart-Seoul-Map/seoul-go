@@ -65,6 +65,22 @@ async function sceneryScreenshot(page: Page) {
   return page.screenshot({ clip: { x: 0, y: 0, width: 300, height: 240 }, timeout: 5_000 });
 }
 
+async function waitForCameraToSettle(page: Page): Promise<void> {
+  let previous = await sceneryScreenshot(page);
+  let stableFrames = 0;
+  await expect
+    .poll(
+      async () => {
+        const current = await sceneryScreenshot(page);
+        stableFrames = current.equals(previous) ? stableFrames + 1 : 0;
+        previous = current;
+        return stableFrames;
+      },
+      { timeout: 15_000, intervals: [250] }
+    )
+    .toBeGreaterThanOrEqual(3);
+}
+
 async function startExploration(page: Page): Promise<void> {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("img", { name: "서울탐방 GO", exact: true })).toBeVisible();
@@ -167,6 +183,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     const before = await sceneryScreenshot(page);
     await panel(page).getByText("이미지 준비중", { exact: true }).click();
     await page.mouse.wheel(0, 450);
+    await waitForCameraToSettle(page);
     expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
     await expect(panel(page)).toHaveAttribute("data-state", "open");
   });
@@ -175,6 +192,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await page.keyboard.press("Escape");
     await expectPanelToStayClosed(page);
     await scene(page).click({ position: { x: 450, y: 450 } });
+    await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
     await scene(page).click({ position: HANOK_DESKTOP_REENTRY_POINT });
     await expect(panel(page)).toBeVisible({ timeout: 15_000 });
@@ -253,6 +271,7 @@ test.describe("mobile", () => {
     await expect
       .poll(async () => (await panel(page).boundingBox())?.height)
       .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
+    await waitForCameraToSettle(page);
     expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
 
     await page.setViewportSize(DESKTOP);

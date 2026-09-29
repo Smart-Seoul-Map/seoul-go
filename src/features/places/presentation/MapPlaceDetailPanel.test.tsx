@@ -73,13 +73,13 @@ test.each([390, 1366])("%ipx에서 시트 위 콘텐츠는 모바일에만 표�
   }
 });
 
-test("모바일에서 50%, 80%를 순환하고 이미지 오류 시 대체 이미지를 표시한다", () => {
+test("모바일에서 50%, 90%를 순환하고 이미지 오류 시 대체 이미지를 표시한다", () => {
   resize(390);
   render(<MapPlaceDetailPanel place={place} onClose={vi.fn()} />);
   const dialog = screen.getByRole("dialog");
   expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
   fireEvent.click(screen.getByRole("button", { name: "패널 높이 조절" }));
-  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("80dvh");
+  expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("90dvh");
   fireEvent.click(screen.getByRole("button", { name: "패널 높이 조절" }));
   expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
   fireEvent.error(screen.getByRole("img", { name: place.image.alt }));
