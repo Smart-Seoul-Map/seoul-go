@@ -50,7 +50,7 @@ test.each([0, 1, 2, 3, 6])("저장된 코스 %i개에 맞는 높이로 열고 �
   savePlaces(count);
   render(<StampCoursePanel onClose={vi.fn()} />);
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe(
-    count <= 2 ? "50dvh" : "90dvh"
+    count <= 2 ? "50dvh" : "80dvh"
   );
   expect(screen.getByLabelText("담긴 코스 개수")).toHaveTextContent(`${count}/6`);
   expect(

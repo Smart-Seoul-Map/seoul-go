@@ -58,7 +58,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
       sourceContentId,
       themeName: "서울에디션25",
       selectionYear,
-      imageUrl: "https://example.com/edition-place.png",
+      imageUrl: "/api/place-image?url=https%3A%2F%2Fexample.com%2Fedition-place.png",
       address: "",
     });
   });
