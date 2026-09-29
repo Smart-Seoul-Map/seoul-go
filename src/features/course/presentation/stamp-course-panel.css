@@ -58,15 +58,9 @@
   border: 0;
   border-radius: var(--sg-radius-4);
   scrollbar-width: none;
-  background-image:
-    url("../../../assets/course/stamp-board-decoration.png"),
+  background:
+    url("../../../assets/course/stamp-board-decoration.png") center / cover,
     linear-gradient(var(--sg-course-board-top), var(--sg-course-board-bottom));
-  background-position:
-    center,
-    0% 0%;
-  background-size:
-    cover,
-    120% 120%;
 }
 
 .StampCourseBoard {
@@ -146,10 +140,6 @@
   border: 0;
   background: transparent;
   box-shadow: none;
-}
-
-.StampCourseSlot[data-filled="false"] .StampCourseSeal.StampCourseDragHandle {
-  background: transparent;
 }
 
 .StampCourseSeal small {
