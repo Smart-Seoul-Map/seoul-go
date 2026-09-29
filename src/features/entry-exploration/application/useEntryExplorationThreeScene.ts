@@ -66,6 +66,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
+  onPlacePanelDismiss?: () => boolean;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -80,13 +81,19 @@ export function useEntryExplorationThreeScene({
   createSceneInteractionControllers,
   onSceneControlsReady,
   placeVisits,
+  onPlacePanelDismiss,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
+  const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
+  onPlacePanelDismissRef.current = onPlacePanelDismiss;
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
   const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
+  const introTargetRef = useRef<EntryExplorationScenePoint>(
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
+  );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
   const startIntroRef = useRef<((time: number) => boolean) | null>(null);
@@ -96,6 +103,7 @@ export function useEntryExplorationThreeScene({
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,
@@ -139,10 +147,8 @@ export function useEntryExplorationThreeScene({
     onArrive: ({ position }) => {
       if (
         introStatusRef.current !== "entering" ||
-        getEntryExplorationSceneDistance(
-          position,
-          ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
-        ) > ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
+        getEntryExplorationSceneDistance(position, introTargetRef.current) >
+          ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
       ) {
         return;
       }
@@ -162,7 +168,7 @@ export function useEntryExplorationThreeScene({
       handles.renderer.domElement.tabIndex = -1;
       updateEntryExplorationCameraView(
         handles.camera,
-        ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
+        introTargetRef.current,
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
       );
@@ -270,6 +276,8 @@ export function useEntryExplorationThreeScene({
       tower: scenery.object.getObjectByName("entry-scenery-tower"),
     };
     const archeryRange = createEntryExplorationArcheryRange();
+    const surroundings = new THREE.Group();
+    surroundings.name = "entry-exploration-surroundings";
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
     ).map(createEntryExplorationSceneObject);
@@ -288,14 +296,21 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    scene.add(introFloor.object);
-    scene.add(scenery.object);
-    scene.add(archeryRange.object);
+    surroundings.add(introFloor.object, scenery.object, archeryRange.object);
     sceneObjectMeshes.forEach((mesh) => {
-      scene.add(mesh);
+      surroundings.add(mesh);
     });
+    scene.add(surroundings);
     registerSceneInteractionControllers(sceneInteractionControllers);
-    addSceneInteractionObjects(scene);
+    addSceneInteractionObjects(scene, renderer);
+    sceneInteractionControllers.forEach((controller) => {
+      controller.setSurroundings?.([
+        surroundings,
+        ...sceneInteractionControllers
+          .filter((other) => other !== controller)
+          .map((other) => other.object),
+      ]);
+    });
     updateEntryExplorationCameraView(
       camera,
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
@@ -326,8 +341,14 @@ export function useEntryExplorationThreeScene({
         return false;
       }
 
+      const entryRect = container.getBoundingClientRect();
+      const guideDestination = scenery.positionLandmarksAtEntry(
+        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
+      );
       const characterStart = movementRef.current.getCurrentPosition();
-      const cameraTarget = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      const cameraTarget: EntryExplorationScenePoint =
+        ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+      introTargetRef.current = cameraTarget;
       const characterDistance = getEntryExplorationSceneDistance(characterStart, cameraTarget);
       const characterTarget = interpolateEntryExplorationScenePoint(
         characterStart,
@@ -338,10 +359,6 @@ export function useEntryExplorationThreeScene({
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
-      const entryRect = container.getBoundingClientRect();
-      const guideDestination = scenery.positionLandmarksAtEntry(
-        Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
-      );
       if (guideDestination) {
         const guide = createEntryExplorationGuideArrow({
           origin: cameraTarget,
@@ -349,11 +366,11 @@ export function useEntryExplorationThreeScene({
           color: getEntryExplorationIntroTheme().guideColor,
         });
         guideArrowRef.current = guide;
-        scene.add(guide.object);
+        surroundings.add(guide.object);
       }
       introStatusRef.current = "entering";
       renderer.domElement.style.cursor = "default";
-      renderer.domElement.setAttribute("aria-label", "서울 탐방을 시작하는 중");
+      renderer.domElement.setAttribute("aria-label", "서울 탐방 공간");
       renderer.domElement.setAttribute("aria-busy", "true");
       renderer.domElement.setAttribute("aria-disabled", "true");
       introCameraTransitionRef.current = createSceneCameraTransition({
@@ -391,6 +408,11 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
+      if (!hasActiveSceneInteraction() && onPlacePanelDismissRef.current?.()) {
+        movementRef.current.stop();
+        return;
+      }
+
       const handledByInteraction = handleSceneInteractionPointerDown(raycaster, performance.now());
 
       if (handledByInteraction) {
@@ -399,6 +421,13 @@ export function useEntryExplorationThreeScene({
 
       if (hasActiveSceneInteraction()) {
         deactivateActiveInteraction();
+        return;
+      }
+
+      const approachDestination = getSceneInteractionPointerDestination(raycaster);
+      if (approachDestination) {
+        Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
+        movementRef.current.moveTo(approachDestination);
         return;
       }
 
@@ -573,6 +602,7 @@ export function useEntryExplorationThreeScene({
     createSceneInteractionControllers,
     deactivateActiveInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,

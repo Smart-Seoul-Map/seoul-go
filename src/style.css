@@ -35,14 +35,14 @@ body {
   height: 100vh;
   overflow: hidden;
   position: relative;
-  touch-action: none;
   width: 100%;
   -webkit-tap-highlight-color: transparent;
 }
 
 .entry-exploration-scene {
+  touch-action: none;
   height: 100vh;
-  min-height: 560px;
+  min-height: 0;
   position: relative;
 }
 

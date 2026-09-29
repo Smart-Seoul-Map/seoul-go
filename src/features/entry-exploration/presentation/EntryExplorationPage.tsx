@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import {
   createSubwayStationExplorationPath,
 } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+import { useAppToast } from "@shared/ui/toast";
 
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import type { SubwayStationAvailabilityStatus } from "../application/subwayStationAvailability";
@@ -29,6 +30,12 @@ import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { EntryExplorationDistrictSelectionDialog } from "./EntryExplorationDistrictSelectionDialog";
 import { SubwaySelectionDialog } from "./SubwaySelectionDialog";
 import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
+import { useEntrySlot } from "../application/useEntrySlot";
+import { EntrySlotOverlay } from "./EntrySlotOverlay";
+import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
+import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
+import type { EntryNumberReward } from "../domain/entryNumberReward";
+import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardConfig";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -50,15 +57,44 @@ export function EntryExplorationPage({
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const { showToast } = useAppToast();
+  const rewards = useEntryNumberRewardStore((state) => state.rewards);
+  const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
+  const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
   const {
     isReady,
     isVisible,
     handleStart,
     handleSceneControlsReady: handleIntroControlsReady,
   } = useEntryExplorationIntro();
-  const { placeVisits, panelProps } = useEntryExplorationPlacePanel();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
+  const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
+    setPendingRewards((previous) => {
+      if (!previous.has(placeId)) return previous;
+      const next = new Map(previous);
+      next.delete(placeId);
+      return next;
+    });
+  });
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel({
+    onVisit: (placeId) => {
+      const reward = visitPlace(placeId);
+      if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
+    },
+    onDismiss: (placeId) => {
+      const reward = pendingRewards.get(placeId);
+      if (!reward) return;
+      showReward(reward);
+    },
+  });
+  const collectedNumbers = rewards
+    .filter((reward) => !pendingRewards.has(reward.placeId))
+    .map((reward) => reward.number);
+  const createExtraSceneInteractionControllers = useCallback(
+    () => [...createSubwayInteractionControllers(), ...createSlotInteractionControllers()],
+    [createSubwayInteractionControllers, createSlotInteractionControllers]
+  );
   const {
     dartShot,
     onArrowThrow,
@@ -70,7 +106,9 @@ export function EntryExplorationPage({
     onRetryThrow,
   } = useEntryExplorationDartShot();
   const districtSelection = useEntryExplorationDistrictSelection({
-    createExtraSceneInteractionControllers: createSubwayInteractionControllers,
+    collectedNumbers,
+    onDartEntryBlocked: () => showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE }),
+    createExtraSceneInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,
     onDartViewActiveChange,
@@ -90,6 +128,7 @@ export function EntryExplorationPage({
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
     placeVisits,
+    onPlacePanelDismiss: dismissOpenPanel,
   });
 
   useEffect(() => {
@@ -139,7 +178,11 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
+      {!isVisible && slot.state.status === "closed" && (
+        <EntryCollectedNumbersPanel numbers={collectedNumbers} />
+      )}
       {!isVisible && renderPlacePanel?.(panelProps)}
+      {!isVisible && <EntrySlotOverlay {...slot} />}
       <SubwaySelectionDialog
         availabilityStatus={subwayStationAvailabilityStatus}
         onExplore={handleExploreSubwayStation}
