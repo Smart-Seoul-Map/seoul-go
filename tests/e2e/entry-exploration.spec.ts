@@ -85,10 +85,12 @@ async function startExploration(page: Page): Promise<void> {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("img", { name: "서울탐방 GO", exact: true })).toBeVisible();
   await expect
-    .poll(() =>
-      page
-        .getByRole("img", { name: "서울탐방 GO", exact: true })
-        .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)
+    .poll(
+      () =>
+        page
+          .getByRole("img", { name: "서울탐방 GO", exact: true })
+          .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0),
+      { timeout: 45_000 }
     )
     .toBe(true);
   const start = page.getByRole("button", { name: "탐방 시작", exact: true });
@@ -96,6 +98,9 @@ async function startExploration(page: Page): Promise<void> {
   await start.click();
   await expect(start).toHaveCount(0);
   await expect(scene(page)).toBeVisible({ timeout: 20_000 });
+  // The canvas is visible while the intro movement still blocks input.
+  await expect(scene(page)).not.toHaveAttribute("aria-busy", "true", { timeout: 45_000 });
+  await expect(scene(page)).toBeEnabled();
   await expect(openPlacePanel(page)).toHaveCount(0);
 }
 
@@ -165,7 +170,8 @@ async function swipe(
 test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", async ({
   page,
 }, testInfo) => {
-  test.setTimeout(120_000);
+  // Allow for intro loading and repeated WebGL screenshots across all four steps.
+  test.setTimeout(180_000);
   await page.setViewportSize(DESKTOP);
   await test.step("Start and arrive through the visible scene", async () => {
     await startExploration(page);
@@ -188,9 +194,13 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await expect(panel(page)).toHaveAttribute("data-state", "open");
   });
   await test.step("Close stays closed; leaving and returning reopens", async () => {
-    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
-    await page.keyboard.press("Escape");
+    await panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true }).click();
     await expectPanelToStayClosed(page);
+    // The first explicit dismissal now presents its one-time number reward.
+    const slotClose = page.getByRole("button", { name: "슬롯 닫기" });
+    await expect(slotClose).toBeEnabled({ timeout: 15000 });
+    await slotClose.click();
+    await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
@@ -283,7 +293,9 @@ test.describe("mobile", () => {
     ).toBeVisible();
     await page.setViewportSize(MOBILE);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-    await expect(panel(page).getByRole("button", { name: "닫기", exact: true })).toHaveCount(0);
+    await expect(
+      panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true })
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     await expectPanelToStayClosed(page);
   });

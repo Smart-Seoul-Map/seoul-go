@@ -9,14 +9,17 @@ export type EntryExplorationSceneInteractionController = {
   deactivate?: () => void;
   dispose: () => void;
   getActivationCharacterDestination?: () => EntryExplorationScenePoint;
+  getPointerDestination?: (raycaster: THREE.Raycaster) => EntryExplorationScenePoint | null;
   handlePointerDown: (raycaster: THREE.Raycaster, time: number) => boolean;
   handlePointerMove: (raycaster: THREE.Raycaster) => boolean;
   handlePointerUp: (raycaster: THREE.Raycaster, time: number) => boolean;
   isActive: () => boolean;
   object: THREE.Object3D;
   priority?: number;
+  prepare?: (renderer: THREE.WebGLRenderer) => void;
   retrySelection?: () => void;
   setCharacter?: (character: THREE.Object3D | null) => void;
+  setSurroundings?: (objects: readonly THREE.Object3D[]) => void;
   update: (time: number) => void;
   updateCamera: (
     camera: THREE.OrthographicCamera,
@@ -61,6 +64,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     }
 
     activeController.deactivate?.();
+    if (activeController.isActive()) return false;
     activeSceneInteractionRef.current = null;
 
     return true;
@@ -78,10 +82,24 @@ export function useEntryExplorationSceneInteractionRegistry() {
     return true;
   }, []);
 
-  const addSceneInteractionObjects = useCallback((scene: THREE.Scene) => {
-    sceneInteractionControllersRef.current.forEach((controller) => {
-      scene.add(controller.object);
-    });
+  const addSceneInteractionObjects = useCallback(
+    (scene: THREE.Scene, renderer?: THREE.WebGLRenderer) => {
+      sceneInteractionControllersRef.current.forEach((controller) => {
+        if (renderer) controller.prepare?.(renderer);
+        scene.add(controller.object);
+      });
+    },
+    []
+  );
+
+  const getSceneInteractionPointerDestination = useCallback((raycaster: THREE.Raycaster) => {
+    if (activeSceneInteractionRef.current) return null;
+    for (const controller of sceneInteractionControllersRef.current) {
+      const destination = controller.getPointerDestination?.(raycaster);
+      if (destination) return destination;
+    }
+
+    return null;
   }, []);
 
   const setSceneInteractionCharacter = useCallback((character: THREE.Object3D | null) => {
@@ -92,25 +110,28 @@ export function useEntryExplorationSceneInteractionRegistry() {
 
   const handleSceneInteractionPointerDown = useCallback(
     (raycaster: THREE.Raycaster, time: number) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerDown(raycaster, time)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerDown(raycaster, time)),
     []
   );
 
   const handleSceneInteractionPointerMove = useCallback(
     (raycaster: THREE.Raycaster) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerMove(raycaster)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerMove(raycaster)),
     []
   );
 
   const handleSceneInteractionPointerUp = useCallback(
     (raycaster: THREE.Raycaster, time: number) =>
-      sceneInteractionControllersRef.current.some((controller) =>
-        controller.handlePointerUp(raycaster, time)
-      ),
+      (activeSceneInteractionRef.current
+        ? [activeSceneInteractionRef.current]
+        : sceneInteractionControllersRef.current
+      ).some((controller) => controller.handlePointerUp(raycaster, time)),
     []
   );
 
@@ -191,6 +212,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,
+    getSceneInteractionPointerDestination,
     handleSceneInteractionPointerDown,
     handleSceneInteractionPointerMove,
     handleSceneInteractionPointerUp,

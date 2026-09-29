@@ -5,6 +5,7 @@ import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 import { AppStack } from "@shared/ui/layout";
+import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 import { AppHeading, AppText } from "@shared/ui/typography";
 
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
@@ -32,33 +33,37 @@ export function EntryExplorationDartGuide({
   onStartExploration,
   shotResult,
 }: EntryExplorationDartGuideProps): ReactElement | null {
+  const isMobileViewport = useIsMobileViewport();
+
   if (!isVisible) {
     return null;
   }
 
   return (
     <div className="entry-exploration-dart-guide">
-      <AppBox
-        {...PANEL_SURFACE}
-        as="section"
-        borderRadius="radius.4_5"
-        className="entry-exploration-dart-guide__intro"
-        px={{ base: "spacing.4_5", md: "spacing.9" }}
-        pt={{ base: "spacing.4", md: "spacing.10" }}
-        pb={{ base: "spacing.3", md: "spacing.10" }}
-      >
-        <AppStack align="start" gap="xs">
-          <AppHeading as="h2" size="md">
-            서울 지도에 <span className="entry-exploration-dart-guide__accent">화살을</span> 쏴
-            볼까요?
-          </AppHeading>
-          <AppText role="supporting" tone="muted">
-            명중하면 오늘 탐방을 시작할{" "}
-            <span className="entry-exploration-dart-guide__accent">서울의 격자번호</span>가
-            정해져요.
-          </AppText>
-        </AppStack>
-      </AppBox>
+      {!isMobileViewport && (
+        <AppBox
+          {...PANEL_SURFACE}
+          as="section"
+          borderRadius="radius.4_5"
+          className="entry-exploration-dart-guide__intro"
+          px={{ base: "spacing.4_5", md: "spacing.9" }}
+          pt={{ base: "spacing.4", md: "spacing.10" }}
+          pb={{ base: "spacing.3", md: "spacing.10" }}
+        >
+          <AppStack align="start" gap="xs">
+            <AppHeading as="h2" size="md">
+              서울 지도에 <span className="entry-exploration-dart-guide__accent">화살을</span> 쏴
+              볼까요?
+            </AppHeading>
+            <AppText role="supporting" tone="muted">
+              명중하면 오늘 탐방을 시작할{" "}
+              <span className="entry-exploration-dart-guide__accent">서울의 격자번호</span>가
+              정해져요.
+            </AppText>
+          </AppStack>
+        </AppBox>
+      )}
 
       {landedResult ? (
         <DartResultPanel
@@ -98,9 +103,16 @@ export function EntryExplorationDartGuide({
             px="spacing.4_5"
             py="spacing.3"
           >
-            <AppText align="center" role="supporting">
-              화살을 클릭해 서울 지도로 쏴보세요!
-            </AppText>
+            {isMobileViewport ? (
+              <AppHeading align="center" as="h2" size="md">
+                서울 지도에 <span className="entry-exploration-dart-guide__accent">화살을</span> 쏴
+                볼까요?
+              </AppHeading>
+            ) : (
+              <AppText align="center" role="supporting">
+                화살을 클릭해 서울 지도로 쏴보세요!
+              </AppText>
+            )}
           </AppBox>
         </>
       )}

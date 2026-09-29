@@ -1,0 +1,31 @@
+export const ENTRY_SLOT_CONFIG = {
+  modelUrl: "/models/slot_v1.glb",
+  height: 3.6,
+  position: { x: -0.5, z: 7.5 },
+  rotationY: -Math.PI / 4,
+  loadTimeoutMs: 10_000,
+  stopFeedbackDistance: 0.018,
+  presentation: {
+    coverMs: 240,
+    revealMs: 360,
+    characterGap: 0.35,
+    characterForwardOffset: 0.7,
+    characterFacingForwardRatio: -0.35,
+  },
+  lever: {
+    name: "slot_lever",
+    pullAngle: -Math.PI / 3,
+    pullMs: 350,
+    holdMs: 100,
+    returnMs: 300,
+  },
+  camera: {
+    distance: 12,
+    elevation: 3,
+    widthUsage: 0.88,
+    heightUsage: 0.68,
+    contentCenterY: 0.42,
+    viewportGapRatio: 0.05,
+  },
+  reelNames: ["slot_number_2", "slot_logo", "slot_number_1"],
+} as const;

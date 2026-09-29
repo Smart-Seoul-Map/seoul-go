@@ -27,6 +27,14 @@
   right: var(--sg-spacing-4_5);
   bottom: var(--sg-spacing-6);
   left: var(--sg-spacing-4_5);
+  border-radius: var(--sg-radius-6);
+}
+
+.entry-exploration-dart-guide__hint .AppHeading {
+  width: 100%;
+  font-size: var(--sg-font-size-7);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-8);
 }
 
 .entry-exploration-dart-guide__result {

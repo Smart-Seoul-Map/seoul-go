@@ -1,0 +1,10 @@
+.EntryPlacePanel .AppResponsivePanelHeader {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sg-spacing-3);
+}
+
+.EntryPlacePanel .AppResponsivePanelTitle {
+  min-width: 0;
+}
