@@ -2,8 +2,8 @@ import { useEffect, useLayoutEffect, useRef, type ReactElement } from "react";
 
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
-import { AppIconButton } from "@shared/ui/button";
-import { AppHeading, AppText } from "@shared/ui/typography";
+import { AppButton, AppIconButton } from "@shared/ui/button";
+import { AppText } from "@shared/ui/typography";
 
 import closeIcon from "../../../assets/close.svg";
 import type { EntrySlotState, EntrySlotViewportBounds } from "../application/entrySlotInteraction";
@@ -22,28 +22,29 @@ export function EntrySlotOverlay({
   onViewportBoundsChange,
 }: EntrySlotOverlayProps): ReactElement | null {
   const overlayRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLElement>(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const continueRef = useRef<HTMLButtonElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const isVisible = state.status !== "closed";
   const canClose = state.status === "result";
   const isFallback = state.status === "result" && state.isFallback;
   useLayoutEffect(() => {
     const overlay = overlayRef.current;
-    const header = headerRef.current;
     const controls = controlsRef.current;
-    if (!overlay || !header || !controls) return;
+    const summary = summaryRef.current;
+    if (!overlay || !controls || !summary) return;
     const measure = () => {
       const viewport = overlay.getBoundingClientRect();
       if (viewport.height <= 0) return;
-      const top = (header.getBoundingClientRect().bottom - viewport.top) / viewport.height;
       const bottom = (controls.getBoundingClientRect().top - viewport.top) / viewport.height;
+      const top = (summary.getBoundingClientRect().bottom - viewport.top) / viewport.height;
       if (bottom > top) onViewportBoundsChange({ top, bottom });
     };
     measure();
     const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
     observer?.observe(overlay);
-    observer?.observe(header);
     observer?.observe(controls);
+    observer?.observe(summary);
     window.addEventListener("resize", measure);
     return () => {
       observer?.disconnect();
@@ -52,7 +53,7 @@ export function EntrySlotOverlay({
     };
   }, [isVisible, onViewportBoundsChange]);
   useEffect(() => {
-    if (canClose) headerRef.current?.querySelector("button")?.focus({ preventScroll: true });
+    if (canClose) continueRef.current?.focus({ preventScroll: true });
     else if (isVisible) overlayRef.current?.focus({ preventScroll: true });
   }, [canClose, isVisible]);
   useEffect(() => {
@@ -64,8 +65,12 @@ export function EntrySlotOverlay({
       }
       if (event.key === "Tab") {
         event.preventDefault();
-        const target = canClose ? headerRef.current?.querySelector("button") : overlayRef.current;
-        target?.focus({ preventScroll: true });
+        const buttons = Array.from(
+          overlayRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []
+        );
+        const current = buttons.findIndex((button) => button === document.activeElement);
+        const next = (current + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+        (buttons[next] ?? overlayRef.current)?.focus({ preventScroll: true });
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -89,29 +94,14 @@ export function EntrySlotOverlay({
       aria-label="숫자 슬롯"
       data-state={state.status}
     >
-      <AppBox
-        as="header"
-        ref={(element) => {
-          headerRef.current = element;
-        }}
-        bg="bg.surfacePaper"
-        px="spacing.4"
-        py="spacing.3"
-        className="entry-slot-header"
-      >
-        <AppHeading as="h2" size="sm">
-          숫자 슬롯
-        </AppHeading>
+      <div className="entry-slot-close">
         <AppIconButton ariaLabel="슬롯 닫기" size="sm" disabled={!canClose} onClick={onClose}>
           <img src={closeIcon} alt="" width="20" height="20" />
         </AppIconButton>
-      </AppBox>
+      </div>
       <AppBox
-        ref={controlsRef}
-        bg="bg.surfacePaper"
-        borderRadius="radius.2"
-        p="spacing.4"
-        className="entry-slot-controls"
+        ref={summaryRef}
+        className="entry-slot-summary"
         role={isFallback ? "alert" : undefined}
       >
         <output
@@ -128,8 +118,17 @@ export function EntrySlotOverlay({
             {result?.[1] ?? "?"}
           </AppBadge>
         </output>
-        <AppText role="supporting">{message}</AppText>
+        <AppText role="supporting" align="center">
+          {message}
+        </AppText>
       </AppBox>
+      <div ref={controlsRef} className="entry-slot-controls">
+        {canClose && (
+          <AppButton ref={continueRef} variant="primary" size="md" onClick={onClose}>
+            계속 탐방하기
+          </AppButton>
+        )}
+      </div>
     </section>
   );
 }

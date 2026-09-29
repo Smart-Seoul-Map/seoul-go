@@ -4,25 +4,43 @@
   pointer-events: none;
 }
 
-.entry-slot-header {
+.entry-slot-close {
+  position: absolute;
+  top: var(--sg-spacing-3);
+  right: var(--sg-spacing-4);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sg-spacing-4);
   pointer-events: auto;
 }
 
 .entry-slot-controls {
   position: absolute;
-  bottom: calc(var(--sg-spacing-4) + env(safe-area-inset-bottom, 0px));
+  bottom: max(var(--sg-spacing-4), env(safe-area-inset-bottom, 0px), 6%);
   left: 50%;
   transform: translateX(-50%);
-  width: min(440px, calc(100% - var(--sg-spacing-4) * 2));
+  width: min(280px, calc(100% - var(--sg-spacing-4) * 2));
+  min-height: 48px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: var(--sg-spacing-3);
   pointer-events: auto;
+}
+
+.entry-slot-controls > button {
+  width: 100%;
+}
+
+.entry-slot-summary {
+  position: absolute;
+  top: max(var(--sg-spacing-4), env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100% - 112px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  min-height: 100px;
 }
 
 .entry-slot-result {
@@ -30,4 +48,43 @@
   align-items: center;
   gap: var(--sg-spacing-2);
   flex-shrink: 0;
+}
+
+.entry-slot-overlay[data-state="result"] .entry-slot-result {
+  animation: entry-slot-result-arrive 320ms ease-out both;
+}
+
+@keyframes entry-slot-result-arrive {
+  0% {
+    transform: translateY(4px) scale(0.94);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-1px) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-height: 480px) {
+  .entry-slot-summary {
+    top: var(--sg-spacing-2);
+    min-height: 72px;
+    flex-direction: row;
+    justify-content: center;
+    width: min(440px, calc(100% - 112px));
+  }
+
+  .entry-slot-controls {
+    bottom: max(var(--sg-spacing-2), env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-slot-overlay[data-state="result"] .entry-slot-result {
+    animation: none;
+  }
 }
