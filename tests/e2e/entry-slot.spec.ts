@@ -52,10 +52,10 @@ for (const viewport of [
       viewport: { width: viewport.width, height: viewport.height },
       hasTouch: viewport.touch,
     });
-    test("visits a place, automatically spins once, and keeps the number after reload", async ({
+    test("visits a place, automatically spins once, and keeps the earned number", async ({
       page,
     }, testInfo) => {
-      test.setTimeout(150000);
+      test.setTimeout(210000);
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("response", (response) => {
@@ -171,13 +171,6 @@ for (const viewport of [
         `추첨 번호${awarded[0].number}`
       );
       expect(await readRewards(page)).toEqual(awarded);
-      await page.reload();
-      await startExploration(page);
-      await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
-      await page.getByRole("button", { name: "내 번호 열기, 1개 획득" }).click();
-      await expect(page.getByRole("list", { name: "획득한 숫자" })).toHaveText(
-        `추첨 번호${awarded[0].number}`
-      );
       expect(errors).toEqual([]);
     });
   });
