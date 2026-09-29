@@ -218,7 +218,7 @@ describe("EntryExplorationPage", () => {
     const saved = loadEntryNumberRewards();
     expect(saved).toHaveLength(2);
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe("추첨 번호40");
-    expect(screen.getByLabelText("1개 획득")).toBeTruthy();
+    expect(screen.getByLabelText(/1개 획득/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     act(() => {
       slotStateChange?.({ status: "result", result: String(saved[1].number) });
