@@ -1,11 +1,12 @@
 import * as THREE from "three";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntrySlotInteraction, type EntrySlotState } from "./entrySlotInteraction";
 
 vi.mock("./entryExplorationGltfLoader", () => ({ loadEntryExplorationGltf: vi.fn() }));
+afterEach(() => vi.unstubAllGlobals());
 
 function sourceModel() {
   const scene = new THREE.Group();
@@ -50,7 +51,46 @@ function focus(controller: ReturnType<typeof createEntrySlotInteraction>) {
   return camera;
 }
 
+function getProjectedModelBounds(object: THREE.Object3D, camera: THREE.Camera): THREE.Box3 {
+  const bounds = new THREE.Box3();
+  object.updateWorldMatrix(true, true);
+  object.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return;
+    const vertices = child.geometry.getAttribute("position");
+    for (let index = 0; index < vertices.count; index++) {
+      const vertex = new THREE.Vector3().fromBufferAttribute(vertices, index);
+      bounds.expandByPoint(vertex.applyMatrix4(child.matrixWorld).project(camera));
+    }
+  });
+  return bounds;
+}
+
 describe("reward slot interaction", () => {
+  test.each([false, true])(
+    "settles only the slot body after a stop (reduced motion: %s)",
+    async (reduced) => {
+      vi.stubGlobal("matchMedia", () => ({ matches: reduced }));
+      const { controller, state } = await setup();
+      const camera = focus(controller);
+      const cameraPosition = camera.position.clone();
+      const machine = controller.object.children[0];
+      const position = machine.position.clone();
+      controller.update(1050);
+      controller.update(2670);
+      expect(machine.position.equals(position)).toBe(reduced);
+      controller.update(3050);
+      expect(state()).toEqual({ status: "result", result: "40" });
+      controller.update(3070);
+      expect(machine.position.equals(position)).toBe(reduced);
+      controller.updateCamera(camera, 3070, { x: 20, z: 30 });
+      expect(camera.position.equals(cameraPosition)).toBe(true);
+      controller.update(3300);
+      expect(machine.position.equals(position)).toBe(true);
+      controller.deactivate();
+      expect(machine.position.equals(position)).toBe(true);
+      controller.dispose();
+    }
+  );
   test.each(["fallback", "dispose"] as const)(
     "restores the canvas opacity after %s interrupts a covered loading screen",
     (completion) => {
@@ -120,19 +160,33 @@ describe("reward slot interaction", () => {
     controller.dispose();
   });
 
-  test("blocks closing until the result and restores the unchanged character position and visibility", async () => {
+  test("stages the character only after covering and restores its pose and surroundings on close", async () => {
     const { controller, state } = await setup();
     const character = new THREE.Group();
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 2.3, 1));
+    mesh.position.y = 1.15;
+    character.add(mesh);
     character.position.set(20, 0, 30);
+    character.rotation.y = 1.2;
+    const rotation = character.quaternion.clone();
+    const scenery = new THREE.Group();
+    const hiddenObject = new THREE.Group();
+    hiddenObject.visible = false;
+    controller.setSurroundings?.([scenery, hiddenObject]);
     controller.setCharacter?.(character);
     controller.requestReward([4, 0]);
     controller.activate(0);
     controller.deactivate();
     expect(state().status).toBe("covering");
-    expect(character.visible).toBe(false);
+    expect(character.visible).toBe(true);
+    expect(character.position.toArray()).toEqual([20, 0, 30]);
+    expect(scenery.visible).toBe(true);
     const camera = new THREE.OrthographicCamera(-12, 12, 9.5, -9.5, 0.1, 1000);
     controller.updateCamera(camera, 0, { x: 20, z: 30 });
     controller.update(240);
+    expect(character.visible).toBe(true);
+    expect(character.position.toArray()).not.toEqual([20, 0, 30]);
+    expect(scenery.visible).toBe(false);
     controller.updateCamera(camera, 240, { x: 20, z: 30 });
     controller.update(600);
     controller.update(1050);
@@ -143,7 +197,62 @@ describe("reward slot interaction", () => {
     expect(state().status).toBe("closed");
     expect(character.visible).toBe(true);
     expect(character.position.toArray()).toEqual([20, 0, 30]);
+    expect(character.quaternion.equals(rotation)).toBe(true);
+    expect(scenery.visible).toBe(true);
+    expect(hiddenObject.visible).toBe(false);
     expect(controller.canActivate()).toBe(false);
+    controller.dispose();
+  });
+
+  test("restores an originally hidden character and scenery when disposed during presentation", async () => {
+    const { controller } = await setup();
+    const character = new THREE.Group();
+    character.position.set(20, 0, 30);
+    character.rotation.y = 0.8;
+    character.visible = false;
+    const rotation = character.quaternion.clone();
+    const scenery = new THREE.Group();
+    controller.setCharacter?.(character);
+    controller.setSurroundings?.([scenery]);
+    focus(controller);
+    expect(character.visible).toBe(true);
+    expect(scenery.visible).toBe(false);
+    controller.dispose();
+    expect(character.visible).toBe(false);
+    expect(character.position.toArray()).toEqual([20, 0, 30]);
+    expect(character.quaternion.equals(rotation)).toBe(true);
+    expect(scenery.visible).toBe(true);
+  });
+
+  test.each([
+    [1366, 900],
+    [390, 844],
+    [320, 640],
+    [844, 390],
+  ])("frames the slot and character without overlap at %i by %i", async (width, height) => {
+    const { controller } = await setup();
+    const character = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2.3, 1));
+    body.position.y = 1.15;
+    character.add(body);
+    character.position.set(20, 0, 30);
+    controller.setCharacter?.(character);
+    const camera = focus(controller);
+    camera.left = (-9.5 * width) / height;
+    camera.right = (9.5 * width) / height;
+    const controlsTop = (height - 110) / height;
+    controller.setViewportBounds({ top: 0, bottom: controlsTop });
+    controller.updateCamera(camera, 600, { x: 20, z: 30 });
+    const slotBounds = getProjectedModelBounds(controller.object, camera);
+    const characterBounds = getProjectedModelBounds(character, camera);
+    for (const bounds of [slotBounds, characterBounds]) {
+      expect(bounds.min.x).toBeGreaterThan(-1);
+      expect(bounds.max.x).toBeLessThan(1);
+      expect(bounds.max.y).toBeLessThan(1);
+      expect((1 - bounds.min.y) / 2).toBeLessThan(controlsTop);
+    }
+    expect(characterBounds.max.x).toBeLessThan(slotBounds.min.x);
+    expect(camera.position.y).toBeGreaterThan(3.6);
     controller.dispose();
   });
 
@@ -198,28 +307,23 @@ describe("reward slot interaction", () => {
     camera.left = -3.6;
     camera.right = 3.6;
     controller.updateCamera(camera, 2000, { x: 20, z: 30 });
-    const bounds = new THREE.Box3().setFromObject(controller.object);
-    for (const x of [bounds.min.x, bounds.max.x])
-      for (const y of [bounds.min.y, bounds.max.y])
-        for (const z of [bounds.min.z, bounds.max.z]) {
-          const projected = new THREE.Vector3(x, y, z).project(camera);
-          expect(Math.abs(projected.x)).toBeLessThan(1);
-          expect(projected.y).toBeGreaterThan(-0.6);
-          expect(projected.y).toBeLessThan(1);
-        }
+    const bounds = getProjectedModelBounds(controller.object, camera);
+    expect(bounds.min.x).toBeGreaterThan(-1);
+    expect(bounds.max.x).toBeLessThan(1);
+    expect(bounds.min.y).toBeGreaterThan(-0.6);
+    expect(bounds.max.y).toBeLessThan(1);
     controller.dispose();
   });
 
-  test("frames the model between the header and controls on a short viewport", async () => {
+  test("frames the model above the result controls on a short viewport", async () => {
     const { controller } = await setup();
     const camera = focus(controller);
-    controller.setViewportBounds({ top: 56 / 320, bottom: 220 / 320 });
+    controller.setViewportBounds({ top: 0, bottom: 220 / 320 });
     controller.updateCamera(camera, 2000, { x: 20, z: 30 });
-    const bounds = new THREE.Box3().setFromObject(controller.object);
+    const bounds = getProjectedModelBounds(controller.object, camera);
     for (const y of [bounds.min.y, bounds.max.y]) {
-      const projected = new THREE.Vector3(bounds.min.x, y, bounds.min.z).project(camera);
-      const screenY = ((1 - projected.y) / 2) * 320;
-      expect(screenY).toBeGreaterThan(56);
+      const screenY = ((1 - y) / 2) * 320;
+      expect(screenY).toBeGreaterThan(0);
       expect(screenY).toBeLessThan(220);
     }
     controller.dispose();

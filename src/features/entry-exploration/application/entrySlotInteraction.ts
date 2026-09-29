@@ -7,12 +7,15 @@ import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import {
   createEntrySlotSpin,
   getEntrySlotSpinFrame,
+  getEntrySlotStopOffset,
+  SLOT_STOP_FEEDBACK_MS,
   type EntrySlotSpin,
   type SlotDigits,
   type SlotReelAngles,
 } from "../domain/entrySlotSpin";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntrySlotModel } from "./entrySlotModel";
+import { createEntrySlotPresentation, getSlotPresentationPoints } from "./entrySlotPresentation";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
 export type EntrySlotState =
@@ -42,21 +45,22 @@ export function createEntrySlotInteraction({
     0,
     -Math.sin(ENTRY_SLOT_CONFIG.rotationY)
   );
+  const presentation = createEntrySlotPresentation(object, front);
   let state: EntrySlotState = { status: "closed" };
   let model: ReturnType<typeof createEntrySlotModel> | null = null;
   let renderer: THREE.WebGLRenderer | null = null;
   let environment: THREE.WebGLRenderTarget | null = null;
-  let character: THREE.Object3D | null = null;
-  let characterWasVisible = true;
   let requestedDigits: SlotDigits | null = null;
   let loadFailed = false;
   let disposed = false;
   let spinAnimation: EntrySlotSpin | null = null;
+  let reducedMotion = false;
   let angles: SlotReelAngles = [0, 0, 0];
   let activatedAt = 0;
   let phaseStartedAt = 0;
   let originalCanvasOpacity = "";
-  let cameraBounds: THREE.Box3 | null = null;
+  let modelPoints: readonly THREE.Vector3[] = [];
+  let presentationPoints: readonly THREE.Vector3[] = [];
   let viewportBounds: EntrySlotViewportBounds | null = null;
 
   const setState = (next: EntrySlotState) => {
@@ -88,7 +92,7 @@ export function createEntrySlotInteraction({
       object.add(model.object);
       object.updateMatrixWorld(true);
       // Framing must not zoom in and out as the lever moves.
-      cameraBounds = new THREE.Box3().setFromObject(object);
+      modelPoints = getSlotPresentationPoints(object);
       prepareEnvironment();
     } catch {
       loadFailed = true;
@@ -111,7 +115,7 @@ export function createEntrySlotInteraction({
     spinAnimation = null;
     object.visible = false;
     model?.setLeverAngle(0);
-    model?.setSelectionVisible(false);
+    model?.setStopFeedback(0);
     restoreCanvasOpacity();
     setState({ status: "result", result: requestedDigits.join(""), isFallback: true });
   };
@@ -119,7 +123,8 @@ export function createEntrySlotInteraction({
     phaseStartedAt = time;
     object.visible = true;
     model?.setLeverAngle(0);
-    model?.setSelectionVisible(true);
+    model?.setStopFeedback(0);
+    presentationPoints = presentation.show(modelPoints);
     setState({ status: "focusing" });
   };
   const deactivate = () => {
@@ -128,9 +133,9 @@ export function createEntrySlotInteraction({
     requestedDigits = null;
     object.visible = false;
     model?.setLeverAngle(0);
-    model?.setSelectionVisible(false);
+    model?.setStopFeedback(0);
     restoreCanvasOpacity();
-    if (character) character.visible = characterWasVisible;
+    presentation.restore();
     setState({ status: "closed" });
   };
 
@@ -146,21 +151,17 @@ export function createEntrySlotInteraction({
     canActivate: () => Boolean(requestedDigits && !isActive()),
     activate(time) {
       if (!requestedDigits || isActive()) return;
+      reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
       activatedAt = time;
       phaseStartedAt = time;
-      if (character) {
-        characterWasVisible = character.visible;
-        character.visible = false;
-      }
       setState({ status: "covering" });
     },
     deactivate,
     handlePointerDown: () => isActive(),
     handlePointerMove: () => isActive(),
     handlePointerUp: () => isActive(),
-    setCharacter(value) {
-      character = value;
-    },
+    setCharacter: presentation.setCharacter,
+    setSurroundings: presentation.setSurroundings,
     prepare(value) {
       renderer = value;
       originalCanvasOpacity = renderer.domElement.style.opacity;
@@ -205,10 +206,12 @@ export function createEntrySlotInteraction({
         const frame = getEntrySlotSpinFrame(spinAnimation, time);
         angles = frame.angles;
         model.setAngles(angles);
-        if (frame.done && frame.result !== null) {
-          spinAnimation = null;
+        model.setStopFeedback(reducedMotion ? 0 : getEntrySlotStopOffset(spinAnimation, time));
+        if (state.status === "spinning" && frame.done && frame.result !== null) {
           setState({ status: "result", result: frame.result });
         }
+        const stoppedAt = Math.max(...spinAnimation.reels.map((reel) => reel.durationMs));
+        if (elapsed >= stoppedAt + SLOT_STOP_FEEDBACK_MS) spinAnimation = null;
       } catch {
         showFallback();
       }
@@ -217,14 +220,14 @@ export function createEntrySlotInteraction({
       if (
         !isActive() ||
         !model ||
-        !cameraBounds ||
+        presentationPoints.length === 0 ||
         state.status === "covering" ||
         state.status === "loading" ||
         (state.status === "result" && state.isFallback)
       )
         return;
       // Switch directly to the front while the canvas is covered, then fade it in.
-      const view = getSlotCameraView(camera, cameraBounds, front, viewportBounds);
+      const view = getSlotCameraView(camera, presentationPoints, front, viewportBounds);
       camera.position.copy(view.position);
       camera.zoom = view.zoom;
       camera.lookAt(view.focus);
@@ -237,7 +240,7 @@ export function createEntrySlotInteraction({
       disposed = true;
       spinAnimation = null;
       restoreCanvasOpacity();
-      if (character && isActive()) character.visible = characterWasVisible;
+      presentation.restore();
       model?.dispose();
       environment?.dispose();
       object.clear();
@@ -247,19 +250,33 @@ export function createEntrySlotInteraction({
 
 function getSlotCameraView(
   camera: THREE.OrthographicCamera,
-  bounds: THREE.Box3,
+  points: readonly THREE.Vector3[],
   front: THREE.Vector3,
   viewportBounds: EntrySlotViewportBounds | null
 ) {
-  const size = bounds.getSize(new THREE.Vector3());
-  const focus = bounds.getCenter(new THREE.Vector3());
-  const width = size.x * Math.abs(front.z) + size.z * Math.abs(front.x);
+  const offset = front.clone().multiplyScalar(ENTRY_SLOT_CONFIG.camera.distance);
+  offset.y = ENTRY_SLOT_CONFIG.camera.elevation;
+  const forward = offset.clone().normalize();
+  const right = new THREE.Vector3(0, 1, 0).cross(forward).normalize();
+  const up = forward.clone().cross(right);
+  // Fit each model in camera space so a diagonal world-space box does not add empty space.
+  const projected = new THREE.Box3();
+  points.forEach((point) => {
+    projected.expandByPoint(new THREE.Vector3(point.dot(right), point.dot(up), point.dot(forward)));
+  });
+  const size = projected.getSize(new THREE.Vector3());
+  const center = projected.getCenter(new THREE.Vector3());
+  const focus = right
+    .clone()
+    .multiplyScalar(center.x)
+    .addScaledVector(up, center.y)
+    .addScaledVector(forward, center.z);
   const { top, bottom } = viewportBounds ?? { top: 0, bottom: 1 };
   const availableHeight = bottom - top;
   const gap = availableHeight * ENTRY_SLOT_CONFIG.camera.viewportGapRatio;
   const heightUsage = Math.min(ENTRY_SLOT_CONFIG.camera.heightUsage, availableHeight - gap * 2);
   const zoom = Math.min(
-    ((camera.right - camera.left) * ENTRY_SLOT_CONFIG.camera.widthUsage) / width,
+    ((camera.right - camera.left) * ENTRY_SLOT_CONFIG.camera.widthUsage) / size.x,
     ((camera.top - camera.bottom) * heightUsage) / size.y
   );
   const contentCenterY = THREE.MathUtils.clamp(
@@ -267,11 +284,15 @@ function getSlotCameraView(
     top + gap + heightUsage / 2,
     bottom - gap - heightUsage / 2
   );
-  focus.y -= ((0.5 - contentCenterY) * (camera.top - camera.bottom)) / zoom;
+  focus.addScaledVector(up, -((0.5 - contentCenterY) * (camera.top - camera.bottom)) / zoom);
+  // Keep the lowest orthographic ray above the floor, including tall mobile viewports.
+  const lowestRayHeight = focus.y + offset.y + (camera.bottom / zoom) * up.y;
+  if (lowestRayHeight < camera.near)
+    offset.multiplyScalar(1 + (camera.near - lowestRayHeight) / offset.y);
 
   return {
     focus,
     zoom,
-    position: focus.clone().addScaledVector(front, ENTRY_SLOT_CONFIG.camera.distance),
+    position: focus.clone().add(offset),
   };
 }

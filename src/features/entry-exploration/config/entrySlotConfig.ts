@@ -4,8 +4,14 @@ export const ENTRY_SLOT_CONFIG = {
   position: { x: -0.5, z: 7.5 },
   rotationY: -Math.PI / 4,
   loadTimeoutMs: 10_000,
-  selection: { width: 5.6, height: 2.7, frontOffset: 0.15 },
-  presentation: { coverMs: 240, revealMs: 360 },
+  stopFeedbackDistance: 0.018,
+  presentation: {
+    coverMs: 240,
+    revealMs: 360,
+    characterGap: 0.35,
+    characterForwardOffset: 0.7,
+    characterFacingForwardRatio: -0.35,
+  },
   lever: {
     name: "slot_lever",
     pullAngle: -Math.PI / 3,
@@ -15,8 +21,9 @@ export const ENTRY_SLOT_CONFIG = {
   },
   camera: {
     distance: 12,
-    widthUsage: 0.78,
-    heightUsage: 0.58,
+    elevation: 3,
+    widthUsage: 0.88,
+    heightUsage: 0.68,
     contentCenterY: 0.42,
     viewportGapRatio: 0.05,
   },

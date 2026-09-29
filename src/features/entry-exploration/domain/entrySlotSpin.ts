@@ -1,5 +1,3 @@
-import { easeOutCubic } from "@shared/lib/animation/easing";
-
 export type SlotDigits = readonly [number, number];
 export type SlotReelAngles = readonly [number, number, number];
 
@@ -13,6 +11,27 @@ export type EntrySlotSpin = {
 const FULL_TURN = Math.PI * 2;
 const REEL_DURATIONS_MS = [1600, 1800, 2000] as const;
 const REEL_TURNS = [4, 5, 6] as const;
+const CRUISE_RATIO = 0.3;
+export const SLOT_STOP_FEEDBACK_MS = 180;
+
+function getReelProgress(progress: number): number {
+  const time = Math.max(0, Math.min(1, progress));
+  const brakeRatio = 1 - CRUISE_RATIO;
+  const distance = CRUISE_RATIO + brakeRatio / 2;
+  if (time <= CRUISE_RATIO) return time / distance;
+  const braking = (time - CRUISE_RATIO) / brakeRatio;
+  // Integrate a constant speed followed by linear braking, keeping velocity continuous.
+  return (CRUISE_RATIO + brakeRatio * (braking - braking ** 2 / 2)) / distance;
+}
+
+export function getEntrySlotStopOffset(spin: EntrySlotSpin, time: number): number {
+  return spin.reels.reduce((offset, reel) => {
+    const elapsed = time - spin.startedAt - reel.durationMs;
+    if (elapsed <= 0 || elapsed >= SLOT_STOP_FEEDBACK_MS) return offset;
+    const progress = elapsed / SLOT_STOP_FEEDBACK_MS;
+    return offset + Math.sin(progress * Math.PI * 4) * (1 - progress) ** 2;
+  }, 0);
+}
 
 export function getSlotDigitAngle(digit: number): number {
   if (!Number.isInteger(digit) || digit < 0 || digit > 9) {
@@ -55,7 +74,7 @@ export function createEntrySlotSpin({
 export function getEntrySlotSpinFrame(spin: EntrySlotSpin, time: number) {
   const elapsed = Math.max(0, time - spin.startedAt);
   const angles = spin.reels.map(
-    ({ from, to, durationMs }) => from + (to - from) * easeOutCubic(elapsed / durationMs)
+    ({ from, to, durationMs }) => from + (to - from) * getReelProgress(elapsed / durationMs)
   );
   const done = spin.reels.every((reel) => elapsed >= reel.durationMs);
 

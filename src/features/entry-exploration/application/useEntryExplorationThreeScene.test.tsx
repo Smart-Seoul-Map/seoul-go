@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -163,6 +164,44 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
+  test("passes decorations and other games as surroundings without hiding the floor or the active model", () => {
+    let surroundings: readonly THREE.Object3D[] = [];
+    const createController = (): EntryExplorationSceneInteractionController => ({
+      object: new THREE.Group(),
+      activate: () => {},
+      canActivate: () => false,
+      dispose: () => {},
+      handlePointerDown: () => false,
+      handlePointerMove: () => false,
+      handlePointerUp: () => false,
+      isActive: () => false,
+      update: () => {},
+      updateCamera: () => {},
+      updateTriggerState: () => {},
+    });
+    const slot = createController();
+    slot.setSurroundings = (objects) => {
+      surroundings = objects;
+    };
+    const dart = createController();
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [slot, dart],
+      })
+    );
+    onTestFinished(unmount);
+    expect(surroundings).toContain(dart.object);
+    expect(surroundings).not.toContain(slot.object);
+    expect(surroundings).not.toContain(mocks.floor);
+    const decorations = surroundings.find((object) =>
+      object.children.includes(mocks.introFloorObject!)
+    );
+    expect(decorations?.getObjectByName("entry-scenery-hanok")).toBeTruthy();
+    expect(decorations?.getObjectByName("entry-scenery-tower")).toBeTruthy();
+    expect(decorations?.children).not.toContain(mocks.floor);
+  });
+
   test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
     let startIntro: (() => boolean) | undefined;
     const dismiss = vi.fn(() => true);
@@ -203,7 +242,7 @@ describe("useEntryExplorationThreeScene", () => {
     });
     expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
   });
-  test("resumes a pending reward near its landmark without reopening the information card", async () => {
+  test("starts at the intro destination without opening a place card", async () => {
     let startIntro: (() => boolean) | undefined;
     const onOpenChange = vi.fn();
     const placeVisits = {
@@ -215,7 +254,6 @@ describe("useEntryExplorationThreeScene", () => {
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         placeVisits,
-        resumePlaceId: "tower",
         onSceneControlsReady: (controls) => {
           startIntro = controls?.startIntro;
         },
@@ -228,21 +266,16 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       startIntro?.();
     });
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
     const target = mocks.movement.moveTo.mock.calls[0]?.[0] as { x: number; z: number };
-    if (!tower || !target) throw new Error("The resume destination is missing.");
-    const distance = Math.hypot(target.x - tower.position.x, target.z - tower.position.z);
-    expect(distance).toBeLessThanOrEqual(2.4);
-    expect(distance).toBeGreaterThan(0);
+    const destination = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    expect(Math.hypot(target.x - destination.x, target.z - destination.z)).toBeCloseTo(
+      ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius
+    );
     act(() => {
-      mocks.movementOptions?.onArrive?.({ position: target, target });
+      mocks.movementOptions?.onArrive?.({ position: destination, target });
     });
     expect(mocks.domElement.hasAttribute("aria-busy")).toBe(false);
-    const callsBeforeReturn = onOpenChange.mock.calls.length;
-    act(() => {
-      placeVisits.tower.update(target, tower.position);
-    });
-    expect(onOpenChange).toHaveBeenCalledTimes(callsBeforeReturn);
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
   test("moves to a clicked model's approach point instead of the floor behind it", async () => {
     let startIntro: (() => boolean) | undefined;
@@ -277,6 +310,7 @@ describe("useEntryExplorationThreeScene", () => {
     vi.clearAllMocks();
     mocks.movement.getCurrentPosition.mockReturnValue({ x: 4, z: 5 });
     mocks.registry.hasActiveSceneInteraction.mockReturnValue(true);
+    mocks.registry.getSceneInteractionPointerDestination.mockReturnValue(null);
     vi.stubGlobal("WebGLRenderingContext", function WebGLRenderingContext() {});
     vi.stubGlobal(
       "requestAnimationFrame",

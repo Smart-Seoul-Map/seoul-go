@@ -43,17 +43,14 @@ describe("entry slot model", () => {
     expect(lever.quaternion.equals(initial)).toBe(true);
     model.dispose();
   });
-  test("uses the existing intro accent token for the selection line", () => {
-    document.documentElement.style.setProperty("--sg-v3-pink-500", "#123456");
+  test("keeps the reel windows unobstructed by selection frames", () => {
     const model = createEntrySlotModel(sourceModel());
-    try {
-      const marker = model.object.getObjectByName("slot-selection-line")
-        ?.children[0] as THREE.LineSegments<THREE.BufferGeometry, THREE.LineBasicMaterial>;
-      expect(marker.material.color.getHexString()).toBe("123456");
-    } finally {
-      model.dispose();
-      document.documentElement.style.removeProperty("--sg-v3-pink-500");
-    }
+    const lines: THREE.Object3D[] = [];
+    model.object.traverse((child) => {
+      if (child instanceof THREE.LineSegments) lines.push(child);
+    });
+    expect(lines).toHaveLength(0);
+    model.dispose();
   });
   test("grounds and scales the wrapper, preserving the model pivots", () => {
     const source = sourceModel();

@@ -3,11 +3,37 @@ import { describe, expect, test } from "vitest";
 import {
   createEntrySlotSpin,
   getEntrySlotSpinFrame,
+  getEntrySlotStopOffset,
   getSlotDigitAngle,
   pickSlotDigits,
 } from "./entrySlotSpin";
 
 describe("entry slot spin", () => {
+  test("holds a fast initial speed then progressively brakes without reversing", () => {
+    const spin = createEntrySlotSpin({ digits: [5, 7], from: [0, 0, 0], startedAt: 0 });
+    const angleAt = (time: number) => getEntrySlotSpinFrame(spin, time).angles[2];
+    const first = angleAt(200) - angleAt(0);
+    expect(angleAt(400) - angleAt(200)).toBeCloseTo(first);
+    expect(angleAt(1600) - angleAt(1400)).toBeLessThan(first);
+    expect(angleAt(1800) - angleAt(1600)).toBeGreaterThan(angleAt(2000) - angleAt(1800));
+    for (let time = 20; time <= 2000; time += 20)
+      expect(angleAt(time)).toBeGreaterThanOrEqual(angleAt(time - 20));
+  });
+
+  test("gives each reel a short damped stop pulse and leaves no residual movement", () => {
+    const spin = createEntrySlotSpin({ digits: [5, 7], from: [0, 0, 0], startedAt: 100 });
+    expect(getEntrySlotStopOffset(spin, 1699)).toBe(0);
+    for (const stop of [1700, 1900, 2100]) {
+      expect(getEntrySlotStopOffset(spin, stop + 20)).toBeGreaterThan(0);
+      expect(getEntrySlotStopOffset(spin, stop + 60)).toBeLessThan(0);
+      expect(Math.abs(getEntrySlotStopOffset(spin, stop + 150))).toBeLessThan(
+        Math.abs(getEntrySlotStopOffset(spin, stop + 20))
+      );
+    }
+    expect(getEntrySlotStopOffset(spin, 2300)).toBe(0);
+    expect(getEntrySlotStopOffset(spin, 99999)).toBe(0);
+  });
+
   test.each([
     [0, 90],
     [1, 126],

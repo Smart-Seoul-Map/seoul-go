@@ -23,7 +23,6 @@ import {
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
-import { ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID } from "../config/entryExplorationPlace";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -68,7 +67,6 @@ export type UseEntryExplorationThreeSceneOptions = {
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
-  resumePlaceId?: EntryExplorationPlaceId;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -84,7 +82,6 @@ export function useEntryExplorationThreeScene({
   onSceneControlsReady,
   placeVisits,
   onPlacePanelDismiss,
-  resumePlaceId,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
@@ -279,6 +276,8 @@ export function useEntryExplorationThreeScene({
       tower: scenery.object.getObjectByName("entry-scenery-tower"),
     };
     const archeryRange = createEntryExplorationArcheryRange();
+    const surroundings = new THREE.Group();
+    surroundings.name = "entry-exploration-surroundings";
     const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
     ).map(createEntryExplorationSceneObject);
@@ -297,14 +296,21 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    scene.add(introFloor.object);
-    scene.add(scenery.object);
-    scene.add(archeryRange.object);
+    surroundings.add(introFloor.object, scenery.object, archeryRange.object);
     sceneObjectMeshes.forEach((mesh) => {
-      scene.add(mesh);
+      surroundings.add(mesh);
     });
+    scene.add(surroundings);
     registerSceneInteractionControllers(sceneInteractionControllers);
     addSceneInteractionObjects(scene, renderer);
+    sceneInteractionControllers.forEach((controller) => {
+      controller.setSurroundings?.([
+        surroundings,
+        ...sceneInteractionControllers
+          .filter((other) => other !== controller)
+          .map((other) => other.object),
+      ]);
+    });
     updateEntryExplorationCameraView(
       camera,
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
@@ -340,22 +346,8 @@ export function useEntryExplorationThreeScene({
         Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
       );
       const characterStart = movementRef.current.getCurrentPosition();
-      let cameraTarget: EntryExplorationScenePoint =
+      const cameraTarget: EntryExplorationScenePoint =
         ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
-      const resumeLandmark = resumePlaceId ? landmarks[resumePlaceId]?.position : null;
-      if (resumePlaceId && resumeLandmark) {
-        const distance = getEntryExplorationSceneDistance(resumeLandmark, cameraTarget);
-        cameraTarget = interpolateEntryExplorationScenePoint(
-          resumeLandmark,
-          cameraTarget,
-          distance === 0
-            ? 0
-            : (ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID[resumePlaceId] * 0.75) / distance
-        );
-        // Prime the visit so returning from the restored slot does not reopen the card.
-        placeVisits?.[resumePlaceId].update(cameraTarget, resumeLandmark);
-        placeVisits?.[resumePlaceId].dismiss();
-      }
       introTargetRef.current = cameraTarget;
       const characterDistance = getEntryExplorationSceneDistance(characterStart, cameraTarget);
       const characterTarget = interpolateEntryExplorationScenePoint(
@@ -374,7 +366,7 @@ export function useEntryExplorationThreeScene({
           color: getEntryExplorationIntroTheme().guideColor,
         });
         guideArrowRef.current = guide;
-        scene.add(guide.object);
+        surroundings.add(guide.object);
       }
       introStatusRef.current = "entering";
       renderer.domElement.style.cursor = "default";
@@ -617,7 +609,6 @@ export function useEntryExplorationThreeScene({
     hasActiveSceneInteraction,
     playAnimation,
     placeVisits,
-    resumePlaceId,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
