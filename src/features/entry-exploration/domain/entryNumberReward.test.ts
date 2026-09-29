@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { grantEntryNumberReward, revealEntryNumberReward } from "./entryNumberReward";
+import { grantEntryNumberReward } from "./entryNumberReward";
 
 describe("entry number rewards", () => {
   test("draws every integer from 36 through 71 from equally sized intervals", () => {
@@ -15,8 +15,8 @@ describe("entry number rewards", () => {
     const first = grantEntryNumberReward([], "hanok", () => 0);
     const second = grantEntryNumberReward(first, "tower", () => 0);
     expect(second).toEqual([
-      { placeId: "hanok", number: 36, revealed: false },
-      { placeId: "tower", number: 37, revealed: false },
+      { placeId: "hanok", number: 36 },
+      { placeId: "tower", number: 37 },
     ]);
     expect(first).toHaveLength(1);
   });
@@ -37,18 +37,5 @@ describe("entry number rewards", () => {
     }
     expect(rewards.map(({ number }) => number)).toEqual([36, 37, 38, 39, 40, 41, 42, 43, 44, 45]);
     expect(rewards.some(({ placeId }) => placeId === "place-10")).toBe(false);
-  });
-
-  test("reveals a saved result without replacing its number or other rewards", () => {
-    const first = grantEntryNumberReward([], "hanok", () => 0);
-    const rewards = grantEntryNumberReward(first, "tower", () => 0.999);
-    const revealed = revealEntryNumberReward(rewards, "hanok");
-    expect(revealed).toEqual([
-      { placeId: "hanok", number: 36, revealed: true },
-      { placeId: "tower", number: 71, revealed: false },
-    ]);
-    expect(revealEntryNumberReward(revealed, "hanok")).toBe(revealed);
-    expect(revealEntryNumberReward(revealed, "missing")).toBe(revealed);
-    expect(rewards[0].revealed).toBe(false);
   });
 });

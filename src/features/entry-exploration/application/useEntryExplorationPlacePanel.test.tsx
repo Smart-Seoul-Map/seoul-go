@@ -19,7 +19,7 @@ test("awards on arrival but starts presentation only on explicit card dismissal"
     result.current.placeVisits.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
   });
   expect(result.current.panelProps.open).toBe(true);
-  expect(store.getState().rewards).toEqual([{ placeId: "hanok", number: 36, revealed: false }]);
+  expect(store.getState().rewards).toEqual([{ placeId: "hanok", number: 36 }]);
   act(() => {
     result.current.placeVisits.hanok.dismiss();
   });

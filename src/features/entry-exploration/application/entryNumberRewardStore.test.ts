@@ -6,15 +6,14 @@ import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 beforeEach(() => sessionStorage.clear());
 
 describe("entry reward store", () => {
-  test("persists the first visit before revealing it and restores it without redrawing", () => {
+  test("returns and persists only a newly granted reward, restoring without redrawing", () => {
     const store = createEntryNumberRewardStore({ random: () => 0 });
-    store.getState().visitPlace("hanok");
-    expect(loadEntryNumberRewards()).toEqual([{ placeId: "hanok", number: 36, revealed: false }]);
+    expect(store.getState().visitPlace("hanok")).toEqual({ placeId: "hanok", number: 36 });
+    expect(loadEntryNumberRewards()).toEqual([{ placeId: "hanok", number: 36 }]);
     const restored = createEntryNumberRewardStore({ random: () => 0.99 });
-    restored.getState().visitPlace("hanok");
+    expect(restored.getState().visitPlace("hanok")).toBeNull();
     expect(restored.getState().rewards).toEqual(store.getState().rewards);
-    restored.getState().revealReward("hanok");
-    expect(loadEntryNumberRewards()).toEqual([{ placeId: "hanok", number: 36, revealed: true }]);
+    expect(loadEntryNumberRewards()).toEqual([{ placeId: "hanok", number: 36 }]);
   });
 
   test("grants one distinct reward per configured place", () => {
@@ -36,8 +35,7 @@ describe("entry reward store", () => {
     };
     const store = createEntryNumberRewardStore({ storage, random: () => 0 });
     store.getState().visitPlace("hanok");
-    store.getState().revealReward("hanok");
     store.getState().visitPlace("hanok");
-    expect(store.getState().rewards).toEqual([{ placeId: "hanok", number: 36, revealed: true }]);
+    expect(store.getState().rewards).toEqual([{ placeId: "hanok", number: 36 }]);
   });
 });

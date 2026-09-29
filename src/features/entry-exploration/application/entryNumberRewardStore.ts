@@ -7,16 +7,11 @@ import {
   saveEntryNumberRewards,
   type EntryNumberRewardStorage,
 } from "../data/entryNumberRewardStorage";
-import {
-  grantEntryNumberReward,
-  revealEntryNumberReward,
-  type EntryNumberReward,
-} from "../domain/entryNumberReward";
+import { grantEntryNumberReward, type EntryNumberReward } from "../domain/entryNumberReward";
 
 export type EntryNumberRewardStoreState = {
   rewards: readonly EntryNumberReward[];
-  visitPlace: (placeId: EntryExplorationPlaceId) => void;
-  revealReward: (placeId: string) => void;
+  visitPlace: (placeId: EntryExplorationPlaceId) => EntryNumberReward | null;
 };
 
 export function createEntryNumberRewardStore({
@@ -27,18 +22,17 @@ export function createEntryNumberRewardStore({
   random?: () => number;
 } = {}) {
   return createStore<EntryNumberRewardStoreState>()((set, get) => {
-    const updateRewards = (rewards: readonly EntryNumberReward[]) => {
-      if (rewards === get().rewards) return;
-      saveEntryNumberRewards(rewards, storage);
-      set({ rewards });
-    };
     return {
       rewards: loadEntryNumberRewards(storage),
       visitPlace: (placeId) => {
-        if (isEntryNumberRewardPlaceId(placeId))
-          updateRewards(grantEntryNumberReward(get().rewards, placeId, random));
+        if (!isEntryNumberRewardPlaceId(placeId)) return null;
+        const previous = get().rewards;
+        const rewards = grantEntryNumberReward(previous, placeId, random);
+        if (rewards === previous) return null;
+        saveEntryNumberRewards(rewards, storage);
+        set({ rewards });
+        return rewards[rewards.length - 1];
       },
-      revealReward: (placeId) => updateRewards(revealEntryNumberReward(get().rewards, placeId)),
     };
   });
 }

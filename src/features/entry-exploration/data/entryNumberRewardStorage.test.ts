@@ -7,8 +7,8 @@ import {
 } from "./entryNumberRewardStorage";
 
 const rewards = [
-  { placeId: "hanok", number: 40, revealed: true },
-  { placeId: "tower", number: 57, revealed: false },
+  { placeId: "hanok", number: 40 },
+  { placeId: "tower", number: 57 },
 ];
 
 beforeEach(() => {
@@ -17,10 +17,26 @@ beforeEach(() => {
 });
 
 describe("entry reward session storage", () => {
-  test("round trips pending and revealed rewards only through sessionStorage", () => {
+  test("round trips place numbers only through sessionStorage", () => {
     expect(saveEntryNumberRewards(rewards)).toBe(true);
     expect(loadEntryNumberRewards()).toEqual(rewards);
     expect(localStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)).toBeNull();
+  });
+
+  test("preserves legacy rewards while discarding the presentation flag", () => {
+    sessionStorage.setItem(
+      ENTRY_NUMBER_REWARD_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        rewards: rewards.map((reward, index) => ({ ...reward, revealed: index === 0 })),
+      })
+    );
+    expect(loadEntryNumberRewards()).toEqual(rewards);
+    saveEntryNumberRewards(loadEntryNumberRewards());
+    expect(JSON.parse(sessionStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)!)).toEqual({
+      version: 1,
+      rewards,
+    });
   });
 
   test.each(["not json", "null", '{"version":2,"rewards":[]}', '{"version":1,"rewards":{}}'])(
@@ -38,12 +54,12 @@ describe("entry reward session storage", () => {
         version: 1,
         rewards: [
           rewards[0],
-          { placeId: "tower", number: 40, revealed: false },
-          { placeId: "hanok", number: 55, revealed: false },
-          { placeId: "tower", number: 72, revealed: false },
-          { placeId: "tower", number: 36.5, revealed: false },
-          { placeId: "tower", number: 57, revealed: "false" },
-          { placeId: "missing", number: 58, revealed: true },
+          { placeId: "tower", number: 40 },
+          { placeId: "hanok", number: 55 },
+          { placeId: "tower", number: 72 },
+          { placeId: "tower", number: 36.5 },
+          { placeId: "tower", number: "57" },
+          { placeId: "missing", number: 58 },
           rewards[1],
         ],
       })

@@ -32,11 +32,8 @@ import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
-import {
-  entryNumberRewardStore,
-  useEntryNumberRewardStore,
-} from "../application/useEntryNumberRewardStore";
-import { isEntryNumberRewardPlaceId } from "../config/entryNumberRewardConfig";
+import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
+import type { EntryNumberReward } from "../domain/entryNumberReward";
 
 export type EntryExplorationPageProps = {
   renderPlacePanel?: (props: {
@@ -60,8 +57,7 @@ export function EntryExplorationPage({
   const navigate = useNavigate();
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
-  const revealReward = useEntryNumberRewardStore((state) => state.revealReward);
-  const [restoredReward] = useState(() => rewards.find((reward) => !reward.revealed));
+  const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
   const {
     isReady,
     isVisible,
@@ -70,23 +66,27 @@ export function EntryExplorationPage({
   } = useEntryExplorationIntro();
   const { createSubwayInteractionControllers, subwaySelection } =
     useEntryExplorationSubwaySelection();
-  const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot({
-    onRewardRevealed: revealReward,
+  const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
+    setPendingRewards((previous) => {
+      if (!previous.has(placeId)) return previous;
+      const next = new Map(previous);
+      next.delete(placeId);
+      return next;
+    });
   });
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel({
-    onVisit: visitPlace,
+    onVisit: (placeId) => {
+      const reward = visitPlace(placeId);
+      if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
+    },
     onDismiss: (placeId) => {
-      const reward = entryNumberRewardStore
-        .getState()
-        .rewards.find((item) => item.placeId === placeId);
-      if (reward) showReward(reward);
+      const reward = pendingRewards.get(placeId);
+      if (!reward) return;
+      showReward(reward);
     },
   });
-  useEffect(() => {
-    if (!isVisible && restoredReward) showReward(restoredReward);
-  }, [isVisible, restoredReward, showReward]);
   const collectedNumbers = rewards
-    .filter((reward) => reward.revealed)
+    .filter((reward) => !pendingRewards.has(reward.placeId))
     .map((reward) => reward.number);
   const createExtraSceneInteractionControllers = useCallback(
     () => [...createSubwayInteractionControllers(), ...createSlotInteractionControllers()],
@@ -124,9 +124,6 @@ export function EntryExplorationPage({
     onSceneControlsReady: handleSceneControlsReady,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
-    resumePlaceId: isEntryNumberRewardPlaceId(restoredReward?.placeId)
-      ? restoredReward.placeId
-      : undefined,
   });
 
   useEffect(() => {

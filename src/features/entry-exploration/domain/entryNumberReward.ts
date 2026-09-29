@@ -1,4 +1,4 @@
-export type EntryNumberReward = { placeId: string; number: number; revealed: boolean };
+export type EntryNumberReward = { placeId: string; number: number };
 
 export const ENTRY_NUMBER_MIN = 36;
 export const ENTRY_NUMBER_MAX = 71;
@@ -22,16 +22,5 @@ export function grantEntryNumberReward(
   ).filter((number) => !owned.has(number));
   const number = available[Math.floor(random() * available.length)];
 
-  return [...rewards, { placeId, number, revealed: false }];
-}
-
-export function revealEntryNumberReward(
-  rewards: readonly EntryNumberReward[],
-  placeId: string
-): readonly EntryNumberReward[] {
-  if (!rewards.some((reward) => reward.placeId === placeId && !reward.revealed)) return rewards;
-
-  return rewards.map((reward) =>
-    reward.placeId === placeId ? { ...reward, revealed: true } : reward
-  );
+  return [...rewards, { placeId, number }];
 }

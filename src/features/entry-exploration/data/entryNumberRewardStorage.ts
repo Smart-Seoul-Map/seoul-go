@@ -28,7 +28,6 @@ export function loadEntryNumberRewards(
       rewards.push({
         placeId: candidate.placeId,
         number: candidate.number,
-        revealed: candidate.revealed,
       });
       if (rewards.length >= MAX_ENTRY_NUMBER_REWARDS) break;
     }
@@ -70,7 +69,6 @@ function isReward(value: unknown): value is EntryNumberReward {
     typeof value.number === "number" &&
     Number.isInteger(value.number) &&
     value.number >= ENTRY_NUMBER_MIN &&
-    value.number <= ENTRY_NUMBER_MAX &&
-    typeof value.revealed === "boolean"
+    value.number <= ENTRY_NUMBER_MAX
   );
 }

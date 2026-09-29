@@ -10,17 +10,13 @@ import {
   type EntrySlotViewportBounds,
 } from "./entrySlotInteraction";
 
-type EntrySlotCallbacks = {
-  onRewardRevealed: (placeId: string) => void;
-};
-
 function getRewardDigits(reward: EntryNumberReward): SlotDigits {
   return [Math.floor(reward.number / 10), reward.number % 10];
 }
 
-export function useEntrySlot(callbacks: EntrySlotCallbacks) {
-  const callbacksRef = useRef(callbacks);
-  callbacksRef.current = callbacks;
+export function useEntrySlot(onResultPresented: (placeId: string) => void) {
+  const onResultPresentedRef = useRef(onResultPresented);
+  onResultPresentedRef.current = onResultPresented;
   const controllerRef = useRef<EntrySlotInteraction | null>(null);
   const activeRewardRef = useRef<EntryNumberReward | null>(null);
   const [state, setState] = useState<EntrySlotState>({ status: "closed" });
@@ -29,7 +25,7 @@ export function useEntrySlot(callbacks: EntrySlotCallbacks) {
       onStateChange: (nextState) => {
         const reward = activeRewardRef.current;
         if (nextState.status === "result" && reward && nextState.result === String(reward.number)) {
-          callbacksRef.current.onRewardRevealed(reward.placeId);
+          onResultPresentedRef.current(reward.placeId);
         }
         if (nextState.status === "closed") activeRewardRef.current = null;
         setState(nextState);
@@ -41,7 +37,7 @@ export function useEntrySlot(callbacks: EntrySlotCallbacks) {
     return [controller];
   }, []);
   const showReward = useCallback((reward: EntryNumberReward) => {
-    if (reward.revealed || activeRewardRef.current) return;
+    if (activeRewardRef.current) return;
     activeRewardRef.current = reward;
     if (controllerRef.current && !controllerRef.current.requestReward(getRewardDigits(reward))) {
       activeRewardRef.current = null;

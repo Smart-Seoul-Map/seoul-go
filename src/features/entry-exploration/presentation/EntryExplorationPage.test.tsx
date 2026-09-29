@@ -119,7 +119,7 @@ describe("EntryExplorationPage", () => {
       placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
     const reward = entryNumberRewardStore.getState().rewards[0];
-    expect(reward.revealed).toBe(false);
+    expect(reward).toEqual({ placeId: "hanok", number: expect.any(Number) });
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
     expect(slotRequestReward).not.toHaveBeenCalled();
@@ -144,12 +144,12 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toContain(
       String(reward.number)
     );
-    expect(loadEntryNumberRewards()[0].revealed).toBe(true);
+    expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(router.state.location.pathname).toBe("/");
   });
-  test("revisiting a revealed place only opens its information card", () => {
+  test("revisiting a rewarded place only opens its information card", () => {
     entryNumberRewardStore.setState({
-      rewards: [{ placeId: "hanok", number: 40, revealed: true }],
+      rewards: [{ placeId: "hanok", number: 40 }],
     });
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
@@ -159,9 +159,31 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("dialog", { name: "한옥체험" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     expect(slotRequestReward).not.toHaveBeenCalled();
-    expect(entryNumberRewardStore.getState().rewards).toEqual([
-      { placeId: "hanok", number: 40, revealed: true },
-    ]);
+    expect(entryNumberRewardStore.getState().rewards).toEqual([{ placeId: "hanok", number: 40 }]);
+  });
+
+  test("keeps an expanded list unchanged on a new visit until the slot presents its result", () => {
+    entryNumberRewardStore.setState({ rewards: [{ placeId: "hanok", number: 40 }] });
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
+    act(() => {
+      placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    const saved = loadEntryNumberRewards();
+    expect(saved).toHaveLength(2);
+    expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe("추첨 번호40");
+    expect(screen.getByLabelText("1개 획득")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    act(() => {
+      slotStateChange?.({ status: "result", result: String(saved[1].number) });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
+    expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
+      `추첨 번호40추첨 번호${saved[1].number}`
+    );
+    expect(loadEntryNumberRewards()).toEqual(saved);
   });
 
   test("background dismissal presents the saved reward once, while revisits do not spin", () => {
@@ -195,16 +217,36 @@ describe("EntryExplorationPage", () => {
     expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
   });
 
-  test("resumes an unrevealed saved reward after starting instead of drawing again", () => {
-    entryNumberRewardStore.setState({
-      rewards: [{ placeId: "tower", number: 65, revealed: false }],
-    });
-    renderEntryExplorationPage();
-    expect(slotRequestReward).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
-    expect(slotRequestReward).toHaveBeenCalledWith([6, 5]);
-    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
-  });
+  test.each(["card", "spinning"])(
+    "keeps the number but does not resume the slot after remounting during %s",
+    (phase) => {
+      const first = renderEntryExplorationPage();
+      fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+      act(() => {
+        placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+      });
+      if (phase === "spinning") fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+      const saved = loadEntryNumberRewards();
+      expect(saved).toHaveLength(1);
+      first.unmount();
+      entryNumberRewardStore.setState({ rewards: saved });
+      slotRequestReward.mockClear();
+      renderEntryExplorationPage();
+      expect(slotRequestReward).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+      expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
+      expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toContain(
+        String(saved[0].number)
+      );
+      act(() => {
+        placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+      });
+      fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+      expect(slotRequestReward).not.toHaveBeenCalled();
+      expect(loadEntryNumberRewards()).toEqual(saved);
+    }
+  );
   beforeEach(() => {
     sessionStorage.clear();
     entryNumberRewardStore.setState({ rewards: [] });
