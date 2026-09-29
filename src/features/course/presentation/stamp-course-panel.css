@@ -58,6 +58,10 @@
   border: 0;
   border-radius: var(--sg-radius-4);
   scrollbar-width: none;
+}
+
+.StampCourseBoardFrame {
+  border-radius: var(--sg-radius-4);
   background:
     url("../../../assets/course/stamp-board-decoration.png") center / cover,
     linear-gradient(var(--sg-course-board-top), var(--sg-course-board-bottom));

@@ -14,7 +14,6 @@ import { useStampCourseStore } from "../application/useStampCourseStore";
 import { MAX_STAMP_COURSE_PLACES } from "../domain/stampCourse";
 import { createKakaoWalkRouteUrl } from "../domain/stampCourseKakaoWalkUrl";
 import { StampCourseBoard } from "./StampCourseBoard";
-import { StampCourseCaptureCard } from "./StampCourseCaptureCard";
 import { useStampCourseEditing } from "./useStampCourseEditing";
 import { useStampCourseImageDownload } from "./useStampCourseImageDownload";
 import "./stamp-course-panel.css";
@@ -99,7 +98,7 @@ export function StampCoursePanel({
   const places = useStampCourseStore((state) => state.places);
   const { showToast } = useAppToast();
   const editing = useStampCourseEditing(open, onClose);
-  const imageDownload = useStampCourseImageDownload(places);
+  const imageDownload = useStampCourseImageDownload();
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(() =>
     places.length <= 2 ? 0.5 : FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]
   );
@@ -165,12 +164,14 @@ export function StampCoursePanel({
         width="var(--sg-detail-width)"
       >
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
-          <StampCourseBoard
-            places={places}
-            isEditing={open && editing.isEditing}
-            onRemove={editing.handleRemovePlace}
-            onReorder={editing.handleReorderPlaces}
-          />
+          <div className="StampCourseBoardFrame" ref={imageDownload.captureRef}>
+            <StampCourseBoard
+              places={places}
+              isEditing={open && editing.isEditing}
+              onRemove={editing.handleRemovePlace}
+              onReorder={editing.handleReorderPlaces}
+            />
+          </div>
         </AppResponsivePanel.Body>
         <StampCourseFooter
           isEmpty={places.length === 0}
@@ -179,10 +180,6 @@ export function StampCoursePanel({
           hasEnoughPlacesForWalkRoute={places.length >= 2}
           onKakaoWalk={handleKakaoWalk}
           onDownloadImage={imageDownload.handleDownloadImage}
-        />
-        <StampCourseCaptureCard
-          places={imageDownload.capturePlaces}
-          ref={imageDownload.captureRef}
         />
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>
