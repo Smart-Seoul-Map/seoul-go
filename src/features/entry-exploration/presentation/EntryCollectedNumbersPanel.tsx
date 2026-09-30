@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactElement, SyntheticEvent } from "react";
 
 import { AppBadge } from "@shared/ui/badge";
@@ -13,10 +13,12 @@ import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
   numbers: readonly number[];
+  shouldOpen?: boolean;
 };
 
 export function EntryCollectedNumbersPanel({
   numbers,
+  shouldOpen = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const id = useId();
@@ -24,6 +26,10 @@ export function EntryCollectedNumbersPanel({
   const panelRef = useRef<HTMLElement>(null);
   const hasOpenedRef = useRef(false);
   const countLabel = `${numbers.length}개 획득`;
+
+  useEffect(() => {
+    if (shouldOpen) setIsOpen(true);
+  }, [shouldOpen]);
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
