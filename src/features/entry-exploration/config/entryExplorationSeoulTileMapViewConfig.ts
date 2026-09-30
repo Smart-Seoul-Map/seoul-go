@@ -33,4 +33,9 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
     },
     yOffset: 0.01,
   },
+  selectableLayer: {
+    dimColor: "--sg-v3-ink-500",
+    dimOpacity: 0.7,
+    yOffset: 0.005,
+  },
 } as const;
