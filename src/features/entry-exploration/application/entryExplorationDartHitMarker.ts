@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { isSeoulGridCellValid, type SeoulGridCell } from "../domain/seoulGridNumber";
+import { readEntryExplorationTokenColor } from "./entryExplorationTokenColor";
 
 export type EntryExplorationDartHitMarkerLayout = {
   cellDepth: number;
@@ -31,16 +32,22 @@ export function createEntryExplorationDartHitMarker(): EntryExplorationDartHitMa
   object.name = "entry-dart-hit-marker";
   object.visible = false;
 
-  const cellMaterial = createMarkerMaterial(hitMarker.cellColor, hitMarker.cellOpacity);
-  const ringMaterial = createMarkerMaterial(hitMarker.ring.color, 1);
+  const cellMaterial = createMarkerMaterial(
+    readEntryExplorationTokenColor(hitMarker.cellColor),
+    hitMarker.cellOpacity
+  );
+  const ringMaterial = createMarkerMaterial(
+    readEntryExplorationTokenColor(hitMarker.ring.color),
+    1
+  );
   const cellMeshes = CELL_OFFSETS.map(() => createMarkerMesh(createCellGeometry(), cellMaterial));
   const borderMesh = createMarkerMesh(
     createCellGeometry(),
-    createMarkerMaterial(hitMarker.borderColor, 1)
+    createMarkerMaterial(readEntryExplorationTokenColor(hitMarker.borderColor), 1)
   );
   const centerMesh = createMarkerMesh(
     createCellGeometry(),
-    createMarkerMaterial(hitMarker.centerColor, 1)
+    createMarkerMaterial(readEntryExplorationTokenColor(hitMarker.centerColor), 1)
   );
   const outerRingMesh = createMarkerMesh(createRingGeometry(hitMarker.ring.outer), ringMaterial);
   const innerRingMesh = createMarkerMesh(createRingGeometry(hitMarker.ring.inner), ringMaterial);

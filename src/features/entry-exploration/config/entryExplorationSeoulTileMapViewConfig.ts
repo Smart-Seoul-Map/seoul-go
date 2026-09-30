@@ -1,11 +1,5 @@
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "./entryExplorationSceneConfig";
 
-const SCENE_TOKEN_COLOR = {
-  bgFloating: 0xffffff,
-  blue500: 0x08b2f0,
-  blue600: 0x0082ff,
-} as const;
-
 export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
   cameraOffset: {
     x: 2.2,
@@ -26,14 +20,14 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
   },
   characterFacingDistance: 0.7,
   hitMarker: {
-    borderColor: SCENE_TOKEN_COLOR.bgFloating,
-    cellColor: SCENE_TOKEN_COLOR.blue500,
+    borderColor: "--sg-color-bg-floating",
+    cellColor: "--sg-v3-blue-500",
     cellOpacity: 0.55,
-    centerColor: SCENE_TOKEN_COLOR.blue600,
+    centerColor: "--sg-v3-blue-600",
     centerScale: 0.78,
     layerGap: 0.002,
     ring: {
-      color: SCENE_TOKEN_COLOR.blue600,
+      color: "--sg-v3-blue-600",
       inner: { radiusCells: 1.16, widthCells: 0.18 },
       outer: { radiusCells: 1.56, widthCells: 0.08 },
     },
