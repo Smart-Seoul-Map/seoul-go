@@ -6,7 +6,11 @@ import {
   type EntryExplorationPlaceId,
 } from "@features/entry-exploration";
 import { PlaceDetailPanel } from "@features/places";
-import { useResponsivePanelPresentation, type PanelSnapPoint } from "@shared/ui/responsive-panel";
+import {
+  FLOATING_PANEL_SHEET_OPTIONS,
+  useResponsivePanelPresentation,
+  type PanelSnapPoint,
+} from "@shared/ui/responsive-panel";
 import { AppIconButton } from "@shared/ui/button";
 import { AppHStack } from "@shared/ui/layout";
 import { AppText } from "@shared/ui/typography";
@@ -17,7 +21,7 @@ import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
 
 import "./EntryExplorationRoute.css";
 
-const ENTRY_PLACE_SNAP_POINTS: PanelSnapPoint[] = [0.5, 0.9];
+const ENTRY_PLACE_INITIAL_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
 
 type EntryPlacePanelProps = {
   placeId: EntryExplorationPlaceId;
@@ -46,12 +50,12 @@ function EntryPlacePanelActions({
 
 function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): ReactElement {
   const [entryPlaceSnapPoint, setEntryPlaceSnapPoint] = useState<PanelSnapPoint | null>(
-    ENTRY_PLACE_SNAP_POINTS[0]
+    ENTRY_PLACE_INITIAL_SNAP_POINT
   );
 
   useEffect(() => {
     if (!open) {
-      setEntryPlaceSnapPoint(ENTRY_PLACE_SNAP_POINTS[0]);
+      setEntryPlaceSnapPoint(ENTRY_PLACE_INITIAL_SNAP_POINT);
     }
   }, [open]);
 
@@ -62,7 +66,6 @@ function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): Reac
       modal={false}
       className="EntryPlacePanel"
       headerTrailing={<EntryPlacePanelActions placeId={placeId} onClose={onClose} />}
-      mobileSnapPoints={ENTRY_PLACE_SNAP_POINTS}
       mobileActiveSnapPoint={entryPlaceSnapPoint}
       onMobileSnapPointChange={setEntryPlaceSnapPoint}
       onOpenChange={(nextOpen) => {
