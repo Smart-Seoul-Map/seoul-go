@@ -18,6 +18,9 @@ import { useStampCourseEditing } from "./useStampCourseEditing";
 import { useStampCourseImageDownload } from "./useStampCourseImageDownload";
 import "./stamp-course-panel.css";
 
+const COURSE_COMPACT_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
+const COURSE_EXPANDED_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1];
+
 type StampCoursePanelProps = Pick<
   AppResponsivePanelContentProps,
   "onExitComplete" | "returnFocus"
@@ -100,7 +103,7 @@ export function StampCoursePanel({
   const editing = useStampCourseEditing(open, onClose);
   const imageDownload = useStampCourseImageDownload();
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(() =>
-    places.length <= 2 ? 0.5 : FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]
+    places.length <= 2 ? COURSE_COMPACT_SNAP_POINT : COURSE_EXPANDED_SNAP_POINT
   );
 
   const handleKakaoWalk = () => {
