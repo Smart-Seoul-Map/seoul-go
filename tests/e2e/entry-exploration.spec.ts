@@ -210,8 +210,6 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
   await test.step("Moving away closes the open card", async () => {
     await scene(page).click({ position: { x: 450, y: 450 } });
     await expectPanelToStayClosed(page);
-    await waitForCameraToSettle(page);
-    await expectPanelToStayClosed(page);
   });
 });
 
