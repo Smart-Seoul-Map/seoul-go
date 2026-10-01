@@ -83,8 +83,10 @@
     top: var(--sg-spacing-10);
     right: auto;
     left: 50%;
-    width: 51%;
+    width: max-content;
+    max-width: calc(100% - var(--sg-spacing-10) * 2);
     transform: translateX(-50%);
+    white-space: nowrap;
     --sg-typography-dialog-title-font-size: var(--sg-detail-title-size);
     --sg-typography-dialog-title-line-height: var(--sg-line-height-12);
     --sg-typography-supporting-font-size: var(--sg-detail-supporting-size);
