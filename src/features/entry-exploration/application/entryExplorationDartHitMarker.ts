@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { isSeoulGridCellValid, type SeoulGridCell } from "../domain/seoulGridNumber";
-import { readEntryExplorationTokenColor } from "./entryExplorationTokenColor";
+import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 
 export type EntryExplorationDartHitMarkerLayout = {
   cellDepth: number;
@@ -32,22 +32,17 @@ export function createEntryExplorationDartHitMarker(): EntryExplorationDartHitMa
   object.name = "entry-dart-hit-marker";
   object.visible = false;
 
-  const cellMaterial = createMarkerMaterial(
-    readEntryExplorationTokenColor(hitMarker.cellColor),
-    hitMarker.cellOpacity
-  );
-  const ringMaterial = createMarkerMaterial(
-    readEntryExplorationTokenColor(hitMarker.ring.color),
-    1
-  );
+  const { dart } = getEntryExplorationIntroTheme();
+  const cellMaterial = createMarkerMaterial(dart.hitCellColor, hitMarker.cellOpacity);
+  const ringMaterial = createMarkerMaterial(dart.hitAccentColor, 1);
   const cellMeshes = CELL_OFFSETS.map(() => createMarkerMesh(createCellGeometry(), cellMaterial));
   const borderMesh = createMarkerMesh(
     createCellGeometry(),
-    createMarkerMaterial(readEntryExplorationTokenColor(hitMarker.borderColor), 1)
+    createMarkerMaterial(dart.hitBorderColor, 1)
   );
   const centerMesh = createMarkerMesh(
     createCellGeometry(),
-    createMarkerMaterial(readEntryExplorationTokenColor(hitMarker.centerColor), 1)
+    createMarkerMaterial(dart.hitAccentColor, 1)
   );
   const outerRingMesh = createMarkerMesh(createRingGeometry(hitMarker.ring.outer), ringMaterial);
   const innerRingMesh = createMarkerMesh(createRingGeometry(hitMarker.ring.inner), ringMaterial);
@@ -89,7 +84,7 @@ export function createEntryExplorationDartHitMarker(): EntryExplorationDartHitMa
   return { object, setCell };
 }
 
-function createMarkerMaterial(color: number, opacity: number): THREE.MeshBasicMaterial {
+function createMarkerMaterial(color: string, opacity: number): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({
     color,
     depthTest: false,

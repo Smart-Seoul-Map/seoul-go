@@ -235,6 +235,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransition = null;
     cameraTransitionStartedAt = null;
     setTargetHover(false);
+    selectableLayer.setHoveredCell(null);
     onActiveChange?.(false);
   };
 
@@ -413,11 +414,15 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
       if (cameraTransitionStartedAt !== null) {
         setTargetHover(false);
+        selectableLayer.setHoveredCell(null);
 
         return false;
       }
 
-      setTargetHover(resolvePointedCell(raycaster) !== null);
+      const pointedCell = resolvePointedCell(raycaster);
+
+      selectableLayer.setHoveredCell(pointedCell);
+      setTargetHover(pointedCell !== null);
 
       return false;
     },

@@ -20,22 +20,16 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
   },
   characterFacingDistance: 0.7,
   hitMarker: {
-    borderColor: "--sg-color-bg-floating",
-    cellColor: "--sg-v3-blue-500",
     cellOpacity: 0.55,
-    centerColor: "--sg-v3-blue-600",
     centerScale: 0.78,
     layerGap: 0.002,
     ring: {
-      color: "--sg-v3-blue-600",
       inner: { radiusCells: 1.16, widthCells: 0.18 },
       outer: { radiusCells: 1.56, widthCells: 0.08 },
     },
     yOffset: 0.01,
   },
   selectableLayer: {
-    dimColor: "--sg-v3-ink-500",
-    dimOpacity: 0.7,
     yOffset: 0.005,
   },
 } as const;

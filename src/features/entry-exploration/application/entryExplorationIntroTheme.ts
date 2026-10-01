@@ -13,6 +13,13 @@ type EntryExplorationIntroTheme = {
     radius: number;
     textColor: string;
   };
+  dart: {
+    hitAccentColor: string;
+    hitBorderColor: string;
+    hitCellColor: string;
+    hoverColor: string;
+    selectableColor: string;
+  };
   fontFamily: string;
   guideColor: string;
 };
@@ -28,6 +35,13 @@ export function getEntryExplorationIntroTheme(): EntryExplorationIntroTheme {
       fontWeight: readCssToken("--sg-typography-button-label-font-weight", "700"),
       radius: readScaledCssLength("--sg-radius-full", 35, INTRO_BUTTON_PIXEL_RATIO),
       textColor: readCssToken("--sg-button-primary-fg", "#ffffff"),
+    },
+    dart: {
+      hitAccentColor: readCssToken("--sg-v3-blue-600", "#0082ff"),
+      hitBorderColor: readCssToken("--sg-color-bg-floating", "#ffffff"),
+      hitCellColor: readCssToken("--sg-v3-blue-500", "#08b2f0"),
+      hoverColor: readCssToken("--sg-v3-pink-600", "#e61f82"),
+      selectableColor: readCssToken("--sg-v3-pink-500", "#ff2e94"),
     },
     fontFamily: getComputedStyle(document.body).fontFamily,
     guideColor: readCssToken("--sg-v3-pink-500", "#ff2e94"),
