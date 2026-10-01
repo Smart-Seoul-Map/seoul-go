@@ -1,4 +1,3 @@
-import { request as httpsRequest } from "node:https";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,7 +16,6 @@ const SMART_SEOUL_TMS_TILE_PATH_PATTERN = new RegExp(
   `^${SMART_SEOUL_TMS_TILE_BASE_PATH}/${SMART_SEOUL_TMS_MAP_ID}/\\d+/\\d+/\\d+\\.png$`
 );
 const SMART_SEOUL_PLACE_IMAGE_FUNCTION_PATH = "/functions/api/place-image.ts";
-const PLACE_IMAGE_INCOMPLETE_CHAIN_ERROR_CODE = "UNABLE_TO_VERIFY_LEAF_SIGNATURE";
 const PLACE_IMAGE_UNPIPED_HEADERS = new Set(["content-encoding", "content-length"]);
 
 const rewriteSmartSeoulTileProxyPath = (path) => {
@@ -31,42 +29,6 @@ const rewriteSmartSeoulTileProxyPath = (path) => {
   return `${SMART_SEOUL_TMS_TILE_BASE_PATH}/invalid-smart-seoul-tile-request.png`;
 };
 
-const fetchWithoutCertificateCheck = (imageUrl, init) =>
-  new Promise((resolve, reject) => {
-    const imageRequest = httpsRequest(
-      imageUrl,
-      { headers: init?.headers ?? {}, rejectUnauthorized: false },
-      (imageResponse) => {
-        const chunks = [];
-
-        imageResponse.on("data", (chunk) => chunks.push(chunk));
-        imageResponse.on("end", () =>
-          resolve(
-            new Response(Buffer.concat(chunks), {
-              status: imageResponse.statusCode,
-              headers: { "Content-Type": imageResponse.headers["content-type"] ?? "" },
-            })
-          )
-        );
-      }
-    );
-
-    imageRequest.on("error", reject);
-    imageRequest.end();
-  });
-
-const fetchPlaceImage = async (imageUrl, init) => {
-  try {
-    return await fetch(imageUrl, init);
-  } catch (error) {
-    if (error?.cause?.code !== PLACE_IMAGE_INCOMPLETE_CHAIN_ERROR_CODE) {
-      throw error;
-    }
-
-    return fetchWithoutCertificateCheck(imageUrl, init);
-  }
-};
-
 const smartSeoulPlaceImageProxy = () => ({
   name: "smart-seoul-place-image-proxy",
   configureServer(server) {
@@ -76,7 +38,7 @@ const smartSeoulPlaceImageProxy = () => ({
       try {
         const { onRequestGet } = await server.ssrLoadModule(SMART_SEOUL_PLACE_IMAGE_FUNCTION_PATH);
         const imageResponse = await onRequestGet({
-          env: { fetchPlaceImage },
+          env: {},
           request: new Request(requestUrl),
         });
 
@@ -127,7 +89,7 @@ export default defineConfig(() => {
     },
     test: {
       environment: "jsdom",
-      include: ["src/**/*.{test,spec}.{ts,tsx}"],
+      include: ["src/**/*.{test,spec}.{ts,tsx}", "tests/**/*.test.ts"],
     },
   };
 });

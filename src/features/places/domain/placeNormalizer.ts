@@ -1,5 +1,3 @@
-import { API_PROXY_PATH } from "@shared/constants/api";
-
 import { getSmartSeoulPlaceTheme, SEOUL_EDITION25_THEME_ID } from "../config/placeThemeConfig";
 import type { SmartSeoulThemePlace } from "./place";
 
@@ -54,9 +52,7 @@ function normalizeSmartSeoulImageUrl(value: string): string {
   }
 
   try {
-    const absoluteImageUrl = new URL(value, SMART_SEOUL_IMAGE_BASE_URL).href;
-
-    return `${API_PROXY_PATH.SMART_SEOUL_PLACE_IMAGE}?url=${encodeURIComponent(absoluteImageUrl)}`;
+    return new URL(value, SMART_SEOUL_IMAGE_BASE_URL).href;
   } catch {
     return value;
   }

@@ -6,6 +6,7 @@ import { AppButton } from "@shared/ui/button";
 import stampSealEmptyImage from "../../../assets/course/stamp-seal-empty.png";
 import type { SavedStampCoursePlace } from "../domain/stampCourse";
 import { createStampCourseSlots } from "../domain/stampCourseSlots";
+import { resolveStampCourseImageUrl } from "../domain/stampCourseImageUrl";
 import { useStampCourseDrag } from "./useStampCourseDrag";
 
 type StampCourseBoardProps = {
@@ -23,16 +24,16 @@ function StampCourseSealContent({
   isFilled: boolean;
 }): ReactElement {
   const [failedUrl, setFailedUrl] = useState<string>();
+  const sourceUrl = imageUrl ? resolveStampCourseImageUrl(imageUrl) : "";
 
-  if (imageUrl && imageUrl !== failedUrl) {
+  if (sourceUrl && sourceUrl !== failedUrl) {
     return (
       <img
         className="StampCourseSealImage"
-        crossOrigin="anonymous"
-        src={imageUrl}
+        src={sourceUrl}
         alt=""
         draggable={false}
-        onError={() => setFailedUrl(imageUrl)}
+        onError={() => setFailedUrl(sourceUrl)}
       />
     );
   }

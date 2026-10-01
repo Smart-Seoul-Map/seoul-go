@@ -18,6 +18,9 @@ import { useStampCourseEditing } from "./useStampCourseEditing";
 import { useStampCourseImageDownload } from "./useStampCourseImageDownload";
 import "./stamp-course-panel.css";
 
+const COURSE_COMPACT_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
+const COURSE_EXPANDED_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1];
+
 type StampCoursePanelProps = Pick<
   AppResponsivePanelContentProps,
   "onExitComplete" | "returnFocus"
@@ -29,19 +32,19 @@ type StampCoursePanelProps = Pick<
 type StampCourseFooterProps = {
   isEmpty: boolean;
   isEditing: boolean;
-  canDownloadImage: boolean;
+  canDownloadCourseImage: boolean;
   hasEnoughPlacesForWalkRoute: boolean;
   onKakaoWalk: () => void;
-  onDownloadImage: () => void;
+  onDownloadCourseImage: () => void;
 };
 
 function StampCourseFooter({
   isEmpty,
   isEditing,
-  canDownloadImage,
+  canDownloadCourseImage,
   hasEnoughPlacesForWalkRoute,
   onKakaoWalk,
-  onDownloadImage,
+  onDownloadCourseImage,
 }: StampCourseFooterProps): ReactElement {
   return (
     <AppResponsivePanel.Footer className="StampCourseFooter">
@@ -68,8 +71,8 @@ function StampCourseFooter({
       <AppButton
         className="StampCourseAction"
         data-action="save"
-        disabled={isEmpty || isEditing || !canDownloadImage}
-        onClick={onDownloadImage}
+        disabled={isEmpty || isEditing || !canDownloadCourseImage}
+        onClick={onDownloadCourseImage}
         aria-label="이미지 저장"
       >
         <span className="StampCourseActionIcon" data-icon="download" aria-hidden="true" />
@@ -100,7 +103,7 @@ export function StampCoursePanel({
   const editing = useStampCourseEditing(open, onClose);
   const imageDownload = useStampCourseImageDownload();
   const [activeSnapPoint, setActiveSnapPoint] = useState<PanelSnapPoint | null>(() =>
-    places.length <= 2 ? 0.5 : FLOATING_PANEL_SHEET_OPTIONS.snapPoints[1]
+    places.length <= 2 ? COURSE_COMPACT_SNAP_POINT : COURSE_EXPANDED_SNAP_POINT
   );
 
   const handleKakaoWalk = () => {
@@ -164,7 +167,7 @@ export function StampCoursePanel({
         width="var(--sg-detail-width)"
       >
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
-          <div className="StampCourseBoardFrame" ref={imageDownload.captureRef}>
+          <div className="StampCourseBoardFrame" ref={imageDownload.captureTargetRef}>
             <StampCourseBoard
               places={places}
               isEditing={open && editing.isEditing}
@@ -176,10 +179,10 @@ export function StampCoursePanel({
         <StampCourseFooter
           isEmpty={places.length === 0}
           isEditing={editing.isEditing}
-          canDownloadImage={imageDownload.canDownloadImage}
+          canDownloadCourseImage={imageDownload.canDownloadCourseImage}
           hasEnoughPlacesForWalkRoute={places.length >= 2}
           onKakaoWalk={handleKakaoWalk}
-          onDownloadImage={imageDownload.handleDownloadImage}
+          onDownloadCourseImage={imageDownload.handleDownloadCourseImage}
         />
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>

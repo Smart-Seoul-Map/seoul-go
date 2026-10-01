@@ -175,6 +175,7 @@ test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에
   render(<StampCoursePanel onClose={vi.fn()} />);
   const image = () => document.querySelector(".StampCourseSealImage");
   expect(image()).toHaveAttribute("src", "https://example.com/place.jpg");
+  expect(image()).not.toHaveAttribute("crossorigin");
   fireEvent.click(screen.getByRole("button", { name: "편집" }));
   expect(image()).toHaveAttribute("src", "https://example.com/place.jpg");
   fireEvent.error(image()!);
@@ -182,6 +183,23 @@ test("저장된 장소 이미지는 복원 후 일반 모드와 편집 모드에
   expect(screen.getByRole("button", { name: "저장된 장소 1 순서 변경" })).not.toHaveTextContent(
     "GO"
   );
+});
+
+test("예전에 저장한 프록시 주소도 원본 사진으로 표시하고 저장 데이터는 보존한다", () => {
+  const imageUrl = "/api/place-image?url=https%3A%2F%2Fimg.daum-kg.net%2Fphoto.png";
+  stampCourseStore.getState().addPlace({
+    id: "legacy-photo",
+    name: "Legacy",
+    themeId: "theme",
+    imageUrl,
+    position: { lat: 37.5, lng: 127 },
+  });
+  render(<StampCoursePanel onClose={vi.fn()} />);
+  expect(document.querySelector(".StampCourseSealImage")).toHaveAttribute(
+    "src",
+    "https://img.daum-kg.net/photo.png"
+  );
+  expect(stampCourseStore.getState().places[0].imageUrl).toBe(imageUrl);
 });
 
 test("연속 삭제의 실행 취소는 마지막 삭제만 복구한다", () => {
