@@ -1,12 +1,9 @@
 import { useRef, useState, type RefObject } from "react";
 
-import { toBlob } from "html-to-image";
-
 import { useAppToast } from "@shared/ui/toast";
 
 import { createStampCourseImageFileName } from "../domain/stampCourseImageFileName";
-
-const STAMP_COURSE_IMAGE_PIXEL_RATIO = 2;
+import { captureStampCourseImage } from "./captureStampCourseImage";
 
 type StampCourseImageDownload = {
   captureRef: RefObject<HTMLDivElement | null>;
@@ -39,10 +36,7 @@ export function useStampCourseImageDownload(): StampCourseImageDownload {
 
     setIsDownloading(true);
 
-    const imageBlob = await toBlob(captureNode, {
-      pixelRatio: STAMP_COURSE_IMAGE_PIXEL_RATIO,
-      skipFonts: true,
-    }).catch(() => null);
+    const imageBlob = await captureStampCourseImage(captureNode).catch(() => null);
 
     setIsDownloading(false);
 
