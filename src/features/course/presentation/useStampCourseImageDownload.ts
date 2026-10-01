@@ -6,9 +6,9 @@ import { createStampCourseImageFileName } from "../domain/stampCourseImageFileNa
 import { captureStampCourseImage } from "./captureStampCourseImage";
 
 type StampCourseImageDownload = {
-  captureRef: RefObject<HTMLDivElement | null>;
-  canDownloadImage: boolean;
-  handleDownloadImage: () => Promise<void>;
+  captureTargetRef: RefObject<HTMLDivElement | null>;
+  canDownloadCourseImage: boolean;
+  handleDownloadCourseImage: () => Promise<void>;
 };
 
 function downloadImageBlob(imageBlob: Blob, fileName: string): void {
@@ -23,12 +23,12 @@ function downloadImageBlob(imageBlob: Blob, fileName: string): void {
 }
 
 export function useStampCourseImageDownload(): StampCourseImageDownload {
-  const captureRef = useRef<HTMLDivElement>(null);
+  const captureTargetRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const { showToast } = useAppToast();
 
-  const handleDownloadImage = async () => {
-    const captureNode = captureRef.current;
+  const handleDownloadCourseImage = async () => {
+    const captureNode = captureTargetRef.current;
 
     if (!captureNode) {
       return;
@@ -51,8 +51,8 @@ export function useStampCourseImageDownload(): StampCourseImageDownload {
   };
 
   return {
-    captureRef,
-    canDownloadImage: !isDownloading,
-    handleDownloadImage,
+    captureTargetRef,
+    canDownloadCourseImage: !isDownloading,
+    handleDownloadCourseImage,
   };
 }

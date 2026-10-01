@@ -21,7 +21,7 @@ function cloneStampCourse(source: HTMLElement): HTMLElement {
   return clone;
 }
 
-async function embedStampPhotos(clone: HTMLElement): Promise<void> {
+async function embedExternalStampPhotos(clone: HTMLElement): Promise<void> {
   const images = Array.from(clone.querySelectorAll("img"));
   const requests = new Map<string, Promise<string>>();
 
@@ -53,7 +53,7 @@ export async function captureStampCourseImage(source: HTMLElement): Promise<Blob
   host.appendChild(clone);
 
   try {
-    await embedStampPhotos(clone);
+    await embedExternalStampPhotos(clone);
     document.body.appendChild(host);
 
     return await toBlob(clone, {

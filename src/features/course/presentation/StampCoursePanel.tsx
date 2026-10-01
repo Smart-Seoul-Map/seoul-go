@@ -32,19 +32,19 @@ type StampCoursePanelProps = Pick<
 type StampCourseFooterProps = {
   isEmpty: boolean;
   isEditing: boolean;
-  canDownloadImage: boolean;
+  canDownloadCourseImage: boolean;
   hasEnoughPlacesForWalkRoute: boolean;
   onKakaoWalk: () => void;
-  onDownloadImage: () => void;
+  onDownloadCourseImage: () => void;
 };
 
 function StampCourseFooter({
   isEmpty,
   isEditing,
-  canDownloadImage,
+  canDownloadCourseImage,
   hasEnoughPlacesForWalkRoute,
   onKakaoWalk,
-  onDownloadImage,
+  onDownloadCourseImage,
 }: StampCourseFooterProps): ReactElement {
   return (
     <AppResponsivePanel.Footer className="StampCourseFooter">
@@ -71,8 +71,8 @@ function StampCourseFooter({
       <AppButton
         className="StampCourseAction"
         data-action="save"
-        disabled={isEmpty || isEditing || !canDownloadImage}
-        onClick={onDownloadImage}
+        disabled={isEmpty || isEditing || !canDownloadCourseImage}
+        onClick={onDownloadCourseImage}
         aria-label="이미지 저장"
       >
         <span className="StampCourseActionIcon" data-icon="download" aria-hidden="true" />
@@ -167,7 +167,7 @@ export function StampCoursePanel({
         width="var(--sg-detail-width)"
       >
         <AppResponsivePanel.Body className="StampCourseBody" aria-label="담긴 장소 목록">
-          <div className="StampCourseBoardFrame" ref={imageDownload.captureRef}>
+          <div className="StampCourseBoardFrame" ref={imageDownload.captureTargetRef}>
             <StampCourseBoard
               places={places}
               isEditing={open && editing.isEditing}
@@ -179,10 +179,10 @@ export function StampCoursePanel({
         <StampCourseFooter
           isEmpty={places.length === 0}
           isEditing={editing.isEditing}
-          canDownloadImage={imageDownload.canDownloadImage}
+          canDownloadCourseImage={imageDownload.canDownloadCourseImage}
           hasEnoughPlacesForWalkRoute={places.length >= 2}
           onKakaoWalk={handleKakaoWalk}
-          onDownloadImage={imageDownload.handleDownloadImage}
+          onDownloadCourseImage={imageDownload.handleDownloadCourseImage}
         />
       </AppResponsivePanel.Content>
     </AppResponsivePanel.Root>
