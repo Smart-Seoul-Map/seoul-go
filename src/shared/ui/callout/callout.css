@@ -1,0 +1,71 @@
+.AppCallout {
+  --callout-icon-bg: var(--sg-color-text-default);
+  --callout-icon-fg: var(--sg-color-text-inverted);
+  --callout-icon-stroke: transparent;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: calc(var(--sg-spacing-12) + var(--sg-spacing-0_5));
+  gap: var(--sg-spacing-3);
+  padding: var(--sg-spacing-3_5);
+  border: 0;
+  border-radius: var(--sg-radius-2_5);
+  background: var(--sg-color-bg-neutral-weak);
+  color: var(--sg-color-text-default);
+  font-family: var(--sg-typography-supporting-font-family);
+  font-size: var(--sg-typography-supporting-font-size);
+  font-weight: var(--sg-font-weight-regular);
+  line-height: var(--sg-line-height-5);
+  letter-spacing: 0;
+  text-align: start;
+}
+
+.AppCallout[data-tone="informative"] {
+  --callout-icon-bg: var(--sg-v3-yellow-500);
+  --callout-icon-fg: var(--sg-color-text-muted);
+  --callout-icon-stroke: var(--sg-v3-pink-500);
+  background: var(--sg-color-bg-surface-paper);
+  box-shadow: inset 0 0 0 1.1px var(--sg-v3-pink-500);
+  color: var(--sg-color-text-muted);
+}
+
+.AppCallout-content {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.AppCallout-title {
+  font-weight: var(--sg-font-weight-bold);
+}
+
+.AppCallout-separator {
+  white-space: pre-wrap;
+}
+
+.AppCallout-description {
+  font-weight: var(--sg-font-weight-regular);
+}
+
+.AppCallout-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--sg-spacing-4);
+  height: var(--sg-spacing-4);
+  font-size: var(--sg-font-size-4);
+  line-height: 1;
+  pointer-events: none;
+  color: var(--callout-icon-fg);
+}
+
+.AppCallout-icon > svg,
+.AppCallout-icon > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
