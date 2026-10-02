@@ -3,6 +3,7 @@ export { createSeoulEdition25MapContent } from "./application/seoulEdition25MapC
 export { filterSmartSeoulPlacesByDistrict } from "./application/placeDistrictFilter";
 export { createPlaceThemeProgressItems } from "./application/placeThemeProgress";
 export { placesQueryKeys } from "./application/placesQueryKeys";
+export { useUnlockedLinkedPlacesQueries } from "./application/useUnlockedLinkedPlacesQueries";
 export {
   useNearbySmartSeoulThemePlacesQuery,
   useSmartSeoulThemePlacesQuery,
