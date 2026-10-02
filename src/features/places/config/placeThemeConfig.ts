@@ -38,6 +38,10 @@ export const SMART_SEOUL_PLACE_THEMES = [
 export type SmartSeoulPlaceTheme = (typeof SMART_SEOUL_PLACE_THEMES)[number];
 
 export const SMART_SEOUL_PLACE_THEME_IDS = SMART_SEOUL_PLACE_THEMES.map((theme) => theme.id);
+export const SEOUL_EDITION_THEME_IDS = [SEOUL_EDITION25_THEME_ID] as const;
+export const LINKED_PLACE_THEME_IDS = SMART_SEOUL_PLACE_THEME_IDS.filter(
+  (id) => id !== SEOUL_EDITION25_THEME_ID
+);
 
 const SMART_SEOUL_PLACE_THEME_BY_ID: ReadonlyMap<string, SmartSeoulPlaceTheme> = new Map(
   SMART_SEOUL_PLACE_THEMES.map((theme) => [theme.id, theme])
