@@ -3,6 +3,7 @@ export const ENTRY_EXPLORATION_GUIDE_CONFIG = {
   dashGap: 0.38,
   dashLength: 0.65,
   dashWidth: 0.12,
+  destinationGap: 1.2,
   drawDurationMs: 600,
   headGap: 0.2,
   headLength: 0.7,

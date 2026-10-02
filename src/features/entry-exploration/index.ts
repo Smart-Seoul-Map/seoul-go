@@ -1,6 +1,8 @@
 export { EntryExplorationPage } from "./presentation/EntryExplorationPage";
-export { ENTRY_EXPLORATION_PLACES } from "./config/entryExplorationPlace";
-export type { EntryExplorationPlaceId } from "./config/entryExplorationPlace";
+export { useEntryEditionSelection } from "./application/useEntryEditionSelection";
+export { EntryExplorationIntroOverlay } from "./presentation/EntryExplorationIntroOverlay";
+export type { EntryEditionPlace, EntryExplorationPlaceId } from "./domain/entryEditionPlace";
+export { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "./config/entryHanokPlace";
 export { getLine2StationById } from "./config/line2SelectionConfig";
 export { getSubwayStationAvailabilityStatus } from "./application/subwayStationAvailability";
 export type { SubwayStationAvailabilityStatus } from "./application/subwayStationAvailability";

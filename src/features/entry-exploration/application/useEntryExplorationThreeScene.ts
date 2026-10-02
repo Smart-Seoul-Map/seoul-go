@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import * as THREE from "three";
+import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
 import {
   playCharacterAnimationClips,
@@ -21,8 +22,9 @@ import {
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
+import { ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
-import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import {
   getEntryExplorationSceneDistance,
   getEntryExplorationSceneHeadingRadians,
@@ -32,6 +34,7 @@ import {
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
 import { createEntryExplorationScenery } from "./entryExplorationScenery";
+import { createEntryEditionScenery } from "./entryEditionScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 import { createEntryExplorationArcheryRange } from "./entryExplorationArcheryRange";
@@ -60,8 +63,10 @@ type SceneHandles = {
 };
 
 type EntryExplorationIntroStatus = "entering" | "ready" | "waiting";
+const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
 
 export type UseEntryExplorationThreeSceneOptions = {
+  places?: readonly EntryEditionPlace[];
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
@@ -77,6 +82,7 @@ export type EntryExplorationThreeSceneControls = {
 };
 
 export function useEntryExplorationThreeScene({
+  places = EMPTY_ENTRY_PLACES,
   containerRef,
   createSceneInteractionControllers,
   onSceneControlsReady,
@@ -271,10 +277,20 @@ export function useEntryExplorationThreeScene({
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
     const scenery = createEntryExplorationScenery();
-    const landmarks = {
-      hanok: scenery.object.getObjectByName("entry-scenery-hanok"),
-      tower: scenery.object.getObjectByName("entry-scenery-tower"),
-    };
+    const editionScenery = createEntryEditionScenery(places, (destination) => {
+      if (introStatusRef.current !== "ready" || hasActiveSceneInteraction()) return;
+      if (onPlacePanelDismissRef.current?.()) return;
+      movementRef.current.moveTo({ x: destination.x, z: destination.z });
+    });
+    editionScenery.positionAtEntry(width / height);
+    const hanok = scenery.object.getObjectByName(`entry-scenery-${ENTRY_HANOK_PLACE_ID}`);
+    const visitLandmarks = new Map<string, THREE.Object3D>(editionScenery.landmarks);
+    if (hanok) visitLandmarks.set(ENTRY_HANOK_PLACE_ID, hanok);
+    const labels = new CSS2DRenderer();
+    labels.setSize(width, height);
+    labels.domElement.className = "EntryEditionLabels";
+    labels.domElement.style.pointerEvents = "none";
+    labels.domElement.hidden = true;
     const archeryRange = createEntryExplorationArcheryRange();
     const surroundings = new THREE.Group();
     surroundings.name = "entry-exploration-surroundings";
@@ -289,6 +305,7 @@ export function useEntryExplorationThreeScene({
     const pointer = new THREE.Vector2();
 
     container.append(renderer.domElement);
+    container.append(labels.domElement);
     renderer.domElement.tabIndex = 0;
     renderer.domElement.setAttribute("aria-label", "서울 탐방 시작하기");
     renderer.domElement.setAttribute("aria-disabled", "true");
@@ -296,7 +313,7 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    surroundings.add(introFloor.object, scenery.object, archeryRange.object);
+    surroundings.add(introFloor.object, scenery.object, editionScenery.object, archeryRange.object);
     sceneObjectMeshes.forEach((mesh) => {
       surroundings.add(mesh);
     });
@@ -326,6 +343,7 @@ export function useEntryExplorationThreeScene({
 
       resizeEntryExplorationCamera(camera, nextWidth, nextHeight);
       renderer.setSize(nextWidth, nextHeight, false);
+      labels.setSize(nextWidth, nextHeight);
     };
 
     const updateRaycasterFromPointerEvent = (event: PointerEvent) => {
@@ -342,7 +360,7 @@ export function useEntryExplorationThreeScene({
       }
 
       const entryRect = container.getBoundingClientRect();
-      const guideDestination = scenery.positionLandmarksAtEntry(
+      const guideDestination = editionScenery.positionAtEntry(
         Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
       );
       const characterStart = movementRef.current.getCurrentPosition();
@@ -428,6 +446,17 @@ export function useEntryExplorationThreeScene({
       if (approachDestination) {
         Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
         movementRef.current.moveTo(approachDestination);
+        return;
+      }
+
+      const placeDestination = editionScenery.getPointerDestination(raycaster);
+      if (placeDestination) {
+        movementRef.current.moveTo(placeDestination);
+        return;
+      }
+
+      if (hanok && raycaster.intersectObject(hanok, true).length > 0) {
+        movementRef.current.moveTo({ x: hanok.position.x, z: hanok.position.z });
         return;
       }
 
@@ -523,9 +552,8 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
-        for (const placeId of ["hanok", "tower"] as const) {
-          const destination = landmarks[placeId]?.position;
-          if (destination && placeVisits?.[placeId].update(characterPosition, destination)) {
+        for (const [placeId, landmark] of visitLandmarks) {
+          if (placeVisits?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
           }
         }
@@ -555,6 +583,9 @@ export function useEntryExplorationThreeScene({
       }
       guideArrowRef.current?.update(time);
       renderer.render(scene, camera);
+      labels.render(scene, camera);
+      labels.domElement.hidden = introStatusRef.current !== "ready";
+      labels.domElement.style.opacity = renderer.domElement.style.opacity || "1";
       frameId = requestAnimationFrame(render);
     };
 
@@ -579,10 +610,11 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.removeEventListener("pointerup", handlePointerUp);
       renderer.domElement.removeEventListener("keydown", handleKeyDown);
       cancelAnimationFrame(frameId);
-      introFloor.cancelPendingRefresh();
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
       scenery.dispose();
+      editionScenery.dispose();
+      labels.domElement.remove();
       archeryRange.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);
@@ -608,6 +640,7 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
+    places,
     placeVisits,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,

@@ -1,3 +1,4 @@
+import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import * as THREE from "three";
@@ -17,7 +18,6 @@ const mocks = vi.hoisted(() => {
     moveTo: vi.fn(),
     stop: vi.fn(),
   };
-  const cancelPendingIntroRefresh = vi.fn();
   const registry = {
     activateReadySceneInteraction: vi.fn(() => false),
     addSceneInteractionObjects: vi.fn(),
@@ -52,7 +52,6 @@ const mocks = vi.hoisted(() => {
       }) => void;
     } | null,
     registry,
-    cancelPendingIntroRefresh,
     updateEntryExplorationCameraFocus,
   };
 });
@@ -86,7 +85,6 @@ vi.mock("./entryExplorationIntroFloor", async () => {
 
   return {
     createEntryExplorationIntroFloor: () => ({
-      cancelPendingRefresh: mocks.cancelPendingIntroRefresh,
       object: mocks.introFloorObject,
     }),
   };
@@ -186,6 +184,7 @@ describe("useEntryExplorationThreeScene", () => {
     const dart = createController();
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [slot, dart],
       })
@@ -197,8 +196,8 @@ describe("useEntryExplorationThreeScene", () => {
     const decorations = surroundings.find((object) =>
       object.children.includes(mocks.introFloorObject!)
     );
-    expect(decorations?.getObjectByName("entry-scenery-hanok")).toBeTruthy();
-    expect(decorations?.getObjectByName("entry-scenery-tower")).toBeTruthy();
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)).toBeTruthy();
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[1].id}`)).toBeTruthy();
     expect(decorations?.children).not.toContain(mocks.floor);
   });
 
@@ -207,6 +206,7 @@ describe("useEntryExplorationThreeScene", () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onPlacePanelDismiss: dismiss,
@@ -246,11 +246,15 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const onOpenChange = vi.fn();
     const placeVisits = {
-      tower: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
-      hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: vi.fn() }),
+      [ENTRY_TEST_PLACES[1].id]: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
+      [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+        radius: 1.2,
+        onOpenChange: vi.fn(),
+      }),
     };
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         placeVisits,
@@ -281,6 +285,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -325,6 +330,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -350,7 +356,6 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
 
     unmount();
-    expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
   });
 
   test("positions the hanok using the viewport at start and keeps both landmarks fixed after resizing", async () => {
@@ -358,6 +363,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -368,8 +374,12 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
-    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-hanok");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
     if (!hanok || !tower || !containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
@@ -406,6 +416,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -442,18 +453,22 @@ describe("useEntryExplorationThreeScene", () => {
 
   test("opens each landmark independently and rearms after leaving", async () => {
     const onOpenChange = vi.fn();
-    const onHanokOpenChange = vi.fn();
+    const onFirstPlaceOpenChange = vi.fn();
     const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
     const containerRef = createContainerRef();
     let startIntro: (() => boolean) | undefined;
     mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         placeVisits: {
-          tower: placeVisit,
-          hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: onHanokOpenChange }),
+          [ENTRY_TEST_PLACES[1].id]: placeVisit,
+          [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+            radius: 1.2,
+            onOpenChange: onFirstPlaceOpenChange,
+          }),
         },
         onSceneControlsReady: (controls) => {
           startIntro = controls?.startIntro;
@@ -467,11 +482,15 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       startIntro?.();
     });
-    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
-    if (!head || !tower) throw new Error("The guide head or tower is missing.");
-    const guideDestination = { x: head.position.x, z: head.position.z };
-    const destination = { x: tower.position.x, z: tower.position.z };
+    const firstPlace = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const secondPlace = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
+    if (!firstPlace || !secondPlace) throw new Error("The place landmarks are missing.");
+    const firstDestination = { x: firstPlace.position.x, z: firstPlace.position.z };
+    const destination = { x: secondPlace.position.x, z: secondPlace.position.z };
     const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
     mocks.movement.getCurrentPosition.mockReturnValue(destination);
     act(() => {
@@ -482,11 +501,11 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
       mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
-      mocks.movement.getCurrentPosition.mockReturnValue(guideDestination);
+      mocks.movement.getCurrentPosition.mockReturnValue(firstDestination);
       frame?.(performance.now());
     });
     expect(onOpenChange).not.toHaveBeenCalled();
-    expect(onHanokOpenChange.mock.calls).toEqual([[true]]);
+    expect(onFirstPlaceOpenChange.mock.calls).toEqual([[true]]);
     expect(mocks.movement.stop).toHaveBeenCalledOnce();
 
     act(() => {
@@ -495,14 +514,22 @@ describe("useEntryExplorationThreeScene", () => {
       frame?.(performance.now());
     });
     expect(onOpenChange.mock.calls).toEqual([[true]]);
-    expect(onHanokOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(onFirstPlaceOpenChange.mock.calls).toEqual([[true], [false]]);
     expect(mocks.movement.stop).toHaveBeenCalledTimes(2);
 
     const intersect = vi
       .spyOn(THREE.Raycaster.prototype, "intersectObject")
-      .mockReturnValue([
-        { point: new THREE.Vector3(destination.x + 0.5, 0, destination.z) } as THREE.Intersection,
-      ]);
+      .mockImplementation((object) =>
+        object === mocks.floor
+          ? [
+              {
+                object,
+                distance: 1,
+                point: new THREE.Vector3(destination.x + 0.5, 0, destination.z),
+              },
+            ]
+          : []
+      );
     onTestFinished(() => intersect.mockRestore());
     act(() => {
       mocks.domElement.dispatchEvent(new PointerEvent("pointerdown", { clientX: 50, clientY: 50 }));
@@ -534,6 +561,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })

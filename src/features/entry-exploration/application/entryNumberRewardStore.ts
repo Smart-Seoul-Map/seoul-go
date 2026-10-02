@@ -1,6 +1,6 @@
 import { createStore } from "zustand/vanilla";
 
-import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import type { EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import { isEntryNumberRewardPlaceId } from "../config/entryNumberRewardConfig";
 import {
   loadEntryNumberRewards,

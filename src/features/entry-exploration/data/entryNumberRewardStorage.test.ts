@@ -17,6 +17,14 @@ beforeEach(() => {
 });
 
 describe("entry reward session storage", () => {
+  test("restores legacy and API place IDs in the same session without losing numbers", () => {
+    const mixed = [
+      ...rewards,
+      { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 41 },
+    ];
+    saveEntryNumberRewards(mixed);
+    expect(loadEntryNumberRewards()).toEqual(mixed);
+  });
   test("round trips place numbers only through sessionStorage", () => {
     expect(saveEntryNumberRewards(rewards)).toBe(true);
     expect(loadEntryNumberRewards()).toEqual(rewards);

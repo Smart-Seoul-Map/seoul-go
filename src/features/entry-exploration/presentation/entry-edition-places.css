@@ -1,0 +1,33 @@
+.EntryEditionLabels {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.EntryEditionLandmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 128px;
+  max-width: 34vw;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.EntryEditionLandmark-image {
+  width: 104px;
+  height: 88px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.EntryEditionLandmark:focus-visible {
+  outline: 2px solid var(--sg-color-stroke-focus);
+  outline-offset: 3px;
+}

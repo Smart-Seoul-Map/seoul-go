@@ -15,7 +15,10 @@ import { EntryExplorationPage } from "./EntryExplorationPage";
 import { AppToastProvider } from "@shared/ui/toast";
 import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
-import { ENTRY_EXPLORATION_PLACES } from "../config/entryExplorationPlace";
+import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
+import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
+const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
+const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 import type { EntrySlotState } from "../application/entrySlotInteraction";
 import type { CreateEntryExplorationSceneInteractionControllersOptions } from "../application/createEntryExplorationSceneInteractionControllers";
 import { createEntryNumberRewardStore } from "../application/entryNumberRewardStore";
@@ -116,12 +119,12 @@ describe("EntryExplorationPage", () => {
   });
 
   test("passes restored numbers and adds new numbers only after the slot result", () => {
-    entryNumberRewardStore.setState({ rewards: [{ placeId: "hanok", number: 40 }] });
+    entryNumberRewardStore.setState({ rewards: [{ placeId: FIRST_PLACE_ID, number: 40 }] });
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     const getNumbers = gridOptions.getCollectedNumbers;
     expect(getNumbers?.()).toEqual([40]);
-    act(() => placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 }));
+    act(() => placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 }));
     expect(getNumbers?.()).toEqual([40]);
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     const reward = entryNumberRewardStore.getState().rewards[1];
@@ -133,7 +136,7 @@ describe("EntryExplorationPage", () => {
   test("restores an interrupted reward from session storage for grid entry without replaying", () => {
     const { unmount } = renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
-    act(() => placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 }));
+    act(() => placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 }));
     const savedNumber = loadEntryNumberRewards()[0].number;
     expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
     unmount();
@@ -161,10 +164,10 @@ describe("EntryExplorationPage", () => {
     const { router } = renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
-      placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
     const reward = entryNumberRewardStore.getState().rewards[0];
-    expect(reward).toEqual({ placeId: "hanok", number: expect.any(Number) });
+    expect(reward).toEqual({ placeId: FIRST_PLACE_ID, number: expect.any(Number) });
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
     expect(slotRequestReward).not.toHaveBeenCalled();
@@ -192,28 +195,56 @@ describe("EntryExplorationPage", () => {
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(router.state.location.pathname).toBe("/");
   });
+  test("visiting hanok starts the slot after closing its panel and only rewards once", () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => {
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
+    const [reward] = entryNumberRewardStore.getState().rewards;
+    expect(reward.placeId).toBe(ENTRY_HANOK_PLACE_ID);
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).toHaveBeenCalledExactlyOnceWith([
+      Math.floor(reward.number / 10),
+      reward.number % 10,
+    ]);
+    act(() => slotStateChange?.({ status: "result", result: String(reward.number) }));
+    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    act(() => {
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 10, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).toHaveBeenCalledTimes(1);
+    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
+  });
+
   test("revisiting a rewarded place only opens its information card", () => {
     entryNumberRewardStore.setState({
-      rewards: [{ placeId: "hanok", number: 40 }],
+      rewards: [{ placeId: FIRST_PLACE_ID, number: 40 }],
     });
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
-      placeVisits?.hanok.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
-    expect(screen.getByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     expect(slotRequestReward).not.toHaveBeenCalled();
-    expect(entryNumberRewardStore.getState().rewards).toEqual([{ placeId: "hanok", number: 40 }]);
+    expect(entryNumberRewardStore.getState().rewards).toEqual([
+      { placeId: FIRST_PLACE_ID, number: 40 },
+    ]);
   });
 
   test("keeps an expanded list unchanged on a new visit until the slot presents its result", () => {
-    entryNumberRewardStore.setState({ rewards: [{ placeId: "hanok", number: 40 }] });
+    entryNumberRewardStore.setState({ rewards: [{ placeId: FIRST_PLACE_ID, number: 40 }] });
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
     act(() => {
-      placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+      placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
     const saved = loadEntryNumberRewards();
     expect(saved).toHaveLength(2);
@@ -235,14 +266,14 @@ describe("EntryExplorationPage", () => {
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
-      placeVisits?.hanok.update({ x: 0, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
     });
     const reward = entryNumberRewardStore.getState().rewards[0];
     act(() => {
       expect(dismissPlaceFromBackground?.()).toBe(true);
       expect(dismissPlaceFromBackground?.()).toBe(false);
     });
-    expect(screen.queryByRole("dialog", { name: "한옥체험" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "해방촌신흥시장" })).toBeNull();
     expect(slotRequestReward).toHaveBeenCalledExactlyOnceWith([
       Math.floor(reward.number / 10),
       reward.number % 10,
@@ -252,8 +283,8 @@ describe("EntryExplorationPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
     act(() => {
-      placeVisits?.hanok.update({ x: 30, z: 0 }, { x: 0, z: 0 });
-      placeVisits?.hanok.update({ x: 0, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
     });
     act(() => {
       expect(dismissPlaceFromBackground?.()).toBe(true);
@@ -268,7 +299,7 @@ describe("EntryExplorationPage", () => {
       const first = renderEntryExplorationPage();
       fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
       act(() => {
-        placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+        placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
       });
       if (phase === "spinning") fireEvent.click(screen.getByRole("button", { name: "닫기" }));
       const saved = loadEntryNumberRewards();
@@ -285,7 +316,7 @@ describe("EntryExplorationPage", () => {
         String(saved[0].number)
       );
       act(() => {
-        placeVisits?.tower.update({ x: 10, z: 20 }, { x: 10, z: 20 });
+        placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
       });
       fireEvent.click(screen.getByRole("button", { name: "닫기" }));
       expect(slotRequestReward).not.toHaveBeenCalled();
@@ -420,53 +451,51 @@ describe("EntryExplorationPage", () => {
   test("shows the tower panel on arrival and keeps manual dismissal until reentry", async () => {
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
-    expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "리움미술관" })).toBeNull();
     const destination = { x: 10, z: 20 };
     act(() => {
-      placeVisits?.tower.update(destination, destination);
+      placeVisits?.[SECOND_PLACE_ID].update(destination, destination);
     });
-    const panel = await screen.findByRole("dialog", { name: "N서울타워" });
+    const panel = await screen.findByRole("dialog", { name: "리움미술관" });
     expect(panel.getAttribute("aria-modal")).not.toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "리움미술관" })).toBeNull());
     act(() => {
-      placeVisits?.tower.update(destination, destination);
+      placeVisits?.[SECOND_PLACE_ID].update(destination, destination);
     });
-    expect(screen.queryByRole("dialog", { name: "N서울타워" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "리움미술관" })).toBeNull();
     act(() => {
-      placeVisits?.tower.update({ x: 20, z: 20 }, destination);
-      placeVisits?.tower.update(destination, destination);
+      placeVisits?.[SECOND_PLACE_ID].update({ x: 20, z: 20 }, destination);
+      placeVisits?.[SECOND_PLACE_ID].update(destination, destination);
     });
-    expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
+    expect(await screen.findByRole("dialog", { name: "리움미술관" })).toBeTruthy();
   });
 
-  test("shows the hanok link, preserves dismissal, and switches to tower details without the link", async () => {
+  test("shows API place names, preserves dismissal, and switches to another place", async () => {
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     const hanok = { x: 10, z: 20 };
     act(() => {
-      placeVisits?.hanok.update(hanok, hanok);
+      placeVisits?.[FIRST_PLACE_ID].update(hanok, hanok);
     });
-    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: /한옥체험 지도 보기/ }).getAttribute("href")).toBe(
-      "https://map.seoul.go.kr/smgis2/short/6P5oo"
-    );
+    expect(await screen.findByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
+    expect(screen.queryByRole("link")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     act(() => {
-      placeVisits?.hanok.update(hanok, hanok);
+      placeVisits?.[FIRST_PLACE_ID].update(hanok, hanok);
     });
     expect(screen.queryByRole("dialog")).toBeNull();
     act(() => {
-      placeVisits?.hanok.update({ x: 30, z: 20 }, hanok);
-      placeVisits?.hanok.update(hanok, hanok);
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 20 }, hanok);
+      placeVisits?.[FIRST_PLACE_ID].update(hanok, hanok);
     });
-    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    expect(await screen.findByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
     act(() => {
-      placeVisits?.tower.update({ x: 30, z: 20 }, { x: 30, z: 20 });
-      placeVisits?.hanok.update({ x: 30, z: 20 }, hanok);
+      placeVisits?.[SECOND_PLACE_ID].update({ x: 30, z: 20 }, { x: 30, z: 20 });
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 20 }, hanok);
     });
-    expect(await screen.findByRole("dialog", { name: "N서울타워" })).toBeTruthy();
+    expect(await screen.findByRole("dialog", { name: "리움미술관" })).toBeTruthy();
     expect(screen.queryByRole("link")).toBeNull();
   });
 
@@ -476,10 +505,10 @@ describe("EntryExplorationPage", () => {
     const hanok = { x: 10, z: 20 };
 
     act(() => {
-      placeVisits?.hanok.update({ x: 13, z: 20 }, hanok);
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 13, z: 20 }, hanok);
     });
 
-    expect(await screen.findByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+    expect(await screen.findByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
   });
 });
 
@@ -513,20 +542,18 @@ function renderEntryExplorationPage({
     {
       element: (
         <EntryExplorationPage
+          places={ENTRY_TEST_PLACES}
           renderPlacePanel={({ open, onClose, placeId }) =>
             open && (
-              <div role="dialog" aria-label={ENTRY_EXPLORATION_PLACES[placeId].title}>
+              <div
+                role="dialog"
+                aria-label={
+                  placeId === ENTRY_HANOK_PLACE_ID
+                    ? ENTRY_HANOK_PLACE.title
+                    : ENTRY_TEST_PLACES.find((place) => place.id === placeId)?.name
+                }
+              >
                 <button onClick={onClose}>닫기</button>
-                {placeId === "hanok" && (
-                  <a
-                    href={ENTRY_EXPLORATION_PLACES.hanok.externalLink.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="한옥체험 지도 보기 (새 탭에서 열기)"
-                  >
-                    한옥체험 지도 보기
-                  </a>
-                )}
               </div>
             )
           }

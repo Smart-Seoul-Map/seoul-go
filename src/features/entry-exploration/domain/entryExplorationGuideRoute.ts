@@ -19,9 +19,10 @@ export function createEntryExplorationGuideRoute({
   const endRight = localEnd.x * right.x + localEnd.z * right.z;
   const endForward = localEnd.x * forward.x + localEnd.z * forward.z;
   const turnDirection = Math.sign(endRight) || 1;
+  const arrowEndRight = turnDirection * Math.max(0, Math.abs(endRight) - CONFIG.destinationGap);
   const radius = Math.min(
     CONFIG.bendRadius,
-    Math.abs(endRight) * 0.65,
+    Math.abs(arrowEndRight) * 0.65,
     Math.max(0, endForward - CONFIG.startForwardOffset) * 0.35
   );
   const toWorld = (rightDistance: number, forwardDistance: number): EntryExplorationScenePoint => ({
@@ -34,6 +35,6 @@ export function createEntryExplorationGuideRoute({
     bendStart: toWorld(0, endForward - radius),
     bendControl: toWorld(0, endForward),
     bendEnd: toWorld(turnDirection * radius, endForward),
-    destination,
+    destination: toWorld(arrowEndRight, endForward),
   };
 }

@@ -1,63 +1,55 @@
 import * as THREE from "three";
-import { afterEach, beforeEach, expect, onTestFinished, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 
+import { createEntryExplorationScenery } from "./entryExplorationScenery";
+import { getEntryEditionPosition } from "../domain/entryEditionLayout";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { createEntryExplorationGuideRoute } from "../domain/entryExplorationGuideRoute";
-import { createEntryExplorationScenery } from "./entryExplorationScenery";
-import {
-  createEntryExplorationCamera,
-  updateEntryExplorationCameraFocus,
-} from "./entryExplorationThreeScene";
 
-const VIEWPORT_EDGE_EPSILON = 0.001;
+afterEach(() => vi.restoreAllMocks());
 
-beforeEach(() => {
+test("restores the hanok atlas sprite at its new position while leaving the tower unused", () => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
+  const scenery = createEntryExplorationScenery();
+  expect(scenery.object.getObjectByName("entry-scenery-bench")).toBeTruthy();
+  const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
+  expect(hanok?.position.x).toBe(ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.x - 8);
+  expect(hanok?.position.z).toBe(ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.z + 10);
+  expect(scenery.object.getObjectByName("entry-scenery-tower")).toBeUndefined();
+  scenery.dispose();
 });
 
 test.each([
   [1440, 900],
   [1920, 1080],
   [360, 844],
-  [375, 812],
   [390, 844],
 ])(
-  "guides to the hanok in 2-3 seconds and reveals the tower while approaching at %ix%i",
+  "keeps ten place destinations apart and preserves the first guide travel at %ix%i",
   (width, height) => {
-    const scenery = createEntryExplorationScenery();
-    onTestFinished(() => scenery.dispose());
-    const destination = scenery.positionLandmarksAtEntry(width / height);
-    const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
-    const tower = scenery.object.getObjectByName("entry-scenery-tower");
-    if (!(hanok instanceof THREE.Mesh) || !(tower instanceof THREE.Mesh)) {
-      throw new Error("The entry landmarks are missing.");
+    const destinations = Array.from({ length: 10 }, (_, index) =>
+      getEntryEditionPosition(index, width / height)
+    );
+    for (let index = 0; index < destinations.length; index += 1) {
+      for (const other of destinations.slice(index + 1)) {
+        expect(
+          Math.hypot(destinations[index].x - other.x, destinations[index].z - other.z)
+        ).toBeGreaterThanOrEqual(11.9);
+      }
     }
-    expect(destination).toEqual({ x: hanok.position.x, z: hanok.position.z });
-
-    const camera = createEntryExplorationCamera(width, height);
-    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
-    updateEntryExplorationCameraFocus(camera, arrival);
-    const initialBounds = projectMeshBounds(hanok, camera);
-
-    expect(initialBounds.max.y).toBeGreaterThan(-1);
-    expect(initialBounds.min.x).toBeLessThan(1);
-    const tipX = initialBounds.getCenter(new THREE.Vector3()).x;
-    expect(tipX).toBeGreaterThan(2 / 3);
-    expect(tipX).toBeLessThan(0.92);
-    expect(projectMeshBounds(tower, camera).min.x).toBeGreaterThan(1);
-
+    const origin = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    const hanok = { x: origin.x - 8, z: origin.z + 10 };
+    for (const destination of destinations) {
+      expect(Math.hypot(destination.x - hanok.x, destination.z - hanok.z)).toBeGreaterThan(10);
+    }
     const route = createEntryExplorationGuideRoute({
-      origin: arrival,
-      destination: hanok.position,
+      origin,
+      destination: destinations[0],
       cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
     });
     const point = ({ x, z }: { x: number; z: number }) => new THREE.Vector3(x, 0, z);
     const length =
-      point(arrival).distanceTo(point(route.bendStart)) +
+      point(origin).distanceTo(point(route.bendStart)) +
       new THREE.QuadraticBezierCurve3(
         point(route.bendStart),
         point(route.bendControl),
@@ -67,40 +59,5 @@ test.each([
     const seconds = length / ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond;
     expect(seconds).toBeGreaterThanOrEqual(2);
     expect(seconds).toBeLessThanOrEqual(3);
-    const firstHanokPosition = hanok.position.clone();
-    const firstTowerPosition = tower.position.clone();
-    scenery.positionLandmarksAtEntry(width / height);
-    expect(hanok.position.distanceTo(firstHanokPosition)).toBeLessThan(0.0001);
-    expect(tower.position.distanceTo(firstTowerPosition)).toBeLessThan(0.0001);
-
-    updateEntryExplorationCameraFocus(camera, {
-      x: arrival.x + (hanok.position.x - arrival.x) * 0.8,
-      z: arrival.z + (hanok.position.z - arrival.z) * 0.8,
-    });
-    const approachedBounds = projectMeshBounds(tower, camera);
-    expect(approachedBounds.min.x).toBeLessThan(1);
-    expect(approachedBounds.max.y).toBeGreaterThan(-1);
-    expect(approachedBounds.min.z).toBeGreaterThan(-1 - VIEWPORT_EDGE_EPSILON);
-    expect(approachedBounds.max.z).toBeLessThan(1);
-
-    updateEntryExplorationCameraFocus(camera, hanok.position);
-    const hanokBounds = projectMeshBounds(hanok, camera);
-    expect(hanokBounds.min.x).toBeGreaterThan(-1);
-    expect(hanokBounds.max.x).toBeLessThan(1);
-    expect(hanokBounds.max.y).toBeLessThan(1);
-    expect(projectMeshBounds(tower, camera).max.y).toBeLessThan(hanokBounds.min.y);
   }
 );
-
-function projectMeshBounds(mesh: THREE.Mesh, camera: THREE.Camera): THREE.Box3 {
-  mesh.updateWorldMatrix(true, false);
-  camera.updateMatrixWorld();
-  const positions = mesh.geometry.getAttribute("position");
-  const bounds = new THREE.Box3();
-  for (let index = 0; index < positions.count; index += 1) {
-    const point = new THREE.Vector3().fromBufferAttribute(positions, index);
-    bounds.expandByPoint(mesh.localToWorld(point).project(camera));
-  }
-
-  return bounds;
-}
