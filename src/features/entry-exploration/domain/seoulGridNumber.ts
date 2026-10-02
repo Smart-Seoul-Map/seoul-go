@@ -26,6 +26,15 @@ export function toSeoulGridCell(point: SeoulGridMapPoint, size: SeoulGridMapSize
   };
 }
 
+export function getSeoulGridCells(): readonly SeoulGridCell[] {
+  const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
+
+  return Array.from({ length: rows * columns }, (_, index) => ({
+    column: index % columns,
+    row: Math.floor(index / columns),
+  }));
+}
+
 export function getSeoulGridCellDistrictId({ column, row }: SeoulGridCell): number | null {
   const encoded = SEOUL_GRID_MAP_CONFIG.districtCellRows[row]?.[column];
 
@@ -40,10 +49,20 @@ export function isSeoulGridCellValid(cell: SeoulGridCell): boolean {
   return getSeoulGridCellDistrictId(cell) !== null;
 }
 
-export function toSeoulGridNumber({ column, row }: SeoulGridCell): string {
+export function toSeoulGridCellKm({ column, row }: SeoulGridCell): {
+  eastKm: number;
+  northKm: number;
+} {
   const { columns, originKm, rows } = SEOUL_GRID_MAP_CONFIG;
-  const eastKm = originKm.x + clamp(column, 0, columns - 1);
-  const northKm = originKm.y + (rows - 1 - clamp(row, 0, rows - 1));
+
+  return {
+    eastKm: originKm.x + clamp(column, 0, columns - 1),
+    northKm: originKm.y + (rows - 1 - clamp(row, 0, rows - 1)),
+  };
+}
+
+export function toSeoulGridNumber(cell: SeoulGridCell): string {
+  const { eastKm, northKm } = toSeoulGridCellKm(cell);
 
   return `${toGridLetter(eastKm)}${toGridLetter(northKm)}${toGridDigits(eastKm)}${toGridDigits(northKm)}`;
 }

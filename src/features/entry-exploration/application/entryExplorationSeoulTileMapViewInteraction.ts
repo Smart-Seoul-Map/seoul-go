@@ -28,13 +28,17 @@ import {
 } from "../domain/entryExplorationTileMapCameraFit";
 import {
   getSeoulGridCellDistrictId,
-  isSeoulGridCellValid,
   toSeoulGridCell,
   toSeoulGridNumber,
   type SeoulGridCell,
 } from "../domain/seoulGridNumber";
+import {
+  getSeoulGridSelectableCells,
+  isSeoulGridCellSelectable,
+} from "../domain/seoulGridNumberLines";
 import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 import { createEntryExplorationDartHitMarker } from "./entryExplorationDartHitMarker";
+import { createEntryExplorationDartSelectableLayer } from "./entryExplorationDartSelectableLayer";
 import {
   createEntryExplorationSceneObject,
   disposeEntryExplorationObject3D,
@@ -97,17 +101,23 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 }: EntryExplorationSeoulTileMapViewInteractionOptions = {}): EntryExplorationSeoulTileMapViewInteractionController {
   const mapMesh = createEntryExplorationSceneObject(seoulTileMapObject);
   const hitMarker = createEntryExplorationDartHitMarker();
+  const selectableLayer = createEntryExplorationDartSelectableLayer({
+    mapSize,
+    mapTexture: getMapTexture(mapMesh),
+  });
   let activeCamera: THREE.OrthographicCamera | null = null;
   let cameraTransition: SceneCameraTransition | null = null;
   let cameraTransitionStartedAt: number | null = null;
   let characterModel: THREE.Object3D | null = null;
+  let activeNumbers: readonly number[] = [];
+  let selectableCells: readonly SeoulGridCell[] = [];
   let isEngaged = false;
   let isCharacterInTrigger = false;
   let hasThrown = false;
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
 
-  mapMesh.add(hitMarker.object);
+  mapMesh.add(selectableLayer.object, hitMarker.object);
 
   const toCellLocalPosition = (cell: SeoulGridCell, zOffset: number): THREE.Vector3 => {
     const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
@@ -140,7 +150,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     const local = mapMesh.worldToLocal(hit.point.clone());
     const cell = toSeoulGridCell({ u: local.x, v: local.y }, mapSize);
 
-    return isSeoulGridCellValid(cell) ? cell : null;
+    return isSeoulGridCellSelectable(cell, activeNumbers) ? cell : null;
   };
 
   const setTargetHover = (nextIsOverValidCell: boolean): void => {
@@ -172,7 +182,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       return;
     }
 
-    const cell = pickRandomSeoulGridCell();
+    const cell = pickRandomSeoulGridCell(Math.random, selectableCells);
 
     if (!cell) {
       return;
@@ -204,6 +214,10 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     }
 
     isEngaged = true;
+    activeNumbers = [...getCollectedNumbers()];
+    selectableCells = getSeoulGridSelectableCells(activeNumbers);
+    selectableLayer.setNumbers(activeNumbers);
+    selectableLayer.object.visible = true;
     waitsForTriggerExit = false;
     hasThrown = false;
     setHitCell(null);
@@ -214,12 +228,14 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
   const deactivate = (): void => {
     isEngaged = false;
+    selectableLayer.object.visible = false;
     waitsForTriggerExit = true;
     hasThrown = false;
     setHitCell(null);
     cameraTransition = null;
     cameraTransitionStartedAt = null;
     setTargetHover(false);
+    selectableLayer.setHoveredCell(null);
     onActiveChange?.(false);
   };
 
@@ -364,6 +380,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       getCollectedNumbers().length > 0,
     deactivate,
     dispose: () => {
+      selectableLayer.dispose();
       disposeEntryExplorationObject3D(mapMesh);
     },
     getActivationCharacterDestination: getCharacterDestination,
@@ -397,11 +414,15 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
       if (cameraTransitionStartedAt !== null) {
         setTargetHover(false);
+        selectableLayer.setHoveredCell(null);
 
         return false;
       }
 
-      setTargetHover(resolvePointedCell(raycaster) !== null);
+      const pointedCell = resolvePointedCell(raycaster);
+
+      selectableLayer.setHoveredCell(pointedCell);
+      setTargetHover(pointedCell !== null);
 
       return false;
     },
@@ -416,6 +437,14 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     updateCamera,
     updateTriggerState,
   };
+}
+
+function getMapTexture(object: THREE.Object3D): THREE.Texture | null {
+  if (!(object instanceof THREE.Mesh) || !(object.material instanceof THREE.MeshBasicMaterial)) {
+    return null;
+  }
+
+  return object.material.map;
 }
 
 function getSeoulTileMapObject(): EntryExplorationFloorOverlayObject & {
