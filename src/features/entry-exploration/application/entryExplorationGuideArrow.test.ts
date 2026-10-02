@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { afterEach, expect, onTestFinished, test, vi } from "vitest";
 
+import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { getEntryEditionPosition } from "../domain/entryEditionLayout";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
@@ -77,8 +78,9 @@ test.each([
   const head = guide.object.getObjectByName("entry-guide-head");
   if (!head) throw new Error("The arrowhead is missing.");
   const projected = head.position.clone().project(camera);
-  expect(projected.x).toBeCloseTo(0, 2);
+  expect(projected.x).toBeLessThan(0);
   expect(Math.abs(projected.y)).toBeLessThan(0.05);
-  expect(head.position.x).toBeCloseTo(destination.x);
-  expect(head.position.z).toBeCloseTo(destination.z);
+  expect(Math.hypot(head.position.x - destination.x, head.position.z - destination.z)).toBeCloseTo(
+    ENTRY_EXPLORATION_GUIDE_CONFIG.destinationGap
+  );
 });

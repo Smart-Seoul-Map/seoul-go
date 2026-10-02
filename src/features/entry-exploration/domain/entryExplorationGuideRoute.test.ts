@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 
+import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
 import { createEntryExplorationGuideRoute } from "./entryExplorationGuideRoute";
 
 const options = {
@@ -8,8 +9,12 @@ const options = {
   cameraOffset: { x: 11, y: 13, z: 11 },
 };
 
-test("ends exactly at the destination base without a front or lateral offset", () => {
-  expect(createEntryExplorationGuideRoute(options).destination).toEqual({ x: 23, z: 15 });
+test("leaves a gap before the place without moving the place itself", () => {
+  const route = createEntryExplorationGuideRoute(options);
+  const gap = ENTRY_EXPLORATION_GUIDE_CONFIG.destinationGap;
+  expect(route.destination.x).toBeCloseTo(options.destination.x - Math.SQRT1_2 * gap);
+  expect(route.destination.z).toBeCloseTo(options.destination.z + Math.SQRT1_2 * gap);
+  expect(options.destination).toEqual({ x: 23, z: 15 });
 });
 
 test("starts down-screen and finishes rightward with a rounded L bend", () => {
