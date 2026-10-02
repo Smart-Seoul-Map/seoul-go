@@ -1,4 +1,6 @@
 export { createPlacesFeatureCollection } from "./application/placeGeoJson";
+export { loadPlaceModel } from "./models";
+export type { PlaceModelResult, PlaceModelAsset, PlaceModelAssets } from "./models";
 export { createSeoulEdition25MapContent } from "./application/seoulEdition25MapContent";
 export { filterSmartSeoulPlacesByDistrict } from "./application/placeDistrictFilter";
 export { createPlaceThemeProgressItems } from "./application/placeThemeProgress";
