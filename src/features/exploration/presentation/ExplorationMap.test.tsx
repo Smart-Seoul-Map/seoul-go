@@ -58,7 +58,11 @@ vi.mock("maplibre-gl", () => {
     }
 
     addControl = vi.fn();
+    getBearing = vi.fn(() => 0);
+    getCenter = vi.fn(() => ({ lat: 0, lng: 0 }));
+    getContainer = vi.fn(() => document.createElement("div"));
     getLayer = vi.fn(() => false);
+    getPitch = vi.fn(() => 0);
     getZoom = vi.fn(() => 12);
     isStyleLoaded = vi.fn(() => false);
     isZooming = vi.fn(() => false);
@@ -67,6 +71,7 @@ vi.mock("maplibre-gl", () => {
     once = vi.fn((eventName: string, handler: MapEventHandler) => {
       this.on(eventName, handler);
     });
+    project = vi.fn(() => ({ x: 0, y: 0 }));
     queryRenderedFeatures = vi.fn(() => []);
     remove = vi.fn();
 

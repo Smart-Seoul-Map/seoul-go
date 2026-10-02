@@ -27,6 +27,7 @@ import {
   updateExplorationPlaceMarkersSource,
 } from "../application/explorationPlaceMarkers";
 import { useCharacterMovementController } from "../application/useCharacterMovementController";
+import { useOffscreenMarkerIndicators } from "../application/useOffscreenMarkerIndicators";
 import {
   CHARACTER_ARRIVAL_RADIUS_METERS,
   CHARACTER_SPEED_METERS_PER_SECOND,
@@ -40,6 +41,7 @@ import { advanceCoordinatesByScreenDirection } from "../domain/explorationDirect
 import { getExplorationDistrictBoundary } from "../domain/explorationDistrictBoundary";
 import { CharacterModelOverlay } from "./CharacterModelOverlay";
 import { ExplorationImageYearMarker } from "./ExplorationImageYearMarker";
+import { ExplorationOffscreenIndicators } from "./ExplorationOffscreenIndicators";
 
 type ExplorationMapProps = {
   districtId?: number;
@@ -141,6 +143,12 @@ export function ExplorationMap({
   });
   const characterMovementRef = useRef(characterMovement);
   characterMovementRef.current = characterMovement;
+  const offscreenIndicators = useOffscreenMarkerIndicators({
+    isEnabled: placeMarkerPresentation === "image-year",
+    map: markerMap,
+    placeMarkers,
+    revealedPlaceIds,
+  });
 
   const handleMoveToPlace = useCallback(
     (position: Coordinates) => {
@@ -323,6 +331,7 @@ export function ExplorationMap({
             onMoveToPlace={handleMoveToPlace}
           />
         ))}
+      <ExplorationOffscreenIndicators indicators={offscreenIndicators} />
       {zoomLevelLabel ? (
         <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
           zoom: {zoomLevelLabel}

@@ -1,0 +1,33 @@
+.ExplorationOffscreenIndicators {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
+}
+
+.ExplorationOffscreenIndicator {
+  align-items: center;
+  background: var(--sg-color-bg-surface);
+  border: var(--sg-spacing-0_5) solid var(--sg-color-text-brand);
+  border-radius: var(--sg-radius-full);
+  box-shadow: var(--sg-shadow-raised);
+  color: var(--sg-color-text-brand);
+  display: flex;
+  height: var(--sg-spacing-10);
+  justify-content: center;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: var(--sg-spacing-10);
+}
+
+.ExplorationOffscreenIndicatorArrow {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  height: var(--sg-spacing-6);
+  width: var(--sg-spacing-6);
+}
