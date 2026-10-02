@@ -13,6 +13,7 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
+import { AppButton } from "@shared/ui/button";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
@@ -92,6 +93,7 @@ export function ExplorationPage({
   const mapBadgeSize = isMobileViewport ? "sm" : "md";
   const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
   const mapStageRef = useRef<HTMLElement | null>(null);
+  const linkedPlacesButtonRef = useRef<HTMLButtonElement | null>(null);
   const content = panel.status === "closed" ? null : panel.content;
   const selectedPlace = content?.type === "place" ? content.place : null;
   const isCoursePanelOpen = content?.type === "course";
@@ -122,6 +124,7 @@ export function ExplorationPage({
   const returnFocus = () => {
     if (isSwitching) return null;
     const stage = mapStageRef.current;
+    if (content?.type === "linked") return linkedPlacesButtonRef.current ?? stage;
     if (isCoursePanelOpen) {
       return stage?.querySelector<HTMLElement>(".exploration-map-footer button") ?? stage;
     }
@@ -184,7 +187,22 @@ export function ExplorationPage({
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
-        {mapNotice}
+        <div className="exploration-map-notice-actions">
+          {mapNotice}
+          {hasLinkedPlaceReference && renderLinkedPlacesPanel && (
+            <AppButton
+              ref={linkedPlacesButtonRef}
+              hidden={isPanelOpen || isSwitching}
+              className="exploration-linked-places-button"
+              size="sm"
+              variant="secondary"
+              aria-haspopup="dialog"
+              onClick={() => openPanel({ type: "linked" })}
+            >
+              근처 추천
+            </AppButton>
+          )}
+        </div>
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {districtName ? (
             <li className="exploration-theme-place-count-item">

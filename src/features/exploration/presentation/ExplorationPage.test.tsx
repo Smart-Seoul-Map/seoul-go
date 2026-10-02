@@ -10,7 +10,7 @@ import { AppResponsivePanel } from "@shared/ui/responsive-panel";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
-import { ExplorationPage } from "./ExplorationPage";
+import { ExplorationPage, type ExplorationPanelLifecycleProps } from "./ExplorationPage";
 
 type MockExplorationMapProps = {
   onMapMoveRequest?: () => void;
@@ -49,6 +49,46 @@ const themeProgressItems = [
 ] as const;
 
 describe("ExplorationPage", () => {
+  test("reopens linked recommendations after closing and hides the entry when the reference is removed", async () => {
+    const renderPanel = ({
+      open,
+      onClose,
+      onExitComplete,
+      returnFocus,
+    }: ExplorationPanelLifecycleProps) => (
+      <AppResponsivePanel.Root open={open} skipAnimation>
+        <AppResponsivePanel.Content
+          title="근처 추천 장소"
+          onExitComplete={onExitComplete}
+          returnFocus={returnFocus}
+        >
+          <button onClick={onClose}>추천 닫기</button>
+        </AppResponsivePanel.Content>
+      </AppResponsivePanel.Root>
+    );
+    const page = (hasReference: boolean) => (
+      <ExplorationPage
+        themeProgressItems={themeProgressItems}
+        hasLinkedPlaceReference={hasReference}
+        renderLinkedPlacesPanel={renderPanel}
+      />
+    );
+    const view = renderExplorationPage(page(false));
+    expect(screen.queryByRole("button", { name: "근처 추천" })).not.toBeInTheDocument();
+    view.rerender(<AppToastProvider>{page(true)}</AppToastProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "근처 추천" }));
+    expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "추천 닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    const reopen = screen.getByRole("button", { name: "근처 추천" });
+    await vi.waitFor(() => expect(reopen).toHaveFocus());
+    fireEvent.click(reopen);
+    expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+    view.rerender(<AppToastProvider>{page(false)}</AppToastProvider>);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "근처 추천" })).not.toBeInTheDocument();
+  });
+
   test.each(["added", "duplicate", "full", "invalid-place"] as const)(
     "opens linked recommendations only for a successful eligible addition: %s",
     (status) => {

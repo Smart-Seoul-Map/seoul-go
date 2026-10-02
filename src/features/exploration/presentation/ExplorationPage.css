@@ -11,6 +11,21 @@
   position: relative;
 }
 
+.exploration-map-notice-actions {
+  display: contents;
+}
+
+.exploration-linked-places-button {
+  position: absolute;
+  top: calc(var(--sg-spacing-16) + var(--sg-spacing-12));
+  right: var(--sg-spacing-4);
+  z-index: 4;
+}
+
+.exploration-linked-places-button[hidden] {
+  display: none;
+}
+
 .exploration-map-footer {
   position: absolute;
   left: var(--sg-spacing-6);
@@ -154,6 +169,34 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
 }
 
 @media (max-width: 860px) {
+  .exploration-map-notice-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sg-spacing-2);
+    position: absolute;
+    top: calc(var(--sg-spacing-4) + var(--sg-spacing-10) + var(--sg-spacing-2));
+    left: var(--sg-spacing-3);
+    right: var(--sg-spacing-3);
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .exploration-map-notice-actions .AppCallout.LinkedPlacesCallout {
+    position: static;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  .exploration-map-notice-actions .exploration-linked-places-button {
+    position: static;
+    align-self: flex-end;
+    pointer-events: auto;
+  }
+
+  .exploration-linked-places-button:only-child {
+    margin-top: var(--sg-spacing-12);
+  }
+
   .exploration-map-footer {
     left: var(--sg-spacing-4);
     bottom: calc(
