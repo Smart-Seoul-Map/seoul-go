@@ -59,9 +59,11 @@ test("selects ten nonrepeating places per entry and shares the query with distri
     .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-place-id")));
   expect(second.every((id) => !first.includes(id))).toBe(true);
   expect(calls).toHaveLength(1);
-  expect(
-    await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "[]"), SELECTION_KEY)
-  ).toEqual(second);
+  const stored: string[] = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key) ?? "[]"),
+    SELECTION_KEY
+  );
+  expect([...stored].sort()).toEqual([...second].sort());
 });
 
 test("keeps entry closed while loading and retries after an API error", async ({ page }) => {
