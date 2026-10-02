@@ -1,18 +1,14 @@
-import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
-import { isSeoulGridCellValid } from "./seoulGridNumber";
+import { getSeoulGridCells, isSeoulGridCellValid } from "./seoulGridNumber";
 import type { SeoulGridCell } from "./seoulGridNumber";
 
 export function getSeoulGridValidCells(): readonly SeoulGridCell[] {
-  const { columns, districtCellRows } = SEOUL_GRID_MAP_CONFIG;
-
-  return districtCellRows.flatMap((_, row) =>
-    Array.from({ length: columns }, (__, column) => ({ column, row })).filter(isSeoulGridCellValid)
-  );
+  return getSeoulGridCells().filter(isSeoulGridCellValid);
 }
 
-export function pickRandomSeoulGridCell(random: () => number = Math.random): SeoulGridCell | null {
-  const cells = getSeoulGridValidCells();
-
+export function pickRandomSeoulGridCell(
+  random: () => number = Math.random,
+  cells: readonly SeoulGridCell[] = getSeoulGridValidCells()
+): SeoulGridCell | null {
   if (cells.length === 0) {
     return null;
   }

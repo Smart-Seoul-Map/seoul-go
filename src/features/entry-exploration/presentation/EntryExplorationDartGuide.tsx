@@ -47,9 +47,9 @@ export function EntryExplorationDartGuide({
           as="section"
           borderRadius="radius.4_5"
           className="entry-exploration-dart-guide__intro"
-          px={{ base: "spacing.4_5", md: "spacing.9" }}
-          pt={{ base: "spacing.4", md: "spacing.10" }}
-          pb={{ base: "spacing.3", md: "spacing.10" }}
+          px={{ base: "spacing.4_5", md: "spacing.6" }}
+          pt={{ base: "spacing.4", md: "spacing.7" }}
+          pb={{ base: "spacing.3", md: "spacing.7" }}
         >
           <AppStack align="start" gap="xs">
             <AppHeading as="h2" size="md">
