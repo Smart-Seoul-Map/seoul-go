@@ -16,6 +16,7 @@ export const EXPLORATION_MAP_BEARING = -28;
 export const CHARACTER_ARRIVAL_RADIUS_METERS = 25;
 export const PLACE_CARD_REVEAL_RADIUS_METERS = 30;
 export const CHARACTER_SPEED_METERS_PER_SECOND = 200;
+export const OFFSCREEN_MARKER_INDICATOR_EDGE_INSET_PX = 48;
 
 function createSmartSeoulTmsTileUrlTemplate(proxyBasePath: string): string {
   return `${proxyBasePath}${END_POINTS.smartSeoulTmsTileTemplate({
