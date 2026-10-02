@@ -2,7 +2,10 @@ import { useCallback, useRef, useState } from "react";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 
-type PanelContent = { type: "place"; place: ExplorationPlaceMarkerSelection } | { type: "course" };
+type PanelContent =
+  | { type: "place"; place: ExplorationPlaceMarkerSelection }
+  | { type: "course" }
+  | { type: "linked" };
 type PanelInstance = PanelContent & { instance: number };
 
 type PanelState =

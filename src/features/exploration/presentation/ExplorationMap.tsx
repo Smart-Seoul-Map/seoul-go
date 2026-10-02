@@ -48,12 +48,14 @@ type ExplorationMapProps = {
   onMapMoveRequest?: () => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
+  linkedPlaceMarkers?: MapMarkerFeatureCollection;
   placeMarkerPresentation?: "treasure" | "image-year";
   revealedPlaceIds?: ReadonlySet<string>;
   stationRadiusMeters?: number;
 };
 
 const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
+const EMPTY_MARKERS = createEmptyMapMarkerFeatureCollection();
 const DEFAULT_INITIAL_CENTER: Coordinates = {
   lng: EXPLORATION_MAP_CENTER[0],
   lat: EXPLORATION_MAP_CENTER[1],
@@ -70,6 +72,7 @@ export function ExplorationMap({
   onMapMoveRequest,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
+  linkedPlaceMarkers = EMPTY_MARKERS,
   placeMarkerPresentation = "treasure",
   revealedPlaceIds = new Set(),
   stationRadiusMeters,
@@ -79,10 +82,25 @@ export function ExplorationMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [markerMap, setMarkerMap] = useState<maplibregl.Map | null>(null);
   const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
+  const [markerLoadFailed, setMarkerLoadFailed] = useState(false);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
-  const placeMarkersRef = useRef(placeMarkers);
-  placeMarkersRef.current = placeMarkers;
+  const arrivalMarkers = useMemo(
+    () =>
+      linkedPlaceMarkers.features.length === 0
+        ? placeMarkers
+        : {
+            type: "FeatureCollection" as const,
+            features: [...placeMarkers.features, ...linkedPlaceMarkers.features],
+          },
+    [placeMarkers, linkedPlaceMarkers]
+  );
+  const treasureMarkers =
+    placeMarkerPresentation === "treasure" ? arrivalMarkers : linkedPlaceMarkers;
+  const placeMarkersRef = useRef(arrivalMarkers);
+  placeMarkersRef.current = arrivalMarkers;
+  const treasureMarkersRef = useRef(treasureMarkers);
+  treasureMarkersRef.current = treasureMarkers;
   const hasActivePanelRef = useRef(hasActivePanel);
   hasActivePanelRef.current = hasActivePanel;
   const onPlaceMarkerSelectRef = useRef(onPlaceMarkerSelect);
@@ -209,7 +227,10 @@ export function ExplorationMap({
       addExplorationStationRadiusLayers(map, initialPosition, stationRadiusMeters);
       if (placeMarkerPresentation === "treasure") {
         void addExplorationPlaceMarkersLayer(map, {
-          getPlaceMarkers: () => placeMarkersRef.current,
+          getPlaceMarkers: () => treasureMarkersRef.current,
+          isActive: () => mapRef.current === map,
+        }).catch(() => {
+          if (mapRef.current === map) setMarkerLoadFailed(true);
         });
       }
     });
@@ -241,7 +262,7 @@ export function ExplorationMap({
       return;
     }
 
-    const updateSource = () => updateExplorationPlaceMarkersSource(map, placeMarkers);
+    const updateSource = () => updateExplorationPlaceMarkersSource(map, treasureMarkersRef.current);
 
     if (map.isStyleLoaded()) {
       updateSource();
@@ -249,13 +270,49 @@ export function ExplorationMap({
     }
 
     map.once("load", updateSource);
-  }, [placeMarkers, placeMarkerPresentation]);
+    return () => {
+      map.off("load", updateSource);
+    };
+  }, [treasureMarkers, placeMarkerPresentation]);
+
+  useEffect(() => {
+    if (!markerMap || placeMarkerPresentation !== "image-year") return;
+    let active = true;
+    const update = async () => {
+      if (treasureMarkersRef.current.features.length > 0) {
+        await addExplorationPlaceMarkersLayer(markerMap, {
+          getPlaceMarkers: () => treasureMarkersRef.current,
+          isActive: () => mapRef.current === markerMap,
+        });
+      }
+      if (active && mapRef.current === markerMap) {
+        updateExplorationPlaceMarkersSource(markerMap, treasureMarkersRef.current);
+        setMarkerLoadFailed(false);
+      }
+    };
+    const onLoad = () => {
+      void update().catch(() => {
+        if (active && mapRef.current === markerMap) setMarkerLoadFailed(true);
+      });
+    };
+    if (markerMap.isStyleLoaded()) onLoad();
+    else markerMap.once("load", onLoad);
+    return () => {
+      active = false;
+      markerMap.off("load", onLoad);
+    };
+  }, [markerMap, treasureMarkers, placeMarkerPresentation]);
 
   const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
 
   return (
     <div className="map-canvas-stack" data-mobile={isMobileViewport}>
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
+      {markerLoadFailed && (
+        <p className="exploration-marker-error" role="alert">
+          장소 마커를 불러오지 못했어요.
+        </p>
+      )}
       {markerMap &&
         placeMarkerPresentation === "image-year" &&
         placeMarkers.features.map((feature) => (

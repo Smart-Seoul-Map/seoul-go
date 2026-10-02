@@ -51,6 +51,11 @@ type ExplorationPageProps = {
   renderMapFooter?: (onOpenCourse: () => void) => ReactNode;
   renderCoursePanel?: (props: ExplorationPanelLifecycleProps) => ReactNode;
   renderPlacePanel?: (props: ExplorationPlacePanelProps) => ReactNode;
+  renderLinkedPlacesPanel?: (props: ExplorationPanelLifecycleProps) => ReactNode;
+  onActivateLinkedPlaces?: (place: ExplorationPlaceMarkerSelection) => boolean;
+  linkedPlaceMarkers?: MapMarkerFeatureCollection;
+  hasLinkedPlaceReference?: boolean;
+  mapNotice?: ReactNode;
   districtId?: number;
   districtName?: string;
   initialCenter?: Coordinates;
@@ -68,6 +73,11 @@ export function ExplorationPage({
   renderMapFooter,
   renderCoursePanel,
   renderPlacePanel,
+  renderLinkedPlacesPanel,
+  onActivateLinkedPlaces,
+  linkedPlaceMarkers,
+  hasLinkedPlaceReference = false,
+  mapNotice,
   districtId,
   districtName,
   initialCenter,
@@ -87,6 +97,9 @@ export function ExplorationPage({
   const isCoursePanelOpen = content?.type === "course";
   const isPanelOpen = panel.status === "open";
   const isSwitching = panel.status === "closing" && panel.next !== null;
+  useEffect(() => {
+    if (content?.type === "linked" && isPanelOpen && !hasLinkedPlaceReference) closePanel();
+  }, [content?.type, isPanelOpen, hasLinkedPlaceReference, closePanel]);
   useEffect(() => {
     if (panel.status === "closing" && content?.type === "place" && !renderPlacePanel) finishExit();
   }, [panel.status, content?.type, renderPlacePanel, finishExit]);
@@ -134,6 +147,13 @@ export function ExplorationPage({
       }),
     [placeMarkers, revealedPlaceIds, themeProgressItems]
   );
+  const displayedLinkedPlaceMarkers = useMemo(
+    () =>
+      linkedPlaceMarkers
+        ? createRevealedPlaceMarkers({ placeMarkers: linkedPlaceMarkers, revealedPlaceIds })
+        : undefined,
+    [linkedPlaceMarkers, revealedPlaceIds]
+  );
   const handleAddPlaceToCourse = useCallback(
     (place: ExplorationPlaceMarkerSelection) => {
       if (!onAddPlaceToCourse) {
@@ -142,8 +162,11 @@ export function ExplorationPage({
 
       const resultStatus = onAddPlaceToCourse(place);
       showToast(createStampCourseToastMessage(resultStatus));
+      if (resultStatus === "added" && onActivateLinkedPlaces?.(place) && renderLinkedPlacesPanel) {
+        openPanel({ type: "linked" });
+      }
     },
-    [onAddPlaceToCourse, showToast]
+    [onAddPlaceToCourse, showToast, onActivateLinkedPlaces, renderLinkedPlacesPanel, openPanel]
   );
 
   return (
@@ -156,10 +179,12 @@ export function ExplorationPage({
           onMapMoveRequest={closePanel}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
+          linkedPlaceMarkers={displayedLinkedPlaceMarkers}
           placeMarkerPresentation={placeMarkerPresentation}
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
+        {mapNotice}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {districtName ? (
             <li className="exploration-theme-place-count-item">
@@ -187,6 +212,7 @@ export function ExplorationPage({
         )}
         <Fragment key={content?.instance}>
           {isCoursePanelOpen && renderCoursePanel?.(lifecycle)}
+          {content?.type === "linked" && renderLinkedPlacesPanel?.(lifecycle)}
           {selectedPlace &&
             renderPlacePanel?.({
               ...lifecycle,

@@ -105,6 +105,9 @@ vi.mock("maplibre-gl", () => {
 vi.mock("./CharacterModelOverlay", () => ({
   CharacterModelOverlay: () => <div data-testid="character-model-overlay" />,
 }));
+vi.mock("./ExplorationImageYearMarker", () => ({
+  ExplorationImageYearMarker: () => <div data-testid="edition-marker" />,
+}));
 
 vi.mock("../application/explorationMapInteractions", () => ({
   disableExplorationMapDragInteractions: vi.fn(),
@@ -180,6 +183,8 @@ function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  maplibreMock.instances.length = 0;
+  placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mockResolvedValue(undefined);
   keyboardDirectionMock.disabled = false;
   keyboardDirectionMock.onDirectionChange = null;
 });
@@ -187,6 +192,61 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("ExplorationMap", () => {
+  test("reports a linked marker asset failure without an unhandled rejection", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mockRejectedValueOnce(
+      new Error("asset failed")
+    );
+    const view = render(
+      <ExplorationMap
+        placeMarkerPresentation="image-year"
+        linkedPlaceMarkers={createPlaceMarkers("Linked")}
+      />
+    );
+    await act(async () => {
+      maplibreMock.instances.at(-1)?.emit("load");
+    });
+    expect(view.getByRole("alert").textContent).toContain("마커");
+  });
+  test("adds and replaces linked treasures without reconstructing the Edition map", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mockResolvedValue(undefined);
+    const base = createPlaceMarkers("Edition");
+    const first = createPlaceMarkers("Linked A");
+    const second = createPlaceMarkers("Linked B");
+    const view = render(
+      <ExplorationMap
+        placeMarkers={base}
+        placeMarkerPresentation="image-year"
+        linkedPlaceMarkers={first}
+      />
+    );
+    const instanceCount = maplibreMock.instances.length;
+    const map = maplibreMock.instances.at(-1);
+    await act(async () => {
+      map?.emit("load");
+    });
+    expect(placeMarkerLayerMock.updateExplorationPlaceMarkersSource).toHaveBeenLastCalledWith(
+      expect.anything(),
+      first
+    );
+    view.rerender(
+      <ExplorationMap
+        placeMarkers={base}
+        placeMarkerPresentation="image-year"
+        linkedPlaceMarkers={second}
+      />
+    );
+    await act(async () => {
+      map?.emit("load");
+    });
+    expect(maplibreMock.instances).toHaveLength(instanceCount);
+    expect(placeMarkerLayerMock.updateExplorationPlaceMarkersSource).toHaveBeenLastCalledWith(
+      expect.anything(),
+      second
+    );
+    expect(view.getAllByTestId("edition-marker")).toHaveLength(1);
+  });
   test("passes the latest place markers to the marker layer setup", () => {
     vi.stubGlobal("WebGLRenderingContext", class {});
     placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mockResolvedValue(undefined);
