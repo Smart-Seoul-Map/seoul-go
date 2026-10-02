@@ -28,6 +28,7 @@ async function setup(page: Page) {
   const requests: { themeId: string; center: string | null; page: number }[] = [];
   await page.addInitScript(
     ({ edition, pointA }) => {
+      if (localStorage.getItem("seoul-go:stamp-course:v1")) return;
       localStorage.setItem(
         "seoul-go:stamp-course:v1",
         JSON.stringify({
@@ -149,7 +150,19 @@ for (const viewport of [
     await page.goto(`/exploration?lat=${pointB.lat}&lng=${pointB.lng}`);
     const markerB = page.getByRole("button", { name: "기준 장소 B 2026년 선정 장소로 이동" });
     await expect(markerB).toBeVisible({ timeout: 20000 });
-    expect(requests.every((request) => request.themeId === edition)).toBe(true);
+    // An Edition saved before reload restores its previously unlocked nearby places.
+    await expect
+      .poll(() =>
+        requests.some(
+          (request) => request.themeId === "100032" && request.center === String(pointA.lng)
+        )
+      )
+      .toBe(true);
+    expect(
+      requests.some(
+        (request) => request.themeId !== edition && request.center === String(pointB.lng)
+      )
+    ).toBe(false);
     const originalCanvas = await page.locator("canvas").first().elementHandle();
     await markerB.click();
     const detail = page.getByRole("dialog", { name: "기준 장소 B", exact: true });
@@ -186,6 +199,32 @@ for (const viewport of [
     expect(calloutBounds).not.toBeNull();
     expect(calloutBounds!.x + calloutBounds!.width).toBeLessThan(viewport.width);
     if (viewport.name === "desktop") expect(calloutBounds!.width).toBeLessThanOrEqual(390);
+    await panel.getByRole("button", { name: "닫기", exact: true }).click();
+    await expect(panel).toHaveCount(0);
+    const reopen = page.getByRole("button", { name: "근처 추천", exact: true });
+    await expect(reopen).toBeVisible();
+    const reopenBounds = await reopen.boundingBox();
+    expect(reopenBounds!.x + reopenBounds!.width).toBeLessThanOrEqual(viewport.width);
+    const zoomBounds = await page.locator(".maplibregl-ctrl-top-right").boundingBox();
+    expect(reopenBounds!.y).toBeGreaterThanOrEqual(zoomBounds!.y + zoomBounds!.height);
+    await page.screenshot({ path: info.outputPath(`${viewport.name}-reopen.png`), fullPage: true });
+    await reopen.click();
+    await expect(panel.getByRole("listitem")).toHaveCount(120);
+    expect(requests).toHaveLength(requestCount);
+    await panel.getByRole("button", { name: "닫기", exact: true }).click();
+    await expect(panel).toHaveCount(0);
+    await page.reload();
+    await expect(reopen).toBeVisible({ timeout: 20000 });
+    await reopen.click();
+    await expect(panel.getByRole("listitem")).toHaveCount(3);
+    await panel.getByRole("tab").nth(0).click();
+    await expect(panel.getByRole("listitem")).toHaveCount(120);
+    const unlockedCount = await page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("seoul-go:unlocked-linked-places:v1") ?? "{}").references
+          ?.length
+    );
+    expect(unlockedCount).toBe(2);
     await panel.getByRole("button", { name: "닫기", exact: true }).click();
     await expect(panel).toHaveCount(0);
     await page.getByRole("button", { name: "코스 보기", exact: true }).click();
