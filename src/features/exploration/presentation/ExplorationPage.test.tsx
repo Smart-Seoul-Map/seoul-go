@@ -10,7 +10,7 @@ import { AppResponsivePanel } from "@shared/ui/responsive-panel";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
 import { visitedPlaceStore } from "../application/useVisitedPlaceStore";
-import { ExplorationPage } from "./ExplorationPage";
+import { ExplorationPage, type ExplorationPanelLifecycleProps } from "./ExplorationPage";
 
 type MockExplorationMapProps = {
   onMapMoveRequest?: () => void;
@@ -49,6 +49,84 @@ const themeProgressItems = [
 ] as const;
 
 describe("ExplorationPage", () => {
+  test("reopens linked recommendations after closing and hides the entry when the reference is removed", async () => {
+    const renderPanel = ({
+      open,
+      onClose,
+      onExitComplete,
+      returnFocus,
+    }: ExplorationPanelLifecycleProps) => (
+      <AppResponsivePanel.Root open={open} skipAnimation>
+        <AppResponsivePanel.Content
+          title="근처 추천 장소"
+          onExitComplete={onExitComplete}
+          returnFocus={returnFocus}
+        >
+          <button onClick={onClose}>추천 닫기</button>
+        </AppResponsivePanel.Content>
+      </AppResponsivePanel.Root>
+    );
+    const page = (hasReference: boolean) => (
+      <ExplorationPage
+        themeProgressItems={themeProgressItems}
+        hasLinkedPlaceReference={hasReference}
+        renderLinkedPlacesPanel={renderPanel}
+      />
+    );
+    const view = renderExplorationPage(page(false));
+    expect(screen.queryByRole("button", { name: "근처 추천" })).not.toBeInTheDocument();
+    view.rerender(<AppToastProvider>{page(true)}</AppToastProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "근처 추천" }));
+    expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "추천 닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    const reopen = screen.getByRole("button", { name: "근처 추천" });
+    await vi.waitFor(() => expect(reopen).toHaveFocus());
+    fireEvent.click(reopen);
+    expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+    view.rerender(<AppToastProvider>{page(false)}</AppToastProvider>);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "근처 추천" })).not.toBeInTheDocument();
+  });
+
+  test.each(["added", "duplicate", "full", "invalid-place"] as const)(
+    "opens linked recommendations only for a successful eligible addition: %s",
+    (status) => {
+      const activate = vi.fn(() => true);
+      renderExplorationPage(
+        <ExplorationPage
+          themeProgressItems={themeProgressItems}
+          onAddPlaceToCourse={() => status}
+          onActivateLinkedPlaces={activate}
+          hasLinkedPlaceReference
+          renderLinkedPlacesPanel={({ open, onExitComplete }) => (
+            <AppResponsivePanel.Root open={open} skipAnimation>
+              <AppResponsivePanel.Content title="근처 추천 장소" onExitComplete={onExitComplete} />
+            </AppResponsivePanel.Root>
+          )}
+          renderPlacePanel={({ place, onAddToCourse, open, onExitComplete }) => (
+            <AppResponsivePanel.Root open={open} skipAnimation>
+              <AppResponsivePanel.Content title="장소 상세" onExitComplete={onExitComplete}>
+                <button onClick={() => onAddToCourse?.(place)}>담기</button>
+              </AppResponsivePanel.Content>
+            </AppResponsivePanel.Root>
+          )}
+        />
+      );
+      act(() =>
+        explorationMapMock.latestProps?.onPlaceMarkerSelect?.(createPlaceMarkerSelection())
+      );
+      fireEvent.click(screen.getByRole("button", { name: "담기" }));
+      if (status === "added") {
+        expect(activate).toHaveBeenCalledOnce();
+        expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+        expect(screen.queryByRole("dialog", { name: "장소 상세" })).not.toBeInTheDocument();
+      } else {
+        expect(activate).not.toHaveBeenCalled();
+        expect(screen.queryByRole("dialog", { name: "근처 추천 장소" })).not.toBeInTheDocument();
+      }
+    }
+  );
   test("서울에디션25 방문만으로 진행률을 올리고 다시 표시해도 유지한다", () => {
     const markers = createPlaceMarkers();
     markers.features[0].properties.themeId = "1786321258890";

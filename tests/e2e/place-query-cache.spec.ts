@@ -25,10 +25,7 @@ const SMART_SEOUL_THEME_PAGE_COUNTS = {
   "1777251935025": 1,
   "1786321258890": 1,
 } as const satisfies Record<(typeof SMART_SEOUL_THEME_IDS)[number], number>;
-const EXPECTED_SOURCE_REQUEST_COUNT = Object.values(SMART_SEOUL_THEME_PAGE_COUNTS).reduce(
-  (sum, pageCount) => sum + pageCount,
-  0
-);
+const EXPECTED_SOURCE_REQUEST_COUNT = SMART_SEOUL_THEME_PAGE_COUNTS["1786321258890"];
 const TRANSPARENT_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
   "base64"
@@ -134,6 +131,9 @@ test("reuses the Smart Seoul theme places source query across district selection
   }
 
   expect(requestUrls).toHaveLength(EXPECTED_SOURCE_REQUEST_COUNT);
+  expect(
+    requestUrls.every((url) => new URL(url).searchParams.get("theme_id") === "1786321258890")
+  ).toBe(true);
   expect(
     requestUrls.every(
       (url) => !url.includes(YONGSAN_DISTRICT_NAME) && !url.includes(GANGNAM_DISTRICT_NAME)

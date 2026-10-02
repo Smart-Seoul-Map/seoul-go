@@ -3,9 +3,13 @@ export { createSeoulEdition25MapContent } from "./application/seoulEdition25MapC
 export { filterSmartSeoulPlacesByDistrict } from "./application/placeDistrictFilter";
 export { createPlaceThemeProgressItems } from "./application/placeThemeProgress";
 export { placesQueryKeys } from "./application/placesQueryKeys";
+export { useUnlockedLinkedPlacesQueries } from "./application/useUnlockedLinkedPlacesQueries";
 export {
   useNearbySmartSeoulThemePlacesQuery,
   useSmartSeoulThemePlacesQuery,
+  useSeoulEditionPlacesQuery,
+  useNearbySeoulEditionPlacesQuery,
+  useLinkedPlacesQuery,
 } from "./application/useSmartSeoulThemePlacesQuery";
 export type { PlaceThemeProgressItem } from "./application/placeThemeProgress";
 export type { SmartSeoulThemeContentsSearchArea } from "./data/smartSeoulThemeApi";
@@ -16,6 +20,7 @@ export {
   getSmartSeoulPlaceTheme,
 } from "./config/placeThemeConfig";
 export type { SmartSeoulThemePlace } from "./domain/place";
+export type { NearbySmartSeoulPlace } from "./domain/nearbyPlace";
 export { PlaceDetailCard } from "./presentation/PlaceDetailCard";
 export type { PlaceDetailCardProps } from "./presentation/PlaceDetailCard";
 export { PlaceDetailPanel } from "./presentation/PlaceDetailPanel";

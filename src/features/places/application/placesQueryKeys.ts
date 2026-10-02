@@ -21,4 +21,13 @@ export const placesQueryKeys = {
       center.lat,
       distanceMeters,
     ] as const,
+  linkedPlaces: ({ center, distanceMeters, themeIds }: NearbySmartSeoulThemePlacesQueryKeyParams) =>
+    [
+      ...placesQueryKeys.all,
+      "linkedPlaces",
+      [...themeIds],
+      center.lng,
+      center.lat,
+      distanceMeters,
+    ] as const,
 };

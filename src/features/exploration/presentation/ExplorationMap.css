@@ -46,3 +46,14 @@
 .map-canvas-stack[data-mobile="true"] .app-virtual-joystick.exploration-map-joystick {
   display: flex;
 }
+.exploration-marker-error {
+  position: absolute;
+  right: var(--sg-spacing-4);
+  bottom: var(--sg-spacing-4);
+  z-index: 4;
+  max-width: calc(100% - var(--sg-spacing-8));
+  padding: var(--sg-spacing-2);
+  background: var(--sg-color-bg-floating);
+  color: var(--sg-color-text-default);
+  font-size: var(--sg-font-size-3);
+}

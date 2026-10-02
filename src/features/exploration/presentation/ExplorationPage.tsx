@@ -13,6 +13,7 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
+import { AppButton } from "@shared/ui/button";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import type { ExplorationPlaceMarkerSelection } from "../application/explorationPlaceMarkers";
@@ -51,6 +52,11 @@ type ExplorationPageProps = {
   renderMapFooter?: (onOpenCourse: () => void) => ReactNode;
   renderCoursePanel?: (props: ExplorationPanelLifecycleProps) => ReactNode;
   renderPlacePanel?: (props: ExplorationPlacePanelProps) => ReactNode;
+  renderLinkedPlacesPanel?: (props: ExplorationPanelLifecycleProps) => ReactNode;
+  onActivateLinkedPlaces?: (place: ExplorationPlaceMarkerSelection) => boolean;
+  linkedPlaceMarkers?: MapMarkerFeatureCollection;
+  hasLinkedPlaceReference?: boolean;
+  mapNotice?: ReactNode;
   districtId?: number;
   districtName?: string;
   initialCenter?: Coordinates;
@@ -68,6 +74,11 @@ export function ExplorationPage({
   renderMapFooter,
   renderCoursePanel,
   renderPlacePanel,
+  renderLinkedPlacesPanel,
+  onActivateLinkedPlaces,
+  linkedPlaceMarkers,
+  hasLinkedPlaceReference = false,
+  mapNotice,
   districtId,
   districtName,
   initialCenter,
@@ -82,11 +93,15 @@ export function ExplorationPage({
   const mapBadgeSize = isMobileViewport ? "sm" : "md";
   const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
   const mapStageRef = useRef<HTMLElement | null>(null);
+  const linkedPlacesButtonRef = useRef<HTMLButtonElement | null>(null);
   const content = panel.status === "closed" ? null : panel.content;
   const selectedPlace = content?.type === "place" ? content.place : null;
   const isCoursePanelOpen = content?.type === "course";
   const isPanelOpen = panel.status === "open";
   const isSwitching = panel.status === "closing" && panel.next !== null;
+  useEffect(() => {
+    if (content?.type === "linked" && isPanelOpen && !hasLinkedPlaceReference) closePanel();
+  }, [content?.type, isPanelOpen, hasLinkedPlaceReference, closePanel]);
   useEffect(() => {
     if (panel.status === "closing" && content?.type === "place" && !renderPlacePanel) finishExit();
   }, [panel.status, content?.type, renderPlacePanel, finishExit]);
@@ -109,6 +124,7 @@ export function ExplorationPage({
   const returnFocus = () => {
     if (isSwitching) return null;
     const stage = mapStageRef.current;
+    if (content?.type === "linked") return linkedPlacesButtonRef.current ?? stage;
     if (isCoursePanelOpen) {
       return stage?.querySelector<HTMLElement>(".exploration-map-footer button") ?? stage;
     }
@@ -134,6 +150,13 @@ export function ExplorationPage({
       }),
     [placeMarkers, revealedPlaceIds, themeProgressItems]
   );
+  const displayedLinkedPlaceMarkers = useMemo(
+    () =>
+      linkedPlaceMarkers
+        ? createRevealedPlaceMarkers({ placeMarkers: linkedPlaceMarkers, revealedPlaceIds })
+        : undefined,
+    [linkedPlaceMarkers, revealedPlaceIds]
+  );
   const handleAddPlaceToCourse = useCallback(
     (place: ExplorationPlaceMarkerSelection) => {
       if (!onAddPlaceToCourse) {
@@ -142,8 +165,11 @@ export function ExplorationPage({
 
       const resultStatus = onAddPlaceToCourse(place);
       showToast(createStampCourseToastMessage(resultStatus));
+      if (resultStatus === "added" && onActivateLinkedPlaces?.(place) && renderLinkedPlacesPanel) {
+        openPanel({ type: "linked" });
+      }
     },
-    [onAddPlaceToCourse, showToast]
+    [onAddPlaceToCourse, showToast, onActivateLinkedPlaces, renderLinkedPlacesPanel, openPanel]
   );
 
   return (
@@ -156,10 +182,27 @@ export function ExplorationPage({
           onMapMoveRequest={closePanel}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
+          linkedPlaceMarkers={displayedLinkedPlaceMarkers}
           placeMarkerPresentation={placeMarkerPresentation}
           revealedPlaceIds={revealedPlaceIds}
           stationRadiusMeters={stationRadiusMeters}
         />
+        <div className="exploration-map-notice-actions">
+          {mapNotice}
+          {hasLinkedPlaceReference && renderLinkedPlacesPanel && (
+            <AppButton
+              ref={linkedPlacesButtonRef}
+              hidden={isPanelOpen || isSwitching}
+              className="exploration-linked-places-button"
+              size="sm"
+              variant="secondary"
+              aria-haspopup="dialog"
+              onClick={() => openPanel({ type: "linked" })}
+            >
+              근처 추천
+            </AppButton>
+          )}
+        </div>
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {districtName ? (
             <li className="exploration-theme-place-count-item">
@@ -187,6 +230,7 @@ export function ExplorationPage({
         )}
         <Fragment key={content?.instance}>
           {isCoursePanelOpen && renderCoursePanel?.(lifecycle)}
+          {content?.type === "linked" && renderLinkedPlacesPanel?.(lifecycle)}
           {selectedPlace &&
             renderPlacePanel?.({
               ...lifecycle,

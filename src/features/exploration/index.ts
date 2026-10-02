@@ -4,6 +4,13 @@ export type {
   ExplorationPanelLifecycleProps,
 } from "./presentation/ExplorationPage";
 export { ExplorationMap } from "./presentation/ExplorationMap";
+export { LinkedPlacesPanel } from "./presentation/LinkedPlacesPanel";
+export { LinkedPlacesCallout } from "./presentation/LinkedPlacesCallout";
+export { InitialMapCallout } from "./presentation/InitialMapCallout";
+export {
+  resolveLinkedPlaceReference,
+  type LinkedPlaceReference,
+} from "./domain/linkedPlaceReference";
 export { CharacterModelOverlay } from "./presentation/CharacterModelOverlay";
 export {
   advanceTrackedMovement,
@@ -47,6 +54,12 @@ export {
   type VisitPlaceResult,
 } from "./application/visitedPlaceStore";
 export { useVisitedPlaceStore, visitedPlaceStore } from "./application/useVisitedPlaceStore";
+export {
+  useUnlockedLinkedPlaceStore,
+  unlockedLinkedPlaceStore,
+} from "./application/useUnlockedLinkedPlaceStore";
+export { createUnlockedLinkedPlaceStore } from "./application/unlockedLinkedPlaceStore";
+export { UNLOCKED_LINKED_PLACE_STORAGE_KEY } from "./data/unlockedLinkedPlaceStorage";
 export {
   createStampCoursePlaceInputFromSelection,
   type AddExplorationPlaceToCourseResultStatus,
