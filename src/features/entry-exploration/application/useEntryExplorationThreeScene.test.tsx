@@ -453,7 +453,7 @@ describe("useEntryExplorationThreeScene", () => {
 
   test("opens each landmark independently and rearms after leaving", async () => {
     const onOpenChange = vi.fn();
-    const onHanokOpenChange = vi.fn();
+    const onFirstPlaceOpenChange = vi.fn();
     const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
     const containerRef = createContainerRef();
     let startIntro: (() => boolean) | undefined;
@@ -467,7 +467,7 @@ describe("useEntryExplorationThreeScene", () => {
           [ENTRY_TEST_PLACES[1].id]: placeVisit,
           [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
             radius: 1.2,
-            onOpenChange: onHanokOpenChange,
+            onOpenChange: onFirstPlaceOpenChange,
           }),
         },
         onSceneControlsReady: (controls) => {
@@ -482,13 +482,15 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       startIntro?.();
     });
-    const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+    const firstPlace = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const secondPlace = mocks.introFloorObject?.parent?.getObjectByName(
       `entry-place-${ENTRY_TEST_PLACES[1].id}`
     );
-    if (!head || !tower) throw new Error("The guide head or tower is missing.");
-    const guideDestination = { x: head.position.x, z: head.position.z };
-    const destination = { x: tower.position.x, z: tower.position.z };
+    if (!firstPlace || !secondPlace) throw new Error("The place landmarks are missing.");
+    const firstDestination = { x: firstPlace.position.x, z: firstPlace.position.z };
+    const destination = { x: secondPlace.position.x, z: secondPlace.position.z };
     const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
     mocks.movement.getCurrentPosition.mockReturnValue(destination);
     act(() => {
@@ -499,11 +501,11 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
       mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
-      mocks.movement.getCurrentPosition.mockReturnValue(guideDestination);
+      mocks.movement.getCurrentPosition.mockReturnValue(firstDestination);
       frame?.(performance.now());
     });
     expect(onOpenChange).not.toHaveBeenCalled();
-    expect(onHanokOpenChange.mock.calls).toEqual([[true]]);
+    expect(onFirstPlaceOpenChange.mock.calls).toEqual([[true]]);
     expect(mocks.movement.stop).toHaveBeenCalledOnce();
 
     act(() => {
@@ -512,14 +514,22 @@ describe("useEntryExplorationThreeScene", () => {
       frame?.(performance.now());
     });
     expect(onOpenChange.mock.calls).toEqual([[true]]);
-    expect(onHanokOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(onFirstPlaceOpenChange.mock.calls).toEqual([[true], [false]]);
     expect(mocks.movement.stop).toHaveBeenCalledTimes(2);
 
     const intersect = vi
       .spyOn(THREE.Raycaster.prototype, "intersectObject")
-      .mockReturnValue([
-        { point: new THREE.Vector3(destination.x + 0.5, 0, destination.z) } as THREE.Intersection,
-      ]);
+      .mockImplementation((object) =>
+        object === mocks.floor
+          ? [
+              {
+                object,
+                distance: 1,
+                point: new THREE.Vector3(destination.x + 0.5, 0, destination.z),
+              },
+            ]
+          : []
+      );
     onTestFinished(() => intersect.mockRestore());
     act(() => {
       mocks.domElement.dispatchEvent(new PointerEvent("pointerdown", { clientX: 50, clientY: 50 }));

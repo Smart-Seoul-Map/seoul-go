@@ -21,7 +21,7 @@ test("blocks the image hotspot until ready and preserves retry handling", () => 
   const onStart = vi.fn();
   const { rerender } = render(<EntryExplorationIntroOverlay disabled onStart={onStart} />);
   const start = screen.getByRole("button", { name: "탐방 시작" });
-  expect(start).toBeDisabled();
+  expect(start.hasAttribute("disabled")).toBe(true);
   fireEvent.click(start);
   expect(onStart).not.toHaveBeenCalled();
   rerender(
@@ -31,6 +31,8 @@ test("blocks the image hotspot until ready and preserves retry handling", () => 
       actionLabel="장소 다시 불러오기"
     />
   );
-  fireEvent.click(screen.getByRole("button", { name: "장소 다시 불러오기" }));
+  const retry = screen.getByRole("button", { name: "장소 다시 불러오기" });
+  expect(retry.hasAttribute("disabled")).toBe(false);
+  fireEvent.click(retry);
   expect(onStart).toHaveBeenCalledOnce();
 });
