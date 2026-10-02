@@ -14,6 +14,7 @@ import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerF
 export type ExplorationRoutePlacesResult = {
   isError: boolean;
   isLoading: boolean;
+  isSuccess: boolean;
   placeMarkers: MapMarkerFeatureCollection;
   places: SmartSeoulThemePlace[];
   themeProgressItems: PlaceThemeProgressItem[];
@@ -36,6 +37,7 @@ export function useDistrictExplorationRoutePlaces(
   return {
     isError: placesQuery.isError,
     isLoading: placesQuery.isLoading,
+    isSuccess: placesQuery.isSuccess,
     ...mapContent,
     places,
   };
@@ -54,6 +56,7 @@ export function useStationExplorationRoutePlaces(
   return {
     isError: placesQuery.isError,
     isLoading: placesQuery.isLoading,
+    isSuccess: placesQuery.isSuccess,
     ...mapContent,
     places,
   };

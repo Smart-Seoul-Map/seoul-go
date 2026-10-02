@@ -46,6 +46,7 @@ export function useLinkedPlaceExploration(sourcePlaces: readonly SmartSeoulTheme
     select: setSelectedId,
     isLoading: selected !== null && query.isEnabled && query.isPending,
     isError: query.isError || (selected !== null && !query.isEnabled),
+    isSuccess: selected !== null && query.isEnabled && query.isSuccess,
     retry: () => {
       void query.refetch();
     },
