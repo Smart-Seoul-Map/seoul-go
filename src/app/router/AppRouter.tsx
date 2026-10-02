@@ -16,7 +16,6 @@ import { StampCoursePanel, StampCourseSummary } from "@features/course";
 import {
   ExplorationPage,
   LinkedPlacesPanel,
-  LinkedPlacesCallout,
   STATION_EXPLORATION_RADIUS_METERS,
   createDistrictExplorationTarget,
   createStationExplorationTarget,
@@ -36,6 +35,7 @@ import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
 import { useLinkedPlaceExploration } from "./useLinkedPlaceExploration";
+import { ExplorationMapNotice } from "./ExplorationMapNotice";
 
 const explorationPageSlots = {
   renderMapFooter: (onOpenCourse: () => void) => <StampCourseSummary onOpen={onOpenCourse} />,
@@ -82,7 +82,8 @@ function DistrictExplorationRouteContent({
     [searchParams, target?.center]
   );
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems, places } = useDistrictExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, places, isSuccess } =
+    useDistrictExplorationRoutePlaces(target);
   const linked = useLinkedPlaceExploration(places);
 
   return (
@@ -98,12 +99,7 @@ function DistrictExplorationRouteContent({
       hasLinkedPlaceReference={linked.selected !== null}
       onActivateLinkedPlaces={linked.activate}
       mapNotice={
-        <LinkedPlacesCallout
-          selected={linked.selected}
-          isLoading={linked.isLoading}
-          isError={linked.isError}
-          count={linked.places.length}
-        />
+        <ExplorationMapNotice initialPlacesReady={isSuccess && places.length > 0} linked={linked} />
       }
       renderLinkedPlacesPanel={(lifecycle) => (
         <LinkedPlacesPanel
@@ -130,7 +126,8 @@ function StationExplorationRouteContent({
   target,
 }: StationExplorationRouteContentProps): ReactElement {
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems, places } = useStationExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, places, isSuccess } =
+    useStationExplorationRoutePlaces(target);
   const linked = useLinkedPlaceExploration(places);
 
   return (
@@ -144,12 +141,7 @@ function StationExplorationRouteContent({
       hasLinkedPlaceReference={linked.selected !== null}
       onActivateLinkedPlaces={linked.activate}
       mapNotice={
-        <LinkedPlacesCallout
-          selected={linked.selected}
-          isLoading={linked.isLoading}
-          isError={linked.isError}
-          count={linked.places.length}
-        />
+        <ExplorationMapNotice initialPlacesReady={isSuccess && places.length > 0} linked={linked} />
       }
       renderLinkedPlacesPanel={(lifecycle) => (
         <LinkedPlacesPanel

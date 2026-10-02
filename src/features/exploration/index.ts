@@ -6,6 +6,7 @@ export type {
 export { ExplorationMap } from "./presentation/ExplorationMap";
 export { LinkedPlacesPanel } from "./presentation/LinkedPlacesPanel";
 export { LinkedPlacesCallout } from "./presentation/LinkedPlacesCallout";
+export { InitialMapCallout } from "./presentation/InitialMapCallout";
 export {
   resolveLinkedPlaceReference,
   type LinkedPlaceReference,

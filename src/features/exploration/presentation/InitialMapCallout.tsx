@@ -1,15 +1,12 @@
 import type { ReactElement } from "react";
+
 import { AppCallout } from "@shared/ui/callout";
+
 import { EXPLORATION_CALLOUT_MESSAGES } from "../config/explorationCalloutMessages";
-import type { LinkedPlaceReference } from "../domain/linkedPlaceReference";
 import "./linked-places.css";
 
-type LinkedPlacesCalloutProps = {
-  selected: LinkedPlaceReference;
-};
-
-export function LinkedPlacesCallout({ selected }: LinkedPlacesCalloutProps): ReactElement {
-  const messages = EXPLORATION_CALLOUT_MESSAGES.linked;
+export function InitialMapCallout(): ReactElement {
+  const messages = EXPLORATION_CALLOUT_MESSAGES.initial;
 
   return (
     <AppCallout
@@ -20,7 +17,7 @@ export function LinkedPlacesCallout({ selected }: LinkedPlacesCalloutProps): Rea
       description={
         <>
           <span>{messages.message}</span>
-          <span>{messages.reference(selected.name)}</span>
+          <span>{messages.description}</span>
         </>
       }
     />
