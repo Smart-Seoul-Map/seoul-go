@@ -58,7 +58,13 @@
   border: 0;
   border-radius: var(--sg-radius-4);
   scrollbar-width: none;
-  background: linear-gradient(var(--sg-course-board-top), var(--sg-course-board-bottom));
+}
+
+.StampCourseBoardFrame {
+  border-radius: var(--sg-radius-4);
+  background:
+    url("../../../assets/course/stamp-board-decoration.png") center / cover,
+    linear-gradient(var(--sg-course-board-top), var(--sg-course-board-bottom));
 }
 
 .StampCourseBoard {
@@ -132,6 +138,12 @@
   color: var(--sg-course-seal-empty-fg);
   box-shadow: var(--sg-shadow-2);
   font-size: var(--sg-font-size-7);
+}
+
+.StampCourseSlot[data-filled="false"] .StampCourseSeal {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .StampCourseSeal small {

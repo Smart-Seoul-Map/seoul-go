@@ -101,7 +101,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
       COT_COORD_X: "126.97842",
       COT_COORD_Y: "37.56668",
       COT_GU_NAME: "district-a",
-      COT_IMG_MAIN_URL: "https://example.com/library.jpg",
+      COT_IMG_MAIN_URL: "https://map.seoul.go.kr/library.jpg",
       COT_THEME_ID: "100032",
     });
 
@@ -109,7 +109,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
       address: "Seoul Jung-gu",
       districtName: "district-a",
       id: "smart-seoul:100032:heritage-1",
-      imageUrl: "https://example.com/library.jpg",
+      imageUrl: "https://map.seoul.go.kr/library.jpg",
       name: "Library",
       position: {
         lat: 37.56668,
@@ -120,7 +120,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
     });
   });
 
-  test("normalizes Smart Seoul relative image paths to absolute URLs", () => {
+  test("normalizes Smart Seoul relative image paths without routing display through a proxy", () => {
     const slashRelativePlace = normalizeSmartSeoulThemeContent({
       COT_CONTS_ID: "soulspot-1",
       COT_CONTS_NAME: "Soul spot",

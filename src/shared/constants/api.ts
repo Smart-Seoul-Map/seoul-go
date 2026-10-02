@@ -5,6 +5,7 @@ export const API_BASE_URL = {
 
 export const API_PROXY_PATH = {
   SMART_SEOUL_MAP: "/api/smart-seoul-map",
+  SMART_SEOUL_PLACE_IMAGE: "/api/place-image",
 } as const;
 
 export const SMART_SEOUL_TMS_MAP_IDS = {

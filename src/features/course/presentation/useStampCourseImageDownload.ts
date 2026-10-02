@@ -1,0 +1,58 @@
+import { useRef, useState, type RefObject } from "react";
+
+import { useAppToast } from "@shared/ui/toast";
+
+import { createStampCourseImageFileName } from "../domain/stampCourseImageFileName";
+import { captureStampCourseImage } from "./captureStampCourseImage";
+
+type StampCourseImageDownload = {
+  captureTargetRef: RefObject<HTMLDivElement | null>;
+  canDownloadCourseImage: boolean;
+  handleDownloadCourseImage: () => Promise<void>;
+};
+
+function downloadImageBlob(imageBlob: Blob, fileName: string): void {
+  const objectUrl = URL.createObjectURL(imageBlob);
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.download = fileName;
+  link.click();
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+}
+
+export function useStampCourseImageDownload(): StampCourseImageDownload {
+  const captureTargetRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const { showToast } = useAppToast();
+
+  const handleDownloadCourseImage = async () => {
+    const captureNode = captureTargetRef.current;
+
+    if (!captureNode) {
+      return;
+    }
+
+    setIsDownloading(true);
+
+    const imageBlob = await captureStampCourseImage(captureNode).catch(() => null);
+
+    setIsDownloading(false);
+
+    if (!imageBlob) {
+      showToast({ message: "이미지를 저장하지 못했어요", status: "error" });
+
+      return;
+    }
+
+    downloadImageBlob(imageBlob, createStampCourseImageFileName(new Date()));
+    showToast({ message: "코스 이미지를 저장했어요", status: "success" });
+  };
+
+  return {
+    captureTargetRef,
+    canDownloadCourseImage: !isDownloading,
+    handleDownloadCourseImage,
+  };
+}
