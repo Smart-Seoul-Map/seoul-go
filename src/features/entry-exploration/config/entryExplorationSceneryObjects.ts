@@ -9,6 +9,7 @@ type EntryExplorationSceneryObject = {
 
 // Offsets are relative to the fixed intro arrival point, not the moving character.
 export const ENTRY_EXPLORATION_SCENERY_OBJECTS = [
+  { key: "hanok", offset: { x: -8, z: 10 }, width: 7.5 },
   { key: "bench", offset: { x: -2, z: 7 }, width: 2.6 },
   { key: "streetlamp", offset: { x: 5, z: -3 }, width: 1.6 },
   { key: "park", offset: { x: -18, z: -10 }, width: 11 },

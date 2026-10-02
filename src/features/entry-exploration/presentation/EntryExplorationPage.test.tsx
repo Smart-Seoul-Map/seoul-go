@@ -16,6 +16,7 @@ import { AppToastProvider } from "@shared/ui/toast";
 import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
+import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 import type { EntrySlotState } from "../application/entrySlotInteraction";
@@ -194,6 +195,32 @@ describe("EntryExplorationPage", () => {
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(router.state.location.pathname).toBe("/");
   });
+  test("visiting hanok starts the slot after closing its panel and only rewards once", () => {
+    renderEntryExplorationPage();
+    fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
+    act(() => {
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
+    const [reward] = entryNumberRewardStore.getState().rewards;
+    expect(reward.placeId).toBe(ENTRY_HANOK_PLACE_ID);
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).toHaveBeenCalledExactlyOnceWith([
+      Math.floor(reward.number / 10),
+      reward.number % 10,
+    ]);
+    act(() => slotStateChange?.({ status: "result", result: String(reward.number) }));
+    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    act(() => {
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 10, z: 0 }, { x: 0, z: 0 });
+      placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(slotRequestReward).toHaveBeenCalledTimes(1);
+    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
+  });
+
   test("revisiting a rewarded place only opens its information card", () => {
     entryNumberRewardStore.setState({
       rewards: [{ placeId: FIRST_PLACE_ID, number: 40 }],
@@ -520,7 +547,11 @@ function renderEntryExplorationPage({
             open && (
               <div
                 role="dialog"
-                aria-label={ENTRY_TEST_PLACES.find((place) => place.id === placeId)?.name}
+                aria-label={
+                  placeId === ENTRY_HANOK_PLACE_ID
+                    ? ENTRY_HANOK_PLACE.title
+                    : ENTRY_TEST_PLACES.find((place) => place.id === placeId)?.name
+                }
               >
                 <button onClick={onClose}>닫기</button>
               </div>

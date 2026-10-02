@@ -3,12 +3,12 @@ import { expect, test } from "vitest";
 import manifest from "../../../assets/entry-exploration/intro-atlas.json";
 import { ENTRY_EXPLORATION_SCENERY_OBJECTS } from "./entryExplorationSceneryObjects";
 
-test("keeps decorative frames with valid bounds while leaving example landmarks unused", () => {
+test("keeps decorative frames and hanok with valid bounds while leaving the tower unused", () => {
   const keys = ENTRY_EXPLORATION_SCENERY_OBJECTS.map(({ key }) => key);
   expect(new Set(keys).size).toBe(keys.length);
   expect([...keys].sort()).toEqual(
     Object.keys(manifest.frames)
-      .filter((key) => key !== "hanok" && key !== "tower")
+      .filter((key) => key !== "tower")
       .sort()
   );
   for (const frame of Object.values(manifest.frames)) {

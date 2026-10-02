@@ -1,8 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { ENTRY_EDITION_ARRIVAL_RADIUS } from "../config/entryEditionModels";
+import { ENTRY_HANOK_ARRIVAL_RADIUS, ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
-import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import {
+  createEntryExplorationPlaceVisit,
+  type EntryExplorationPlaceVisit,
+} from "../domain/entryExplorationPlaceVisit";
 
 type PlacePanelState = {
   placeId: EntryExplorationPlaceId;
@@ -25,10 +29,10 @@ export function useEntryExplorationPlacePanel(
     open: false,
   });
   const panelRef = useRef(panel);
-  const placeVisits = useMemo(() => {
-    const createVisit = (placeId: EntryExplorationPlaceId) =>
+  const placeVisits = useMemo<Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>>(() => {
+    const createVisit = (placeId: EntryExplorationPlaceId, radius: number) =>
       createEntryExplorationPlaceVisit({
-        radius: ENTRY_EDITION_ARRIVAL_RADIUS,
+        radius,
         onOpenChange: (open) => {
           if (open) callbacksRef.current.onVisit?.(placeId);
           if (!open && panelRef.current.placeId !== placeId) return;
@@ -37,7 +41,12 @@ export function useEntryExplorationPlacePanel(
         },
       });
 
-    return Object.fromEntries(places.map((place) => [place.id, createVisit(place.id)]));
+    return {
+      ...Object.fromEntries(
+        places.map((place) => [place.id, createVisit(place.id, ENTRY_EDITION_ARRIVAL_RADIUS)])
+      ),
+      [ENTRY_HANOK_PLACE_ID]: createVisit(ENTRY_HANOK_PLACE_ID, ENTRY_HANOK_ARRIVAL_RADIUS),
+    };
   }, [places]);
   const dismissOpenPanel = useCallback((): boolean => {
     const current = panelRef.current;

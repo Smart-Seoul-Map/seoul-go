@@ -22,6 +22,7 @@ import {
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
+import { ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import {
@@ -282,6 +283,9 @@ export function useEntryExplorationThreeScene({
       movementRef.current.moveTo({ x: destination.x, z: destination.z });
     });
     editionScenery.positionAtEntry(width / height);
+    const hanok = scenery.object.getObjectByName(`entry-scenery-${ENTRY_HANOK_PLACE_ID}`);
+    const visitLandmarks = new Map<string, THREE.Object3D>(editionScenery.landmarks);
+    if (hanok) visitLandmarks.set(ENTRY_HANOK_PLACE_ID, hanok);
     const labels = new CSS2DRenderer();
     labels.setSize(width, height);
     labels.domElement.className = "EntryEditionLabels";
@@ -451,6 +455,11 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
+      if (hanok && raycaster.intersectObject(hanok, true).length > 0) {
+        movementRef.current.moveTo({ x: hanok.position.x, z: hanok.position.z });
+        return;
+      }
+
       const floorHit = raycaster.intersectObject(floor)[0];
 
       if (!floorHit) {
@@ -543,7 +552,7 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
-        for (const [placeId, landmark] of editionScenery.landmarks) {
+        for (const [placeId, landmark] of visitLandmarks) {
           if (placeVisits?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
           }

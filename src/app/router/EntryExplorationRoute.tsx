@@ -3,10 +3,15 @@ import { useEffect, useState, type ReactElement } from "react";
 import {
   EntryExplorationPage,
   EntryExplorationIntroOverlay,
+  ENTRY_HANOK_PLACE,
+  ENTRY_HANOK_PLACE_ID,
   useEntryEditionSelection,
-  type EntryEditionPlace,
 } from "@features/entry-exploration";
-import { PlaceDetailPanel, useSeoulEditionPlacesQuery } from "@features/places";
+import {
+  PlaceDetailPanel,
+  useSeoulEditionPlacesQuery,
+  type PlaceDetailCardProps,
+} from "@features/places";
 import {
   FLOATING_PANEL_SHEET_OPTIONS,
   useResponsivePanelPresentation,
@@ -25,7 +30,7 @@ import "./EntryExplorationRoute.css";
 const ENTRY_PLACE_INITIAL_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
 
 type EntryPlacePanelProps = {
-  place: EntryEditionPlace;
+  place: PlaceDetailCardProps;
   open: boolean;
   onClose: () => void;
 };
@@ -39,7 +44,7 @@ function EntryPlacePanelActions({
     <AppHStack align="center" gap="sm">
       {presentation !== "bottom-sheet" && (
         <AppText role="detailSupporting" tone="muted" align="end">
-          {place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션"}
+          {place.subtitle}
         </AppText>
       )}
       <AppIconButton ariaLabel="장소 정보 닫기" size="sm" onClick={onClose}>
@@ -62,13 +67,7 @@ function EntryPlacePanel({ place, open, onClose }: EntryPlacePanelProps): ReactE
 
   return (
     <PlaceDetailPanel
-      place={{
-        title: place.name,
-        description: place.description,
-        address: place.address,
-        subtitle: place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션",
-        image: { src: place.imageUrl, alt: place.name },
-      }}
+      place={place}
       open={open}
       modal={false}
       className="EntryPlacePanel"
@@ -111,8 +110,23 @@ export function EntryExplorationRoute(): ReactElement {
       onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
       subwayStationAvailabilityStatus={availabilityStatus}
       renderPlacePanel={({ placeId, ...props }) => {
+        if (placeId === ENTRY_HANOK_PLACE_ID) {
+          return <EntryPlacePanel key={placeId} place={ENTRY_HANOK_PLACE} {...props} />;
+        }
         const place = places.find((candidate) => candidate.id === placeId);
-        return place ? <EntryPlacePanel key={placeId} place={place} {...props} /> : null;
+        return place ? (
+          <EntryPlacePanel
+            key={placeId}
+            place={{
+              title: place.name,
+              description: place.description,
+              address: place.address,
+              subtitle: place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션",
+              image: { src: place.imageUrl, alt: place.name },
+            }}
+            {...props}
+          />
+        ) : null;
       }}
     />
   );

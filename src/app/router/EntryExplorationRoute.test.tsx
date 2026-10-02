@@ -7,13 +7,14 @@ import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ENTRY_TEST_PLACES } from "../../features/entry-exploration/testing/entryEditionFixtures";
 
 const onClose = vi.hoisted(() => vi.fn());
+const panelSelection = vi.hoisted(() => ({ placeId: null as string | null }));
 vi.mock("@features/entry-exploration", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@features/entry-exploration")>()),
   EntryExplorationPage: ({
     renderPlacePanel,
     places,
   }: ComponentProps<typeof EntryExplorationPage>) =>
-    renderPlacePanel?.({ placeId: places[0].id, open: true, onClose }),
+    renderPlacePanel?.({ placeId: panelSelection.placeId ?? places[0].id, open: true, onClose }),
 }));
 vi.mock("@features/places", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@features/places")>()),
@@ -27,8 +28,26 @@ const originalWidth = window.innerWidth;
 afterEach(() => {
   cleanup();
   onClose.mockClear();
+  panelSelection.placeId = null;
   localStorage.clear();
   Object.defineProperty(window, "innerWidth", { configurable: true, value: originalWidth });
+});
+
+test.each([390, 1366])("restores the hanok information and external link at %ipx", (width) => {
+  panelSelection.placeId = "hanok";
+  act(() => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+    window.dispatchEvent(new Event("resize"));
+  });
+  render(<EntryExplorationRoute />);
+  expect(screen.getByRole("dialog", { name: "한옥체험" })).toBeTruthy();
+  expect(screen.getByText(/서울의 공공한옥과 한옥체험 정보를 만나보세요/)).toBeTruthy();
+  const link = screen.getByRole("link", { name: /한옥체험 지도 보기/ });
+  expect(link.getAttribute("href")).toBe("https://map.seoul.go.kr/smgis2/short/6P5oo");
+  expect(link.getAttribute("target")).toBe("_blank");
+  expect(screen.queryByText("탐방중 이런 정보를 만나요!") !== null).toBe(width >= 768);
+  fireEvent.click(screen.getByRole("button", { name: "장소 정보 닫기" }));
+  expect(onClose).toHaveBeenCalledOnce();
 });
 
 test.each([390, 1366])("provides a pointer-accessible card close action at %ipx", (width) => {

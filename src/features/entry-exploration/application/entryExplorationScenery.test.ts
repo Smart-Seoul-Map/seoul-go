@@ -8,11 +8,13 @@ import { createEntryExplorationGuideRoute } from "../domain/entryExplorationGuid
 
 afterEach(() => vi.restoreAllMocks());
 
-test("keeps atlas decorations but removes the two example place sprites", () => {
+test("restores the hanok atlas sprite at its new position while leaving the tower unused", () => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
   const scenery = createEntryExplorationScenery();
   expect(scenery.object.getObjectByName("entry-scenery-bench")).toBeTruthy();
-  expect(scenery.object.getObjectByName("entry-scenery-hanok")).toBeUndefined();
+  const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
+  expect(hanok?.position.x).toBe(ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.x - 8);
+  expect(hanok?.position.z).toBe(ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.z + 10);
   expect(scenery.object.getObjectByName("entry-scenery-tower")).toBeUndefined();
   scenery.dispose();
 });
@@ -36,6 +38,10 @@ test.each([
       }
     }
     const origin = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    const hanok = { x: origin.x - 8, z: origin.z + 10 };
+    for (const destination of destinations) {
+      expect(Math.hypot(destination.x - hanok.x, destination.z - hanok.z)).toBeGreaterThan(10);
+    }
     const route = createEntryExplorationGuideRoute({
       origin,
       destination: destinations[0],
