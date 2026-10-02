@@ -1,13 +1,10 @@
+import { mockIntroEdition, approachIntroPlace, INTRO_PLACE_NAME } from "./helpers/introEdition";
 import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
 const MOBILE = { width: 390, height: 844 };
 const MOBILE_SHEET_COLLAPSED_HEIGHT = MOBILE.height * 0.5;
 const MOBILE_SHEET_EXPANDED_HEIGHT = MOBILE.height * 0.9;
-const HANOK_DESKTOP_POINT = { x: 1242, y: 650 };
-const HANOK_DESKTOP_REENTRY_POINT = { x: 916, y: 448 };
-const HANOK_MOBILE_POINT = { x: 371, y: 801 };
-const HANOK_MAP_LINK_NAME = "한옥체험 지도 보기 (새 탭에서 열기)";
 
 base.use({ actionTimeout: 10_000, launchOptions: { args: ["--disable-dev-shm-usage"] } });
 
@@ -36,6 +33,7 @@ const test = base.extend({
         error: request.failure()?.errorText,
       });
     });
+    await mockIntroEdition(page);
     try {
       await use(page);
     } finally {
@@ -52,7 +50,7 @@ function scene(page: Page) {
   return page.getByLabel("서울 탐방 공간", { exact: true });
 }
 
-function panel(page: Page, name = "한옥체험") {
+function panel(page: Page, name = INTRO_PLACE_NAME) {
   return page.getByRole("dialog", { name, exact: true });
 }
 
@@ -104,13 +102,8 @@ async function startExploration(page: Page): Promise<void> {
   await expect(openPlacePanel(page)).toHaveCount(0);
 }
 
-async function arriveAtHanok(page: Page, mobile: boolean): Promise<void> {
-  // Clicks recorded from these fixed viewports; no application world coordinates or state hooks.
-  if (mobile) {
-    await scene(page).click({ position: HANOK_MOBILE_POINT });
-  } else {
-    await scene(page).click({ position: HANOK_DESKTOP_POINT });
-  }
+async function arriveAtPlace(page: Page): Promise<void> {
+  await approachIntroPlace(page);
   await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   await expect(panel(page)).toHaveAttribute("data-state", "open");
 }
@@ -175,19 +168,17 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
   await page.setViewportSize(DESKTOP);
   await test.step("Start and arrive through the visible scene", async () => {
     await startExploration(page);
-    await arriveAtHanok(page, false);
+    await arriveAtPlace(page);
     await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
-    await expect(
-      panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
-    ).toBeVisible();
-    await expect(
-      panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
-    ).toHaveAttribute("href", "https://map.seoul.go.kr/smgis2/short/6P5oo");
+    await expect(panel(page).getByText("2025 · 서울에디션", { exact: true })).toBeVisible();
+    await expect(panel(page).getByText("서울특별시 용산구 신흥로 95-9")).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("desktop-arrival.png") });
   });
   await test.step("Card clicks and wheel input must not move the scene", async () => {
     const before = await sceneryScreenshot(page);
-    await panel(page).getByText("이미지 준비중", { exact: true }).click();
+    await panel(page)
+      .getByText("오래된 시장에 새로움을 입힌 개성 가득한 복합문화 공간", { exact: true })
+      .click();
     await page.mouse.wheel(0, 450);
     await waitForCameraToSettle(page);
     expect((await sceneryScreenshot(page)).equals(before)).toBe(true);
@@ -204,7 +195,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
-    await scene(page).click({ position: HANOK_DESKTOP_REENTRY_POINT });
+    await approachIntroPlace(page);
     await expect(panel(page)).toBeVisible({ timeout: 15_000 });
   });
   await test.step("Moving away closes the open card", async () => {
@@ -219,11 +210,9 @@ test.describe("mobile", () => {
   test("arrival and sheet snap point cycling", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     await startExploration(page);
-    await arriveAtHanok(page, true);
+    await arriveAtPlace(page);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-    await expect(panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })).toHaveCount(
-      0
-    );
+    await expect(panel(page).getByText("2025 · 서울에디션", { exact: true })).toHaveCount(0);
     await expect
       .poll(async () => (await panel(page).boundingBox())?.height)
       .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
@@ -242,10 +231,10 @@ test.describe("mobile", () => {
       .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
   });
 
-  test("content scrolling keeps the fixed external link reachable", async ({ page }) => {
+  test("content scrolling keeps the close action reachable", async ({ page }) => {
     test.setTimeout(120_000);
     await startExploration(page);
-    await arriveAtHanok(page, true);
+    await arriveAtPlace(page);
 
     const body = panel(page).locator(".PlaceDetailPanelBody");
     await expect(body).toBeVisible();
@@ -259,14 +248,14 @@ test.describe("mobile", () => {
       await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
     }
     await expect(
-      panel(page).getByRole("link", { name: HANOK_MAP_LINK_NAME, exact: true })
+      panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true })
     ).toBeInViewport();
   });
 
   test("dragging and responsive switching keep the sheet behavior stable", async ({ page }) => {
     test.setTimeout(120_000);
     await startExploration(page);
-    await arriveAtHanok(page, true);
+    await arriveAtPlace(page);
 
     const before = await sceneryScreenshot(page);
     const handle = panel(page).getByRole("button", { name: "패널 높이 조절", exact: true });
@@ -286,9 +275,7 @@ test.describe("mobile", () => {
 
     await page.setViewportSize(DESKTOP);
     await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
-    await expect(
-      panel(page).getByText("탐방중 이런 정보를 만나요!", { exact: true })
-    ).toBeVisible();
+    await expect(panel(page).getByText("2025 · 서울에디션", { exact: true })).toBeVisible();
     await page.setViewportSize(MOBILE);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
     await expect(

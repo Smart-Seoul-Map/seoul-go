@@ -1,3 +1,4 @@
+import { mockIntroEdition } from "./helpers/introEdition";
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { Buffer } from "node:buffer";
 import { readFile } from "node:fs/promises";
@@ -20,6 +21,8 @@ function isBuiltAssetResponse(response: Response): boolean {
 
   return url.pathname.startsWith("/assets/") && /\.(css|js)$/.test(url.pathname);
 }
+
+test.beforeEach(async ({ page }) => mockIntroEdition(page));
 
 async function expectRouteCanvasToRender(page: Page, route: string): Promise<void> {
   const invalidAssetResponses: string[] = [];

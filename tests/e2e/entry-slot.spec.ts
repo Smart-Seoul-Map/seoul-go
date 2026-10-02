@@ -1,4 +1,12 @@
+import {
+  mockIntroEdition,
+  approachIntroPlace,
+  INTRO_PLACE_NAME,
+  INTRO_PLACE_ID,
+} from "./helpers/introEdition";
 import { expect, test, type Page } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => mockIntroEdition(page));
 
 const REWARD_STORAGE_KEY = "seoul-go:entry-number-rewards:v1";
 
@@ -64,12 +72,11 @@ for (const viewport of [
       });
       await page.goto("/");
       const canvas = await startExploration(page);
-      if (viewport.touch) await canvas.tap({ position: { x: viewport.x, y: viewport.y } });
-      else await canvas.click({ position: { x: viewport.x, y: viewport.y } });
-      const panel = page.getByRole("dialog", { name: "한옥체험", exact: true });
+      await approachIntroPlace(page);
+      const panel = page.getByRole("dialog", { name: INTRO_PLACE_NAME, exact: true });
       await expect(panel).toBeVisible({ timeout: 20000 });
       const titleBounds = await panel
-        .getByRole("heading", { name: "한옥체험", exact: true })
+        .getByRole("heading", { name: INTRO_PLACE_NAME, exact: true })
         .boundingBox();
       const closeBounds = await panel.getByRole("button", { name: "장소 정보 닫기" }).boundingBox();
       expect(titleBounds && closeBounds).toBeTruthy();
@@ -80,7 +87,7 @@ for (const viewport of [
       ).toBeLessThan(2);
       const awarded = await readRewards(page);
       expect(awarded).toHaveLength(1);
-      expect(awarded[0]).toEqual({ placeId: "hanok", number: expect.any(Number) });
+      expect(awarded[0]).toEqual({ placeId: INTRO_PLACE_ID, number: expect.any(Number) });
       expect(awarded[0].number).toBeGreaterThanOrEqual(36);
       expect(awarded[0].number).toBeLessThanOrEqual(71);
       await expect(page.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeVisible();
@@ -183,9 +190,9 @@ for (const phase of ["card", "spinning"] as const) {
     test.setTimeout(150000);
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto("/");
-    const canvas = await startExploration(page);
-    await canvas.click({ position: { x: 1242, y: 650 } });
-    await expect(page.getByRole("dialog", { name: "한옥체험", exact: true })).toBeVisible({
+    await startExploration(page);
+    await approachIntroPlace(page);
+    await expect(page.getByRole("dialog", { name: INTRO_PLACE_NAME, exact: true })).toBeVisible({
       timeout: 20000,
     });
     const [reward] = await readRewards(page);
@@ -220,9 +227,9 @@ test("model loading failure still reveals the earned number and allows closing",
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/models/slot_v1.glb", (route) => route.abort());
   await page.goto("/");
-  const canvas = await startExploration(page);
-  await canvas.click({ position: { x: 371, y: 801 } });
-  await expect(page.getByRole("dialog", { name: "한옥체험", exact: true })).toBeVisible({
+  await startExploration(page);
+  await approachIntroPlace(page);
+  await expect(page.getByRole("dialog", { name: INTRO_PLACE_NAME, exact: true })).toBeVisible({
     timeout: 20000,
   });
   const [reward] = await readRewards(page);
