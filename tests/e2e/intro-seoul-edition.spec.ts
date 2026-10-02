@@ -35,6 +35,8 @@ test("selects ten nonrepeating places per entry and shares the query with distri
     });
   });
   await page.route("**/api/smart-seoul-map/tms/**", (route) => route.abort());
+  // Use image fallbacks so random GLB selections do not change the DOM count.
+  await page.route("**/models/places/*.glb", (route) => route.abort());
   await page.goto("/");
   await expect(page.locator(".EntryEditionLandmark")).toHaveCount(10);
   const first = await page
