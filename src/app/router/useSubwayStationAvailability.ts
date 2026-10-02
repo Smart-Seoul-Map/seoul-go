@@ -1,7 +1,5 @@
 import { useCallback, useState } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
-
 import {
   getSubwayStationAvailabilityStatus,
   type EntryExplorationSubwaySelectionStatus,
@@ -9,11 +7,7 @@ import {
   type SubwayStationAvailabilityStatus,
 } from "@features/entry-exploration";
 import { STATION_EXPLORATION_RADIUS_METERS } from "@features/exploration";
-import {
-  SMART_SEOUL_PLACE_THEME_IDS,
-  placesQueryKeys,
-  useNearbySmartSeoulThemePlacesQuery,
-} from "@features/places";
+import { useNearbySmartSeoulThemePlacesQuery } from "@features/places";
 
 type SubwayStationSelectionChangeHandler = (
   station: Line2Station | null,
@@ -26,7 +20,6 @@ type UseSubwayStationAvailabilityResult = {
 };
 
 export function useSubwayStationAvailability(): UseSubwayStationAvailabilityResult {
-  const queryClient = useQueryClient();
   const [selectedStation, setSelectedStation] = useState<Line2Station | null>(null);
   const handleSubwayStationSelectionChange = useCallback<SubwayStationSelectionChangeHandler>(
     (station, selectionStatus): void => {
@@ -39,17 +32,9 @@ export function useSubwayStationAvailability(): UseSubwayStationAvailabilityResu
         return;
       }
 
-      void queryClient.invalidateQueries({
-        exact: true,
-        queryKey: placesQueryKeys.nearbySmartSeoulThemePlaces({
-          center: station.stationGeoPosition,
-          distanceMeters: STATION_EXPLORATION_RADIUS_METERS,
-          themeIds: SMART_SEOUL_PLACE_THEME_IDS,
-        }),
-      });
       setSelectedStation(station);
     },
-    [queryClient]
+    []
   );
 
   const placesQuery = useNearbySmartSeoulThemePlacesQuery(
@@ -58,8 +43,7 @@ export function useSubwayStationAvailability(): UseSubwayStationAvailabilityResu
           center: selectedStation.stationGeoPosition,
           distanceMeters: STATION_EXPLORATION_RADIUS_METERS,
         }
-      : null,
-    { staleTimeMs: 0 }
+      : null
   );
   const availabilityStatus = getSubwayStationAvailabilityStatus({
     hasSelectedStation: selectedStation !== null,

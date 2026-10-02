@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 import {
   Navigate,
   RouterProvider,
@@ -15,6 +15,8 @@ import { getLine2StationById } from "@features/entry-exploration";
 import { StampCoursePanel, StampCourseSummary } from "@features/course";
 import {
   ExplorationPage,
+  LinkedPlacesPanel,
+  LinkedPlacesCallout,
   STATION_EXPLORATION_RADIUS_METERS,
   createDistrictExplorationTarget,
   createStationExplorationTarget,
@@ -33,6 +35,7 @@ import {
 import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
+import { useLinkedPlaceExploration } from "./useLinkedPlaceExploration";
 
 const explorationPageSlots = {
   renderMapFooter: (onOpenCourse: () => void) => <StampCourseSummary onOpen={onOpenCourse} />,
@@ -74,18 +77,46 @@ function DistrictExplorationRouteContent({
   target,
 }: DistrictExplorationRouteContentProps): ReactElement {
   const [searchParams] = useSearchParams();
+  const initialCenter = useMemo(
+    () => parseExplorationSpawnCenter(searchParams) ?? target?.center,
+    [searchParams, target?.center]
+  );
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems } = useDistrictExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, places } = useDistrictExplorationRoutePlaces(target);
+  const linked = useLinkedPlaceExploration(places);
 
   return (
     <ExplorationPage
       districtId={target?.districtId}
       {...explorationPageSlots}
       districtName={target?.districtName}
-      initialCenter={parseExplorationSpawnCenter(searchParams) ?? target?.center}
+      initialCenter={initialCenter}
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       placeMarkerPresentation="image-year"
+      linkedPlaceMarkers={linked.markers}
+      hasLinkedPlaceReference={linked.selected !== null}
+      onActivateLinkedPlaces={linked.activate}
+      mapNotice={
+        <LinkedPlacesCallout
+          selected={linked.selected}
+          isLoading={linked.isLoading}
+          isError={linked.isError}
+          count={linked.places.length}
+        />
+      }
+      renderLinkedPlacesPanel={(lifecycle) => (
+        <LinkedPlacesPanel
+          {...lifecycle}
+          references={linked.references}
+          selected={linked.selected}
+          places={linked.places}
+          isLoading={linked.isLoading}
+          isError={linked.isError}
+          onSelect={linked.select}
+          onRetry={linked.retry}
+        />
+      )}
       themeProgressItems={themeProgressItems}
     />
   );
@@ -99,7 +130,8 @@ function StationExplorationRouteContent({
   target,
 }: StationExplorationRouteContentProps): ReactElement {
   const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems } = useStationExplorationRoutePlaces(target);
+  const { placeMarkers, themeProgressItems, places } = useStationExplorationRoutePlaces(target);
+  const linked = useLinkedPlaceExploration(places);
 
   return (
     <ExplorationPage
@@ -108,6 +140,29 @@ function StationExplorationRouteContent({
       onAddPlaceToCourse={handleAddPlaceToCourse}
       placeMarkers={placeMarkers}
       placeMarkerPresentation="image-year"
+      linkedPlaceMarkers={linked.markers}
+      hasLinkedPlaceReference={linked.selected !== null}
+      onActivateLinkedPlaces={linked.activate}
+      mapNotice={
+        <LinkedPlacesCallout
+          selected={linked.selected}
+          isLoading={linked.isLoading}
+          isError={linked.isError}
+          count={linked.places.length}
+        />
+      }
+      renderLinkedPlacesPanel={(lifecycle) => (
+        <LinkedPlacesPanel
+          {...lifecycle}
+          references={linked.references}
+          selected={linked.selected}
+          places={linked.places}
+          isLoading={linked.isLoading}
+          isError={linked.isError}
+          onSelect={linked.select}
+          onRetry={linked.retry}
+        />
+      )}
       stationRadiusMeters={target.radiusMeters}
       themeProgressItems={themeProgressItems}
     />

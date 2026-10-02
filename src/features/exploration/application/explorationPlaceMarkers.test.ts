@@ -14,6 +14,26 @@ import {
 } from "./explorationPlaceMarkers";
 
 describe("addExplorationPlaceMarkersLayer", () => {
+  it("shares concurrent image loading and stops adding to a disposed map", async () => {
+    let active = true;
+    const release: ((value: { data: object }) => void)[] = [];
+    const map = {
+      addImage: vi.fn(),
+      addLayer: vi.fn(),
+      addSource: vi.fn(),
+      getSource: vi.fn(),
+      hasImage: vi.fn(() => false),
+      loadImage: vi.fn(() => new Promise<{ data: object }>((resolve) => release.push(resolve))),
+    };
+    const one = addExplorationPlaceMarkersLayer(map as never, { isActive: () => active });
+    const two = addExplorationPlaceMarkersLayer(map as never, { isActive: () => active });
+    expect(map.loadImage).toHaveBeenCalledTimes(10);
+    active = false;
+    release.forEach((resolve) => resolve({ data: {} }));
+    await Promise.all([one, two]);
+    expect(map.addSource).not.toHaveBeenCalled();
+    expect(map.addImage).not.toHaveBeenCalled();
+  });
   it("loads closed and open marker images and adds the marker source and layer", async () => {
     const map = {
       addImage: vi.fn(),

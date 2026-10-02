@@ -26,7 +26,9 @@ type PlaceMarkersLayerMap = Pick<
 type PlaceMarkersSourceMap = Pick<MapLibreMap, "getSource">;
 type AddExplorationPlaceMarkersLayerOptions = {
   getPlaceMarkers?: () => MapMarkerFeatureCollection;
+  isActive?: () => boolean;
 };
+const pendingMarkerLayers = new WeakMap<PlaceMarkersLayerMap, Promise<void>>();
 type FeatureWithPlaceMarkerSelection = {
   geometry?: {
     coordinates?: unknown;
@@ -93,7 +95,22 @@ function createExplorationPlaceMarkersLayer(): SymbolLayerSpecification {
 
 export async function addExplorationPlaceMarkersLayer(
   map: PlaceMarkersLayerMap,
-  { getPlaceMarkers }: AddExplorationPlaceMarkersLayerOptions = {}
+  options: AddExplorationPlaceMarkersLayerOptions = {}
+): Promise<void> {
+  const pending = pendingMarkerLayers.get(map);
+  if (pending) return pending;
+  const work = loadExplorationPlaceMarkersLayer(map, options);
+  pendingMarkerLayers.set(map, work);
+  try {
+    await work;
+  } finally {
+    pendingMarkerLayers.delete(map);
+  }
+}
+
+async function loadExplorationPlaceMarkersLayer(
+  map: PlaceMarkersLayerMap,
+  { getPlaceMarkers, isActive = () => true }: AddExplorationPlaceMarkersLayerOptions
 ): Promise<void> {
   if (map.getSource(EXPLORATION_PLACE_MARKERS_SOURCE_ID)) {
     return;
@@ -107,11 +124,12 @@ export async function addExplorationPlaceMarkersLayer(
 
       const image = await map.loadImage(url);
 
-      if (!map.hasImage(id)) {
+      if (isActive() && !map.hasImage(id)) {
         map.addImage(id, image.data);
       }
     })
   );
+  if (!isActive()) return;
 
   map.addSource(EXPLORATION_PLACE_MARKERS_SOURCE_ID, {
     type: "geojson",

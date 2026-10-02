@@ -4,8 +4,8 @@ import type { DistrictExplorationTarget, StationExplorationTarget } from "@featu
 import {
   createSeoulEdition25MapContent,
   filterSmartSeoulPlacesByDistrict,
-  useNearbySmartSeoulThemePlacesQuery,
-  useSmartSeoulThemePlacesQuery,
+  useNearbySeoulEditionPlacesQuery,
+  useSeoulEditionPlacesQuery,
   type PlaceThemeProgressItem,
   type SmartSeoulThemePlace,
 } from "@features/places";
@@ -22,7 +22,7 @@ export type ExplorationRoutePlacesResult = {
 export function useDistrictExplorationRoutePlaces(
   target: DistrictExplorationTarget | null
 ): ExplorationRoutePlacesResult {
-  const placesQuery = useSmartSeoulThemePlacesQuery();
+  const placesQuery = useSeoulEditionPlacesQuery();
   const sourcePlaces = placesQuery.data ?? [];
   const places = useMemo(
     () =>
@@ -44,7 +44,7 @@ export function useDistrictExplorationRoutePlaces(
 export function useStationExplorationRoutePlaces(
   target: StationExplorationTarget
 ): ExplorationRoutePlacesResult {
-  const placesQuery = useNearbySmartSeoulThemePlacesQuery({
+  const placesQuery = useNearbySeoulEditionPlacesQuery({
     center: target.center,
     distanceMeters: target.radiusMeters,
   });
