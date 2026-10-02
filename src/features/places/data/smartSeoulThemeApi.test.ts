@@ -1,9 +1,197 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { SMART_SEOUL_PLACE_THEME_IDS } from "../config/placeThemeConfig";
-import { buildSmartSeoulThemeContentsUrl, fetchSmartSeoulThemePlaces } from "./smartSeoulThemeApi";
+import {
+  buildSmartSeoulThemeContentsUrl,
+  fetchSmartSeoulThemePlaces,
+  getNearbySmartSeoulPlaces,
+} from "./smartSeoulThemeApi";
 
 describe("Smart Seoul theme API", () => {
+  test("retains pagination metadata when later pages omit it", async () => {
+    const pages: number[] = [];
+    await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      themeIds: ["100032"],
+      requestJson: async (url) => {
+        const page = Number(url.searchParams.get("page_no"));
+        pages.push(page);
+        return {
+          header:
+            page === 1
+              ? { resultCode: "200", PAGE_COUNT: 3, TOTAL_COUNT: 3 }
+              : { resultCode: "200" },
+          body: [{ COT_CONTS_ID: `row-${page}` }],
+        };
+      },
+    });
+    expect(pages).toEqual([1, 2, 3]);
+  });
+  test("rejects changing total or page counts instead of trusting a shortened later page", async () => {
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        requestJson: async (url) => ({
+          header: {
+            resultCode: "200",
+            PAGE_COUNT: url.searchParams.get("page_no") === "1" ? 3 : 2,
+            TOTAL_COUNT: 3,
+          },
+          body: [{ COT_CONTS_ID: "row" }],
+        }),
+      })
+    ).rejects.toThrow("incomplete");
+  });
+  test("rejects an empty terminal page when earlier pages promised more results", async () => {
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        requestJson: async (url) => ({
+          header: { resultCode: "200", PAGE_COUNT: 2 },
+          body: url.searchParams.get("page_no") === "1" ? [{ COT_CONTS_ID: "one" }] : [],
+        }),
+      })
+    ).rejects.toThrow("incomplete");
+  });
+  test("shares the request budget across independent catalog and nearby queries", async () => {
+    let active = 0;
+    let peak = 0;
+    const requestJson = async () => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      active--;
+      return { header: { resultCode: "200", PAGE_COUNT: 1 }, body: [] };
+    };
+    await Promise.all([
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032", "100575", "1725252918740"],
+        requestJson,
+      }),
+      fetchSmartSeoulThemePlaces({ apiKey: "KEY", themeIds: ["1786321258890"], requestJson }),
+    ]);
+    expect(peak).toBe(2);
+  });
+  test("starts at most two independent theme requests concurrently", async () => {
+    let active = 0;
+    let peak = 0;
+    const release: (() => void)[] = [];
+    const result = fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      themeIds: ["100032", "100575", "1725252918740"],
+      requestJson: async () => {
+        active++;
+        peak = Math.max(peak, active);
+        await new Promise<void>((resolve) => release.push(resolve));
+        active--;
+        return { header: { resultCode: "200", PAGE_COUNT: 1 }, body: [] };
+      },
+    });
+    await vi.waitFor(() => expect(release).toHaveLength(2));
+    release[0]();
+    release[1]();
+    await vi.waitFor(() => expect(release).toHaveLength(3));
+    release[2]();
+    await result;
+    expect(peak).toBe(2);
+  });
+  test("passes cancellation to HTTP and stops remaining pages", async () => {
+    const controller = new AbortController();
+    let requests = 0;
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        signal: controller.signal,
+        requestJson: async (_url, options) => {
+          expect(options?.signal).toBe(controller.signal);
+          requests++;
+          controller.abort();
+          return { header: { resultCode: "200", PAGE_COUNT: 2 }, body: [] };
+        },
+      })
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(requests).toBe(1);
+  });
+
+  test("rejects a page cap instead of silently returning a partial result", async () => {
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        maxPages: 1,
+        requestJson: async () => ({ header: { resultCode: "200", PAGE_COUNT: 2 }, body: [] }),
+      })
+    ).rejects.toThrow("incomplete");
+  });
+
+  test("uses total and page size when page count is absent", async () => {
+    const pages: number[] = [];
+    await fetchSmartSeoulThemePlaces({
+      apiKey: "KEY",
+      themeIds: ["100032"],
+      requestJson: async (url) => {
+        const page = Number(url.searchParams.get("page_no"));
+        pages.push(page);
+        return {
+          header: { resultCode: "200", TOTAL_COUNT: 2, PAGE_SIZE: 1 },
+          body: [
+            {
+              COT_THEME_ID: "100032",
+              COT_CONTS_ID: String(page),
+              COT_CONTS_NAME: "Place",
+              COT_COORD_X: 127,
+              COT_COORD_Y: 37,
+            },
+          ],
+        };
+      },
+    });
+    expect(pages).toEqual([1, 2]);
+  });
+
+  test("rejects malformed successful bodies", async () => {
+    await expect(
+      fetchSmartSeoulThemePlaces({
+        apiKey: "KEY",
+        themeIds: ["100032"],
+        requestJson: async () => ({ header: { resultCode: "200" }, body: null }),
+      })
+    ).rejects.toThrow("body");
+  });
+
+  test("deduplicates nearby results and orders server distances across themes", async () => {
+    const makeRow = (id: string, themeId: string, distance: unknown) => ({
+      COT_CONTS_ID: id,
+      COT_CONTS_NAME: id,
+      COT_THEME_ID: themeId,
+      COT_COORD_X: 127,
+      COT_COORD_Y: 37,
+      DIST: distance,
+    });
+    const results = await getNearbySmartSeoulPlaces({
+      apiKey: "KEY",
+      themeIds: ["100032", "100575"],
+      searchArea: { center: { lat: 37, lng: 127 }, distanceMeters: 1000 },
+      requestJson: async (url) => ({
+        header: { resultCode: "200", PAGE_COUNT: 1 },
+        body:
+          url.searchParams.get("theme_id") === "100032"
+            ? [
+                makeRow("far", "100032", "0.02"),
+                makeRow("missing", "100032", ""),
+                makeRow("far", "100032", "0.02"),
+              ]
+            : [makeRow("near", "100575", "0.001"), makeRow("zero", "100575", 0)],
+      }),
+    });
+    expect(results.map(({ place }) => place.name)).toEqual(["zero", "near", "far", "missing"]);
+    expect(results.at(-1)?.distance).toBeNull();
+  });
+
   test("loads later edition years across pages without merging different year IDs", async () => {
     const requestedPages: string[] = [];
     const rows = [
@@ -221,6 +409,7 @@ describe("Smart Seoul theme API", () => {
         },
         header: {
           DATA_COUNT: "0",
+          PAGE_NO: "0",
           PAGE_COUNT: "0",
           resultCode: "100",
           TOTAL_COUNT: "0",
