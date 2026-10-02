@@ -18,7 +18,6 @@ const mocks = vi.hoisted(() => {
     moveTo: vi.fn(),
     stop: vi.fn(),
   };
-  const cancelPendingIntroRefresh = vi.fn();
   const registry = {
     activateReadySceneInteraction: vi.fn(() => false),
     addSceneInteractionObjects: vi.fn(),
@@ -53,7 +52,6 @@ const mocks = vi.hoisted(() => {
       }) => void;
     } | null,
     registry,
-    cancelPendingIntroRefresh,
     updateEntryExplorationCameraFocus,
   };
 });
@@ -87,7 +85,6 @@ vi.mock("./entryExplorationIntroFloor", async () => {
 
   return {
     createEntryExplorationIntroFloor: () => ({
-      cancelPendingRefresh: mocks.cancelPendingIntroRefresh,
       object: mocks.introFloorObject,
     }),
   };
@@ -359,7 +356,6 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
 
     unmount();
-    expect(mocks.cancelPendingIntroRefresh).toHaveBeenCalledTimes(1);
   });
 
   test("positions the hanok using the viewport at start and keeps both landmarks fixed after resizing", async () => {

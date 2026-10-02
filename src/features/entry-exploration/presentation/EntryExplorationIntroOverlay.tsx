@@ -1,7 +1,6 @@
 import type { ReactElement } from "react";
 
 import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.png";
-import { AppButton } from "@shared/ui/button";
 
 import "./EntryExplorationIntroOverlay.css";
 
@@ -26,9 +25,13 @@ export function EntryExplorationIntroOverlay({
           loading="eager"
           src={introBackgroundUrl}
         />
-        <AppButton disabled={disabled} onClick={onStart} size="lg" variant="strong">
-          {actionLabel}
-        </AppButton>
+        <button
+          type="button"
+          className="entry-exploration-intro-start"
+          aria-label={actionLabel}
+          disabled={disabled}
+          onClick={onStart}
+        />
       </div>
     </section>
   );

@@ -610,7 +610,6 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.removeEventListener("pointerup", handlePointerUp);
       renderer.domElement.removeEventListener("keydown", handleKeyDown);
       cancelAnimationFrame(frameId);
-      introFloor.cancelPendingRefresh();
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
       scenery.dispose();
