@@ -2,10 +2,11 @@ import { useEffect, useState, type ReactElement } from "react";
 
 import {
   EntryExplorationPage,
-  ENTRY_EXPLORATION_PLACES,
-  type EntryExplorationPlaceId,
+  EntryExplorationIntroOverlay,
+  useEntryEditionSelection,
+  type EntryEditionPlace,
 } from "@features/entry-exploration";
-import { PlaceDetailPanel } from "@features/places";
+import { PlaceDetailPanel, useSeoulEditionPlacesQuery } from "@features/places";
 import {
   FLOATING_PANEL_SHEET_OPTIONS,
   useResponsivePanelPresentation,
@@ -24,21 +25,21 @@ import "./EntryExplorationRoute.css";
 const ENTRY_PLACE_INITIAL_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
 
 type EntryPlacePanelProps = {
-  placeId: EntryExplorationPlaceId;
+  place: EntryEditionPlace;
   open: boolean;
   onClose: () => void;
 };
 
 function EntryPlacePanelActions({
-  placeId,
+  place,
   onClose,
-}: Pick<EntryPlacePanelProps, "placeId" | "onClose">): ReactElement {
+}: Pick<EntryPlacePanelProps, "place" | "onClose">): ReactElement {
   const presentation = useResponsivePanelPresentation();
   return (
     <AppHStack align="center" gap="sm">
       {presentation !== "bottom-sheet" && (
         <AppText role="detailSupporting" tone="muted" align="end">
-          {ENTRY_EXPLORATION_PLACES[placeId].subtitle}
+          {place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션"}
         </AppText>
       )}
       <AppIconButton ariaLabel="장소 정보 닫기" size="sm" onClick={onClose}>
@@ -48,7 +49,7 @@ function EntryPlacePanelActions({
   );
 }
 
-function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): ReactElement {
+function EntryPlacePanel({ place, open, onClose }: EntryPlacePanelProps): ReactElement {
   const [entryPlaceSnapPoint, setEntryPlaceSnapPoint] = useState<PanelSnapPoint | null>(
     ENTRY_PLACE_INITIAL_SNAP_POINT
   );
@@ -61,11 +62,17 @@ function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): Reac
 
   return (
     <PlaceDetailPanel
-      place={ENTRY_EXPLORATION_PLACES[placeId]}
+      place={{
+        title: place.name,
+        description: place.description,
+        address: place.address,
+        subtitle: place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션",
+        image: { src: place.imageUrl, alt: place.name },
+      }}
       open={open}
       modal={false}
       className="EntryPlacePanel"
-      headerTrailing={<EntryPlacePanelActions placeId={placeId} onClose={onClose} />}
+      headerTrailing={<EntryPlacePanelActions place={place} onClose={onClose} />}
       mobileActiveSnapPoint={entryPlaceSnapPoint}
       onMobileSnapPointChange={setEntryPlaceSnapPoint}
       onOpenChange={(nextOpen) => {
@@ -79,14 +86,34 @@ function EntryPlacePanel({ placeId, open, onClose }: EntryPlacePanelProps): Reac
 
 export function EntryExplorationRoute(): ReactElement {
   const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
+  const query = useSeoulEditionPlacesQuery();
+  const places = useEntryEditionSelection(query.data);
+
+  if (!places) {
+    const canRetry =
+      !query.isFetching && (query.isError || query.isSuccess || query.fetchStatus === "idle");
+    return (
+      <main className="entry-exploration-page">
+        <EntryExplorationIntroOverlay
+          disabled={!canRetry}
+          onStart={() => {
+            void query.refetch();
+          }}
+          actionLabel={canRetry ? "장소 다시 불러오기" : "탐방 시작"}
+        />
+      </main>
+    );
+  }
 
   return (
     <EntryExplorationPage
+      places={places}
       onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
       subwayStationAvailabilityStatus={availabilityStatus}
-      renderPlacePanel={({ placeId, ...props }) => (
-        <EntryPlacePanel key={placeId} placeId={placeId} {...props} />
-      )}
+      renderPlacePanel={({ placeId, ...props }) => {
+        const place = places.find((candidate) => candidate.id === placeId);
+        return place ? <EntryPlacePanel key={placeId} place={place} {...props} /> : null;
+      }}
     />
   );
 }

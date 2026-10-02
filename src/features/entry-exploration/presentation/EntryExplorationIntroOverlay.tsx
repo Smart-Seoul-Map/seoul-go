@@ -8,11 +8,13 @@ import "./EntryExplorationIntroOverlay.css";
 export type EntryExplorationIntroOverlayProps = {
   disabled: boolean;
   onStart: () => void;
+  actionLabel?: string;
 };
 
 export function EntryExplorationIntroOverlay({
   disabled,
   onStart,
+  actionLabel = "탐방 시작",
 }: EntryExplorationIntroOverlayProps): ReactElement {
   return (
     <section aria-label="서울고 탐방 시작" className="entry-exploration-intro-overlay">
@@ -25,7 +27,7 @@ export function EntryExplorationIntroOverlay({
           src={introBackgroundUrl}
         />
         <AppButton disabled={disabled} onClick={onStart} size="lg" variant="strong">
-          탐방 시작
+          {actionLabel}
         </AppButton>
       </div>
     </section>

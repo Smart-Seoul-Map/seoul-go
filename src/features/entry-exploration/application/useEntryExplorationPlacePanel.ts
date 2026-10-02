@@ -1,13 +1,8 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import {
-  ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID,
-  type EntryExplorationPlaceId,
-} from "../config/entryExplorationPlace";
-import {
-  createEntryExplorationPlaceVisit,
-  type EntryExplorationPlaceVisit,
-} from "../domain/entryExplorationPlaceVisit";
+import { ENTRY_EDITION_ARRIVAL_RADIUS } from "../config/entryEditionModels";
+import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
+import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 
 type PlacePanelState = {
   placeId: EntryExplorationPlaceId;
@@ -19,15 +14,21 @@ type PlacePanelCallbacks = {
   onDismiss?: (placeId: EntryExplorationPlaceId) => void;
 };
 
-export function useEntryExplorationPlacePanel(callbacks: PlacePanelCallbacks = {}) {
+export function useEntryExplorationPlacePanel(
+  places: readonly EntryEditionPlace[],
+  callbacks: PlacePanelCallbacks = {}
+) {
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
-  const [panel, setPanel] = useState<PlacePanelState>({ placeId: "hanok", open: false });
+  const [panel, setPanel] = useState<PlacePanelState>({
+    placeId: places[0]?.id ?? "",
+    open: false,
+  });
   const panelRef = useRef(panel);
-  const [placeVisits] = useState(() => {
+  const placeVisits = useMemo(() => {
     const createVisit = (placeId: EntryExplorationPlaceId) =>
       createEntryExplorationPlaceVisit({
-        radius: ENTRY_EXPLORATION_PLACE_ARRIVAL_RADIUS_BY_ID[placeId],
+        radius: ENTRY_EDITION_ARRIVAL_RADIUS,
         onOpenChange: (open) => {
           if (open) callbacksRef.current.onVisit?.(placeId);
           if (!open && panelRef.current.placeId !== placeId) return;
@@ -36,15 +37,12 @@ export function useEntryExplorationPlacePanel(callbacks: PlacePanelCallbacks = {
         },
       });
 
-    return {
-      hanok: createVisit("hanok"),
-      tower: createVisit("tower"),
-    } satisfies Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
-  });
+    return Object.fromEntries(places.map((place) => [place.id, createVisit(place.id)]));
+  }, [places]);
   const dismissOpenPanel = useCallback((): boolean => {
     const current = panelRef.current;
     if (!current.open) return false;
-    placeVisits[current.placeId].dismiss();
+    placeVisits[current.placeId]?.dismiss();
     callbacksRef.current.onDismiss?.(current.placeId);
     return true;
   }, [placeVisits]);

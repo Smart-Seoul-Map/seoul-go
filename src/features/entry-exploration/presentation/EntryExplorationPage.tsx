@@ -20,7 +20,7 @@ import {
   useEntryExplorationThreeScene,
 } from "../application/useEntryExplorationThreeScene";
 import type { Line2Station } from "../domain/line2Station";
-import type { EntryExplorationPlaceId } from "../config/entryExplorationPlace";
+import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import { useEntryExplorationIntro } from "../application/useEntryExplorationIntro";
 import { useEntryExplorationPlacePanel } from "../application/useEntryExplorationPlacePanel";
 import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
@@ -36,8 +36,10 @@ import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import type { EntryNumberReward } from "../domain/entryNumberReward";
 import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardConfig";
+import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
+  places: readonly EntryEditionPlace[];
   renderPlacePanel?: (props: {
     open: boolean;
     onClose: () => void;
@@ -51,6 +53,7 @@ export type EntryExplorationPageProps = {
 };
 
 export function EntryExplorationPage({
+  places,
   renderPlacePanel,
   onSubwayStationSelectionChange,
   subwayStationAvailabilityStatus,
@@ -77,7 +80,7 @@ export function EntryExplorationPage({
       return next;
     });
   });
-  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel({
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(places, {
     onVisit: (placeId) => {
       const reward = visitPlace(placeId);
       if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
@@ -124,6 +127,7 @@ export function EntryExplorationPage({
   );
 
   useEntryExplorationThreeScene({
+    places,
     containerRef,
     createSceneInteractionControllers: districtSelection.createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,

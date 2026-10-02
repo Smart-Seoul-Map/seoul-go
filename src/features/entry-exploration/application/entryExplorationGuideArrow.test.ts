@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { afterEach, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
-import { createEntryExplorationScenery } from "./entryExplorationScenery";
+import { getEntryEditionPosition } from "../domain/entryEditionLayout";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import {
   createEntryExplorationCamera,
@@ -65,38 +65,20 @@ test("shows the complete guide immediately for reduced motion and releases GPU r
 
 test.each([
   [1440, 900],
-  [853, 872],
   [375, 812],
   [390, 844],
-])("aligns the arrowhead with the visible hanok base at %ix%i", (width, height) => {
-  vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
-  const scenery = createEntryExplorationScenery();
-  onTestFinished(scenery.dispose);
-  scenery.positionLandmarksAtEntry(width / height);
-  const hanok = scenery.object.getObjectByName("entry-scenery-hanok");
-  if (!(hanok instanceof THREE.Mesh)) throw new Error("The hanok is missing.");
-  const guide = createEntryExplorationGuideArrow({
-    origin,
-    destination: { x: hanok.position.x, z: hanok.position.z },
-    color: "#ff2e94",
-  });
+])("aligns the guide with the first API place at %ix%i", (width, height) => {
+  const destination = getEntryEditionPosition(0, width / height);
+  const guide = createEntryExplorationGuideArrow({ origin, destination, color: "#ff2e94" });
   onTestFinished(guide.dispose);
   const camera = createEntryExplorationCamera(width, height);
-  updateEntryExplorationCameraFocus(camera, guide.destination);
+  updateEntryExplorationCameraFocus(camera, destination);
   camera.updateMatrixWorld();
-  hanok.updateWorldMatrix(true, false);
-  const positions = hanok.geometry.getAttribute("position");
-  const bounds = new THREE.Box3();
-  for (let index = 0; index < positions.count; index += 1) {
-    const vertex = new THREE.Vector3().fromBufferAttribute(positions, index);
-    bounds.expandByPoint(hanok.localToWorld(vertex).project(camera));
-  }
   const head = guide.object.getObjectByName("entry-guide-head");
   if (!head) throw new Error("The arrowhead is missing.");
-  const headScreen = head.position.clone().project(camera);
-  expect(headScreen.x).toBeCloseTo(bounds.getCenter(new THREE.Vector3()).x, 2);
-  expect(headScreen.y).toBeCloseTo(bounds.min.y, 2);
-  expect(bounds.max.y).toBeLessThan(1);
-  expect(bounds.min.x).toBeGreaterThan(-1);
-  expect(bounds.max.x).toBeLessThan(1);
+  const projected = head.position.clone().project(camera);
+  expect(projected.x).toBeCloseTo(0, 2);
+  expect(Math.abs(projected.y)).toBeLessThan(0.05);
+  expect(head.position.x).toBeCloseTo(destination.x);
+  expect(head.position.z).toBeCloseTo(destination.z);
 });

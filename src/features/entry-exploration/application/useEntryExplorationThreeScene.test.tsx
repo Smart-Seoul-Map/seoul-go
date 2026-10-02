@@ -1,3 +1,4 @@
+import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import * as THREE from "three";
@@ -186,6 +187,7 @@ describe("useEntryExplorationThreeScene", () => {
     const dart = createController();
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [slot, dart],
       })
@@ -197,8 +199,8 @@ describe("useEntryExplorationThreeScene", () => {
     const decorations = surroundings.find((object) =>
       object.children.includes(mocks.introFloorObject!)
     );
-    expect(decorations?.getObjectByName("entry-scenery-hanok")).toBeTruthy();
-    expect(decorations?.getObjectByName("entry-scenery-tower")).toBeTruthy();
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)).toBeTruthy();
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[1].id}`)).toBeTruthy();
     expect(decorations?.children).not.toContain(mocks.floor);
   });
 
@@ -207,6 +209,7 @@ describe("useEntryExplorationThreeScene", () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onPlacePanelDismiss: dismiss,
@@ -246,11 +249,15 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const onOpenChange = vi.fn();
     const placeVisits = {
-      tower: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
-      hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: vi.fn() }),
+      [ENTRY_TEST_PLACES[1].id]: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
+      [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+        radius: 1.2,
+        onOpenChange: vi.fn(),
+      }),
     };
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         placeVisits,
@@ -281,6 +288,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -325,6 +333,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -358,6 +367,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -368,8 +378,12 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
-    const hanok = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-hanok");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
     if (!hanok || !tower || !containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
@@ -406,6 +420,7 @@ describe("useEntryExplorationThreeScene", () => {
     let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         onSceneControlsReady: (controls) => {
@@ -449,11 +464,15 @@ describe("useEntryExplorationThreeScene", () => {
     mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         placeVisits: {
-          tower: placeVisit,
-          hanok: createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange: onHanokOpenChange }),
+          [ENTRY_TEST_PLACES[1].id]: placeVisit,
+          [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+            radius: 1.2,
+            onOpenChange: onHanokOpenChange,
+          }),
         },
         onSceneControlsReady: (controls) => {
           startIntro = controls?.startIntro;
@@ -468,7 +487,9 @@ describe("useEntryExplorationThreeScene", () => {
       startIntro?.();
     });
     const head = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-head");
-    const tower = mocks.introFloorObject?.parent?.getObjectByName("entry-scenery-tower");
+    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
     if (!head || !tower) throw new Error("The guide head or tower is missing.");
     const guideDestination = { x: head.position.x, z: head.position.z };
     const destination = { x: tower.position.x, z: tower.position.z };
@@ -534,6 +555,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     renderHook(() =>
       useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
