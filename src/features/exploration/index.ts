@@ -55,6 +55,12 @@ export {
 } from "./application/visitedPlaceStore";
 export { useVisitedPlaceStore, visitedPlaceStore } from "./application/useVisitedPlaceStore";
 export {
+  useUnlockedLinkedPlaceStore,
+  unlockedLinkedPlaceStore,
+} from "./application/useUnlockedLinkedPlaceStore";
+export { createUnlockedLinkedPlaceStore } from "./application/unlockedLinkedPlaceStore";
+export { UNLOCKED_LINKED_PLACE_STORAGE_KEY } from "./data/unlockedLinkedPlaceStorage";
+export {
   createStampCoursePlaceInputFromSelection,
   type AddExplorationPlaceToCourseResultStatus,
   type ExplorationStampCoursePlaceInput,

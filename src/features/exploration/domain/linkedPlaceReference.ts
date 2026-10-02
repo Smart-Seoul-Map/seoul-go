@@ -13,6 +13,8 @@ export type LinkedPlaceReference = Omit<SavedReferencePlace, "themeId"> & {
   selectionYear?: number;
 };
 
+export type UnlockedLinkedPlaceReference = Pick<LinkedPlaceReference, "id" | "position">;
+
 export function resolveLinkedPlaceReference(
   references: readonly LinkedPlaceReference[],
   selectedId: string | null
