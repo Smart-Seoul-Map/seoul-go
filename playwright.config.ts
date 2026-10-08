@@ -12,6 +12,7 @@ export default defineConfig({
   reporter: [[process.env.CI ? "github" : "list"], ["html", { open: "never" }]],
   use: {
     baseURL: previewUrl,
+    channel: "chromium",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
     video: process.env.PLAYWRIGHT_VIDEO === "1" ? "retain-on-failure" : "off",
