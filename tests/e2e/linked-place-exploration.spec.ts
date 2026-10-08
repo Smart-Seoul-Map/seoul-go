@@ -235,3 +235,97 @@ for (const viewport of [
     expect(errors).toEqual([]);
   });
 }
+
+const linkedThemeIds = ["100032", "1741228380725", "1777251935025", "1725252918740", "100575"];
+const emptyModelThemeId = "1741228380725";
+const decodablePng = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==",
+  "base64"
+);
+
+test("loads each linked marker GLB once across tabs and panel reopen, even an empty one", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.route("**/api/smart-seoul-map/tms/**", (route) =>
+    route.fulfill({ body: decodablePng, contentType: "image/png" })
+  );
+  await page.route("**/openapi/v5/**/public/themes/contents/ko?**", async (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    const themeId = params.get("theme_id") ?? "";
+    if (themeId === edition || themeId === "100032") {
+      await route.fallback();
+      return;
+    }
+    const rows =
+      params.get("coord_x") === String(pointA.lng)
+        ? [row(`${themeId}-1`, `연계 ${themeId}`, themeId, { lat: 37.5458, lng: 126.9858 }, 0.01)]
+        : [];
+    await route.fulfill({
+      json: {
+        header: {
+          resultCode: rows.length ? "200" : "100",
+          TOTAL_COUNT: rows.length,
+          PAGE_COUNT: rows.length ? 1 : 0,
+          PAGE_NO: rows.length ? 1 : 0,
+          PAGE_SIZE: rows.length ? 100 : 0,
+        },
+        body: rows,
+      },
+    });
+  });
+  const modelRequests = new Map<string, number>();
+  const modelResponses = new Map<string, number>();
+  await page.route("**/models/markers/*.glb", async (route) => {
+    const fileName = new URL(route.request().url()).pathname.split("/").at(-1) ?? "";
+    modelRequests.set(fileName, (modelRequests.get(fileName) ?? 0) + 1);
+    await route.continue();
+  });
+  page.on("response", (response) => {
+    const pathname = new URL(response.url()).pathname;
+    if (!pathname.startsWith("/models/markers/")) return;
+    const fileName = pathname.split("/").at(-1) ?? "";
+    modelResponses.set(fileName, response.status());
+  });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  page.on("console", (message) => {
+    if (message.type() === "error")
+      errors.push(`console: ${message.text()} @ ${message.location().url}`);
+  });
+  const expectEachModelLoadedOnce = () =>
+    expect
+      .poll(() => linkedThemeIds.map((themeId) => modelRequests.get(`${themeId}.glb`) ?? 0))
+      .toEqual(linkedThemeIds.map(() => 1));
+
+  await page.goto(`/exploration?lat=${pointB.lat}&lng=${pointB.lng}`);
+  const markerB = page.getByRole("button", { name: "기준 장소 B 2026년 선정 장소로 이동" });
+  await expect(markerB).toBeVisible({ timeout: 20000 });
+  await expectEachModelLoadedOnce();
+  await expect.poll(() => modelResponses.get(`${emptyModelThemeId}.glb`)).toBe(200);
+
+  await markerB.click();
+  await page
+    .getByRole("dialog", { name: "기준 장소 B", exact: true })
+    .getByRole("button", { name: "스탬프/코스 추가", exact: true })
+    .click();
+  const panel = page.getByRole("dialog", { name: "근처 추천 장소", exact: true });
+  await expect(panel.getByRole("listitem")).toHaveCount(3);
+  const tabs = panel.getByRole("tab");
+  await tabs.nth(0).click();
+  await expect(panel.getByRole("listitem")).toHaveCount(124);
+  await tabs.nth(1).click();
+  await expect(panel.getByRole("listitem")).toHaveCount(3);
+  await panel.getByRole("button", { name: "닫기", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+  await page.getByRole("button", { name: "근처 추천", exact: true }).click();
+  await expect(panel.getByRole("listitem")).toHaveCount(3);
+  await panel.getByRole("tab").nth(0).click();
+  await expect(panel.getByRole("listitem")).toHaveCount(124);
+
+  await expectEachModelLoadedOnce();
+  expect([...modelRequests.keys()].sort()).toEqual(
+    linkedThemeIds.map((themeId) => `${themeId}.glb`).sort()
+  );
+  expect(errors).toEqual([]);
+});
