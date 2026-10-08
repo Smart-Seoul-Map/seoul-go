@@ -10,6 +10,8 @@ export type MapMarkerFeatureProperties = {
   closedMarkerImage: string;
   markerImage: string;
   openMarkerImage: string;
+  markerModelUrl?: string;
+  markerModelYawDegrees?: number;
 };
 
 export type MapMarkerPointGeometry = {

@@ -1,30 +1,39 @@
 import { PLACE_THEME_MARKERS } from "@shared/constants/placeThemeMarker";
 
 export const SEOUL_EDITION25_THEME_ID = "1786321258890";
+export const PLACE_MARKER_MODEL_BASE_PATH = "/models/markers";
 
 export const SMART_SEOUL_PLACE_THEMES = [
   {
     id: "100032",
+    markerModelUrl: `${PLACE_MARKER_MODEL_BASE_PATH}/100032.glb`,
     name: "서울 미래유산",
     ...PLACE_THEME_MARKERS.RED,
   },
   {
     id: "1741228380725",
+    markerModelUrl: `${PLACE_MARKER_MODEL_BASE_PATH}/1741228380725.glb`,
+    markerModelYawDegrees: -90,
     name: "서울 야경명소",
     ...PLACE_THEME_MARKERS.PURPLE,
   },
   {
     id: "1777251935025",
+    markerModelUrl: `${PLACE_MARKER_MODEL_BASE_PATH}/1777251935025.glb`,
     name: "서울물빛나루",
     ...PLACE_THEME_MARKERS.BLUE,
   },
   {
     id: "1725252918740",
+    markerModelUrl: `${PLACE_MARKER_MODEL_BASE_PATH}/1725252918740.glb`,
+    markerModelYawDegrees: -90,
     name: "소울스팟",
     ...PLACE_THEME_MARKERS.BLACK,
   },
   {
     id: "100575",
+    markerModelUrl: `${PLACE_MARKER_MODEL_BASE_PATH}/100575.glb`,
+    markerModelYawDegrees: -90,
     name: "오래가게",
     ...PLACE_THEME_MARKERS.YELLOW,
   },
