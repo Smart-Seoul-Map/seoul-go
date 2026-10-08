@@ -1,3 +1,5 @@
+import { ENTRY_EDITION_PLACE_COUNT } from "../config/entryEditionModels";
+
 const STORAGE_KEY = "seoul-go:entry-edition-selection:v1";
 
 export function loadPreviousEntryEditionIds(): string[] {
@@ -5,7 +7,9 @@ export function loadPreviousEntryEditionIds(): string[] {
     const value: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null");
     if (!Array.isArray(value)) return [];
 
-    return value.filter((id): id is string => typeof id === "string").slice(0, 10);
+    return value
+      .filter((id): id is string => typeof id === "string")
+      .slice(0, ENTRY_EDITION_PLACE_COUNT);
   } catch {
     return [];
   }

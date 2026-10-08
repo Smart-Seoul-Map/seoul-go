@@ -29,3 +29,4 @@ export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> =
 };
 
 export const ENTRY_EDITION_ARRIVAL_RADIUS = 3.2;
+export const ENTRY_EDITION_PLACE_COUNT = 10;
