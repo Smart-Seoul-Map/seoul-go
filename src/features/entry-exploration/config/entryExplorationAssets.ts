@@ -5,7 +5,7 @@ import introBackgroundUrl from "../../../assets/entry-exploration/intro-backgrou
 import line2RouteMapUrl from "../../../assets/entry-exploration/line2-route-map.png";
 import seoulTileMapBackgroundUrl from "../../../assets/entry-exploration/seoul-grid-map-background.webp";
 import seoulTileMapUrl from "../../../assets/entry-exploration/seoul-grid-map.svg";
-import floorTextureUrl from "../../../assets/textures/tile.webp";
+import floorTextureUrl from "../../../assets/textures/brown_tile.png";
 
 type EntryExplorationTextureAsset = {
   src: string;

@@ -75,16 +75,19 @@ for (const viewport of [
       await approachIntroPlace(page);
       const panel = page.getByRole("dialog", { name: INTRO_PLACE_NAME, exact: true });
       await expect(panel).toBeVisible({ timeout: 20000 });
-      const titleBounds = await panel
-        .getByRole("heading", { name: INTRO_PLACE_NAME, exact: true })
-        .boundingBox();
-      const closeBounds = await panel.getByRole("button", { name: "장소 정보 닫기" }).boundingBox();
-      expect(titleBounds && closeBounds).toBeTruthy();
-      expect(
-        Math.abs(
-          closeBounds!.y + closeBounds!.height / 2 - titleBounds!.y - titleBounds!.height / 2
-        )
-      ).toBeLessThan(2);
+      const title = panel.getByRole("heading", { name: INTRO_PLACE_NAME, exact: true });
+      const closePlace = panel.getByRole("button", { name: "장소 정보 닫기" });
+      // The sheet slides in, so the two boxes only line up once it has settled.
+      await expect
+        .poll(async () => {
+          const titleBounds = await title.boundingBox();
+          const closeBounds = await closePlace.boundingBox();
+          if (!titleBounds || !closeBounds) return Infinity;
+          return Math.abs(
+            closeBounds.y + closeBounds.height / 2 - titleBounds.y - titleBounds.height / 2
+          );
+        })
+        .toBeLessThan(2);
       const awarded = await readRewards(page);
       expect(awarded).toHaveLength(1);
       expect(awarded[0]).toEqual({ placeId: INTRO_PLACE_ID, number: expect.any(Number) });
