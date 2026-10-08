@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 import type { EntryExplorationPage } from "@features/entry-exploration";
 
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
-import { ENTRY_TEST_PLACES } from "../../features/entry-exploration/testing/entryEditionFixtures";
+import { ENTRY_MODELED_TEST_PLACES } from "../../features/entry-exploration/testing/entryEditionFixtures";
 
 const onClose = vi.hoisted(() => vi.fn());
 const panelSelection = vi.hoisted(() => ({ placeId: null as string | null }));
@@ -18,7 +18,7 @@ vi.mock("@features/entry-exploration", async (importOriginal) => ({
 }));
 vi.mock("@features/places", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@features/places")>()),
-  useSeoulEditionPlacesQuery: () => ({ data: ENTRY_TEST_PLACES, isSuccess: true }),
+  useSeoulEditionPlacesQuery: () => ({ data: ENTRY_MODELED_TEST_PLACES, isSuccess: true }),
 }));
 vi.mock("./useSubwayStationAvailability", () => ({
   useSubwayStationAvailability: () => ({ availabilityStatus: "idle" }),

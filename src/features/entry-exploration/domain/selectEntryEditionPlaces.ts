@@ -1,5 +1,6 @@
+import { ENTRY_EDITION_PLACE_COUNT } from "../config/entryEditionModels";
+
 import type { EntryEditionPlace } from "./entryEditionPlace";
-import { MAX_ENTRY_NUMBER_REWARDS } from "./entryNumberReward";
 
 export function selectEntryEditionPlaces(
   places: readonly EntryEditionPlace[],
@@ -17,7 +18,7 @@ export function selectEntryEditionPlaces(
     random
   );
 
-  return [...unseen, ...repeated].slice(0, MAX_ENTRY_NUMBER_REWARDS);
+  return [...unseen, ...repeated].slice(0, ENTRY_EDITION_PLACE_COUNT);
 }
 
 function shuffle<T>(items: T[], random: () => number): T[] {

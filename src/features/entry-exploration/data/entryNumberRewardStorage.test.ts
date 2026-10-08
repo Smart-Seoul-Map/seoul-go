@@ -7,8 +7,8 @@ import {
 } from "./entryNumberRewardStorage";
 
 const rewards = [
-  { placeId: "hanok", number: 40 },
   { placeId: "tower", number: 57 },
+  { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 41 },
 ];
 
 beforeEach(() => {
@@ -20,7 +20,7 @@ describe("entry reward session storage", () => {
   test("restores legacy and API place IDs in the same session without losing numbers", () => {
     const mixed = [
       ...rewards,
-      { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 41 },
+      { placeId: "smart-seoul:1786321258890:25_edition25_12", number: 42 },
     ];
     saveEntryNumberRewards(mixed);
     expect(loadEntryNumberRewards()).toEqual(mixed);
@@ -62,8 +62,8 @@ describe("entry reward session storage", () => {
         version: 1,
         rewards: [
           rewards[0],
-          { placeId: "tower", number: 40 },
-          { placeId: "hanok", number: 55 },
+          { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 57 },
+          { placeId: "tower", number: 55 },
           { placeId: "tower", number: 72 },
           { placeId: "tower", number: 36.5 },
           { placeId: "tower", number: "57" },
@@ -72,6 +72,23 @@ describe("entry reward session storage", () => {
         ],
       })
     );
+    expect(loadEntryNumberRewards()).toEqual(rewards);
+  });
+
+  test("restores at most ten saved rewards and drops anything beyond", () => {
+    const stored = Array.from({ length: 10 }, (_, index) => ({
+      placeId: `smart-seoul:1786321258890:25_edition25_${index + 1}`,
+      number: 36 + index,
+    }));
+    saveEntryNumberRewards([
+      ...stored,
+      { placeId: "smart-seoul:1786321258890:25_edition25_11", number: 46 },
+    ]);
+    expect(loadEntryNumberRewards()).toEqual(stored);
+  });
+
+  test("drops a hanok reward saved by an earlier version and keeps the other rewards", () => {
+    saveEntryNumberRewards([{ placeId: "hanok", number: 40 }, ...rewards]);
     expect(loadEntryNumberRewards()).toEqual(rewards);
   });
 

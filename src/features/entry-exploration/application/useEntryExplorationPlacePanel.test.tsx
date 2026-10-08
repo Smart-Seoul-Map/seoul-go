@@ -7,7 +7,7 @@ import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 
-test("opens hanok within its original four-unit radius and dismisses through the reward flow", () => {
+test("opens hanok within its original four-unit radius and dismisses it without granting a reward", () => {
   const store = createEntryNumberRewardStore({ storage: null, random: () => 0 });
   const dismissed: string[] = [];
   const { result } = renderHook(() =>
@@ -20,7 +20,7 @@ test("opens hanok within its original four-unit radius and dismisses through the
     result.current.placeVisits.hanok.update({ x: 3.9, z: 0 }, { x: 0, z: 0 });
   });
   expect(result.current.panelProps).toMatchObject({ placeId: "hanok", open: true });
-  expect(store.getState().rewards).toEqual([{ placeId: "hanok", number: 36 }]);
+  expect(store.getState().rewards).toEqual([]);
   expect(dismissed).toEqual([]);
   act(() => result.current.panelProps.onClose());
   expect(dismissed).toEqual(["hanok"]);
@@ -29,7 +29,7 @@ test("opens hanok within its original four-unit radius and dismisses through the
     result.current.placeVisits.hanok.update({ x: 0, z: 0 }, { x: 0, z: 0 });
   });
   expect(result.current.panelProps.open).toBe(true);
-  expect(store.getState().rewards).toHaveLength(1);
+  expect(store.getState().rewards).toEqual([]);
 });
 
 test("awards on arrival but starts presentation only on explicit card dismissal", () => {

@@ -1,33 +1,40 @@
 import { beforeEach, describe, expect, test } from "vitest";
 
 import { createEntryNumberRewardStore } from "./entryNumberRewardStore";
-import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
+import { loadEntryNumberRewards, saveEntryNumberRewards } from "../data/entryNumberRewardStorage";
 
 beforeEach(() => sessionStorage.clear());
 
 describe("entry reward store", () => {
-  test("allows ten edition places but never an eleventh place or the removed tower ID", () => {
+  test("rewards ten edition places but blocks an eleventh place and the removed tower ID", () => {
     const store = createEntryNumberRewardStore({ storage: null, random: () => 0 });
-    for (let index = 1; index <= 11; index += 1) {
-      store.getState().visitPlace(`smart-seoul:1786321258890:25_edition25_${index}`);
+    for (let index = 1; index <= 10; index += 1) {
+      expect(
+        store.getState().visitPlace(`smart-seoul:1786321258890:25_edition25_${index}`)
+      ).not.toBeNull();
     }
+    expect(store.getState().visitPlace("smart-seoul:1786321258890:25_edition25_11")).toBeNull();
     expect(store.getState().rewards).toHaveLength(10);
     expect(new Set(store.getState().rewards.map((reward) => reward.number)).size).toBe(10);
     expect(
       createEntryNumberRewardStore({ storage: null }).getState().visitPlace("tower")
     ).toBeNull();
   });
-  test("counts hanok toward the same ten-reward limit and preserves its saved reward", () => {
+  test("never rewards hanok and drops a hanok reward saved by an earlier version", () => {
     const store = createEntryNumberRewardStore({ random: () => 0 });
-    expect(store.getState().visitPlace("hanok")).toEqual({ placeId: "hanok", number: 36 });
     expect(store.getState().visitPlace("hanok")).toBeNull();
-    for (let index = 1; index <= 10; index += 1) {
-      store.getState().visitPlace(`smart-seoul:1786321258890:25_edition25_${index}`);
-    }
-    expect(store.getState().rewards).toHaveLength(10);
-    const restored = createEntryNumberRewardStore({ random: () => 0.99 });
+    expect(store.getState().rewards).toEqual([]);
+    expect(loadEntryNumberRewards()).toEqual([]);
+
+    saveEntryNumberRewards([
+      { placeId: "hanok", number: 36 },
+      { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 37 },
+    ]);
+    const restored = createEntryNumberRewardStore({ random: () => 0 });
+    expect(restored.getState().rewards).toEqual([
+      { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 37 },
+    ]);
     expect(restored.getState().visitPlace("hanok")).toBeNull();
-    expect(restored.getState().rewards[0]).toEqual({ placeId: "hanok", number: 36 });
   });
   test("returns and persists only a newly granted reward, restoring without redrawing", () => {
     const store = createEntryNumberRewardStore({ random: () => 0 });

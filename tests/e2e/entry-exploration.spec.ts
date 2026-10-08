@@ -260,6 +260,9 @@ test.describe("mobile", () => {
     const before = await sceneryScreenshot(page);
     const handle = panel(page).getByRole("button", { name: "패널 높이 조절", exact: true });
     await handle.tap();
+    await expect
+      .poll(async () => (await panel(page).boundingBox())?.height)
+      .toBeCloseTo(MOBILE_SHEET_EXPANDED_HEIGHT, 0);
     const box = await handle.boundingBox();
     if (!box) throw new Error("Sheet handle has no visible bounds");
     await swipe(
