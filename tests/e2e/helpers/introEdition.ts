@@ -2,7 +2,8 @@ import { Buffer } from "node:buffer";
 import type { Page } from "@playwright/test";
 
 export const INTRO_PLACE_NAME = "해방촌신흥시장";
-export const INTRO_PLACE_ID = "smart-seoul:1786321258890:25_edition25_21";
+export const INTRO_PLACE_ID = "smart-seoul:1786321258890:25_edition25_24";
+const INTRO_PLACE_MODEL_PATH = "**/models/places/namsan_baekbeom_square.glb";
 
 export async function mockIntroEdition(page: Page): Promise<void> {
   await page.route("**/openapi/v5/**/public/themes/contents/ko?**", async (route) => {
@@ -12,7 +13,7 @@ export async function mockIntroEdition(page: Page): Promise<void> {
         ? [
             {
               COT_THEME_ID: themeId,
-              COT_CONTS_ID: "25_edition25_21",
+              COT_CONTS_ID: "25_edition25_24",
               COT_CONTS_NAME: INTRO_PLACE_NAME,
               COT_GU_NAME: "용산구",
               COT_COORD_X: 126.985085516,
@@ -38,6 +39,9 @@ export async function mockIntroEdition(page: Page): Promise<void> {
       },
     });
   });
+  await page.route(INTRO_PLACE_MODEL_PATH, (route) =>
+    route.fulfill({ contentType: "model/gltf-binary", body: "not a glb" })
+  );
   await page.route("**/test-entry-place.png", (route) =>
     route.fulfill({
       contentType: "image/png",

@@ -2,10 +2,24 @@ import { expect, test } from "@playwright/test";
 
 const THEME = "1786321258890";
 const SELECTION_KEY = "seoul-go:entry-edition-selection:v1";
+const MODELED_PLACE_IDS = [
+  "25_edition25_24",
+  "25_edition25_12",
+  "25_edition25_20",
+  "25_edition25_2",
+]
+  .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
+  .sort();
+const MODEL_PATHS = [
+  "/models/places/amsa_dong_site.glb",
+  "/models/places/gangbyeon_seojae.glb",
+  "/models/places/namsan_baekbeom_square.glb",
+  "/models/places/yongyangbongjeojeong_park.glb",
+];
 
 test.use({ launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
-test("selects ten nonrepeating places per entry and shares the query with district exploration", async ({
+test("shows only places with a GLB model, falls back to images when models fail, and shares the query with district exploration", async ({
   page,
 }) => {
   const calls: string[] = [];
@@ -35,13 +49,18 @@ test("selects ten nonrepeating places per entry and shares the query with distri
     });
   });
   await page.route("**/api/smart-seoul-map/tms/**", (route) => route.abort());
-  // Use image fallbacks so random GLB selections do not change the DOM count.
-  await page.route("**/models/places/*.glb", (route) => route.abort());
+  const modelRequests = new Set<string>();
+  await page.route("**/models/places/*.glb", (route) => {
+    modelRequests.add(new URL(route.request().url()).pathname);
+    return route.abort();
+  });
   await page.goto("/");
-  await expect(page.locator(".EntryEditionLandmark")).toHaveCount(10);
+  await expect(page.locator(".EntryEditionLandmark")).toHaveCount(MODELED_PLACE_IDS.length);
   const first = await page
     .locator(".EntryEditionLandmark")
     .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-place-id")));
+  expect([...first].sort()).toEqual(MODELED_PLACE_IDS);
+  expect([...modelRequests].sort()).toEqual(MODEL_PATHS);
   expect(calls).toHaveLength(1);
   await page.evaluate(() => {
     history.pushState(null, "", "/exploration/districts/8");
@@ -53,11 +72,11 @@ test("selects ten nonrepeating places per entry and shares the query with distri
     history.pushState(null, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
-  await expect(page.locator(".EntryEditionLandmark")).toHaveCount(10);
+  await expect(page.locator(".EntryEditionLandmark")).toHaveCount(MODELED_PLACE_IDS.length);
   const second = await page
     .locator(".EntryEditionLandmark")
     .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-place-id")));
-  expect(second.every((id) => !first.includes(id))).toBe(true);
+  expect([...second].sort()).toEqual(MODELED_PLACE_IDS);
   expect(calls).toHaveLength(1);
   const stored: string[] = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key) ?? "[]"),
@@ -84,7 +103,7 @@ test("keeps entry closed while loading and retries after an API error", async ({
             body: [
               {
                 COT_THEME_ID: THEME,
-                COT_CONTS_ID: "25_edition25_21",
+                COT_CONTS_ID: "25_edition25_24",
                 COT_CONTS_NAME: "해방촌신흥시장",
                 COT_COORD_X: 126.985,
                 COT_COORD_Y: 37.545,
@@ -94,6 +113,7 @@ test("keeps entry closed while loading and retries after an API error", async ({
         : { header: { resultCode: "400", resultMessage: "test failure" } },
     })
   );
+  await page.route("**/models/places/*.glb", (route) => route.abort());
   await page.goto("/");
   const retry = page.getByRole("button", { name: "장소 다시 불러오기" });
   await expect(retry).toBeEnabled();
