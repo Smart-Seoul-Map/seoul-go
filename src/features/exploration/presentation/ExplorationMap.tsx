@@ -20,6 +20,11 @@ import { createExplorationMapOptions } from "../application/explorationMapCreati
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
 import { addExplorationDistrictBoundaryLayers } from "../application/explorationDistrictBoundaryLayer";
 import { findNearestArrivedPlaceMarker } from "../application/explorationPlaceMarkerArrival";
+import {
+  createPlaceMarkerModelLayer,
+  type PlaceMarkerModelLayer,
+} from "../application/explorationPlaceMarkerModelLayer";
+import { partitionPlaceMarkersByModel } from "../application/explorationPlaceMarkerModels";
 import { addExplorationStationRadiusLayers } from "../application/explorationStationRadiusLayer";
 import {
   addExplorationPlaceMarkersLayer,
@@ -28,6 +33,7 @@ import {
 } from "../application/explorationPlaceMarkers";
 import { useCharacterMovementController } from "../application/useCharacterMovementController";
 import { useOffscreenMarkerIndicators } from "../application/useOffscreenMarkerIndicators";
+import { usePlaceMarkerModels } from "../application/usePlaceMarkerModels";
 import {
   CHARACTER_ARRIVAL_RADIUS_METERS,
   CHARACTER_SPEED_METERS_PER_SECOND,
@@ -85,6 +91,7 @@ export function ExplorationMap({
   const [markerMap, setMarkerMap] = useState<maplibregl.Map | null>(null);
   const [mapZoomLevel, setMapZoomLevel] = useState<number | null>(null);
   const [markerLoadFailed, setMarkerLoadFailed] = useState(false);
+  const [isModelLayerAvailable, setIsModelLayerAvailable] = useState(true);
   const initialPosition = useMemo(() => initialCenter ?? DEFAULT_INITIAL_CENTER, [initialCenter]);
   const districtBoundary = useMemo(() => getExplorationDistrictBoundary(districtId), [districtId]);
   const arrivalMarkers = useMemo(
@@ -99,10 +106,20 @@ export function ExplorationMap({
   );
   const treasureMarkers =
     placeMarkerPresentation === "treasure" ? arrivalMarkers : linkedPlaceMarkers;
+  const markerModelStates = usePlaceMarkerModels(treasureMarkers);
+  const { modelFeatures, symbolMarkers } = useMemo(
+    () => partitionPlaceMarkersByModel(treasureMarkers, markerModelStates, isModelLayerAvailable),
+    [treasureMarkers, markerModelStates, isModelLayerAvailable]
+  );
   const placeMarkersRef = useRef(arrivalMarkers);
   placeMarkersRef.current = arrivalMarkers;
-  const treasureMarkersRef = useRef(treasureMarkers);
-  treasureMarkersRef.current = treasureMarkers;
+  const symbolMarkersRef = useRef(symbolMarkers);
+  symbolMarkersRef.current = symbolMarkers;
+  const modelFeaturesRef = useRef(modelFeatures);
+  modelFeaturesRef.current = modelFeatures;
+  const markerModelStatesRef = useRef(markerModelStates);
+  markerModelStatesRef.current = markerModelStates;
+  const modelLayerRef = useRef<PlaceMarkerModelLayer | null>(null);
   const hasActivePanelRef = useRef(hasActivePanel);
   hasActivePanelRef.current = hasActivePanel;
   const onPlaceMarkerSelectRef = useRef(onPlaceMarkerSelect);
@@ -215,6 +232,17 @@ export function ExplorationMap({
     );
     mapRef.current = map;
     setMarkerMap(map);
+    const modelLayer = createPlaceMarkerModelLayer({
+      onUnavailable: () => {
+        if (mapRef.current === map) setIsModelLayerAvailable(false);
+      },
+    });
+    modelLayer.setMarkers(
+      modelFeaturesRef.current,
+      markerModelStatesRef.current,
+      revealedPlaceIdsRef.current
+    );
+    modelLayerRef.current = modelLayer;
 
     disableExplorationMapDragInteractions(map);
     setExplorationMapZoomEnabled(map, !characterMovementRef.current.getIsMoving());
@@ -230,17 +258,24 @@ export function ExplorationMap({
     updateMapZoomLevel();
     map.on("zoom", updateMapZoomLevel);
 
+    const addModelLayer = () => {
+      if (!map.getLayer(modelLayer.id)) map.addLayer(modelLayer);
+    };
+    map.once("style.load", addModelLayer);
+
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
       addExplorationStationRadiusLayers(map, initialPosition, stationRadiusMeters);
       if (placeMarkerPresentation === "treasure") {
         void addExplorationPlaceMarkersLayer(map, {
-          getPlaceMarkers: () => treasureMarkersRef.current,
+          getPlaceMarkers: () => symbolMarkersRef.current,
           isActive: () => mapRef.current === map,
         }).catch(() => {
           if (mapRef.current === map) setMarkerLoadFailed(true);
         });
       }
+      if (map.getLayer(modelLayer.id)) map.moveLayer(modelLayer.id);
+      else addModelLayer();
     });
 
     map.on("click", (event) => {
@@ -253,6 +288,7 @@ export function ExplorationMap({
       map.off("zoom", updateMapZoomLevel);
       map.remove();
       mapRef.current = null;
+      modelLayerRef.current = null;
       setMarkerMap(null);
     };
   }, [
@@ -270,7 +306,7 @@ export function ExplorationMap({
       return;
     }
 
-    const updateSource = () => updateExplorationPlaceMarkersSource(map, treasureMarkersRef.current);
+    const updateSource = () => updateExplorationPlaceMarkersSource(map, symbolMarkersRef.current);
 
     if (map.isStyleLoaded()) {
       updateSource();
@@ -281,20 +317,24 @@ export function ExplorationMap({
     return () => {
       map.off("load", updateSource);
     };
-  }, [treasureMarkers, placeMarkerPresentation]);
+  }, [symbolMarkers, placeMarkerPresentation]);
+
+  useEffect(() => {
+    modelLayerRef.current?.setMarkers(modelFeatures, markerModelStates, revealedPlaceIds);
+  }, [modelFeatures, markerModelStates, revealedPlaceIds]);
 
   useEffect(() => {
     if (!markerMap || placeMarkerPresentation !== "image-year") return;
     let active = true;
     const update = async () => {
-      if (treasureMarkersRef.current.features.length > 0) {
+      if (symbolMarkersRef.current.features.length > 0) {
         await addExplorationPlaceMarkersLayer(markerMap, {
-          getPlaceMarkers: () => treasureMarkersRef.current,
+          getPlaceMarkers: () => symbolMarkersRef.current,
           isActive: () => mapRef.current === markerMap,
         });
       }
       if (active && mapRef.current === markerMap) {
-        updateExplorationPlaceMarkersSource(markerMap, treasureMarkersRef.current);
+        updateExplorationPlaceMarkersSource(markerMap, symbolMarkersRef.current);
         setMarkerLoadFailed(false);
       }
     };
@@ -309,7 +349,7 @@ export function ExplorationMap({
       active = false;
       markerMap.off("load", onLoad);
     };
-  }, [markerMap, treasureMarkers, placeMarkerPresentation]);
+  }, [markerMap, symbolMarkers, placeMarkerPresentation]);
 
   const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
 
