@@ -389,12 +389,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      if (cameraTransitionStartedAt !== null) {
+      if (cameraTransitionStartedAt !== null || hasThrown) {
         return true;
-      }
-
-      if (hasThrown) {
-        return false;
       }
 
       const cell = resolvePointedCell(raycaster);

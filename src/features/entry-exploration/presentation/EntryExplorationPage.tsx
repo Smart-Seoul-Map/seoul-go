@@ -170,6 +170,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
+        onClose={districtSelection.deactivateSelection}
         onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
         shotResult={dartShot.shotResult}

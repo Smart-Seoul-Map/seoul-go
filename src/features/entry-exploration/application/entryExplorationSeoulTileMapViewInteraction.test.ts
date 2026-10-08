@@ -219,6 +219,7 @@ describe("entry exploration seoul tile map view interaction", () => {
     viewControls!.throwAtRandomCell();
 
     expect(onDartThrowResult).toHaveBeenCalledTimes(1);
+    expect(controller.handlePointerDown(new THREE.Raycaster(), 0)).toBe(true);
 
     controller.dispose();
   });

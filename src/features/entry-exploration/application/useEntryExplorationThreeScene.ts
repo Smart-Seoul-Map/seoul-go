@@ -95,7 +95,7 @@ export function useEntryExplorationThreeScene({
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
-  const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
+  const cameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
   const introTargetRef = useRef<EntryExplorationScenePoint>(
     ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
@@ -160,7 +160,7 @@ export function useEntryExplorationThreeScene({
       }
 
       introStatusRef.current = "ready";
-      introCameraTransitionRef.current = null;
+      cameraTransitionRef.current = null;
 
       const handles = sceneHandlesRef.current;
       if (!handles) {
@@ -195,7 +195,17 @@ export function useEntryExplorationThreeScene({
       return;
     }
 
-    updateEntryExplorationCameraFocus(handles.camera, movementRef.current.getCurrentPosition());
+    const { x, z } = movementRef.current.getCurrentPosition();
+    const { cameraOffset, cameraTransitionDurationMs } = ENTRY_EXPLORATION_SCENE_CONFIG;
+
+    cameraTransitionRef.current = createSceneCameraTransition({
+      camera: handles.camera,
+      durationMs: cameraTransitionDurationMs,
+      now: performance.now(),
+      toLookAt: new THREE.Vector3(x, 0, z),
+      toPosition: new THREE.Vector3(x + cameraOffset.x, cameraOffset.y, z + cameraOffset.z),
+      toZoom: 1,
+    });
   }, []);
 
   const deactivateActiveInteraction = useCallback(() => {
@@ -391,7 +401,7 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.setAttribute("aria-label", "서울 탐방 공간");
       renderer.domElement.setAttribute("aria-busy", "true");
       renderer.domElement.setAttribute("aria-disabled", "true");
-      introCameraTransitionRef.current = createSceneCameraTransition({
+      cameraTransitionRef.current = createSceneCameraTransition({
         camera,
         durationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
         fromLookAt: new THREE.Vector3(
@@ -540,14 +550,11 @@ export function useEntryExplorationThreeScene({
       lastTime = time;
       mixerRef.current?.update(deltaSeconds);
 
-      if (introCameraTransitionRef.current) {
-        const transitionResult = updateSceneCameraTransition(
-          introCameraTransitionRef.current,
-          time
-        );
+      if (cameraTransitionRef.current) {
+        const transitionResult = updateSceneCameraTransition(cameraTransitionRef.current, time);
 
         if (transitionResult.done) {
-          introCameraTransitionRef.current = null;
+          cameraTransitionRef.current = null;
         }
       }
 
@@ -599,7 +606,7 @@ export function useEntryExplorationThreeScene({
     return () => {
       disposed = true;
       sceneHandlesRef.current = null;
-      introCameraTransitionRef.current = null;
+      cameraTransitionRef.current = null;
       startIntroRef.current = null;
       introStatusRef.current = "waiting";
       mixerRef.current = null;
