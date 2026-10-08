@@ -16,6 +16,7 @@ type MapClickEvent = {
 
 const maplibreMock = vi.hoisted(() => ({
   instances: [] as Array<{
+    addLayer: ReturnType<typeof vi.fn>;
     emit: (eventName: string, event?: MapClickEvent) => void;
     getLayer: ReturnType<typeof vi.fn>;
     handlers: Map<string, MapEventHandler[]>;
@@ -24,6 +25,7 @@ const maplibreMock = vi.hoisted(() => ({
 }));
 
 const characterMovementMock = vi.hoisted(() => ({
+  onFrame: null as ((frame: { position: { lat: number; lng: number } }) => void) | null,
   moveInDirection: vi.fn(),
   moveTo: vi.fn(),
   stop: vi.fn(),
@@ -40,6 +42,15 @@ const placeMarkerLayerMock = vi.hoisted(() => ({
   updateExplorationPlaceMarkersSource: vi.fn(),
 }));
 
+const modelLayerMock = vi.hoisted(() => ({
+  layers: [] as Array<{
+    id: string;
+    onUnavailable: () => void;
+    setMarkers: ReturnType<typeof vi.fn>;
+  }>,
+  loadPlaceMarkerModel: vi.fn(),
+}));
+
 const stationRadiusLayerMock = vi.hoisted(() => ({
   addExplorationStationRadiusLayers: vi.fn(),
 }));
@@ -50,6 +61,7 @@ vi.mock("maplibre-gl", () => {
 
     constructor() {
       maplibreMock.instances.push({
+        addLayer: this.addLayer,
         emit: this.emit.bind(this),
         getLayer: this.getLayer,
         handlers: this.handlers,
@@ -58,6 +70,7 @@ vi.mock("maplibre-gl", () => {
     }
 
     addControl = vi.fn();
+    addLayer = vi.fn();
     getBearing = vi.fn(() => 0);
     getCenter = vi.fn(() => ({ lat: 0, lng: 0 }));
     getContainer = vi.fn(() => document.createElement("div"));
@@ -123,16 +136,34 @@ vi.mock("../application/explorationPlaceMarkers", () => placeMarkerLayerMock);
 
 vi.mock("../application/explorationStationRadiusLayer", () => stationRadiusLayerMock);
 
+vi.mock("../application/explorationPlaceMarkerModelLayer", () => ({
+  createPlaceMarkerModelLayer: ({ onUnavailable }: { onUnavailable: () => void }) => {
+    const layer = { id: "place-marker-models", onUnavailable, setMarkers: vi.fn() };
+    modelLayerMock.layers.push(layer);
+    return layer;
+  },
+}));
+
+vi.mock("../application/explorationPlaceMarkerModels", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../application/explorationPlaceMarkerModels")>()),
+  loadPlaceMarkerModel: modelLayerMock.loadPlaceMarkerModel,
+}));
+
 vi.mock("../application/useCharacterMovementController", () => ({
-  useCharacterMovementController: () => ({
-    getCurrentPosition: vi.fn(),
-    getIsMoving: vi.fn(),
-    headingRadians: 0,
-    modelKey: "idlePrimary",
-    moveInDirection: characterMovementMock.moveInDirection,
-    moveTo: characterMovementMock.moveTo,
-    stop: characterMovementMock.stop,
-  }),
+  useCharacterMovementController: (options: {
+    onFrame: (frame: { position: { lat: number; lng: number } }) => void;
+  }) => {
+    characterMovementMock.onFrame = options.onFrame;
+    return {
+      getCurrentPosition: vi.fn(),
+      getIsMoving: vi.fn(),
+      headingRadians: 0,
+      modelKey: "idlePrimary",
+      moveInDirection: characterMovementMock.moveInDirection,
+      moveTo: characterMovementMock.moveTo,
+      stop: characterMovementMock.stop,
+    };
+  },
 }));
 
 vi.mock("@shared/lib/character/useKeyboardCharacterDirection", () => ({
@@ -186,9 +217,58 @@ function createPlaceMarkers(name: string): MapMarkerFeatureCollection {
   } as MapMarkerFeatureCollection;
 }
 
+function createModelMarkers(
+  markers: Array<{ id: string; url?: string; coordinates: [number, number] }>
+): MapMarkerFeatureCollection {
+  return {
+    features: markers.map(({ id, url, coordinates }) => ({
+      geometry: { coordinates, type: "Point" },
+      id,
+      properties: {
+        closedMarkerImage: "red_closed_box",
+        id,
+        imageUrl: "",
+        markerColor: "#c92a2a",
+        markerImage: "red_closed_box",
+        name: id,
+        openMarkerImage: "red_open_box",
+        themeId: "100032",
+        themeName: "Theme",
+        ...(url ? { markerModelUrl: url } : {}),
+      },
+      type: "Feature",
+    })),
+    type: "FeatureCollection",
+  };
+}
+
+const READY_COORDINATES: [number, number] = [126.990703, 37.532326];
+const MODEL_MARKERS = createModelMarkers([
+  { id: "ready", url: "/models/markers/ready.glb", coordinates: READY_COORDINATES },
+  { id: "empty", url: "/models/markers/empty.glb", coordinates: [126.95, 37.55] },
+  { id: "pending", url: "/models/markers/pending.glb", coordinates: [126.96, 37.56] },
+  { id: "plain", coordinates: [126.97, 37.57] },
+]);
+
+function mockModelLoading() {
+  modelLayerMock.loadPlaceMarkerModel.mockImplementation((url: string) => {
+    if (url.endsWith("ready.glb")) return Promise.resolve({ parts: [] });
+    if (url.endsWith("pending.glb")) return new Promise(() => undefined);
+    return Promise.resolve(null);
+  });
+}
+
+function featureIds(collection: MapMarkerFeatureCollection | readonly { id: string }[]) {
+  const features = "features" in collection ? collection.features : collection;
+  return features.map((feature) => feature.id);
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   maplibreMock.instances.length = 0;
+  modelLayerMock.layers.length = 0;
+  modelLayerMock.loadPlaceMarkerModel.mockResolvedValue(null);
+  characterMovementMock.onFrame = null;
   placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mockResolvedValue(undefined);
   keyboardDirectionMock.disabled = false;
   keyboardDirectionMock.onDirectionChange = null;
@@ -341,5 +421,121 @@ describe("ExplorationMap", () => {
     expect(keyboardDirectionMock.disabled).toBe(true);
     expect(getByTestId("exploration-map-joystick").getAttribute("data-disabled")).toBe("true");
     expect(characterMovementMock.stop).toHaveBeenCalled();
+  });
+
+  test("adds the GLB marker model layer once the map loads", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    render(<ExplorationMap placeMarkers={MODEL_MARKERS} />);
+    const map = maplibreMock.instances.at(-1);
+
+    expect(map?.addLayer).not.toHaveBeenCalled();
+    await act(async () => {
+      map?.emit("load");
+    });
+
+    expect(modelLayerMock.layers).toHaveLength(1);
+    expect(map?.addLayer).toHaveBeenCalledOnce();
+    expect(map?.addLayer).toHaveBeenCalledWith(modelLayerMock.layers[0]);
+  });
+
+  test("draws ready models in the model layer and keeps only model-less markers as symbols", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    mockModelLoading();
+    const revealedPlaceIds = new Set(["ready"]);
+    render(<ExplorationMap placeMarkers={MODEL_MARKERS} revealedPlaceIds={revealedPlaceIds} />);
+    const map = maplibreMock.instances.at(-1);
+
+    await act(async () => {
+      map?.emit("load");
+    });
+    await act(async () => {
+      map?.emit("load");
+    });
+
+    expect(modelLayerMock.loadPlaceMarkerModel).toHaveBeenCalledTimes(3);
+    const lastSourceMarkers =
+      placeMarkerLayerMock.updateExplorationPlaceMarkersSource.mock.calls.at(
+        -1
+      )?.[1] as MapMarkerFeatureCollection;
+    expect(featureIds(lastSourceMarkers)).toEqual(["plain"]);
+    const markerLayerOptions =
+      placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mock.calls[0]?.[1];
+    expect(featureIds(markerLayerOptions.getPlaceMarkers())).toEqual(["plain"]);
+    const [modelFeatures, states, revealed] =
+      modelLayerMock.layers[0]?.setMarkers.mock.calls.at(-1) ?? [];
+    expect(featureIds(modelFeatures)).toEqual(["ready"]);
+    expect(states.get("/models/markers/ready.glb")).toEqual({
+      status: "ready",
+      model: { parts: [] },
+    });
+    expect(revealed).toBe(revealedPlaceIds);
+  });
+
+  test("hides model markers when the model layer is unavailable", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    mockModelLoading();
+    render(<ExplorationMap placeMarkers={MODEL_MARKERS} />);
+    const map = maplibreMock.instances.at(-1);
+    await act(async () => {
+      map?.emit("load");
+    });
+
+    act(() => modelLayerMock.layers[0]?.onUnavailable());
+    await act(async () => {
+      map?.emit("load");
+    });
+
+    const markerLayerOptions =
+      placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mock.calls[0]?.[1];
+    expect(featureIds(markerLayerOptions.getPlaceMarkers())).toEqual(["plain"]);
+    expect(modelLayerMock.layers[0]?.setMarkers.mock.calls.at(-1)?.[0]).toEqual([]);
+    const lastSourceMarkers =
+      placeMarkerLayerMock.updateExplorationPlaceMarkersSource.mock.calls.at(
+        -1
+      )?.[1] as MapMarkerFeatureCollection;
+    expect(featureIds(lastSourceMarkers)).toEqual(["plain"]);
+  });
+
+  test("still opens a place drawn as a GLB model when the character arrives", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    mockModelLoading();
+    placeMarkerLayerMock.getExplorationPlaceMarkerSelection.mockImplementation(
+      (feature: { properties: { id: string }; geometry: { coordinates: [number, number] } }) => ({
+        id: feature.properties.id,
+        position: { lng: feature.geometry.coordinates[0], lat: feature.geometry.coordinates[1] },
+      })
+    );
+    const onPlaceMarkerSelect = vi.fn();
+    render(
+      <ExplorationMap placeMarkers={MODEL_MARKERS} onPlaceMarkerSelect={onPlaceMarkerSelect} />
+    );
+    const map = maplibreMock.instances.at(-1);
+    await act(async () => {
+      map?.emit("load");
+    });
+    expect(featureIds(modelLayerMock.layers[0]?.setMarkers.mock.calls.at(-1)?.[0])).toEqual([
+      "ready",
+    ]);
+
+    act(() => {
+      characterMovementMock.onFrame?.({
+        position: { lng: READY_COORDINATES[0], lat: READY_COORDINATES[1] },
+      });
+    });
+
+    expect(onPlaceMarkerSelect).toHaveBeenCalledOnce();
+    expect(onPlaceMarkerSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ready" }));
+    expect(characterMovementMock.stop).toHaveBeenCalled();
+  });
+
+  test("does not show the marker failure alert when a GLB model is unavailable", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    modelLayerMock.loadPlaceMarkerModel.mockResolvedValue(null);
+    const view = render(<ExplorationMap placeMarkers={MODEL_MARKERS} />);
+    await act(async () => {
+      maplibreMock.instances.at(-1)?.emit("load");
+    });
+
+    expect(view.queryByRole("alert")).toBeNull();
   });
 });

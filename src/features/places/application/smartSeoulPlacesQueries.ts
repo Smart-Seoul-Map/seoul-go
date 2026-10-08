@@ -56,24 +56,21 @@ export function nearbyThemePlacesOptions(
   });
 }
 
-export function linkedPlacesOptions(center: PlaceCoordinates | null) {
+export function linkedThemePlacesOptions(center: PlaceCoordinates, themeId: string) {
   const apiKey = getSmartSeoulThemeApiKey();
-  const searchArea = center ? { center, distanceMeters: LINKED_PLACE_RADIUS_METERS } : null;
+  const searchArea = { center, distanceMeters: LINKED_PLACE_RADIUS_METERS };
   return queryOptions({
     ...cachePolicy,
-    queryKey: searchArea
-      ? placesQueryKeys.linkedPlaces({ ...searchArea, themeIds: LINKED_PLACE_THEME_IDS })
-      : [...placesQueryKeys.all, "linkedPlaces", "idle"],
+    queryKey: placesQueryKeys.linkedPlaces({ ...searchArea, themeId }),
     queryFn: ({ signal }) =>
-      searchArea
-        ? getNearbySmartSeoulPlaces({
-            apiKey,
-            searchArea,
-            themeIds: LINKED_PLACE_THEME_IDS,
-            signal,
-          })
-        : Promise.resolve([]),
-    enabled: Boolean(apiKey && center),
+      getNearbySmartSeoulPlaces({ apiKey, searchArea, themeIds: [themeId], signal }),
+    enabled: Boolean(apiKey),
     staleTime: SMART_SEOUL_NEARBY_PLACES_STALE_TIME_MS,
   });
+}
+
+export function linkedPlacesOptionsByTheme(center: PlaceCoordinates | null) {
+  if (!center) return [];
+
+  return LINKED_PLACE_THEME_IDS.map((themeId) => linkedThemePlacesOptions(center, themeId));
 }

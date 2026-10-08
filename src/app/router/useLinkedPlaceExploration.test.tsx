@@ -11,9 +11,15 @@ import {
 import type { SmartSeoulThemePlace } from "@features/places";
 import { useLinkedPlaceExploration } from "./useLinkedPlaceExploration";
 
+type NearbyResult = { place: SmartSeoulThemePlace; distance: number | null };
+type NearbyParams = {
+  searchArea: { center: { lat: number; lng: number } };
+  themeIds: readonly string[];
+};
+
 const { getNearbySmartSeoulPlaces, getSmartSeoulThemeApiKey } = vi.hoisted(() => ({
-  getNearbySmartSeoulPlaces: vi.fn(
-    async (): Promise<{ place: SmartSeoulThemePlace; distance: number | null }[]> => []
+  getNearbySmartSeoulPlaces: vi.fn<(params: NearbyParams) => Promise<NearbyResult[]>>(
+    async () => []
   ),
   getSmartSeoulThemeApiKey: vi.fn(() => "TEST"),
 }));
@@ -43,6 +49,34 @@ const b = {
   position: { lat: 37.1, lng: 127.1 },
   addedAt: "2026-01-02",
 };
+const LINKED_THEME_IDS = ["100032", "1741228380725", "1777251935025", "1725252918740", "100575"];
+type Center = { lat: number; lng: number };
+
+function linkedPlace(id: string, themeId = "100032"): SmartSeoulThemePlace {
+  return { ...a, id, sourceContentId: id, themeId, districtName: "", address: "" };
+}
+
+function respondByCenterAndTheme(
+  respond: (center: Center, themeId: string) => NearbyResult[] | Error
+) {
+  getNearbySmartSeoulPlaces.mockImplementation(async ({ searchArea, themeIds }) => {
+    expect(themeIds).toHaveLength(1);
+    const response = respond(searchArea.center, themeIds[0] ?? "");
+    if (response instanceof Error) throw response;
+    return response;
+  });
+}
+
+function isCenterOf(center: Center, place: { position: Center }) {
+  return center.lat === place.position.lat && center.lng === place.position.lng;
+}
+
+function countCalls(themeId: string, place: { position: Center }) {
+  return getNearbySmartSeoulPlaces.mock.calls.filter(
+    ([params]) => params.themeIds[0] === themeId && isCenterOf(params.searchArea.center, place)
+  ).length;
+}
+
 afterEach(() => {
   cleanup();
   stampCourseStore.setState({ places: [] });
@@ -79,7 +113,7 @@ test("only activates after adding an Edition, preserves selection, and reconcile
   expect(result.current.selected?.id).toBe(a.id);
   act(() => stampCourseStore.setState({ places: [b] }));
   expect(result.current.selected?.id).toBe(b.id);
-  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(2);
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(10);
   act(() => stampCourseStore.setState({ places: [] }));
   expect(result.current.selected).toBeNull();
   expect(result.current.markers.features).toHaveLength(0);
@@ -106,18 +140,14 @@ test("missing API configuration shows an error instead of loading forever", () =
 });
 
 test("tab selection changes the list but keeps all unlocked markers after course removal", async () => {
-  const linkedA: SmartSeoulThemePlace = {
-    ...a,
-    id: "linked-a",
-    sourceContentId: "linked-a",
-    themeId: "100032",
-    districtName: "",
-    address: "",
-  };
-  const linkedB = { ...linkedA, id: "linked-b", sourceContentId: "linked-b" };
-  getNearbySmartSeoulPlaces
-    .mockResolvedValueOnce([{ place: linkedA, distance: 100 }])
-    .mockResolvedValueOnce([{ place: linkedB, distance: 200 }]);
+  const linkedA = linkedPlace("linked-a");
+  const linkedB = linkedPlace("linked-b");
+  respondByCenterAndTheme((center, themeId) => {
+    if (themeId !== "100032") return [];
+    return isCenterOf(center, a)
+      ? [{ place: linkedA, distance: 100 }]
+      : [{ place: linkedB, distance: 200 }];
+  });
   stampCourseStore.setState({ places: [a] });
   const client = new QueryClient();
   const wrapper = ({ children }: PropsWithChildren) => (
@@ -147,7 +177,7 @@ test("tab selection changes the list but keeps all unlocked markers after course
     "linked-a",
     "linked-b",
   ]);
-  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(2);
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(10);
   expect(stampCourseStore.getState().places.map((place) => place.id)).toEqual([a.id, b.id]);
   act(() => stampCourseStore.setState({ places: [] }));
   expect(result.current.selected).toBeNull();
@@ -159,15 +189,10 @@ test("tab selection changes the list but keeps all unlocked markers after course
 });
 
 test("restores unlocked markers with a fresh query cache even after courses were deleted", async () => {
-  const linked: SmartSeoulThemePlace = {
-    ...a,
-    id: "linked-a",
-    sourceContentId: "linked-a",
-    themeId: "100032",
-    districtName: "",
-    address: "",
-  };
-  getNearbySmartSeoulPlaces.mockResolvedValue([{ place: linked, distance: 100 }]);
+  const linked = linkedPlace("linked-a");
+  respondByCenterAndTheme((_center, themeId) =>
+    themeId === "100032" ? [{ place: linked, distance: 100 }] : []
+  );
   stampCourseStore.setState({ places: [a] });
   const client = new QueryClient();
   const wrapper = ({ children }: PropsWithChildren) => (
@@ -194,21 +219,16 @@ test("restores unlocked markers with a fresh query cache even after courses were
     ])
   );
   expect(restored.result.current.selected).toBeNull();
-  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(2);
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(10);
   restored.unmount();
   freshClient.clear();
 });
 
 test("overlapping results appear once on the map while each reference keeps its own list", async () => {
-  const linked: SmartSeoulThemePlace = {
-    ...a,
-    id: "shared",
-    sourceContentId: "shared",
-    themeId: "100032",
-    districtName: "",
-    address: "",
-  };
-  getNearbySmartSeoulPlaces.mockResolvedValue([{ place: linked, distance: 100 }]);
+  const linked = linkedPlace("shared");
+  respondByCenterAndTheme((_center, themeId) =>
+    themeId === "100032" ? [{ place: linked, distance: 100 }] : []
+  );
   stampCourseStore.setState({ places: [a, b] });
   const client = new QueryClient();
   const view = renderHook(() => useLinkedPlaceExploration([]), {
@@ -224,23 +244,17 @@ test("overlapping results appear once on the map while each reference keeps its 
   await waitFor(() => expect(view.result.current.isSuccess).toBe(true));
   expect(view.result.current.places.map((place) => place.id)).toEqual(["shared"]);
   expect(view.result.current.markers.features).toHaveLength(1);
-  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(2);
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(10);
   view.unmount();
   client.clear();
 });
 
 test("a failed request for the newly added reference does not remove previously unlocked markers", async () => {
-  const linked: SmartSeoulThemePlace = {
-    ...a,
-    id: "linked-a",
-    sourceContentId: "linked-a",
-    themeId: "100032",
-    districtName: "",
-    address: "",
-  };
-  getNearbySmartSeoulPlaces
-    .mockResolvedValueOnce([{ place: linked, distance: 100 }])
-    .mockRejectedValue(new Error("offline"));
+  const linked = linkedPlace("linked-a");
+  respondByCenterAndTheme((center, themeId) => {
+    if (!isCenterOf(center, a)) return new Error("offline");
+    return themeId === "100032" ? [{ place: linked, distance: 100 }] : [];
+  });
   stampCourseStore.setState({ places: [a] });
   const client = new QueryClient();
   const view = renderHook(() => useLinkedPlaceExploration([]), {
@@ -256,6 +270,97 @@ test("a failed request for the newly added reference does not remove previously 
   await waitFor(() => expect(view.result.current.isError).toBe(true));
   expect(view.result.current.markers.features.map((feature) => feature.id)).toEqual(["linked-a"]);
   expect(view.result.current.places).toEqual([]);
+  view.unmount();
+  client.clear();
+});
+
+test("a failed theme keeps the other themes on the map and retries only that theme", async () => {
+  const failingTheme = "100032";
+  let isFailingThemeOffline = true;
+  respondByCenterAndTheme((_center, themeId) => {
+    if (themeId === failingTheme) {
+      return isFailingThemeOffline
+        ? new Error("offline")
+        : [{ place: linkedPlace("recovered", themeId), distance: 50 }];
+    }
+    const index = LINKED_THEME_IDS.indexOf(themeId);
+    return [{ place: linkedPlace(`ok-${index}`, themeId), distance: 500 - index * 100 }];
+  });
+  stampCourseStore.setState({ places: [a] });
+  const client = new QueryClient();
+  const view = renderHook(() => useLinkedPlaceExploration([]), {
+    wrapper: ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+  await waitFor(() => expect(view.result.current.isError).toBe(true));
+  await waitFor(() => expect(view.result.current.markers.features).toHaveLength(4));
+  expect(view.result.current.markers.features.map((feature) => feature.id).sort()).toEqual([
+    "ok-1",
+    "ok-2",
+    "ok-3",
+    "ok-4",
+  ]);
+  expect(view.result.current.places).toEqual([]);
+  expect(view.result.current.isSuccess).toBe(false);
+  expect(view.result.current.isLoading).toBe(false);
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(5);
+
+  isFailingThemeOffline = false;
+  act(() => view.result.current.retry());
+  await waitFor(() => expect(view.result.current.isSuccess).toBe(true));
+  expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(6);
+  expect(countCalls(failingTheme, a)).toBe(2);
+  for (const themeId of LINKED_THEME_IDS.slice(1)) expect(countCalls(themeId, a)).toBe(1);
+  expect(view.result.current.isError).toBe(false);
+  expect(view.result.current.places.map((place) => place.id)).toEqual([
+    "recovered",
+    "ok-4",
+    "ok-3",
+    "ok-2",
+    "ok-1",
+  ]);
+  await waitFor(() => expect(view.result.current.markers.features).toHaveLength(5));
+  view.unmount();
+  client.clear();
+});
+
+test("merges theme results by distance and lists a duplicated place once", async () => {
+  const shared = linkedPlace("shared");
+  respondByCenterAndTheme((_center, themeId) => {
+    if (themeId === "100032") {
+      return [
+        { place: shared, distance: 300 },
+        { place: linkedPlace("far"), distance: null },
+      ];
+    }
+    if (themeId === "1741228380725") {
+      return [
+        { place: shared, distance: 100 },
+        { place: linkedPlace("near", themeId), distance: 50 },
+      ];
+    }
+    if (themeId === "100575") return [{ place: linkedPlace("middle", themeId), distance: 200 }];
+    return [];
+  });
+  stampCourseStore.setState({ places: [a] });
+  const client = new QueryClient();
+  const view = renderHook(() => useLinkedPlaceExploration([]), {
+    wrapper: ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+  await waitFor(() => expect(view.result.current.isSuccess).toBe(true));
+  expect(view.result.current.places.map((place) => place.id)).toEqual([
+    "near",
+    "shared",
+    "middle",
+    "far",
+  ]);
+  await waitFor(() => expect(view.result.current.markers.features).toHaveLength(4));
+  expect(
+    view.result.current.markers.features.filter((feature) => feature.id === "shared")
+  ).toHaveLength(1);
   view.unmount();
   client.clear();
 });

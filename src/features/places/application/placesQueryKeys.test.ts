@@ -28,4 +28,14 @@ describe("placesQueryKeys", () => {
       500,
     ]);
   });
+
+  test("linked places key is per theme and keeps the linkedPlaces prefix", () => {
+    expect(
+      placesQueryKeys.linkedPlaces({
+        center: { lat: 37.5657, lng: 126.9769 },
+        distanceMeters: 1000,
+        themeId: "100032",
+      })
+    ).toEqual(["places", "linkedPlaces", "100032", 126.9769, 37.5657, 1000]);
+  });
 });

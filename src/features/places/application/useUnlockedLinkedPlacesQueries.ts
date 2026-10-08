@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQueries, type UseQueryResult } from "@tanstack/react-query";
 import type { NearbySmartSeoulPlace } from "../domain/nearbyPlace";
 import type { PlaceCoordinates, SmartSeoulThemePlace } from "../domain/place";
-import { linkedPlacesOptions } from "./smartSeoulPlacesQueries";
+import { linkedPlacesOptionsByTheme } from "./smartSeoulPlacesQueries";
 
 function combinePlaces(results: UseQueryResult<NearbySmartSeoulPlace[]>[]): SmartSeoulThemePlace[] {
   const byId = new Map<string, SmartSeoulThemePlace>();
@@ -15,7 +15,9 @@ function combinePlaces(results: UseQueryResult<NearbySmartSeoulPlace[]>[]): Smar
 export function useUnlockedLinkedPlacesQueries(centers: readonly PlaceCoordinates[]) {
   const queries = useMemo(() => {
     const uniqueCenters = new Map(centers.map((center) => [`${center.lat},${center.lng}`, center]));
-    return Array.from(uniqueCenters.values(), linkedPlacesOptions);
+    return Array.from(uniqueCenters.values()).flatMap((center) =>
+      linkedPlacesOptionsByTheme(center)
+    );
   }, [centers]);
 
   return useQueries({ queries, combine: combinePlaces });

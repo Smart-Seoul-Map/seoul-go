@@ -68,11 +68,29 @@ describe("Smart Seoul 장소 테마 설정", () => {
   test("테마 ID로 표시 이름과 색상을 찾는다", () => {
     expect(getSmartSeoulPlaceTheme("100575")).toEqual({
       id: "100575",
+      markerModelUrl: "/models/markers/100575.glb",
+      markerModelYawDegrees: -90,
       name: "오래가게",
       markerColor: "#e6a100",
       markerColorToken: "--sg-place-theme-yellow",
       closedBoxImage: "yellow_closed_box",
       openBoxImage: "yellow_open_box",
     });
+  });
+
+  test("연계 5개 테마에만 테마 ID 기반 GLB 마커 모델 경로를 둔다", () => {
+    expect(
+      SMART_SEOUL_PLACE_THEMES.map((theme) => [
+        theme.id,
+        "markerModelUrl" in theme ? theme.markerModelUrl : undefined,
+      ])
+    ).toEqual([
+      ["100032", "/models/markers/100032.glb"],
+      ["1741228380725", "/models/markers/1741228380725.glb"],
+      ["1777251935025", "/models/markers/1777251935025.glb"],
+      ["1725252918740", "/models/markers/1725252918740.glb"],
+      ["100575", "/models/markers/100575.glb"],
+      ["1786321258890", undefined],
+    ]);
   });
 });
