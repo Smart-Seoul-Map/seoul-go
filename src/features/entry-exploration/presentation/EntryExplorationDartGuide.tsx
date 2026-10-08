@@ -3,11 +3,12 @@ import type { ReactElement } from "react";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppStack } from "@shared/ui/layout";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 import { AppHeading, AppText } from "@shared/ui/typography";
 
+import closeIcon from "../../../assets/close.svg";
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartGuide.css";
@@ -21,6 +22,7 @@ const PANEL_SURFACE = {
 export type EntryExplorationDartGuideProps = {
   isVisible: boolean;
   landedResult: EntryExplorationDartThrowResult | null;
+  onClose: () => void;
   onRetryThrow: () => void;
   onStartExploration: (result: EntryExplorationDartThrowResult) => void;
   shotResult: EntryExplorationDartThrowResult | null;
@@ -29,6 +31,7 @@ export type EntryExplorationDartGuideProps = {
 export function EntryExplorationDartGuide({
   isVisible,
   landedResult,
+  onClose,
   onRetryThrow,
   onStartExploration,
   shotResult,
@@ -41,6 +44,17 @@ export function EntryExplorationDartGuide({
 
   return (
     <div className="entry-exploration-dart-guide">
+      <AppBox
+        className="entry-exploration-dart-guide__action"
+        position="absolute"
+        right="spacing.4_5"
+        top="spacing.4_5"
+      >
+        <AppIconButton ariaLabel="격자번호 다트 닫기" size="sm" onClick={onClose}>
+          <img src={closeIcon} alt="" width="20" height="20" />
+        </AppIconButton>
+      </AppBox>
+
       {!isMobileViewport && (
         <AppBox
           {...PANEL_SURFACE}

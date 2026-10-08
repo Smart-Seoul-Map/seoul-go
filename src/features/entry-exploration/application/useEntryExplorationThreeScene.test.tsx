@@ -600,11 +600,18 @@ describe("useEntryExplorationThreeScene", () => {
     });
 
     expect(mocks.registry.deactivateActiveSceneInteraction).toHaveBeenCalledTimes(1);
-    expect(mocks.updateEntryExplorationCameraFocus).toHaveBeenLastCalledWith(mocks.camera, {
-      x: 4,
-      z: 5,
-    });
+    expect(mocks.updateEntryExplorationCameraFocus).not.toHaveBeenCalled();
     expect(mocks.movement.moveTo).not.toHaveBeenCalled();
+
+    const { cameraOffset, cameraTransitionDurationMs } = ENTRY_EXPLORATION_SCENE_CONFIG;
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+
+    act(() => {
+      frame?.(performance.now() + cameraTransitionDurationMs * 2);
+    });
+
+    expect(mocks.camera?.position.x).toBeCloseTo(4 + cameraOffset.x);
+    expect(mocks.camera?.position.z).toBeCloseTo(5 + cameraOffset.z);
 
     intersectObject.mockRestore();
   });
