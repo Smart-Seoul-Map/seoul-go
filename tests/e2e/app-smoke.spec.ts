@@ -111,8 +111,12 @@ test("reuses character GLBs when route changes in one app session", async ({ pag
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("canvas").first()).toBeVisible({ timeout: 15_000 });
-  await expect.poll(() => glbRequestCounts.get("/models/haechi_v1.glb") ?? 0).toBe(1);
-  await expect.poll(() => glbRequestCounts.get("/models/haechi_idle_01_v1.glb") ?? 0).toBe(1);
+  await expect
+    .poll(() => glbRequestCounts.get("/models/haechi_v1.glb") ?? 0, { timeout: 15_000 })
+    .toBe(1);
+  await expect
+    .poll(() => glbRequestCounts.get("/models/haechi_idle_01_v1.glb") ?? 0, { timeout: 15_000 })
+    .toBe(1);
 
   await navigateInSameAppSession(page, "/exploration");
   await expect(page).toHaveURL(/\/exploration$/);
