@@ -4,6 +4,10 @@ export type NearbySmartSeoulThemePlacesQueryKeyParams = SmartSeoulThemeContentsS
   themeIds: readonly string[];
 };
 
+export type LinkedThemePlacesQueryKeyParams = SmartSeoulThemeContentsSearchArea & {
+  themeId: string;
+};
+
 export const placesQueryKeys = {
   all: ["places"] as const,
   smartSeoulThemePlaces: (themeIds: readonly string[]) =>
@@ -21,11 +25,11 @@ export const placesQueryKeys = {
       center.lat,
       distanceMeters,
     ] as const,
-  linkedPlaces: ({ center, distanceMeters, themeIds }: NearbySmartSeoulThemePlacesQueryKeyParams) =>
+  linkedPlaces: ({ center, distanceMeters, themeId }: LinkedThemePlacesQueryKeyParams) =>
     [
       ...placesQueryKeys.all,
       "linkedPlaces",
-      [...themeIds],
+      themeId,
       center.lng,
       center.lat,
       distanceMeters,

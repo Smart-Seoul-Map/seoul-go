@@ -5,7 +5,8 @@ import { fetchSmartSeoulThemePlaces, getNearbySmartSeoulPlaces } from "../data/s
 import {
   seoulEditionPlacesOptions,
   nearbyThemePlacesOptions,
-  linkedPlacesOptions,
+  linkedPlacesOptionsByTheme,
+  linkedThemePlacesOptions,
 } from "./smartSeoulPlacesQueries";
 
 vi.mock("../data/smartSeoulThemeApi", () => ({
@@ -43,16 +44,35 @@ describe("purpose-specific place queries", () => {
   });
   test("queries linked themes only and separates centers in cache", async () => {
     const client = new QueryClient();
-    await client.fetchQuery(linkedPlacesOptions(area.center));
-    await client.fetchQuery(linkedPlacesOptions({ ...area.center, lng: 127 }));
-    expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(2);
-    expect(getNearbySmartSeoulPlaces).toHaveBeenCalledWith(
-      expect.objectContaining({
-        themeIds: SMART_SEOUL_PLACE_THEME_IDS.filter((id) => id !== SEOUL_EDITION25_THEME_ID),
-        searchArea: area,
-      })
+    const linkedThemeIds = SMART_SEOUL_PLACE_THEME_IDS.filter(
+      (id) => id !== SEOUL_EDITION25_THEME_ID
     );
-    expect(linkedPlacesOptions(null).enabled).toBe(false);
+    const otherCenter = { ...area.center, lng: 127 };
+    for (const center of [area.center, otherCenter]) {
+      for (const options of linkedPlacesOptionsByTheme(center)) await client.fetchQuery(options);
+    }
+    expect(getNearbySmartSeoulPlaces).toHaveBeenCalledTimes(10);
+    const calls = vi.mocked(getNearbySmartSeoulPlaces).mock.calls.map(([params]) => params);
+    expect(calls.every((params) => params.themeIds?.length === 1)).toBe(true);
+    expect(calls.some((params) => params.themeIds?.includes(SEOUL_EDITION25_THEME_ID))).toBe(false);
+    expect(calls.filter((params) => params.searchArea.center === area.center)).toHaveLength(5);
+    expect(
+      calls
+        .filter((params) => params.searchArea.center === area.center)
+        .map((params) => params.themeIds?.[0])
+    ).toEqual(linkedThemeIds);
+    expect(getNearbySmartSeoulPlaces).toHaveBeenCalledWith(
+      expect.objectContaining({ themeIds: [linkedThemeIds[0]], searchArea: area })
+    );
+    expect(linkedPlacesOptionsByTheme(null)).toEqual([]);
+    expect(linkedThemePlacesOptions(area.center, "100032").queryKey).toEqual([
+      "places",
+      "linkedPlaces",
+      "100032",
+      area.center.lng,
+      area.center.lat,
+      area.distanceMeters,
+    ]);
     client.clear();
   });
 });
