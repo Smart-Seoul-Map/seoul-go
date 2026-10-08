@@ -65,9 +65,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isReward(value: unknown): value is EntryNumberReward {
   return (
     isRecord(value) &&
-    (isEntryNumberRewardPlaceId(value.placeId) ||
-      value.placeId === "hanok" ||
-      value.placeId === "tower") &&
+    (isEntryNumberRewardPlaceId(value.placeId) || value.placeId === "tower") &&
     typeof value.number === "number" &&
     Number.isInteger(value.number) &&
     value.number >= ENTRY_NUMBER_MIN &&

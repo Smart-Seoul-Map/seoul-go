@@ -195,30 +195,27 @@ describe("EntryExplorationPage", () => {
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(router.state.location.pathname).toBe("/");
   });
-  test("visiting hanok starts the slot after closing its panel and only rewards once", () => {
+  test("visiting hanok opens its panel but grants no reward and never starts the slot", () => {
     renderEntryExplorationPage();
     fireEvent.click(screen.getByRole("button", { name: "탐방 시작" }));
     act(() => {
       placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
     });
     expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
-    const [reward] = entryNumberRewardStore.getState().rewards;
-    expect(reward.placeId).toBe(ENTRY_HANOK_PLACE_ID);
-    expect(slotRequestReward).not.toHaveBeenCalled();
+    expect(entryNumberRewardStore.getState().rewards).toEqual([]);
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(slotRequestReward).toHaveBeenCalledExactlyOnceWith([
-      Math.floor(reward.number / 10),
-      reward.number % 10,
-    ]);
-    act(() => slotStateChange?.({ status: "result", result: String(reward.number) }));
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     act(() => {
       placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 10, z: 0 }, { x: 0, z: 0 });
       placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
     });
+    expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(slotRequestReward).toHaveBeenCalledTimes(1);
-    expect(entryNumberRewardStore.getState().rewards).toHaveLength(1);
+    expect(slotRequestReward).not.toHaveBeenCalled();
+    expect(entryNumberRewardStore.getState().rewards).toEqual([]);
+    expect(loadEntryNumberRewards()).toEqual([]);
+    expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
   });
 
   test("revisiting a rewarded place only opens its information card", () => {

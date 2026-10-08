@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { grantEntryNumberReward } from "./entryNumberReward";
+import { ENTRY_EDITION_PLACE_COUNT } from "../config/entryEditionModels";
+import { grantEntryNumberReward, MAX_ENTRY_NUMBER_REWARDS } from "./entryNumberReward";
 
 describe("entry number rewards", () => {
   test("draws every integer from 36 through 71 from equally sized intervals", () => {
@@ -30,7 +31,9 @@ describe("entry number rewards", () => {
     ).toBe(first);
   });
 
-  test("retains at most ten distinct place rewards", () => {
+  test("retains at most ten distinct place rewards, matching the edition place count", () => {
+    expect(MAX_ENTRY_NUMBER_REWARDS).toBe(ENTRY_EDITION_PLACE_COUNT);
+    expect(MAX_ENTRY_NUMBER_REWARDS).toBe(10);
     let rewards = grantEntryNumberReward([], "place-0", () => 0);
     for (let index = 1; index <= 10; index++) {
       rewards = grantEntryNumberReward(rewards, `place-${index}`, () => 0);

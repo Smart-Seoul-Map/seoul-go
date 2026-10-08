@@ -1,8 +1,10 @@
+import { ENTRY_EDITION_PLACE_COUNT } from "../config/entryEditionModels";
+
 export type EntryNumberReward = { placeId: string; number: number };
 
 export const ENTRY_NUMBER_MIN = 36;
 export const ENTRY_NUMBER_MAX = 71;
-export const MAX_ENTRY_NUMBER_REWARDS = 10;
+export const MAX_ENTRY_NUMBER_REWARDS = ENTRY_EDITION_PLACE_COUNT;
 
 export function grantEntryNumberReward(
   rewards: readonly EntryNumberReward[],
