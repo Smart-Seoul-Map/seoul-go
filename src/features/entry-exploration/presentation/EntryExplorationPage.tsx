@@ -133,10 +133,7 @@ export function EntryExplorationPage({
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {!isVisible && slot.state.status === "closed" && (
-        <EntryCollectedNumbersPanel
-          numbers={collectedNumbers}
-          shouldOpen={dartShot.isGuideVisible}
-        />
+        <EntryCollectedNumbersPanel numbers={collectedNumbers} />
       )}
       {!isVisible && renderPlacePanel?.(panelProps)}
       {!isVisible && <EntrySlotOverlay {...slot} />}
