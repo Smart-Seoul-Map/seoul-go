@@ -9,16 +9,6 @@ export type DistrictExplorationTarget = {
   type: "district";
 };
 
-export type StationExplorationTarget = {
-  center: Coordinates;
-  radiusMeters: number;
-  stationId: string;
-  stationName: string;
-  type: "station";
-};
-
-export type ExplorationTarget = DistrictExplorationTarget | StationExplorationTarget;
-
 export function createDistrictExplorationTarget(
   district: SeoulDistrict
 ): DistrictExplorationTarget {
@@ -28,27 +18,6 @@ export function createDistrictExplorationTarget(
     districtName: district.name,
     type: "district",
   };
-}
-
-export function createStationExplorationTarget({
-  center,
-  radiusMeters,
-  stationId,
-  stationName,
-}: Omit<StationExplorationTarget, "type">): StationExplorationTarget {
-  return {
-    center,
-    radiusMeters,
-    stationId,
-    stationName,
-    type: "station",
-  };
-}
-
-export function isDistrictExplorationTarget(
-  target: ExplorationTarget | null
-): target is DistrictExplorationTarget {
-  return target?.type === "district";
 }
 
 export function parseDistrictExplorationTargetIdParam(value: string | undefined): number | null {

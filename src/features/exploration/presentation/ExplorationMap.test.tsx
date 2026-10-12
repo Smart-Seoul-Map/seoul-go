@@ -51,10 +51,6 @@ const modelLayerMock = vi.hoisted(() => ({
   loadPlaceMarkerModel: vi.fn(),
 }));
 
-const stationRadiusLayerMock = vi.hoisted(() => ({
-  addExplorationStationRadiusLayers: vi.fn(),
-}));
-
 vi.mock("maplibre-gl", () => {
   class Map {
     handlers = new globalThis.Map<string, MapEventHandler[]>();
@@ -133,8 +129,6 @@ vi.mock("../application/explorationMapInteractions", () => ({
 }));
 
 vi.mock("../application/explorationPlaceMarkers", () => placeMarkerLayerMock);
-
-vi.mock("../application/explorationStationRadiusLayer", () => stationRadiusLayerMock);
 
 vi.mock("../application/explorationPlaceMarkerModelLayer", () => ({
   createPlaceMarkerModelLayer: ({ onUnavailable }: { onUnavailable: () => void }) => {
@@ -349,23 +343,6 @@ describe("ExplorationMap", () => {
       placeMarkerLayerMock.addExplorationPlaceMarkersLayer.mock.calls[0]?.[1];
 
     expect(markerLayerOptions.getPlaceMarkers()).toBe(nextPlaceMarkers);
-  });
-
-  test("adds a fixed station radius around the initial center", () => {
-    vi.stubGlobal("WebGLRenderingContext", class {});
-    const initialCenter = { lat: 37.564718, lng: 126.977108 };
-    render(<ExplorationMap initialCenter={initialCenter} stationRadiusMeters={1000} />);
-    const map = maplibreMock.instances.at(-1);
-
-    act(() => {
-      map?.emit("load");
-    });
-
-    expect(stationRadiusLayerMock.addExplorationStationRadiusLayers).toHaveBeenCalledWith(
-      expect.anything(),
-      initialCenter,
-      1000
-    );
   });
 
   test("moves the character when a place marker is clicked", () => {

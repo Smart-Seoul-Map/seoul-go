@@ -65,7 +65,6 @@ type ExplorationPageProps = {
   ) => AddExplorationPlaceToCourseResultStatus;
   placeMarkers?: MapMarkerFeatureCollection;
   placeMarkerPresentation?: "treasure" | "image-year";
-  stationRadiusMeters?: number;
   themeProgressItems: readonly ExplorationThemePlaceVisitProgressItem[];
 };
 
@@ -85,7 +84,6 @@ export function ExplorationPage({
   onAddPlaceToCourse,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   placeMarkerPresentation,
-  stationRadiusMeters,
   themeProgressItems,
 }: ExplorationPageProps): ReactElement {
   const { showToast } = useAppToast();
@@ -185,7 +183,6 @@ export function ExplorationPage({
           linkedPlaceMarkers={displayedLinkedPlaceMarkers}
           placeMarkerPresentation={placeMarkerPresentation}
           revealedPlaceIds={revealedPlaceIds}
-          stationRadiusMeters={stationRadiusMeters}
         />
         <div className="exploration-map-notice-actions">
           {mapNotice}

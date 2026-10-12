@@ -15,7 +15,6 @@ import {
   fetchSmartSeoulThemePlaces,
   getNearbySmartSeoulPlaces,
   getSmartSeoulThemeApiKey,
-  type SmartSeoulThemeContentsSearchArea,
 } from "../data/smartSeoulThemeApi";
 import type { PlaceCoordinates } from "../domain/place";
 import { placesQueryKeys } from "./placesQueryKeys";
@@ -35,25 +34,6 @@ export function themePlacesOptions(themeIds: readonly string[] = SMART_SEOUL_PLA
 
 export function seoulEditionPlacesOptions() {
   return themePlacesOptions(SEOUL_EDITION_THEME_IDS);
-}
-
-export function nearbyThemePlacesOptions(
-  searchArea: SmartSeoulThemeContentsSearchArea | null,
-  themeIds: readonly string[] = SMART_SEOUL_PLACE_THEME_IDS
-) {
-  const apiKey = getSmartSeoulThemeApiKey();
-  return queryOptions({
-    ...cachePolicy,
-    queryKey: searchArea
-      ? placesQueryKeys.nearbySmartSeoulThemePlaces({ ...searchArea, themeIds })
-      : [...placesQueryKeys.all, "nearbySmartSeoulThemePlaces", "idle", [...themeIds]],
-    queryFn: ({ signal }) =>
-      searchArea
-        ? fetchSmartSeoulThemePlaces({ apiKey, searchArea, themeIds, signal })
-        : Promise.resolve([]),
-    enabled: Boolean(apiKey && searchArea),
-    staleTime: SMART_SEOUL_NEARBY_PLACES_STALE_TIME_MS,
-  });
 }
 
 export function linkedThemePlacesOptions(center: PlaceCoordinates, themeId: string) {
