@@ -437,7 +437,7 @@ describe("useEntryExplorationThreeScene", () => {
     const mountLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100);
     expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledOnce();
     expect(mocks.registry.setSceneInteractionLayout).toHaveBeenLastCalledWith(mountLayout);
-    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(mountLayout);
+    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(mountLayout, 100 / 100);
 
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
@@ -447,7 +447,7 @@ describe("useEntryExplorationThreeScene", () => {
     const introLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
     expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledTimes(2);
     expect(mocks.registry.setSceneInteractionLayout).toHaveBeenLastCalledWith(introLayout);
-    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(introLayout);
+    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(introLayout, 375 / 812);
 
     viewport.mockReturnValue(new DOMRect(0, 0, 1440, 900));
     act(() => {

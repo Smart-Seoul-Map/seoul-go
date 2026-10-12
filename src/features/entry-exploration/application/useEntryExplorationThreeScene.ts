@@ -303,7 +303,7 @@ export function useEntryExplorationThreeScene({
     const applyLayout = (aspect: number): EntryExplorationScenePoint | null => {
       const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, aspect);
 
-      introFloor.applyLayout(layout);
+      introFloor.applyLayout(layout, aspect);
       scenery.applyLayout(layout);
       archeryRange.applyLayout(layout);
       staticSceneObjects.forEach((object, index) => {
