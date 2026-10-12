@@ -3,7 +3,8 @@ import { afterEach, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_GUIDE_CONFIG } from "../config/entryExplorationGuideConfig";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
-import { getEntryEditionPosition } from "../domain/entryEditionLayout";
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import {
   createEntryExplorationCamera,
@@ -69,7 +70,7 @@ test.each([
   [375, 812],
   [390, 844],
 ])("aligns the guide with the first API place at %ix%i", (width, height) => {
-  const destination = getEntryEditionPosition(0, width / height);
+  const destination = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, width / height).edition[0];
   const guide = createEntryExplorationGuideArrow({ origin, destination, color: "#ff2e94" });
   onTestFinished(guide.dispose);
   const camera = createEntryExplorationCamera(width, height);
@@ -78,7 +79,9 @@ test.each([
   const head = guide.object.getObjectByName("entry-guide-head");
   if (!head) throw new Error("The arrowhead is missing.");
   const projected = head.position.clone().project(camera);
-  expect(projected.x).toBeLessThan(0);
+  const projectedOrigin = new THREE.Vector3(origin.x, 0, origin.z).project(camera);
+  expect(projected.x).not.toBe(0);
+  expect(Math.sign(projected.x)).toBe(Math.sign(projectedOrigin.x));
   expect(Math.abs(projected.y)).toBeLessThan(0.05);
   expect(Math.hypot(head.position.x - destination.x, head.position.z - destination.z)).toBeCloseTo(
     ENTRY_EXPLORATION_GUIDE_CONFIG.destinationGap

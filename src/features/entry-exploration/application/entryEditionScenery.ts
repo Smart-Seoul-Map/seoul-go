@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
 import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
+import type { EntryIntroLayout } from "../config/entryIntroLayout";
 import type { EntryEditionPlace } from "../domain/entryEditionPlace";
-import { getEntryEditionPosition } from "../domain/entryEditionLayout";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 import { createEntryEditionModel } from "./entryEditionModel";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
@@ -71,12 +71,12 @@ export function createEntryEditionScenery(
   return {
     object,
     landmarks,
-    positionAtEntry(aspect: number): EntryExplorationScenePoint | null {
+    applyLayout(layout: EntryIntroLayout): EntryExplorationScenePoint | null {
       places.forEach((place, index) => {
-        const point = getEntryEditionPosition(index, aspect);
+        const point = layout.edition[index];
         landmarks.get(place.id)?.position.set(point.x, 0.06, point.z);
       });
-      return places.length ? getEntryEditionPosition(0, aspect) : null;
+      return places.length ? layout.edition[0] : null;
     },
     getPointerDestination(raycaster: THREE.Raycaster): EntryExplorationScenePoint | null {
       const hit = raycaster.intersectObject(object, true)[0];

@@ -2,11 +2,10 @@ import * as THREE from "three";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG } from "../config/entryExplorationDistrictSelectionEvent";
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
-import { useEntryExplorationDistrictSelection } from "./useEntryExplorationDistrictSelection";
-import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
+import { useEntryExplorationSceneInteractionControllers } from "./useEntryExplorationSceneInteractionControllers";
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 
 describe("createEntryExplorationSceneInteractionControllers", () => {
   beforeEach(() => {
@@ -27,7 +26,7 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(2);
+    expect(controllers).toHaveLength(1);
     expect(controllers.every((controller) => (controller.priority ?? 0) > 0)).toBe(true);
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
 
@@ -40,13 +39,16 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
     const onDartEntryBlocked = vi.fn();
     const { result, rerender, unmount } = renderHook(
       ({ numbers }: { numbers: readonly number[] }) =>
-        useEntryExplorationDistrictSelection({ collectedNumbers: numbers, onDartEntryBlocked }),
+        useEntryExplorationSceneInteractionControllers({
+          collectedNumbers: numbers,
+          onDartEntryBlocked,
+        }),
       { initialProps: { numbers: [] as readonly number[] } }
     );
     const createControllers = result.current.createSceneInteractionControllers;
     const controllers = createControllers();
-    const grid = controllers[1];
-    const position = ENTRY_EXPLORATION_ARCHERY_RANGE.position;
+    const grid = controllers[0];
+    const position = ENTRY_INTRO_LAYOUTS.pc.objects["archery-range"];
     act(() => grid.updateTriggerState(position));
     expect(grid.canActivate()).toBe(false);
     expect(onDartEntryBlocked).toHaveBeenCalledTimes(1);
@@ -73,46 +75,11 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
       extraControllers: [extraController],
     });
 
-    expect(controllers).toHaveLength(3);
-    expect(controllers[2]).toBe(extraController);
-
-    controllers.forEach((controller) => {
-      controller.dispose();
-    });
-  });
-
-  test("connects district selection result handler to registered controllers", () => {
-    const handleDistrictSelectionResult = vi.fn();
-    const controllers = createEntryExplorationSceneInteractionControllers({
-      onDistrictSelectionResult: handleDistrictSelectionResult,
-    });
-    const controller = controllers[0];
-
-    controller?.activate(0);
-    controller?.object.updateMatrixWorld(true);
-    controller?.handlePointerDown(createSelectionRaycaster(), 0);
-    controller?.handlePointerUp(
-      createSelectionRaycaster(),
-      ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG.chargeMaxDurationMs
-    );
-    controller?.update(
-      ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG.chargeMaxDurationMs +
-        ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG.bounceDurationMs
-    );
-
-    expect(handleDistrictSelectionResult).toHaveBeenCalledTimes(1);
+    expect(controllers).toHaveLength(2);
+    expect(controllers[1]).toBe(extraController);
 
     controllers.forEach((controller) => {
       controller.dispose();
     });
   });
 });
-
-function createSelectionRaycaster(): THREE.Raycaster {
-  const { jumpMapPosition } = ENTRY_EXPLORATION_DISTRICT_SELECTION_EVENT_CONFIG;
-
-  return new THREE.Raycaster(
-    new THREE.Vector3(jumpMapPosition.x, 10, jumpMapPosition.z),
-    new THREE.Vector3(0, -1, 0)
-  );
-}

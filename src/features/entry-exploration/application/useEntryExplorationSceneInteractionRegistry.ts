@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import * as THREE from "three";
 
+import type { EntryIntroLayout } from "../config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 
 export type EntryExplorationSceneInteractionController = {
@@ -17,8 +18,8 @@ export type EntryExplorationSceneInteractionController = {
   object: THREE.Object3D;
   priority?: number;
   prepare?: (renderer: THREE.WebGLRenderer) => void;
-  retrySelection?: () => void;
   setCharacter?: (character: THREE.Object3D | null) => void;
+  setLayout?: (layout: EntryIntroLayout) => void;
   setSurroundings?: (objects: readonly THREE.Object3D[]) => void;
   update: (time: number) => void;
   updateCamera: (
@@ -70,18 +71,6 @@ export function useEntryExplorationSceneInteractionRegistry() {
     return true;
   }, []);
 
-  const retryActiveSceneInteraction = useCallback(() => {
-    const activeController = activeSceneInteractionRef.current;
-
-    if (!activeController?.retrySelection) {
-      return false;
-    }
-
-    activeController.retrySelection();
-
-    return true;
-  }, []);
-
   const addSceneInteractionObjects = useCallback(
     (scene: THREE.Scene, renderer?: THREE.WebGLRenderer) => {
       sceneInteractionControllersRef.current.forEach((controller) => {
@@ -105,6 +94,12 @@ export function useEntryExplorationSceneInteractionRegistry() {
   const setSceneInteractionCharacter = useCallback((character: THREE.Object3D | null) => {
     sceneInteractionControllersRef.current.forEach((controller) => {
       controller.setCharacter?.(character);
+    });
+  }, []);
+
+  const setSceneInteractionLayout = useCallback((layout: EntryIntroLayout) => {
+    sceneInteractionControllersRef.current.forEach((controller) => {
+      controller.setLayout?.(layout);
     });
   }, []);
 
@@ -219,8 +214,8 @@ export function useEntryExplorationSceneInteractionRegistry() {
     hasActiveSceneInteraction,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
-    retryActiveSceneInteraction,
     setSceneInteractionCharacter,
+    setSceneInteractionLayout,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,

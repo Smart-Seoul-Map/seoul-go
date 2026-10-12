@@ -5,7 +5,9 @@ import * as THREE from "three";
 import { beforeEach, describe, expect, onTestFinished, test, vi } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
@@ -31,8 +33,8 @@ const mocks = vi.hoisted(() => {
     hasActiveSceneInteraction: vi.fn(() => true),
     releaseInactiveSceneInteraction: vi.fn(() => false),
     registerSceneInteractionControllers: vi.fn(),
-    retryActiveSceneInteraction: vi.fn(() => false),
     setSceneInteractionCharacter: vi.fn(),
+    setSceneInteractionLayout: vi.fn(),
     updateActiveSceneInteractionCamera: vi.fn(),
     updateSceneInteractions: vi.fn(),
     updateSceneInteractionTriggers: vi.fn(),
@@ -43,6 +45,7 @@ const mocks = vi.hoisted(() => {
     camera: null as THREE.OrthographicCamera | null,
     domElement,
     floor: null as THREE.Mesh | null,
+    introFloorApplyLayout: vi.fn(),
     introFloorObject: null as THREE.Group | null,
     movement,
     movementOptions: null as {
@@ -85,6 +88,7 @@ vi.mock("./entryExplorationIntroFloor", async () => {
 
   return {
     createEntryExplorationIntroFloor: () => ({
+      applyLayout: mocks.introFloorApplyLayout,
       object: mocks.introFloorObject,
     }),
   };
@@ -392,12 +396,13 @@ describe("useEntryExplorationThreeScene", () => {
     });
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
-    expect(placedPosition.equals(originalPosition)).toBe(false);
-    const expectedScreenRight = (19 / 2) * (375 / 812) * 0.9;
-    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
-    expect((placedPosition.x - arrival.x - placedPosition.z + arrival.z) / Math.SQRT2).toBeCloseTo(
-      expectedScreenRight
+    expect({ x: originalPosition.x, z: originalPosition.z }).toEqual(
+      resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100).edition[0]
     );
+    const placedLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
+    expect({ x: placedPosition.x, z: placedPosition.z }).toEqual(placedLayout.edition[0]);
+    expect({ x: placedTowerPosition.x, z: placedTowerPosition.z }).toEqual(placedLayout.edition[1]);
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
 
     viewport.mockReturnValue(new DOMRect(0, 0, 1440, 900));
     act(() => {
@@ -409,6 +414,48 @@ describe("useEntryExplorationThreeScene", () => {
     expect(tower.position.equals(placedTowerPosition)).toBe(true);
     viewport.mockRestore();
     unmount();
+  });
+
+  test("applies the resolved layout to the intro floor and interactions on mount and intro start but not on resize", async () => {
+    const containerRef = createContainerRef();
+    let startIntro: (() => boolean) | undefined;
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
+        containerRef,
+        createSceneInteractionControllers: () => [],
+        onSceneControlsReady: (controls) => {
+          startIntro = controls?.startIntro;
+        },
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    if (!containerRef.current) throw new Error("The entry container is missing.");
+    const mountLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100);
+    expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledOnce();
+    expect(mocks.registry.setSceneInteractionLayout).toHaveBeenLastCalledWith(mountLayout);
+    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(mountLayout);
+
+    const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
+    viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
+    act(() => {
+      startIntro?.();
+    });
+    const introLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
+    expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledTimes(2);
+    expect(mocks.registry.setSceneInteractionLayout).toHaveBeenLastCalledWith(introLayout);
+    expect(mocks.introFloorApplyLayout).toHaveBeenLastCalledWith(introLayout);
+
+    viewport.mockReturnValue(new DOMRect(0, 0, 1440, 900));
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+    expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledTimes(2);
+    expect(mocks.introFloorApplyLayout).toHaveBeenCalledTimes(2);
+    viewport.mockRestore();
   });
 
   test("draws the guide only after intro arrival and disposes it on unmount", async () => {

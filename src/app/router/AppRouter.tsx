@@ -11,26 +11,18 @@ import { App } from "@app/App";
 import { PATH, parseExplorationSpawnCenter } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 
-import { getLine2StationById } from "@features/entry-exploration";
 import { StampCoursePanel, StampCourseSummary } from "@features/course";
 import {
   ExplorationPage,
   LinkedPlacesPanel,
-  STATION_EXPLORATION_RADIUS_METERS,
   createDistrictExplorationTarget,
-  createStationExplorationTarget,
   parseDistrictExplorationTargetIdParam,
   type DistrictExplorationTarget,
   type ExplorationPlacePanelProps as ExplorationPlacePanelRenderProps,
   type ExplorationPanelLifecycleProps,
-  type ExplorationTarget,
-  type StationExplorationTarget,
 } from "@features/exploration";
 
-import {
-  useDistrictExplorationRoutePlaces,
-  useStationExplorationRoutePlaces,
-} from "./useExplorationRoutePlaces";
+import { useDistrictExplorationRoutePlaces } from "./useExplorationRoutePlaces";
 import { useAddExplorationPlaceToCourse } from "./useAddExplorationPlaceToCourse";
 import { EntryExplorationRoute } from "./EntryExplorationRoute";
 import { ExplorationPlacePanel } from "./ExplorationPlacePanel";
@@ -46,27 +38,11 @@ const explorationPageSlots = {
 };
 
 type ExplorationRouteProps = {
-  target?: ExplorationTarget | null;
+  target?: DistrictExplorationTarget | null;
 };
 
 function ExplorationRoute({ target = null }: ExplorationRouteProps): ReactElement {
-  if (!target) {
-    return <DefaultExplorationRouteContent />;
-  }
-
-  if (target.type === "district") {
-    return <DistrictExplorationRouteContent target={target} />;
-  }
-
-  if (target.type === "station") {
-    return <StationExplorationRouteContent target={target} />;
-  }
-
-  return <Navigate to={PATH.HOME} replace />;
-}
-
-function DefaultExplorationRouteContent(): ReactElement {
-  return <DistrictExplorationRouteContent target={null} />;
+  return <DistrictExplorationRouteContent target={target} />;
 }
 
 type DistrictExplorationRouteContentProps = {
@@ -118,49 +94,6 @@ function DistrictExplorationRouteContent({
   );
 }
 
-type StationExplorationRouteContentProps = {
-  target: StationExplorationTarget;
-};
-
-function StationExplorationRouteContent({
-  target,
-}: StationExplorationRouteContentProps): ReactElement {
-  const handleAddPlaceToCourse = useAddExplorationPlaceToCourse();
-  const { placeMarkers, themeProgressItems, places, isSuccess } =
-    useStationExplorationRoutePlaces(target);
-  const linked = useLinkedPlaceExploration(places);
-
-  return (
-    <ExplorationPage
-      initialCenter={target.center}
-      {...explorationPageSlots}
-      onAddPlaceToCourse={handleAddPlaceToCourse}
-      placeMarkers={placeMarkers}
-      placeMarkerPresentation="image-year"
-      linkedPlaceMarkers={linked.markers}
-      hasLinkedPlaceReference={linked.selected !== null}
-      onActivateLinkedPlaces={linked.activate}
-      mapNotice={
-        <ExplorationMapNotice initialPlacesReady={isSuccess && places.length > 0} linked={linked} />
-      }
-      renderLinkedPlacesPanel={(lifecycle) => (
-        <LinkedPlacesPanel
-          {...lifecycle}
-          references={linked.references}
-          selected={linked.selected}
-          places={linked.places}
-          isLoading={linked.isLoading}
-          isError={linked.isError}
-          onSelect={linked.select}
-          onRetry={linked.retry}
-        />
-      )}
-      stationRadiusMeters={target.radiusMeters}
-      themeProgressItems={themeProgressItems}
-    />
-  );
-}
-
 function DistrictExplorationRoute(): ReactElement {
   const { districtId } = useParams();
   const parsedDistrictId = parseDistrictExplorationTargetIdParam(districtId);
@@ -171,27 +104,6 @@ function DistrictExplorationRoute(): ReactElement {
   }
 
   return <ExplorationRoute key={district.id} target={createDistrictExplorationTarget(district)} />;
-}
-
-function SubwayStationExplorationRoute(): ReactElement {
-  const { stationId } = useParams();
-  const station = stationId ? getLine2StationById(stationId) : null;
-
-  if (!station) {
-    return <Navigate to={PATH.HOME} replace />;
-  }
-
-  return (
-    <ExplorationRoute
-      key={station.id}
-      target={createStationExplorationTarget({
-        center: station.stationGeoPosition,
-        radiusMeters: STATION_EXPLORATION_RADIUS_METERS,
-        stationId: station.id,
-        stationName: station.name,
-      })}
-    />
-  );
 }
 
 const appRouter = createBrowserRouter([
@@ -206,10 +118,6 @@ const appRouter = createBrowserRouter([
       {
         path: PATH.DISTRICT_EXPLORATION,
         element: <DistrictExplorationRoute />,
-      },
-      {
-        path: PATH.SUBWAY_STATION_EXPLORATION,
-        element: <SubwayStationExplorationRoute />,
       },
       {
         path: PATH.EXPLORATION,

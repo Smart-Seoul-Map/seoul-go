@@ -5,6 +5,7 @@ import { createAtlasScenery } from "@shared/lib/three/atlasScenery";
 import manifest from "../../../assets/entry-exploration/archery-atlas.json";
 import atlasUrl from "../../../assets/entry-exploration/archery-atlas.png";
 import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
+import type { EntryIntroLayout } from "../config/entryIntroLayout";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { getEntryExplorationFacingQuaternion } from "./entryExplorationThreeScene";
 
@@ -15,12 +16,11 @@ type ArcheryPropModelPlacement = {
   rotation: { x: number; y: number; z: number };
 };
 
-const { position, props } = ENTRY_EXPLORATION_ARCHERY_RANGE;
+const { props } = ENTRY_EXPLORATION_ARCHERY_RANGE;
 
 export function createEntryExplorationArcheryRange() {
   const object = new THREE.Group();
   object.name = "entry-archery-range";
-  object.position.set(position.x, 0, position.z);
   let disposed = false;
 
   const { targetBoard } = props;
@@ -57,6 +57,11 @@ export function createEntryExplorationArcheryRange() {
 
   return {
     object,
+    applyLayout(layout: EntryIntroLayout): void {
+      const point = layout.objects["archery-range"];
+
+      object.position.setX(point.x).setZ(point.z);
+    },
     dispose(): void {
       disposed = true;
       scenery.dispose();
