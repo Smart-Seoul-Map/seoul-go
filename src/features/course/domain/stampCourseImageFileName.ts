@@ -1,4 +1,5 @@
 const STAMP_COURSE_IMAGE_FILE_PREFIX = "seoul-go-stamp-course";
+
 const STAMP_COURSE_IMAGE_FILE_EXTENSION = "png";
 
 function padStart(value: number): string {
