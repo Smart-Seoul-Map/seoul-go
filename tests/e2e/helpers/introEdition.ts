@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export const INTRO_PLACE_NAME = "해방촌신흥시장";
 export const INTRO_PLACE_ID = "smart-seoul:1786321258890:25_edition25_24";
@@ -55,4 +55,11 @@ export async function mockIntroEdition(page: Page): Promise<void> {
 
 export async function approachIntroPlace(page: Page): Promise<void> {
   await page.getByRole("button", { name: `${INTRO_PLACE_NAME} 방문`, exact: true }).click();
+}
+
+export async function startIntro(page: Page): Promise<void> {
+  const start = page.getByRole("button", { name: "서울 탐방 시작하기", exact: true });
+  await expect(start).toBeEnabled({ timeout: 45_000 });
+  await start.focus();
+  await page.keyboard.press("Enter");
 }
