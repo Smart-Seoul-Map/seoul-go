@@ -5,17 +5,14 @@ on:
     branches:
       - main
       - dev
-      - "setting/**"
-      - "feature/**"
-      - "fix/**"
-      - "docs/**"
-      - "refactor/**"
-      - "hotfix/**"
-      - "release/**"
   pull_request:
     branches:
       - main
       - dev
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   quality:
@@ -56,8 +53,26 @@ jobs:
       - name: Build
         run: pnpm run build
 
+  e2e-scope:
+    name: E2E 대상 선택
+    runs-on: ubuntu-latest
+    outputs:
+      specs: ${{ steps.select.outputs.specs }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Select E2E specs
+        id: select
+        run: node scripts/ci/selectE2eSpecs.mjs
+
   e2e:
     name: E2E
+    needs: e2e-scope
+    if: needs.e2e-scope.outputs.specs != 'none'
     runs-on: ubuntu-latest
 
     steps:
@@ -83,9 +98,16 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm run test:e2e
+        run: |
+          if [ "$E2E_SPECS" = "all" ]; then
+            pnpm run test:e2e
+          else
+            pnpm run build
+            pnpm exec playwright test $E2E_SPECS
+          fi
         env:
           VITE_SMART_SEOUL_THEME_KEY: E2E_KEY
+          E2E_SPECS: ${{ needs.e2e-scope.outputs.specs }}
 
       - name: Upload E2E report and failure evidence
         if: always()
