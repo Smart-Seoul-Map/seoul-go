@@ -45,7 +45,13 @@ export function EntryExplorationPage({
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
-  const { isReady, isVisible, handleStart, handleSceneControlsReady } = useEntryExplorationIntro();
+  const {
+    isReady,
+    isVisible,
+    handleStart,
+    handleSceneControlsReady,
+    handleDeactivateActiveInteraction,
+  } = useEntryExplorationIntro();
   const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
     setPendingRewards((previous) => {
       if (!previous.has(placeId)) return previous;
@@ -120,6 +126,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
+        onClose={handleDeactivateActiveInteraction}
         onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
         shotResult={dartShot.shotResult}
