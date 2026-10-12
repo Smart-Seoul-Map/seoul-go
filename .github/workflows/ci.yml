@@ -106,10 +106,10 @@ jobs:
 
       - name: Run E2E tests
         run: |
+          pnpm exec vite build
           if [ "$E2E_SPECS" = "all" ]; then
-            pnpm run test:e2e
+            pnpm exec playwright test
           else
-            pnpm run build
             pnpm exec playwright test $E2E_SPECS
           fi
         env:
