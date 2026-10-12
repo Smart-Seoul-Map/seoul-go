@@ -253,4 +253,19 @@ describe("resolved intro layout placement", () => {
       expect(seconds).toBeLessThanOrEqual(3);
     }
   );
+
+  test("keeps ten place destinations apart at every aspect between mobile and PC", () => {
+    const steps = 100;
+    for (let step = 0; step <= steps; step += 1) {
+      const aspect = MOBILE_ASPECT + ((PC_ASPECT - MOBILE_ASPECT) * step) / steps;
+      const destinations = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, aspect).edition;
+      for (let index = 0; index < destinations.length; index += 1) {
+        for (const other of destinations.slice(index + 1)) {
+          expect(
+            Math.hypot(destinations[index].x - other.x, destinations[index].z - other.z)
+          ).toBeGreaterThan(ENTRY_EDITION_ARRIVAL_RADIUS * 2);
+        }
+      }
+    }
+  });
 });
