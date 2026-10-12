@@ -4,7 +4,6 @@ import { SEOUL_EDITION25_THEME_ID, SMART_SEOUL_PLACE_THEME_IDS } from "../config
 import { fetchSmartSeoulThemePlaces, getNearbySmartSeoulPlaces } from "../data/smartSeoulThemeApi";
 import {
   seoulEditionPlacesOptions,
-  nearbyThemePlacesOptions,
   linkedPlacesOptionsByTheme,
   linkedThemePlacesOptions,
 } from "./smartSeoulPlacesQueries";
@@ -32,14 +31,6 @@ describe("purpose-specific place queries", () => {
     );
     expect(seoulEditionPlacesOptions().retry).toBe(false);
     expect(seoulEditionPlacesOptions().gcTime).toBeGreaterThanOrEqual(30 * 60 * 1000);
-    client.clear();
-  });
-  test("keeps station availability on all six themes", async () => {
-    const client = new QueryClient();
-    await client.fetchQuery(nearbyThemePlacesOptions(area));
-    expect(fetchSmartSeoulThemePlaces).toHaveBeenCalledWith(
-      expect.objectContaining({ themeIds: SMART_SEOUL_PLACE_THEME_IDS, searchArea: area })
-    );
     client.clear();
   });
   test("queries linked themes only and separates centers in cache", async () => {

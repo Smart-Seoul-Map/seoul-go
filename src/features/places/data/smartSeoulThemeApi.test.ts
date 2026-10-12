@@ -362,7 +362,7 @@ describe("Smart Seoul theme API", () => {
     expect(requestedUrls[0]?.searchParams.get("distance")).toBe("500");
   });
 
-  test("requests all supported themes for a selected station search area", async () => {
+  test("requests all supported themes for a search area", async () => {
     const requestedUrls: URL[] = [];
 
     await fetchSmartSeoulThemePlaces({

@@ -5,14 +5,11 @@ export { createPlaceThemeProgressItems } from "./application/placeThemeProgress"
 export { placesQueryKeys } from "./application/placesQueryKeys";
 export { useUnlockedLinkedPlacesQueries } from "./application/useUnlockedLinkedPlacesQueries";
 export {
-  useNearbySmartSeoulThemePlacesQuery,
   useSmartSeoulThemePlacesQuery,
   useSeoulEditionPlacesQuery,
-  useNearbySeoulEditionPlacesQuery,
   useLinkedPlacesQuery,
 } from "./application/useSmartSeoulThemePlacesQuery";
 export type { PlaceThemeProgressItem } from "./application/placeThemeProgress";
-export type { SmartSeoulThemeContentsSearchArea } from "./data/smartSeoulThemeApi";
 export {
   SEOUL_EDITION25_THEME_ID,
   SMART_SEOUL_PLACE_THEME_IDS,

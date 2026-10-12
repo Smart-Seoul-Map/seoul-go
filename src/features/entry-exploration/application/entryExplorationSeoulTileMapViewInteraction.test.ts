@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { describe, expect, test, vi } from "vitest";
 
-import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
 } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
 import { toSeoulGridCell, toSeoulGridCellKm, type SeoulGridCell } from "../domain/seoulGridNumber";
 import { isSeoulGridCellOnNumberLine } from "../domain/seoulGridNumberLines";
@@ -16,10 +16,8 @@ import {
   type EntryExplorationDartViewControls,
 } from "./entryExplorationSeoulTileMapViewInteraction";
 
-const MAP_POSITION = ENTRY_EXPLORATION_SCENE_OBJECTS.find(
-  (object) => object.id === ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
-)!.position;
-const TRIGGER_POSITION = ENTRY_EXPLORATION_ARCHERY_RANGE.position;
+const MAP_POSITION = ENTRY_INTRO_LAYOUTS.pc.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+const TRIGGER_POSITION = ENTRY_INTRO_LAYOUTS.pc.objects["archery-range"];
 const MAP_SIZE = (
   ENTRY_EXPLORATION_SCENE_OBJECTS.find(
     (object) => object.id === ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
@@ -255,6 +253,57 @@ describe("entry exploration seoul tile map view interaction", () => {
     controller.updateCamera(camera, cameraTransitionDurationMs, TRIGGER_POSITION);
 
     expect(camera.zoom).toBeLessThan(cameraZoom);
+
+    controller.dispose();
+  });
+
+  test("moves its trigger, tile map mesh, character destination, and camera focus with the layout", () => {
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [40],
+    });
+    const camera = new THREE.OrthographicCamera(-20, 20, 10, -10, 0.1, 1_000);
+    const {
+      cameraFocusOffset,
+      cameraOffset,
+      cameraTransitionDurationMs,
+      characterDestinationOffset,
+    } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+    const movedMapPosition = { x: MAP_POSITION.x - 25, z: MAP_POSITION.z + 30 };
+    const movedTriggerPosition = { x: TRIGGER_POSITION.x - 25, z: TRIGGER_POSITION.z + 30 };
+
+    controller.setLayout?.({
+      ...ENTRY_INTRO_LAYOUTS.pc,
+      objects: {
+        ...ENTRY_INTRO_LAYOUTS.pc.objects,
+        [ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID]: movedMapPosition,
+        "archery-range": movedTriggerPosition,
+      },
+    });
+
+    expect(controller.object.position.x).toBe(movedMapPosition.x);
+    expect(controller.object.position.z).toBe(movedMapPosition.z);
+    expect(controller.getActivationCharacterDestination?.()).toEqual({
+      x: movedMapPosition.x + characterDestinationOffset.x,
+      z: movedMapPosition.z + characterDestinationOffset.z,
+    });
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+
+    expect(controller.canActivate()).toBe(false);
+
+    controller.updateTriggerState(movedTriggerPosition);
+
+    expect(controller.canActivate()).toBe(true);
+
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs, movedTriggerPosition);
+
+    expect(camera.position.x).toBeCloseTo(
+      movedMapPosition.x + cameraFocusOffset.x + cameraOffset.x
+    );
+    expect(camera.position.z).toBeCloseTo(
+      movedMapPosition.z + cameraFocusOffset.z + cameraOffset.z
+    );
 
     controller.dispose();
   });

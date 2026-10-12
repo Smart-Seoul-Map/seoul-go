@@ -27,18 +27,9 @@ export {
 } from "./domain/explorationGeo";
 export {
   createDistrictExplorationTarget,
-  createStationExplorationTarget,
-  isDistrictExplorationTarget,
   parseDistrictExplorationTargetIdParam,
   type DistrictExplorationTarget,
-  type ExplorationTarget,
-  type StationExplorationTarget,
 } from "./domain/explorationTarget";
-export {
-  getUnlockedStationExplorationRadius,
-  STATION_EXPLORATION_RADIUS_STEPS,
-  type StationExplorationRadiusStep,
-} from "./domain/explorationStationRadius";
 export {
   VISITED_PLACE_STORAGE_KEY,
   VISITED_PLACE_STORAGE_VERSION,
@@ -73,4 +64,3 @@ export {
   type MovementStatus,
 } from "./domain/explorationMovement";
 export { CHARACTER_MODEL_MANIFEST } from "./config/explorationCharacterModels";
-export { STATION_EXPLORATION_RADIUS_METERS } from "./config/stationExplorationConfig";

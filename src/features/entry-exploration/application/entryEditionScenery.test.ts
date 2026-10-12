@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { afterEach, expect, test, vi } from "vitest";
 
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { createEntryEditionScenery } from "./entryEditionScenery";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
@@ -11,8 +13,12 @@ afterEach(() => vi.resetAllMocks());
 test("shows API images without captions and connects image buttons to scene destinations", () => {
   const approach = vi.fn();
   const scenery = createEntryEditionScenery(ENTRY_TEST_PLACES, approach);
-  const destination = scenery.positionAtEntry(390 / 844);
+  const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 390 / 844);
+  const destination = scenery.applyLayout(layout);
   const first = scenery.landmarks.get(ENTRY_TEST_PLACES[0].id)!;
+  const second = scenery.landmarks.get(ENTRY_TEST_PLACES[1].id)!;
+  expect({ x: first.position.x, z: first.position.z }).toEqual(layout.edition[0]);
+  expect({ x: second.position.x, z: second.position.z }).toEqual(layout.edition[1]);
   const element = first.children[0] as THREE.Object3D & { element: HTMLButtonElement };
   expect(element.element.textContent).toBe("");
   expect(element.element.getAttribute("aria-label")).toBe(`${ENTRY_TEST_PLACES[0].name} 방문`);

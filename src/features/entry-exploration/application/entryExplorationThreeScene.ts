@@ -139,7 +139,7 @@ export function createEntryExplorationFloorOverlayMesh(
   });
   const mesh = new THREE.Mesh(geometry, material);
 
-  mesh.position.set(object.position.x, object.yOffset, object.position.z);
+  mesh.position.y = object.yOffset;
   mesh.rotation.set(-Math.PI / 2, 0, object.rotationY + getCameraFacingFloorOverlayRotationY());
 
   return mesh;

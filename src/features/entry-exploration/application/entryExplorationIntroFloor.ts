@@ -2,15 +2,13 @@ import * as THREE from "three";
 
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
+import type { EntryIntroLayout } from "../config/entryIntroLayout";
 import { getCameraFacingFloorOverlayRotationY } from "./entryExplorationThreeScene";
 
 const INTRO_FLOOR_CONFIG = {
   introBackground: {
     depth: 12.375,
-    position: {
-      x: ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.x - 7.2 / Math.SQRT2,
-      z: ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition.z - 7.2 / Math.SQRT2,
-    },
+    viewWidthRatio: 0.91,
     width: 22,
     yOffset: 0.05,
   },
@@ -20,7 +18,14 @@ const textureLoader = new THREE.TextureLoader();
 
 export type EntryExplorationIntroFloor = {
   object: THREE.Group;
+  applyLayout: (layout: EntryIntroLayout, aspect: number) => void;
 };
+
+export function getIntroBackgroundWidth(aspect: number): number {
+  const { viewWidthRatio, width } = INTRO_FLOOR_CONFIG.introBackground;
+
+  return Math.min(width, ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect * viewWidthRatio);
+}
 
 export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
   const object = new THREE.Group();
@@ -30,6 +35,14 @@ export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
 
   return {
     object,
+    applyLayout(layout, aspect) {
+      const point = layout.objects["intro-background"];
+
+      introBackgroundMesh.position.setX(point.x).setZ(point.z);
+      introBackgroundMesh.scale.setScalar(
+        getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width
+      );
+    },
   };
 }
 
@@ -46,7 +59,6 @@ function createIntroBackgroundMesh(): THREE.Mesh {
       side: THREE.DoubleSide,
       transparent: true,
     }),
-    position: INTRO_FLOOR_CONFIG.introBackground.position,
     width: INTRO_FLOOR_CONFIG.introBackground.width,
     yOffset: INTRO_FLOOR_CONFIG.introBackground.yOffset,
   });
@@ -55,20 +67,18 @@ function createIntroBackgroundMesh(): THREE.Mesh {
 function createFloorPlaneMesh({
   depth,
   material,
-  position,
   width,
   yOffset,
 }: {
   depth: number;
   material: THREE.Material;
-  position: { x: number; z: number };
   width: number;
   yOffset: number;
 }): THREE.Mesh {
   const geometry = new THREE.PlaneGeometry(width, depth);
   const mesh = new THREE.Mesh(geometry, material);
 
-  mesh.position.set(position.x, yOffset, position.z);
+  mesh.position.y = yOffset;
   mesh.rotation.set(-Math.PI / 2, 0, getCameraFacingFloorOverlayRotationY());
 
   return mesh;

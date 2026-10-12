@@ -1,8 +1,4 @@
 export const ENTRY_EXPLORATION_ARCHERY_RANGE = {
-  position: {
-    x: 30.25,
-    z: 20,
-  },
   props: {
     arrow: {
       groundSize: 2.2,

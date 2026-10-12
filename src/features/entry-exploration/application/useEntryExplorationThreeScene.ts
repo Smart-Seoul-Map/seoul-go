@@ -23,6 +23,7 @@ import {
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
 import { ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import {
@@ -31,6 +32,7 @@ import {
   interpolateEntryExplorationScenePoint,
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
+import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
 import { createEntryExplorationScenery } from "./entryExplorationScenery";
@@ -77,7 +79,6 @@ export type UseEntryExplorationThreeSceneOptions = {
 export type EntryExplorationThreeSceneControls = {
   deactivateActiveInteraction: () => void;
   isIntroReady: boolean;
-  retryActiveInteraction: () => void;
   startIntro: () => boolean;
 };
 
@@ -116,8 +117,8 @@ export function useEntryExplorationThreeScene({
     hasActiveSceneInteraction,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
-    retryActiveSceneInteraction,
     setSceneInteractionCharacter,
+    setSceneInteractionLayout,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,
@@ -214,24 +215,19 @@ export function useEntryExplorationThreeScene({
     }
   }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
 
-  const retryActiveInteraction = useCallback(() => {
-    retryActiveSceneInteraction();
-  }, [retryActiveSceneInteraction]);
-
   const startIntro = useCallback(() => startIntroRef.current?.(performance.now()) ?? false, []);
 
   useEffect(() => {
     onSceneControlsReady?.({
       deactivateActiveInteraction,
       isIntroReady: Boolean(sceneHandlesRef.current?.character),
-      retryActiveInteraction,
       startIntro,
     });
 
     return () => {
       onSceneControlsReady?.(null);
     };
-  }, [deactivateActiveInteraction, onSceneControlsReady, retryActiveInteraction, startIntro]);
+  }, [deactivateActiveInteraction, onSceneControlsReady, startIntro]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -292,7 +288,6 @@ export function useEntryExplorationThreeScene({
       if (onPlacePanelDismissRef.current?.()) return;
       movementRef.current.moveTo({ x: destination.x, z: destination.z });
     });
-    editionScenery.positionAtEntry(width / height);
     const hanok = scenery.object.getObjectByName(`entry-scenery-${ENTRY_HANOK_PLACE_ID}`);
     const visitLandmarks = new Map<string, THREE.Object3D>(editionScenery.landmarks);
     if (hanok) visitLandmarks.set(ENTRY_HANOK_PLACE_ID, hanok);
@@ -304,15 +299,31 @@ export function useEntryExplorationThreeScene({
     const archeryRange = createEntryExplorationArcheryRange();
     const surroundings = new THREE.Group();
     surroundings.name = "entry-exploration-surroundings";
-    const sceneObjectMeshes = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
+    const staticSceneObjects = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
       (object) => !("interaction" in object)
-    ).map(createEntryExplorationSceneObject);
+    );
+    const sceneObjectMeshes = staticSceneObjects.map(createEntryExplorationSceneObject);
     let frameId = 0;
     let lastTime = performance.now();
     let disposed = false;
     const sceneInteractionControllers = createSceneInteractionControllers();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
+
+    const applyLayout = (aspect: number): EntryExplorationScenePoint | null => {
+      const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, aspect);
+
+      introFloor.applyLayout(layout, aspect);
+      scenery.applyLayout(layout);
+      archeryRange.applyLayout(layout);
+      staticSceneObjects.forEach((object, index) => {
+        const point = layout.objects[object.id];
+        sceneObjectMeshes[index].position.setX(point.x).setZ(point.z);
+      });
+      setSceneInteractionLayout(layout);
+
+      return editionScenery.applyLayout(layout);
+    };
 
     container.append(renderer.domElement);
     container.append(labels.domElement);
@@ -338,6 +349,7 @@ export function useEntryExplorationThreeScene({
           .map((other) => other.object),
       ]);
     });
+    applyLayout(width / height);
     updateEntryExplorationCameraView(
       camera,
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
@@ -370,7 +382,7 @@ export function useEntryExplorationThreeScene({
       }
 
       const entryRect = container.getBoundingClientRect();
-      const guideDestination = editionScenery.positionAtEntry(
+      const guideDestination = applyLayout(
         Math.max(entryRect.width, 1) / Math.max(entryRect.height, 1)
       );
       const characterStart = movementRef.current.getCurrentPosition();
@@ -535,7 +547,6 @@ export function useEntryExplorationThreeScene({
       onSceneControlsReady?.({
         deactivateActiveInteraction,
         isIntroReady: true,
-        retryActiveInteraction,
         startIntro: () => startIntroRef.current?.(performance.now()) ?? false,
       });
       renderer.domElement.setAttribute("aria-disabled", "false");
@@ -652,6 +663,7 @@ export function useEntryExplorationThreeScene({
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
+    setSceneInteractionLayout,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,

@@ -22,8 +22,8 @@ export function createEntryExplorationGuideRoute({
   const arrowEndRight = turnDirection * Math.max(0, Math.abs(endRight) - CONFIG.destinationGap);
   const radius = Math.min(
     CONFIG.bendRadius,
-    Math.abs(arrowEndRight) * 0.65,
-    Math.max(0, endForward - CONFIG.startForwardOffset) * 0.35
+    Math.abs(arrowEndRight) * 0.85,
+    Math.max(0, endForward - CONFIG.startForwardOffset) * 0.85
   );
   const toWorld = (rightDistance: number, forwardDistance: number): EntryExplorationScenePoint => ({
     x: origin.x + right.x * rightDistance + forward.x * forwardDistance,

@@ -1,11 +1,10 @@
 import dartArrowUrl from "../../../assets/entry-exploration/dart-arrow.png";
 import dartClickHintUrl from "../../../assets/entry-exploration/dart-click-hint.png";
 import dartCrosshairUrl from "../../../assets/entry-exploration/dart-crosshair.png";
-import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.png";
-import line2RouteMapUrl from "../../../assets/entry-exploration/line2-route-map.png";
+import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.webp";
 import seoulTileMapBackgroundUrl from "../../../assets/entry-exploration/seoul-grid-map-background.webp";
 import seoulTileMapUrl from "../../../assets/entry-exploration/seoul-grid-map.svg";
-import floorTextureUrl from "../../../assets/textures/tile.webp";
+import floorTextureUrl from "../../../assets/textures/brown_tile.png";
 
 type EntryExplorationTextureAsset = {
   src: string;
@@ -26,9 +25,6 @@ export const ENTRY_EXPLORATION_TEXTURE_ASSETS = {
   },
   introBackground: {
     src: introBackgroundUrl,
-  },
-  line2RouteMap: {
-    src: line2RouteMapUrl,
   },
   seoulTileMap: {
     src: seoulTileMapUrl,

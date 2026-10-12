@@ -9,6 +9,10 @@ const transparentPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
   "base64"
 );
+const decodablePng = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==",
+  "base64"
+);
 
 function row(id: string, name: string, themeId: string, position = pointA, distance = 0) {
   return {
@@ -56,6 +60,10 @@ async function setup(page: Page) {
   );
   await page.route("**/api/smart-seoul-map/tms/**", (route) =>
     route.fulfill({ body: transparentPng, contentType: "image/png" })
+  );
+  // Fixture place images resolve to the real Smart Seoul host; keep e2e off the network.
+  await page.route("https://map.seoul.go.kr/images/seoul-characters/hachi.png", (route) =>
+    route.fulfill({ body: decodablePng, contentType: "image/png" })
   );
   await page.route("**/openapi/v5/**/public/themes/contents/ko?**", async (route) => {
     const params = new URL(route.request().url()).searchParams;
@@ -238,10 +246,6 @@ for (const viewport of [
 
 const linkedThemeIds = ["100032", "1741228380725", "1777251935025", "1725252918740", "100575"];
 const emptyModelThemeId = "1741228380725";
-const decodablePng = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==",
-  "base64"
-);
 
 test("loads each linked marker GLB once across tabs and panel reopen, even an empty one", async ({
   page,
