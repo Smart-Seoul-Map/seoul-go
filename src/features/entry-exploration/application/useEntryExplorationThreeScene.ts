@@ -34,7 +34,10 @@ import {
 } from "../domain/entryExplorationSceneMath";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
-import { createEntryExplorationIntroFloor } from "./entryExplorationIntroFloor";
+import {
+  createEntryExplorationIntroFloor,
+  isEntryExplorationIntroTitleUv,
+} from "./entryExplorationIntroFloor";
 import { createEntryExplorationScenery } from "./entryExplorationScenery";
 import { createEntryEditionScenery } from "./entryEditionScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
@@ -71,25 +74,21 @@ export type UseEntryExplorationThreeSceneOptions = {
   places?: readonly EntryEditionPlace[];
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
-  onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
+  onIntroStart?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
-};
-
-export type EntryExplorationThreeSceneControls = {
-  deactivateActiveInteraction: () => void;
-  isIntroReady: boolean;
-  startIntro: () => boolean;
 };
 
 export function useEntryExplorationThreeScene({
   places = EMPTY_ENTRY_PLACES,
   containerRef,
   createSceneInteractionControllers,
-  onSceneControlsReady,
+  onIntroStart,
   placeVisits,
   onPlacePanelDismiss,
 }: UseEntryExplorationThreeSceneOptions): void {
+  const onIntroStartRef = useRef(onIntroStart);
+  onIntroStartRef.current = onIntroStart;
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
@@ -103,7 +102,6 @@ export function useEntryExplorationThreeScene({
   );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
-  const startIntroRef = useRef<((time: number) => boolean) | null>(null);
   const {
     activateReadySceneInteraction,
     addSceneInteractionObjects,
@@ -204,20 +202,6 @@ export function useEntryExplorationThreeScene({
       restoreCameraToCurrentPosition();
     }
   }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
-
-  const startIntro = useCallback(() => startIntroRef.current?.(performance.now()) ?? false, []);
-
-  useEffect(() => {
-    onSceneControlsReady?.({
-      deactivateActiveInteraction,
-      isIntroReady: Boolean(sceneHandlesRef.current?.character),
-      startIntro,
-    });
-
-    return () => {
-      onSceneControlsReady?.(null);
-    };
-  }, [deactivateActiveInteraction, onSceneControlsReady, startIntro]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -329,6 +313,13 @@ export function useEntryExplorationThreeScene({
       surroundings.add(mesh);
     });
     scene.add(surroundings);
+    const introHiddenObjects = [
+      scenery.object,
+      editionScenery.object,
+      archeryRange.object,
+      ...sceneObjectMeshes,
+    ];
+    introHiddenObjects.forEach((object) => (object.visible = false));
     registerSceneInteractionControllers(sceneInteractionControllers);
     addSceneInteractionObjects(scene, renderer);
     sceneInteractionControllers.forEach((controller) => {
@@ -342,7 +333,7 @@ export function useEntryExplorationThreeScene({
     applyLayout(width / height);
     updateEntryExplorationCameraView(
       camera,
-      ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition,
+      introFloor.getCenter(),
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset,
       ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.zoom
     );
@@ -388,6 +379,7 @@ export function useEntryExplorationThreeScene({
           : 1 + ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius / characterDistance
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
+      const introCenter = introFloor.getCenter();
 
       if (guideDestination) {
         const guide = createEntryExplorationGuideArrow({
@@ -399,6 +391,8 @@ export function useEntryExplorationThreeScene({
         surroundings.add(guide.object);
       }
       introStatusRef.current = "entering";
+      introHiddenObjects.forEach((object) => (object.visible = true));
+      sceneHandlesRef.current.character.visible = true;
       renderer.domElement.style.cursor = "default";
       renderer.domElement.setAttribute("aria-label", "서울 탐방 공간");
       renderer.domElement.setAttribute("aria-busy", "true");
@@ -406,11 +400,7 @@ export function useEntryExplorationThreeScene({
       introCameraTransitionRef.current = createSceneCameraTransition({
         camera,
         durationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
-        fromLookAt: new THREE.Vector3(
-          ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition.x,
-          0,
-          ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.focusPosition.z
-        ),
+        fromLookAt: new THREE.Vector3(introCenter.x, 0, introCenter.z),
         now: time,
         toLookAt: new THREE.Vector3(cameraTarget.x, 0, cameraTarget.z),
         toPosition: new THREE.Vector3(
@@ -421,16 +411,22 @@ export function useEntryExplorationThreeScene({
         toZoom: 1,
       });
       movementRef.current.moveTo(characterTarget);
+      onIntroStartRef.current?.();
 
       return true;
     };
 
-    startIntroRef.current = startIntro;
+    const isPointerOnIntroTitle = (): boolean => {
+      const uv = raycaster.intersectObject(introFloor.object, true)[0]?.uv;
+
+      return uv ? isEntryExplorationIntroTitleUv(uv) : false;
+    };
 
     const handlePointerDown = (event: PointerEvent) => {
       updateRaycasterFromPointerEvent(event);
 
       if (introStatusRef.current === "waiting") {
+        if (isPointerOnIntroTitle()) startIntro(performance.now());
         return;
       }
 
@@ -489,6 +485,7 @@ export function useEntryExplorationThreeScene({
       updateRaycasterFromPointerEvent(event);
 
       if (introStatusRef.current === "waiting") {
+        renderer.domElement.style.cursor = isPointerOnIntroTitle() ? "pointer" : "default";
         return;
       }
 
@@ -527,6 +524,7 @@ export function useEntryExplorationThreeScene({
 
       fitEntryExplorationCharacterModel(model);
       model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
+      model.visible = introStatusRef.current !== "waiting";
       model.traverse((object) => {
         object.castShadow = true;
       });
@@ -534,11 +532,6 @@ export function useEntryExplorationThreeScene({
       setSceneInteractionCharacter(model);
       mixerRef.current = new THREE.AnimationMixer(model);
       sceneHandlesRef.current = { camera, character: model, renderer, scene };
-      onSceneControlsReady?.({
-        deactivateActiveInteraction,
-        isIntroReady: true,
-        startIntro: () => startIntroRef.current?.(performance.now()) ?? false,
-      });
       renderer.domElement.setAttribute("aria-disabled", "false");
       applyScenePosition(movementRef.current.getCurrentPosition());
       void playAnimation(currentModelKeyRef.current);
@@ -611,7 +604,6 @@ export function useEntryExplorationThreeScene({
       disposed = true;
       sceneHandlesRef.current = null;
       introCameraTransitionRef.current = null;
-      startIntroRef.current = null;
       introStatusRef.current = "waiting";
       mixerRef.current = null;
       activeActionsRef.current = [];

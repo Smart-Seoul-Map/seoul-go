@@ -11,13 +11,11 @@ import { useEntryExplorationDartShot } from "../application/useEntryExplorationD
 import { useEntryExplorationSceneInteractionControllers } from "../application/useEntryExplorationSceneInteractionControllers";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
-import { useEntryExplorationIntro } from "../application/useEntryExplorationIntro";
 import { useEntryExplorationPlacePanel } from "../application/useEntryExplorationPlacePanel";
 import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
-import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
@@ -45,7 +43,7 @@ export function EntryExplorationPage({
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
-  const { isReady, isVisible, handleStart, handleSceneControlsReady } = useEntryExplorationIntro();
+  const [hasStarted, setHasStarted] = useState(false);
   const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
     setPendingRewards((previous) => {
       if (!previous.has(placeId)) return previous;
@@ -92,7 +90,7 @@ export function EntryExplorationPage({
     places,
     containerRef,
     createSceneInteractionControllers,
-    onSceneControlsReady: handleSceneControlsReady,
+    onIntroStart: () => setHasStarted(true),
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
   });
@@ -114,9 +112,6 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {isVisible ? (
-        <EntryExplorationIntroOverlay disabled={!isReady} onStart={handleStart} />
-      ) : null}
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
@@ -132,11 +127,11 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
-      {!isVisible && slot.state.status === "closed" && (
+      {hasStarted && slot.state.status === "closed" && (
         <EntryCollectedNumbersPanel numbers={collectedNumbers} />
       )}
-      {!isVisible && renderPlacePanel?.(panelProps)}
-      {!isVisible && <EntrySlotOverlay {...slot} />}
+      {hasStarted && renderPlacePanel?.(panelProps)}
+      {hasStarted && <EntrySlotOverlay {...slot} />}
     </main>
   );
 }

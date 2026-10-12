@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { ENTRY_EXPLORATION_TEXTURE_ASSETS } from "../config/entryExplorationAssets";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import type { EntryIntroLayout } from "../config/entryIntroLayout";
+import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 import { getCameraFacingFloorOverlayRotationY } from "./entryExplorationThreeScene";
 
 const INTRO_FLOOR_CONFIG = {
@@ -14,17 +15,38 @@ const INTRO_FLOOR_CONFIG = {
   },
 } as const;
 
+const INTRO_TITLE_BUTTON = {
+  centerU: 0.4875,
+  centerV: 0.65,
+  halfHeightRatio: 0.13,
+  halfWidthRatio: 0.2625,
+  tiltRadians: THREE.MathUtils.degToRad(-6),
+} as const;
+
 const textureLoader = new THREE.TextureLoader();
 
 export type EntryExplorationIntroFloor = {
   object: THREE.Group;
   applyLayout: (layout: EntryIntroLayout, aspect: number) => void;
+  getCenter: () => EntryExplorationScenePoint;
 };
 
 export function getIntroBackgroundWidth(aspect: number): number {
+  const { cameraViewSize, intro } = ENTRY_EXPLORATION_SCENE_CONFIG;
   const { viewWidthRatio, width } = INTRO_FLOOR_CONFIG.introBackground;
 
-  return Math.min(width, ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect * viewWidthRatio);
+  return Math.min(width, (cameraViewSize * aspect * viewWidthRatio) / intro.camera.zoom);
+}
+
+export function isEntryExplorationIntroTitleUv(uv: { x: number; y: number }): boolean {
+  const { centerU, centerV, halfHeightRatio, halfWidthRatio, tiltRadians } = INTRO_TITLE_BUTTON;
+  const { depth, width } = INTRO_FLOOR_CONFIG.introBackground;
+  const offsetX = (uv.x - centerU) * width;
+  const offsetY = (1 - uv.y - centerV) * depth;
+  const localX = offsetX * Math.cos(tiltRadians) + offsetY * Math.sin(tiltRadians);
+  const localY = -offsetX * Math.sin(tiltRadians) + offsetY * Math.cos(tiltRadians);
+
+  return Math.abs(localX) <= halfWidthRatio * width && Math.abs(localY) <= halfHeightRatio * depth;
 }
 
 export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
@@ -37,12 +59,15 @@ export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
     object,
     applyLayout(layout, aspect) {
       const point = layout.objects["intro-background"];
+      const { targetPosition } = ENTRY_EXPLORATION_SCENE_CONFIG.intro;
+      const scale = getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width;
 
-      introBackgroundMesh.position.setX(point.x).setZ(point.z);
-      introBackgroundMesh.scale.setScalar(
-        getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width
-      );
+      introBackgroundMesh.position
+        .setX(targetPosition.x + (point.x - targetPosition.x) * scale)
+        .setZ(targetPosition.z + (point.z - targetPosition.z) * scale);
+      introBackgroundMesh.scale.setScalar(scale);
     },
+    getCenter: () => ({ x: introBackgroundMesh.position.x, z: introBackgroundMesh.position.z }),
   };
 }
 
