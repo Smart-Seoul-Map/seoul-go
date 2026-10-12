@@ -56,6 +56,9 @@ jobs:
   e2e-scope:
     name: E2E 대상 선택
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     outputs:
       specs: ${{ steps.select.outputs.specs }}
 
@@ -63,11 +66,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Select E2E specs
         id: select
         run: node scripts/ci/selectE2eSpecs.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
   e2e:
     name: E2E

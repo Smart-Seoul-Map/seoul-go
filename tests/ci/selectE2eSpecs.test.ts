@@ -1,7 +1,11 @@
 // @vitest-environment node
 import { expect, test } from "vitest";
 
-import { RUN_ALL_E2E, selectE2eSpecs } from "../../scripts/ci/selectE2eSpecs.mjs";
+import {
+  findLastPassedSha,
+  RUN_ALL_E2E,
+  selectE2eSpecs,
+} from "../../scripts/ci/selectE2eSpecs.mjs";
 
 const SPECS = [
   "tests/e2e/app-smoke.spec.ts",
@@ -17,8 +21,9 @@ const INTRO_SPECS = [
   "tests/e2e/entry-slot.spec.ts",
   "tests/e2e/intro-seoul-edition.spec.ts",
 ];
+const UNMAPPED_SPEC = "tests/e2e/app-smoke.spec.ts";
 
-test("runs only the intro specs for entry exploration code and place models", () => {
+test("runs the intro specs and unmapped specs for entry exploration code and place models", () => {
   expect(
     selectE2eSpecs(
       [
@@ -27,7 +32,7 @@ test("runs only the intro specs for entry exploration code and place models", ()
       ],
       SPECS
     )
-  ).toEqual(INTRO_SPECS);
+  ).toEqual([UNMAPPED_SPEC, ...INTRO_SPECS]);
 });
 
 test("runs the exploration specs for exploration code and linked place markers", () => {
@@ -37,6 +42,7 @@ test("runs the exploration specs for exploration code and linked place markers",
       SPECS
     )
   ).toEqual([
+    UNMAPPED_SPEC,
     "tests/e2e/intro-seoul-edition.spec.ts",
     "tests/e2e/linked-place-exploration.spec.ts",
     "tests/e2e/place-query-cache.spec.ts",
@@ -46,6 +52,7 @@ test("runs the exploration specs for exploration code and linked place markers",
 
 test("runs the course specs for course code", () => {
   expect(selectE2eSpecs(["src/features/course/domain/course.ts"], SPECS)).toEqual([
+    UNMAPPED_SPEC,
     "tests/e2e/linked-place-exploration.spec.ts",
     "tests/e2e/stamp-course-image.spec.ts",
   ]);
@@ -53,23 +60,24 @@ test("runs the course specs for course code", () => {
 
 test("merges the specs of every changed area without duplicates", () => {
   expect(
-    selectE2eSpecs(
-      [
-        "src/features/entry-exploration/a.ts",
-        "src/features/course/b.ts",
-        "tests/e2e/app-smoke.spec.ts",
-      ],
-      SPECS
-    )
+    selectE2eSpecs(["src/features/entry-exploration/a.ts", "src/features/course/b.ts"], SPECS)
   ).toEqual([
-    "tests/e2e/app-smoke.spec.ts",
+    UNMAPPED_SPEC,
     ...INTRO_SPECS,
     "tests/e2e/linked-place-exploration.spec.ts",
     "tests/e2e/stamp-course-image.spec.ts",
   ]);
 });
 
-test("runs a changed spec by itself and nothing for a deleted spec", () => {
+test("runs a newly added spec missing from the path rules whenever source code changes", () => {
+  const specs = [...SPECS, "tests/e2e/new-feature.spec.ts"];
+
+  expect(selectE2eSpecs(["src/features/course/a.ts"], specs)).toContain(
+    "tests/e2e/new-feature.spec.ts"
+  );
+});
+
+test("runs only a changed spec when no source code changes", () => {
   expect(selectE2eSpecs(["tests/e2e/entry-slot.spec.ts"], SPECS)).toEqual([
     "tests/e2e/entry-slot.spec.ts",
   ]);
@@ -111,4 +119,16 @@ test.each([
   "scripts/ci/selectE2eSpecs.mjs",
 ])("runs every spec when %s changes", (file) => {
   expect(selectE2eSpecs(["src/features/course/a.ts", file], SPECS)).toBe(RUN_ALL_E2E);
+});
+
+test("uses the newest passed commit that is still in the branch history", () => {
+  const history = new Set(["c3", "c1"]);
+  const isAncestor = (sha: string) => history.has(sha);
+
+  expect(findLastPassedSha(["amended", "c3", "c1"], "head", isAncestor)).toBe("c3");
+});
+
+test("finds no passed commit on the first run or after history was rewritten", () => {
+  expect(findLastPassedSha([], "head", () => true)).toBeNull();
+  expect(findLastPassedSha(["amended"], "head", () => false)).toBeNull();
 });
