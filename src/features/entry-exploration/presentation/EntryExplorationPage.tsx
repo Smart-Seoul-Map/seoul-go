@@ -11,6 +11,7 @@ import { useEntryExplorationDartShot } from "../application/useEntryExplorationD
 import { useEntryExplorationSceneInteractionControllers } from "../application/useEntryExplorationSceneInteractionControllers";
 import { useEntryExplorationThreeScene } from "../application/useEntryExplorationThreeScene";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
+import { useEntryExplorationIntro } from "../application/useEntryExplorationIntro";
 import { useEntryExplorationPlacePanel } from "../application/useEntryExplorationPlacePanel";
 import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
@@ -43,7 +44,12 @@ export function EntryExplorationPage({
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
-  const [hasStarted, setHasStarted] = useState(false);
+  const {
+    hasStarted,
+    handleIntroStart,
+    handleSceneControlsReady,
+    handleDeactivateActiveInteraction,
+  } = useEntryExplorationIntro();
   const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
     setPendingRewards((previous) => {
       if (!previous.has(placeId)) return previous;
@@ -90,7 +96,8 @@ export function EntryExplorationPage({
     places,
     containerRef,
     createSceneInteractionControllers,
-    onIntroStart: () => setHasStarted(true),
+    onSceneControlsReady: handleSceneControlsReady,
+    onIntroStart: handleIntroStart,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
   });
@@ -115,6 +122,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
+        onClose={handleDeactivateActiveInteraction}
         onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
         shotResult={dartShot.shotResult}

@@ -74,34 +74,43 @@ export type UseEntryExplorationThreeSceneOptions = {
   places?: readonly EntryEditionPlace[];
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
+  onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
   onIntroStart?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
+};
+
+export type EntryExplorationThreeSceneControls = {
+  deactivateActiveInteraction: () => void;
+  isIntroReady: boolean;
+  startIntro: () => boolean;
 };
 
 export function useEntryExplorationThreeScene({
   places = EMPTY_ENTRY_PLACES,
   containerRef,
   createSceneInteractionControllers,
+  onSceneControlsReady,
   onIntroStart,
   placeVisits,
   onPlacePanelDismiss,
 }: UseEntryExplorationThreeSceneOptions): void {
+  const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onIntroStartRef = useRef(onIntroStart);
   onIntroStartRef.current = onIntroStart;
-  const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
-  const introCameraTransitionRef = useRef<SceneCameraTransition | null>(null);
+  const cameraTransitionRef = useRef<SceneCameraTransition | null>(null);
   const introStatusRef = useRef<EntryExplorationIntroStatus>("waiting");
   const introTargetRef = useRef<EntryExplorationScenePoint>(
     ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition
   );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
+  const startIntroRef = useRef<((time: number) => boolean) | null>(null);
   const {
     activateReadySceneInteraction,
     addSceneInteractionObjects,
@@ -159,7 +168,7 @@ export function useEntryExplorationThreeScene({
       }
 
       introStatusRef.current = "ready";
-      introCameraTransitionRef.current = null;
+      cameraTransitionRef.current = null;
 
       const handles = sceneHandlesRef.current;
       if (!handles) {
@@ -194,7 +203,17 @@ export function useEntryExplorationThreeScene({
       return;
     }
 
-    updateEntryExplorationCameraFocus(handles.camera, movementRef.current.getCurrentPosition());
+    const { x, z } = movementRef.current.getCurrentPosition();
+    const { cameraOffset, cameraTransitionDurationMs } = ENTRY_EXPLORATION_SCENE_CONFIG;
+
+    cameraTransitionRef.current = createSceneCameraTransition({
+      camera: handles.camera,
+      durationMs: cameraTransitionDurationMs,
+      now: performance.now(),
+      toLookAt: new THREE.Vector3(x, 0, z),
+      toPosition: new THREE.Vector3(x + cameraOffset.x, cameraOffset.y, z + cameraOffset.z),
+      toZoom: 1,
+    });
   }, []);
 
   const deactivateActiveInteraction = useCallback(() => {
@@ -202,6 +221,20 @@ export function useEntryExplorationThreeScene({
       restoreCameraToCurrentPosition();
     }
   }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
+
+  const startIntro = useCallback(() => startIntroRef.current?.(performance.now()) ?? false, []);
+
+  useEffect(() => {
+    onSceneControlsReady?.({
+      deactivateActiveInteraction,
+      isIntroReady: Boolean(sceneHandlesRef.current?.character),
+      startIntro,
+    });
+
+    return () => {
+      onSceneControlsReady?.(null);
+    };
+  }, [deactivateActiveInteraction, onSceneControlsReady, startIntro]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -397,7 +430,7 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.setAttribute("aria-label", "서울 탐방 공간");
       renderer.domElement.setAttribute("aria-busy", "true");
       renderer.domElement.setAttribute("aria-disabled", "true");
-      introCameraTransitionRef.current = createSceneCameraTransition({
+      cameraTransitionRef.current = createSceneCameraTransition({
         camera,
         durationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
         fromLookAt: new THREE.Vector3(introCenter.x, 0, introCenter.z),
@@ -415,6 +448,8 @@ export function useEntryExplorationThreeScene({
 
       return true;
     };
+
+    startIntroRef.current = startIntro;
 
     const isPointerOnIntroTitle = (): boolean => {
       const uv = raycaster.intersectObject(introFloor.object, true)[0]?.uv;
@@ -532,6 +567,11 @@ export function useEntryExplorationThreeScene({
       setSceneInteractionCharacter(model);
       mixerRef.current = new THREE.AnimationMixer(model);
       sceneHandlesRef.current = { camera, character: model, renderer, scene };
+      onSceneControlsReady?.({
+        deactivateActiveInteraction,
+        isIntroReady: true,
+        startIntro: () => startIntroRef.current?.(performance.now()) ?? false,
+      });
       renderer.domElement.setAttribute("aria-disabled", "false");
       applyScenePosition(movementRef.current.getCurrentPosition());
       void playAnimation(currentModelKeyRef.current);
@@ -544,14 +584,11 @@ export function useEntryExplorationThreeScene({
       lastTime = time;
       mixerRef.current?.update(deltaSeconds);
 
-      if (introCameraTransitionRef.current) {
-        const transitionResult = updateSceneCameraTransition(
-          introCameraTransitionRef.current,
-          time
-        );
+      if (cameraTransitionRef.current) {
+        const transitionResult = updateSceneCameraTransition(cameraTransitionRef.current, time);
 
         if (transitionResult.done) {
-          introCameraTransitionRef.current = null;
+          cameraTransitionRef.current = null;
         }
       }
 
@@ -603,7 +640,8 @@ export function useEntryExplorationThreeScene({
     return () => {
       disposed = true;
       sceneHandlesRef.current = null;
-      introCameraTransitionRef.current = null;
+      cameraTransitionRef.current = null;
+      startIntroRef.current = null;
       introStatusRef.current = "waiting";
       mixerRef.current = null;
       activeActionsRef.current = [];

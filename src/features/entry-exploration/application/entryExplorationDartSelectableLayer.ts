@@ -21,6 +21,7 @@ export type EntryExplorationDartSelectableLayer = {
 const LAYER_RENDER_ORDER = 998;
 const CHANNEL_COUNT = 4;
 const BYTE_MAX = 255;
+const SELECTABLE_CELL_OPACITY = 0.5;
 const MAP_ALPHA_THRESHOLD = 0.02;
 const CELL_GAP_RATIO = 0.06;
 
@@ -44,13 +45,15 @@ varying vec2 vUv;
 
 void main() {
   vec4 cell = texture2D(uCells, vUv);
-  vec3 color = floor(vUv * uGrid) == uHoveredCell ? uHoverColor : cell.rgb;
+  bool isHovered = floor(vUv * uGrid) == uHoveredCell;
+  vec3 color = isHovered ? uHoverColor : cell.rgb;
+  float cellAlpha = isHovered ? cell.a : cell.a * ${SELECTABLE_CELL_OPACITY.toFixed(2)};
   float mapAlpha = texture2D(uMap, vUv).a;
   vec2 cellUv = fract(vUv * uGrid);
   vec2 edgeDistance = min(cellUv, 1.0 - cellUv);
   float insideCell = step(${CELL_GAP_RATIO.toFixed(2)}, min(edgeDistance.x, edgeDistance.y));
 
-  gl_FragColor = vec4(color, cell.a * insideCell * step(${MAP_ALPHA_THRESHOLD.toFixed(2)}, mapAlpha));
+  gl_FragColor = vec4(color, cellAlpha * insideCell * step(${MAP_ALPHA_THRESHOLD.toFixed(2)}, mapAlpha));
 }
 `;
 
