@@ -77,7 +77,6 @@ for (const viewport of [
       await expect(panel).toBeVisible({ timeout: 20000 });
       const title = panel.getByRole("heading", { name: INTRO_PLACE_NAME, exact: true });
       const closePlace = panel.getByRole("button", { name: "장소 정보 닫기" });
-      // The sheet slides in, so the two boxes only line up once it has settled.
       await expect
         .poll(async () => {
           const titleBounds = await title.boundingBox();

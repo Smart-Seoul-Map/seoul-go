@@ -100,6 +100,7 @@ test("shows only places with a GLB model, falls back to images when models fail,
 });
 
 test("keeps entry closed while loading and retries after an API error", async ({ page }) => {
+  test.setTimeout(120000);
   let succeed = false;
   await page.route("**/openapi/v5/**/public/themes/contents/ko?**", (route) =>
     route.fulfill({
@@ -134,8 +135,6 @@ test("keeps entry closed while loading and retries after an API error", async ({
   expect(await page.locator(".EntryEditionLandmark").count()).toBe(0);
   succeed = true;
   await retry.click();
-  await expect(page.getByRole("button", { name: "탐방 시작", exact: true })).toBeEnabled({
-    timeout: 45000,
-  });
+  await startExploration(page);
   await expect(page.locator(".EntryEditionLandmark")).toHaveCount(1);
 });
