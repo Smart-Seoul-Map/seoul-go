@@ -31,7 +31,7 @@ function acquireSlot(signal?: AbortSignal): Promise<() => void> {
   });
 }
 
-// Share the budget across catalog, station availability and linked-place queries.
+// Share the budget across catalog and linked-place queries.
 export async function withSmartSeoulRequestSlot<T>(
   request: () => Promise<T>,
   signal?: AbortSignal

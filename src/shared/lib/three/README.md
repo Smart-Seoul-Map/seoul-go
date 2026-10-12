@@ -14,7 +14,7 @@
 | `src/features/entry-exploration/config/entryExplorationAtlasObjects.ts`      | 인트로 오브젝트 종류, 폭, 상대 위치                      |
 | `src/features/entry-exploration/application/entryExplorationAtlasScenery.ts` | 인트로 설정을 공통 형식으로 변환하고 한옥·타워 동선 배치 |
 
-공통 코드는 특정 에셋, 카메라 각도, 도착 판정, 자치구·지하철을 알지 않는다.
+공통 코드는 특정 에셋, 카메라 각도, 도착 판정, 자치구를 알지 않는다.
 다른 페이지에서는 자기 에셋과 배치 설정을 전달한다. 인트로 에셋의 실제 파일은
 `src/assets/entry-exploration/intro-atlas.png`와 `intro-atlas.json`이다.
 
@@ -98,7 +98,7 @@ scenery.dispose();
 
 - `useEntryExplorationIntro`: 씬 준비 여부, 시작 동작, 시작 오버레이 표시 상태.
 - `useEntryExplorationPlacePanel`: 장소별 방문 컨트롤러, 활성 장소, 패널 상태와 닫기 연결.
-- `EntryExplorationPage`: 위 훅과 기존 씬·자치구·지하철 훅을 연결하고 화면과 라우팅을 조합.
+- `EntryExplorationPage`: 위 훅과 기존 씬·인터랙션 훅을 연결하고 화면과 라우팅을 조합.
 
 페이지가 장소별 반경과 다른 장소의 닫힘 이벤트 처리까지 알 필요가 없도록 관련 코드를 모았다.
 `AppBox`와 HTML 태그의 혼용은 역할 분리 기준이 아니므로 태그마다 래퍼를 만들지 않았다.
