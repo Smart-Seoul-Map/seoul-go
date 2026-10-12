@@ -26,6 +26,11 @@ export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> =
     size: 6,
     rotationY: Math.PI / 4,
   },
+  "smart-seoul:1786321258890:25_edition25_6": {
+    url: "/models/places/achasan_eoullim_garden.glb",
+    size: 6,
+    rotationY: Math.PI / 4,
+  },
 };
 
 export const ENTRY_EDITION_ARRIVAL_RADIUS = 3.2;

@@ -7,10 +7,12 @@ const MODELED_PLACE_IDS = [
   "25_edition25_12",
   "25_edition25_20",
   "25_edition25_2",
+  "25_edition25_6",
 ]
   .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
   .sort();
 const MODEL_PATHS = [
+  "/models/places/achasan_eoullim_garden.glb",
   "/models/places/amsa_dong_site.glb",
   "/models/places/gangbyeon_seojae.glb",
   "/models/places/namsan_baekbeom_square.glb",
