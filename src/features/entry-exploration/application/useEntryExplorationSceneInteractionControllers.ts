@@ -1,15 +1,13 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import type {
   EntryExplorationDartThrowResult,
   EntryExplorationDartViewControls,
 } from "./entryExplorationSeoulTileMapViewInteraction";
-import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
-import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
-export type UseEntryExplorationDistrictSelectionOptions = {
+export type UseEntryExplorationSceneInteractionControllersOptions = {
   collectedNumbers?: readonly number[];
   onDartEntryBlocked?: () => void;
   createExtraSceneInteractionControllers?: () => readonly EntryExplorationSceneInteractionController[];
@@ -19,10 +17,14 @@ export type UseEntryExplorationDistrictSelectionOptions = {
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
 };
 
+type UseEntryExplorationSceneInteractionControllersResult = {
+  createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
+};
+
 const createNoExtraSceneInteractionControllers =
   (): readonly EntryExplorationSceneInteractionController[] => [];
 
-export function useEntryExplorationDistrictSelection({
+export function useEntryExplorationSceneInteractionControllers({
   collectedNumbers = [],
   onDartEntryBlocked,
   createExtraSceneInteractionControllers = createNoExtraSceneInteractionControllers,
@@ -30,17 +32,13 @@ export function useEntryExplorationDistrictSelection({
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
-}: UseEntryExplorationDistrictSelectionOptions = {}) {
+}: UseEntryExplorationSceneInteractionControllersOptions = {}): UseEntryExplorationSceneInteractionControllersResult {
   const collectedNumbersRef = useRef(collectedNumbers);
   collectedNumbersRef.current = collectedNumbers;
   const onDartEntryBlockedRef = useRef(onDartEntryBlocked);
   onDartEntryBlockedRef.current = onDartEntryBlocked;
-  // Scene controllers outlive renders; read current rewards without rebuilding the scene.
   const getCollectedNumbers = useCallback(() => collectedNumbersRef.current, []);
   const handleDartEntryBlocked = useCallback(() => onDartEntryBlockedRef.current?.(), []);
-  const sceneControlsRef = useRef<EntryExplorationThreeSceneControls | null>(null);
-  const [selectionResult, setSelectionResult] =
-    useState<EntryExplorationDistrictSelectionResult | null>(null);
 
   const createSceneInteractionControllers = useCallback(
     () =>
@@ -52,7 +50,6 @@ export function useEntryExplorationDistrictSelection({
         onDartThrowResult,
         onDartViewActiveChange,
         onDartViewControlsReady,
-        onDistrictSelectionResult: setSelectionResult,
       }),
     [
       getCollectedNumbers,
@@ -65,28 +62,5 @@ export function useEntryExplorationDistrictSelection({
     ]
   );
 
-  const handleSceneControlsReady = useCallback(
-    (controls: EntryExplorationThreeSceneControls | null) => {
-      sceneControlsRef.current = controls;
-    },
-    []
-  );
-
-  const deactivateSelection = useCallback(() => {
-    setSelectionResult(null);
-    sceneControlsRef.current?.deactivateActiveInteraction();
-  }, []);
-
-  const retrySelection = useCallback(() => {
-    setSelectionResult(null);
-    sceneControlsRef.current?.retryActiveInteraction();
-  }, []);
-
-  return {
-    createSceneInteractionControllers,
-    deactivateSelection,
-    handleSceneControlsReady,
-    retrySelection,
-    selectionResult,
-  };
+  return { createSceneInteractionControllers };
 }

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.png";
+import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.webp";
 
 import "./EntryExplorationIntroOverlay.css";
 

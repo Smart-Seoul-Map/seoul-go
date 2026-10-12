@@ -23,8 +23,6 @@ import { AppText } from "@shared/ui/typography";
 
 import closeIcon from "../../assets/close.svg";
 
-import { useSubwayStationAvailability } from "./useSubwayStationAvailability";
-
 import "./EntryExplorationRoute.css";
 
 const ENTRY_PLACE_INITIAL_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
@@ -84,7 +82,6 @@ function EntryPlacePanel({ place, open, onClose }: EntryPlacePanelProps): ReactE
 }
 
 export function EntryExplorationRoute(): ReactElement {
-  const { availabilityStatus, handleSubwayStationSelectionChange } = useSubwayStationAvailability();
   const query = useSeoulEditionPlacesQuery();
   const places = useEntryEditionSelection(query.data);
 
@@ -107,8 +104,6 @@ export function EntryExplorationRoute(): ReactElement {
   return (
     <EntryExplorationPage
       places={places}
-      onSubwayStationSelectionChange={handleSubwayStationSelectionChange}
-      subwayStationAvailabilityStatus={availabilityStatus}
       renderPlacePanel={({ placeId, ...props }) => {
         if (placeId === ENTRY_HANOK_PLACE_ID) {
           return <EntryPlacePanel key={placeId} place={ENTRY_HANOK_PLACE} {...props} />;

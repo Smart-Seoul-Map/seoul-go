@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import introBackground from "../../../assets/entry-exploration/intro-background.png";
+import introBackground from "../../../assets/entry-exploration/intro-background.webp";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 
 import "../../../style.css";

@@ -8,13 +8,13 @@ import {
 } from "@shared/lib/three/sceneCameraTransition";
 import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 
-import { ENTRY_EXPLORATION_ARCHERY_RANGE } from "../config/entryExplorationArcheryRange";
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
   type EntryExplorationFloorOverlayObject,
 } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
+import { ENTRY_INTRO_LAYOUTS, type EntryIntroLayout } from "../config/entryIntroLayout";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
 import {
   getEntryExplorationSceneDistance,
@@ -116,7 +116,16 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let hasThrown = false;
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
+  let mapPosition: EntryExplorationScenePoint;
+  let triggerPosition: EntryExplorationScenePoint;
 
+  const setLayout = (layout: EntryIntroLayout): void => {
+    mapPosition = layout.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+    triggerPosition = layout.objects["archery-range"];
+    mapMesh.position.setX(mapPosition.x).setZ(mapPosition.z);
+  };
+
+  setLayout(ENTRY_INTRO_LAYOUTS.pc);
   mapMesh.add(selectableLayer.object, hitMarker.object);
 
   const toCellLocalPosition = (cell: SeoulGridCell, zOffset: number): THREE.Vector3 => {
@@ -243,8 +252,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     const { characterDestinationOffset } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 
     return {
-      x: seoulTileMapObject.position.x + characterDestinationOffset.x,
-      z: seoulTileMapObject.position.z + characterDestinationOffset.z,
+      x: mapPosition.x + characterDestinationOffset.x,
+      z: mapPosition.z + characterDestinationOffset.z,
     };
   };
 
@@ -252,8 +261,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     const { cameraFocusOffset } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 
     return {
-      x: seoulTileMapObject.position.x + cameraFocusOffset.x,
-      z: seoulTileMapObject.position.z + cameraFocusOffset.z,
+      x: mapPosition.x + cameraFocusOffset.x,
+      z: mapPosition.z + cameraFocusOffset.z,
     };
   };
 
@@ -265,7 +274,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       cameraZoom,
     } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
     const focus = getCameraFocus();
-    const mapPoints = getEntryExplorationRectanglePoints(seoulTileMapObject.position, mapSize);
+    const mapPoints = getEntryExplorationRectanglePoints(mapPosition, mapSize);
     const zoom = getEntryExplorationTileMapCameraZoom({
       cameraOffset,
       focusPoint: focus,
@@ -349,7 +358,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     }
 
     characterModel.rotation.y = toCharacterModelRotationRadians(
-      getEntryExplorationSceneHeadingRadians(characterPoint, seoulTileMapObject.position)
+      getEntryExplorationSceneHeadingRadians(characterPoint, mapPosition)
     );
   };
 
@@ -357,7 +366,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     isCharacterInTrigger = isInsideSceneTriggerRadius({
       position,
       radius: seoulTileMapObject.interaction.triggerRadius,
-      triggerPoint: ENTRY_EXPLORATION_ARCHERY_RANGE.position,
+      triggerPoint: triggerPosition,
     });
 
     if (!isCharacterInTrigger) {
@@ -433,6 +442,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     setCharacter: (character) => {
       characterModel = character;
     },
+    setLayout,
     update: faceCharacterTowardMap,
     updateCamera,
     updateTriggerState,

@@ -120,17 +120,25 @@ function createDashGeometry(): THREE.ShapeGeometry {
 }
 
 function createHeadGeometry(): THREE.ShapeGeometry {
-  const length = CONFIG.headLength;
-  const halfWidth = CONFIG.headWidth / 2;
-  const radius = halfWidth * 0.25;
+  const tip = new THREE.Vector2(0, 0);
+  const arms = [1, -1].map((side) =>
+    createStrokeShape(
+      new THREE.Vector2(-CONFIG.headLength, (side * CONFIG.headWidth) / 2),
+      tip,
+      CONFIG.dashWidth
+    )
+  );
+
+  return new THREE.ShapeGeometry(arms, 8).rotateX(-Math.PI / 2);
+}
+
+function createStrokeShape(from: THREE.Vector2, to: THREE.Vector2, width: number): THREE.Shape {
+  const radius = width / 2;
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
   const shape = new THREE.Shape();
-  shape.moveTo(-length, -halfWidth + radius);
-  shape.quadraticCurveTo(-length, -halfWidth, -length + radius, -halfWidth + radius / 2);
-  shape.lineTo(-radius, -radius / 2);
-  shape.quadraticCurveTo(0, 0, -radius, radius / 2);
-  shape.lineTo(-length + radius, halfWidth - radius / 2);
-  shape.quadraticCurveTo(-length, halfWidth, -length, halfWidth - radius);
+  shape.absarc(to.x, to.y, radius, angle - Math.PI / 2, angle + Math.PI / 2, false);
+  shape.absarc(from.x, from.y, radius, angle + Math.PI / 2, angle + (Math.PI * 3) / 2, false);
   shape.closePath();
 
-  return new THREE.ShapeGeometry(shape, 8).rotateX(-Math.PI / 2);
+  return shape;
 }

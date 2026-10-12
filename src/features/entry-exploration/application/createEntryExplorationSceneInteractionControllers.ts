@@ -1,5 +1,3 @@
-import { createEntryExplorationDistrictJumpSelectionInteractionController } from "./entryExplorationDistrictJumpSelectionInteraction";
-import type { EntryExplorationDistrictSelectionResult } from "./entryExplorationDistrictJumpSelectionInteraction";
 import { createEntryExplorationSeoulTileMapViewInteractionController } from "./entryExplorationSeoulTileMapViewInteraction";
 import type {
   EntryExplorationDartThrowResult,
@@ -15,7 +13,6 @@ export type CreateEntryExplorationSceneInteractionControllersOptions = {
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartViewActiveChange?: (isActive: boolean) => void;
-  onDistrictSelectionResult?: (result: EntryExplorationDistrictSelectionResult) => void;
 };
 
 export function createEntryExplorationSceneInteractionControllers({
@@ -26,12 +23,8 @@ export function createEntryExplorationSceneInteractionControllers({
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
-  onDistrictSelectionResult,
 }: CreateEntryExplorationSceneInteractionControllersOptions = {}): EntryExplorationSceneInteractionController[] {
   return [
-    createEntryExplorationDistrictJumpSelectionInteractionController({
-      onSelectionResult: onDistrictSelectionResult,
-    }),
     createEntryExplorationSeoulTileMapViewInteractionController({
       getCollectedNumbers,
       onEntryBlocked: onDartEntryBlocked,

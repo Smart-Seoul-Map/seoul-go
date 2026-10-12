@@ -20,9 +20,6 @@ vi.mock("@features/places", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@features/places")>()),
   useSeoulEditionPlacesQuery: () => ({ data: ENTRY_MODELED_TEST_PLACES, isSuccess: true }),
 }));
-vi.mock("./useSubwayStationAvailability", () => ({
-  useSubwayStationAvailability: () => ({ availabilityStatus: "idle" }),
-}));
 
 const originalWidth = window.innerWidth;
 afterEach(() => {

@@ -2,7 +2,6 @@ export const PATH = {
   DISTRICT_EXPLORATION: "/exploration/districts/:districtId",
   EXPLORATION: "/exploration",
   HOME: "/",
-  SUBWAY_STATION_EXPLORATION: "/exploration/stations/:stationId",
 } as const;
 
 export type ExplorationSpawnCenter = {
@@ -39,8 +38,4 @@ export function parseExplorationSpawnCenter(
   }
 
   return { lat, lng };
-}
-
-export function createSubwayStationExplorationPath(stationId: string): string {
-  return PATH.SUBWAY_STATION_EXPLORATION.replace(":stationId", encodeURIComponent(stationId));
 }

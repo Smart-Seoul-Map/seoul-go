@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import * as THREE from "three";
 import { describe, expect, test, vi } from "vitest";
 
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import {
   type EntryExplorationSceneInteractionController,
   useEntryExplorationSceneInteractionRegistry,
@@ -44,6 +45,24 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     );
     result.current.activateReadySceneInteraction(0);
     expect(result.current.getSceneInteractionPointerDestination(new THREE.Raycaster())).toBeNull();
+  });
+
+  test("passes the intro layout to every controller that accepts one", () => {
+    const firstSetLayout = vi.fn();
+    const secondSetLayout = vi.fn();
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([
+      createSceneInteractionController({ setLayout: firstSetLayout }),
+      createSceneInteractionController(),
+      createSceneInteractionController({ setLayout: secondSetLayout }),
+    ]);
+
+    result.current.setSceneInteractionLayout(ENTRY_INTRO_LAYOUTS.mobile);
+
+    expect(firstSetLayout).toHaveBeenCalledOnce();
+    expect(firstSetLayout).toHaveBeenCalledWith(ENTRY_INTRO_LAYOUTS.mobile);
+    expect(secondSetLayout).toHaveBeenCalledOnce();
+    expect(secondSetLayout).toHaveBeenCalledWith(ENTRY_INTRO_LAYOUTS.mobile);
   });
 
   test("prepares renderer-dependent resources only for controllers that request it", () => {
@@ -205,26 +224,6 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
 
     expect(controller.deactivate).toHaveBeenCalledTimes(1);
     expect(result.current.hasActiveSceneInteraction()).toBe(false);
-  });
-
-  test("retries the active controller selection without clearing the active interaction", () => {
-    const controller = createSceneInteractionController({
-      canActivate: vi.fn(() => true),
-      retrySelection: vi.fn(),
-    });
-    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
-
-    act(() => {
-      result.current.registerSceneInteractionControllers([controller]);
-      result.current.activateReadySceneInteraction(10);
-    });
-
-    act(() => {
-      expect(result.current.retryActiveSceneInteraction()).toBe(true);
-    });
-
-    expect(controller.retrySelection).toHaveBeenCalledTimes(1);
-    expect(result.current.hasActiveSceneInteraction()).toBe(true);
   });
 
   test("does not release an interaction that rejects closing until its result", () => {

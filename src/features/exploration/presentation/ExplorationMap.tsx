@@ -25,7 +25,6 @@ import {
   type PlaceMarkerModelLayer,
 } from "../application/explorationPlaceMarkerModelLayer";
 import { partitionPlaceMarkersByModel } from "../application/explorationPlaceMarkerModels";
-import { addExplorationStationRadiusLayers } from "../application/explorationStationRadiusLayer";
 import {
   addExplorationPlaceMarkersLayer,
   type ExplorationPlaceMarkerSelection,
@@ -59,7 +58,6 @@ type ExplorationMapProps = {
   linkedPlaceMarkers?: MapMarkerFeatureCollection;
   placeMarkerPresentation?: "treasure" | "image-year";
   revealedPlaceIds?: ReadonlySet<string>;
-  stationRadiusMeters?: number;
 };
 
 const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
@@ -83,7 +81,6 @@ export function ExplorationMap({
   linkedPlaceMarkers = EMPTY_MARKERS,
   placeMarkerPresentation = "treasure",
   revealedPlaceIds = new Set(),
-  stationRadiusMeters,
 }: ExplorationMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isMobileViewport = useIsMobileViewport();
@@ -265,7 +262,6 @@ export function ExplorationMap({
 
     map.on("load", () => {
       addExplorationDistrictBoundaryLayers(map, districtBoundary);
-      addExplorationStationRadiusLayers(map, initialPosition, stationRadiusMeters);
       if (placeMarkerPresentation === "treasure") {
         void addExplorationPlaceMarkersLayer(map, {
           getPlaceMarkers: () => symbolMarkersRef.current,
@@ -291,13 +287,7 @@ export function ExplorationMap({
       modelLayerRef.current = null;
       setMarkerMap(null);
     };
-  }, [
-    districtBoundary,
-    initialPosition,
-    onMapMoveRequest,
-    placeMarkerPresentation,
-    stationRadiusMeters,
-  ]);
+  }, [districtBoundary, initialPosition, onMapMoveRequest, placeMarkerPresentation]);
 
   useEffect(() => {
     const map = mapRef.current;
