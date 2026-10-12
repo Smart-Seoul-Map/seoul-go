@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const THEME = "1786321258890";
 const SELECTION_KEY = "seoul-go:entry-edition-selection:v1";
@@ -19,9 +19,21 @@ const MODEL_PATHS = [
 
 test.use({ launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
+async function startExploration(page: Page) {
+  const start = page.getByRole("button", { name: "탐방 시작", exact: true });
+  await expect(start).toBeEnabled({ timeout: 45000 });
+  await start.click();
+  await expect(page.getByLabel("서울 탐방 공간", { exact: true })).not.toHaveAttribute(
+    "aria-busy",
+    "true",
+    { timeout: 45000 }
+  );
+}
+
 test("shows only places with a GLB model, falls back to images when models fail, and shares the query with district exploration", async ({
   page,
 }) => {
+  test.setTimeout(120000);
   const calls: string[] = [];
   await page.route("**/openapi/v5/**/public/themes/contents/ko?**", async (route) => {
     calls.push(route.request().url());
@@ -55,6 +67,7 @@ test("shows only places with a GLB model, falls back to images when models fail,
     return route.abort();
   });
   await page.goto("/");
+  await startExploration(page);
   await expect(page.locator(".EntryEditionLandmark")).toHaveCount(MODELED_PLACE_IDS.length);
   const first = await page
     .locator(".EntryEditionLandmark")
@@ -72,6 +85,7 @@ test("shows only places with a GLB model, falls back to images when models fail,
     history.pushState(null, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
+  await startExploration(page);
   await expect(page.locator(".EntryEditionLandmark")).toHaveCount(MODELED_PLACE_IDS.length);
   const second = await page
     .locator(".EntryEditionLandmark")
