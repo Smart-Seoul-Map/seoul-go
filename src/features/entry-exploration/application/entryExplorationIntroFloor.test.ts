@@ -22,7 +22,9 @@ test.each([
   [820, 1180],
 ])("fits the intro background inside the visible width at %ix%i", (width, height) => {
   const aspect = width / height;
-  const visibleWidth = ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect;
+  const visibleWidth =
+    (ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect) /
+    ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.zoom;
 
   expect(getIntroBackgroundWidth(aspect)).toBeLessThan(visibleWidth);
   expect(getIntroBackgroundWidth(aspect)).toBeLessThan(22);
