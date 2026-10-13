@@ -123,6 +123,7 @@ export function ExplorationMap({
   onPlaceMarkerSelectRef.current = onPlaceMarkerSelect;
   const revealedPlaceIdsRef = useRef(revealedPlaceIds);
   revealedPlaceIdsRef.current = revealedPlaceIds;
+  const previousPositionRef = useRef(initialPosition);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -135,6 +136,8 @@ export function ExplorationMap({
     }),
     onFrame: ({ position }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
+      const previousPosition = previousPositionRef.current;
+      previousPositionRef.current = position;
 
       if (hasActivePanelRef.current) {
         return;
@@ -144,7 +147,7 @@ export function ExplorationMap({
         arrivalRadiusMeters: PLACE_CARD_REVEAL_RADIUS_METERS,
         placeMarkers: placeMarkersRef.current,
         position,
-        revealedPlaceIds: revealedPlaceIdsRef.current,
+        previousPosition,
       });
 
       if (arrivedPlace) {
