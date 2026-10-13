@@ -304,6 +304,7 @@ export function useEntryExplorationThreeScene({
     let frameId = 0;
     let lastTime = performance.now();
     let disposed = false;
+    let hasPendingIntroStart = false;
     const sceneInteractionControllers = createSceneInteractionControllers();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -371,6 +372,16 @@ export function useEntryExplorationThreeScene({
       resizeEntryExplorationCamera(camera, nextWidth, nextHeight);
       renderer.setSize(nextWidth, nextHeight, false);
       labels.setSize(nextWidth, nextHeight);
+
+      if (introStatusRef.current !== "waiting") return;
+
+      applyLayout(nextWidth / nextHeight);
+      updateEntryExplorationCameraView(
+        camera,
+        introFloor.getCenter(),
+        ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.offset,
+        ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.zoom
+      );
     };
 
     const updateRaycasterFromPointerEvent = (event: PointerEvent) => {
@@ -450,7 +461,7 @@ export function useEntryExplorationThreeScene({
       updateRaycasterFromPointerEvent(event);
 
       if (introStatusRef.current === "waiting") {
-        if (isPointerOnIntroTitle()) startIntro(performance.now());
+        if (isPointerOnIntroTitle()) hasPendingIntroStart = !startIntro(performance.now());
         return;
       }
 
@@ -559,6 +570,8 @@ export function useEntryExplorationThreeScene({
       renderer.domElement.setAttribute("aria-disabled", "false");
       applyScenePosition(movementRef.current.getCurrentPosition());
       void playAnimation(currentModelKeyRef.current);
+
+      if (hasPendingIntroStart) startIntro(performance.now());
     });
 
     const render = (time: number) => {
