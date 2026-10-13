@@ -82,8 +82,6 @@ export type UseEntryExplorationThreeSceneOptions = {
 
 export type EntryExplorationThreeSceneControls = {
   deactivateActiveInteraction: () => void;
-  isIntroReady: boolean;
-  startIntro: () => boolean;
 };
 
 export function useEntryExplorationThreeScene({
@@ -110,7 +108,6 @@ export function useEntryExplorationThreeScene({
   );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
-  const startIntroRef = useRef<((time: number) => boolean) | null>(null);
   const {
     activateReadySceneInteraction,
     addSceneInteractionObjects,
@@ -222,19 +219,13 @@ export function useEntryExplorationThreeScene({
     }
   }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
 
-  const startIntro = useCallback(() => startIntroRef.current?.(performance.now()) ?? false, []);
-
   useEffect(() => {
-    onSceneControlsReady?.({
-      deactivateActiveInteraction,
-      isIntroReady: Boolean(sceneHandlesRef.current?.character),
-      startIntro,
-    });
+    onSceneControlsReady?.({ deactivateActiveInteraction });
 
     return () => {
       onSceneControlsReady?.(null);
     };
-  }, [deactivateActiveInteraction, onSceneControlsReady, startIntro]);
+  }, [deactivateActiveInteraction, onSceneControlsReady]);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterMovementModelKey) => {
     const mixer = mixerRef.current;
@@ -449,8 +440,6 @@ export function useEntryExplorationThreeScene({
       return true;
     };
 
-    startIntroRef.current = startIntro;
-
     const isPointerOnIntroTitle = (): boolean => {
       const uv = raycaster.intersectObject(introFloor.object, true)[0]?.uv;
 
@@ -567,11 +556,6 @@ export function useEntryExplorationThreeScene({
       setSceneInteractionCharacter(model);
       mixerRef.current = new THREE.AnimationMixer(model);
       sceneHandlesRef.current = { camera, character: model, renderer, scene };
-      onSceneControlsReady?.({
-        deactivateActiveInteraction,
-        isIntroReady: true,
-        startIntro: () => startIntroRef.current?.(performance.now()) ?? false,
-      });
       renderer.domElement.setAttribute("aria-disabled", "false");
       applyScenePosition(movementRef.current.getCurrentPosition());
       void playAnimation(currentModelKeyRef.current);
@@ -641,7 +625,6 @@ export function useEntryExplorationThreeScene({
       disposed = true;
       sceneHandlesRef.current = null;
       cameraTransitionRef.current = null;
-      startIntroRef.current = null;
       introStatusRef.current = "waiting";
       mixerRef.current = null;
       activeActionsRef.current = [];
