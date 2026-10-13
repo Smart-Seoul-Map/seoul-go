@@ -123,6 +123,8 @@ export function ExplorationMap({
   onPlaceMarkerSelectRef.current = onPlaceMarkerSelect;
   const revealedPlaceIdsRef = useRef(revealedPlaceIds);
   revealedPlaceIdsRef.current = revealedPlaceIds;
+  const previousPositionRef = useRef(initialPosition);
+  const isMovingToPlaceRef = useRef(false);
   const characterMovement = useCharacterMovementController<Coordinates>({
     arrivalRadius: CHARACTER_ARRIVAL_RADIUS_METERS,
     getDistance: distanceMeters,
@@ -133,8 +135,15 @@ export function ExplorationMap({
       lng: from.lng + (to.lng - from.lng) * ratio,
       lat: from.lat + (to.lat - from.lat) * ratio,
     }),
-    onFrame: ({ position }) => {
+    onFrame: ({ position, status }) => {
       mapRef.current?.jumpTo({ center: [position.lng, position.lat] });
+      const previousPosition = previousPositionRef.current;
+      previousPositionRef.current = position;
+      const hasArrivedAtPlace = status === "arrived" && isMovingToPlaceRef.current;
+
+      if (status === "arrived") {
+        isMovingToPlaceRef.current = false;
+      }
 
       if (hasActivePanelRef.current) {
         return;
@@ -144,7 +153,7 @@ export function ExplorationMap({
         arrivalRadiusMeters: PLACE_CARD_REVEAL_RADIUS_METERS,
         placeMarkers: placeMarkersRef.current,
         position,
-        revealedPlaceIds: revealedPlaceIdsRef.current,
+        previousPosition: hasArrivedAtPlace ? null : previousPosition,
       });
 
       if (arrivedPlace) {
@@ -167,6 +176,7 @@ export function ExplorationMap({
   const handleMoveToPlace = useCallback(
     (position: Coordinates) => {
       onMapMoveRequest?.();
+      isMovingToPlaceRef.current = true;
       characterMovementRef.current.moveTo(position);
     },
     [onMapMoveRequest]
@@ -277,6 +287,7 @@ export function ExplorationMap({
     map.on("click", (event) => {
       onMapMoveRequest?.();
       const target = { lng: event.lngLat.lng, lat: event.lngLat.lat };
+      isMovingToPlaceRef.current = false;
       characterMovementRef.current.moveTo(target);
     });
 

@@ -45,23 +45,47 @@ function createPlaceMarkers(): MapMarkerFeatureCollection {
 }
 
 describe("findNearestArrivedPlaceMarker", () => {
-  it("returns the nearest unrevealed marker within the arrival radius", () => {
+  const position = { lat: 37.5, lng: 126.9 };
+
+  it("returns the nearest marker the character has just entered", () => {
     const place = findNearestArrivedPlaceMarker({
       arrivalRadiusMeters: 25,
       placeMarkers: createPlaceMarkers(),
-      position: { lat: 37.5, lng: 126.9 },
-      revealedPlaceIds: new Set(["farther-place"]),
+      position,
+      previousPosition: { lat: 37.51, lng: 126.9 },
     });
 
     expect(place?.id).toBe("nearest-place");
   });
 
-  it("returns null when every marker in range is already revealed", () => {
+  it("returns a newly entered marker instead of one the character was already inside", () => {
     const place = findNearestArrivedPlaceMarker({
       arrivalRadiusMeters: 25,
       placeMarkers: createPlaceMarkers(),
-      position: { lat: 37.5, lng: 126.9 },
-      revealedPlaceIds: new Set(["farther-place", "nearest-place"]),
+      position,
+      previousPosition: { lat: 37.49985, lng: 126.9 },
+    });
+
+    expect(place?.id).toBe("farther-place");
+  });
+
+  it("returns the nearest marker in range when there is no previous position", () => {
+    const place = findNearestArrivedPlaceMarker({
+      arrivalRadiusMeters: 25,
+      placeMarkers: createPlaceMarkers(),
+      position,
+      previousPosition: null,
+    });
+
+    expect(place?.id).toBe("nearest-place");
+  });
+
+  it("returns null while the character stays inside every marker in range", () => {
+    const place = findNearestArrivedPlaceMarker({
+      arrivalRadiusMeters: 25,
+      placeMarkers: createPlaceMarkers(),
+      position,
+      previousPosition: position,
     });
 
     expect(place).toBeNull();

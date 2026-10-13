@@ -8,3 +8,9 @@
   width: min(42vw, 340px);
   z-index: 2;
 }
+
+.character-overlay canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}

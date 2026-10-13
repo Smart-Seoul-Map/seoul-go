@@ -1,4 +1,4 @@
-import { act, cleanup, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
@@ -13,6 +13,10 @@ type MapClickEvent = {
   };
   point: unknown;
 };
+type MovementFrame = {
+  position: { lat: number; lng: number };
+  status?: "moving" | "arrived";
+};
 
 const maplibreMock = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -25,7 +29,7 @@ const maplibreMock = vi.hoisted(() => ({
 }));
 
 const characterMovementMock = vi.hoisted(() => ({
-  onFrame: null as ((frame: { position: { lat: number; lng: number } }) => void) | null,
+  onFrame: null as ((frame: MovementFrame) => void) | null,
   moveInDirection: vi.fn(),
   moveTo: vi.fn(),
   stop: vi.fn(),
@@ -120,7 +124,24 @@ vi.mock("./CharacterModelOverlay", () => ({
   CharacterModelOverlay: () => <div data-testid="character-model-overlay" />,
 }));
 vi.mock("./ExplorationImageYearMarker", () => ({
-  ExplorationImageYearMarker: () => <div data-testid="edition-marker" />,
+  ExplorationImageYearMarker: ({
+    feature,
+    onMoveToPlace,
+  }: {
+    feature: { geometry: { coordinates: [number, number] } };
+    onMoveToPlace: (position: { lat: number; lng: number }) => void;
+  }) => (
+    <button
+      data-testid="edition-marker"
+      onClick={() =>
+        onMoveToPlace({
+          lng: feature.geometry.coordinates[0],
+          lat: feature.geometry.coordinates[1],
+        })
+      }
+      type="button"
+    />
+  ),
 }));
 
 vi.mock("../application/explorationMapInteractions", () => ({
@@ -144,9 +165,7 @@ vi.mock("../application/explorationPlaceMarkerModels", async (importOriginal) =>
 }));
 
 vi.mock("../application/useCharacterMovementController", () => ({
-  useCharacterMovementController: (options: {
-    onFrame: (frame: { position: { lat: number; lng: number } }) => void;
-  }) => {
+  useCharacterMovementController: (options: { onFrame: (frame: MovementFrame) => void }) => {
     characterMovementMock.onFrame = options.onFrame;
     return {
       getCurrentPosition: vi.fn(),
@@ -503,6 +522,42 @@ describe("ExplorationMap", () => {
     expect(onPlaceMarkerSelect).toHaveBeenCalledOnce();
     expect(onPlaceMarkerSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ready" }));
     expect(characterMovementMock.stop).toHaveBeenCalled();
+  });
+
+  test("opens a clicked Edition place even when the character starts inside its radius", async () => {
+    vi.stubGlobal("WebGLRenderingContext", class {});
+    placeMarkerLayerMock.getExplorationPlaceMarkerSelection.mockImplementation(
+      (feature: { properties: { id: string }; geometry: { coordinates: [number, number] } }) => ({
+        id: feature.properties.id,
+        position: { lng: feature.geometry.coordinates[0], lat: feature.geometry.coordinates[1] },
+      })
+    );
+    const onPlaceMarkerSelect = vi.fn();
+    const position = { lng: READY_COORDINATES[0], lat: READY_COORDINATES[1] };
+    const view = render(
+      <ExplorationMap
+        initialCenter={position}
+        placeMarkers={createModelMarkers([{ id: "edition", coordinates: READY_COORDINATES }])}
+        placeMarkerPresentation="image-year"
+        onPlaceMarkerSelect={onPlaceMarkerSelect}
+      />
+    );
+    await act(async () => {
+      maplibreMock.instances.at(-1)?.emit("load");
+    });
+
+    act(() => {
+      characterMovementMock.onFrame?.({ position, status: "arrived" });
+    });
+    expect(onPlaceMarkerSelect).not.toHaveBeenCalled();
+
+    fireEvent.click(view.getByTestId("edition-marker"));
+    act(() => {
+      characterMovementMock.onFrame?.({ position, status: "arrived" });
+    });
+
+    expect(characterMovementMock.moveTo).toHaveBeenCalledWith(position);
+    expect(onPlaceMarkerSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "edition" }));
   });
 
   test("does not show the marker failure alert when a GLB model is unavailable", async () => {

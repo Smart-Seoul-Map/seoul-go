@@ -10,23 +10,19 @@ type FindNearestArrivedPlaceMarkerParams = {
   arrivalRadiusMeters: number;
   placeMarkers: MapMarkerFeatureCollection;
   position: Coordinates;
-  revealedPlaceIds: ReadonlySet<string>;
+  previousPosition: Coordinates | null;
 };
 
 export function findNearestArrivedPlaceMarker({
   arrivalRadiusMeters,
   placeMarkers,
   position,
-  revealedPlaceIds,
+  previousPosition,
 }: FindNearestArrivedPlaceMarkerParams): ExplorationPlaceMarkerSelection | null {
   let nearestPlace: ExplorationPlaceMarkerSelection | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
 
   for (const feature of placeMarkers.features) {
-    if (revealedPlaceIds.has(feature.properties.id)) {
-      continue;
-    }
-
     const place = getExplorationPlaceMarkerSelection(feature);
 
     if (!place) {
@@ -34,8 +30,11 @@ export function findNearestArrivedPlaceMarker({
     }
 
     const distance = distanceMeters(position, place.position);
+    const wasInside =
+      previousPosition !== null &&
+      distanceMeters(previousPosition, place.position) <= arrivalRadiusMeters;
 
-    if (distance <= arrivalRadiusMeters && distance < nearestDistance) {
+    if (!wasInside && distance <= arrivalRadiusMeters && distance < nearestDistance) {
       nearestPlace = place;
       nearestDistance = distance;
     }

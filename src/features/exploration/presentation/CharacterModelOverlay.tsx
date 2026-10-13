@@ -22,6 +22,28 @@ import { calculateZoomScaleRatio } from "../domain/explorationZoomScale";
 const MODEL_TARGET_SIZE = 0.86;
 const MODEL_OFFSET_Y = -0.2;
 
+type ModelBodyCenter = {
+  x: number;
+  z: number;
+};
+
+function placeCharacterModel(
+  model: THREE.Object3D,
+  headingRadians: number,
+  bodyCenter: ModelBodyCenter
+): void {
+  const rotation = toCharacterModelRotationRadians(headingRadians);
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+
+  model.rotation.y = rotation;
+  model.position.set(
+    -(bodyCenter.x * cos + bodyCenter.z * sin),
+    MODEL_OFFSET_Y,
+    -(-bodyCenter.x * sin + bodyCenter.z * cos)
+  );
+}
+
 interface CharacterModelOverlayProps {
   headingRadians: number;
   mapZoomLevel?: number;
@@ -38,6 +60,7 @@ export function CharacterModelOverlay({
   const modelRef = useRef<THREE.Object3D | null>(null);
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const headingRadiansRef = useRef(headingRadians);
+  const bodyCenterRef = useRef<ModelBodyCenter>({ x: 0, z: 0 });
   const currentModelKeyRef = useRef(modelKey);
 
   const playAnimation = useCallback(async (nextModelKey: CharacterModelKey) => {
@@ -71,7 +94,7 @@ export function CharacterModelOverlay({
     headingRadiansRef.current = headingRadians;
 
     if (modelRef.current) {
-      modelRef.current.rotation.y = toCharacterModelRotationRadians(headingRadians);
+      placeCharacterModel(modelRef.current, headingRadians, bodyCenterRef.current);
     }
   }, [headingRadians]);
 
@@ -116,14 +139,18 @@ export function CharacterModelOverlay({
 
       model.scale.setScalar(1);
       model.position.set(0, 0, 0);
+      model.rotation.y = 0;
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3();
       box.getSize(size);
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
       const modelScale = MODEL_TARGET_SIZE / maxAxis;
       model.scale.setScalar(modelScale);
-      model.position.set(0, MODEL_OFFSET_Y, 0);
-      model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
+      bodyCenterRef.current = {
+        x: (box.min.x + size.x / 2) * modelScale,
+        z: (box.min.z + size.z / 2) * modelScale,
+      };
+      placeCharacterModel(model, headingRadiansRef.current, bodyCenterRef.current);
       camera.lookAt(0, box.min.y * modelScale + MODEL_OFFSET_Y, 0);
 
       modelRef.current = model;
