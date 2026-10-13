@@ -10,7 +10,7 @@ type FindNearestArrivedPlaceMarkerParams = {
   arrivalRadiusMeters: number;
   placeMarkers: MapMarkerFeatureCollection;
   position: Coordinates;
-  previousPosition: Coordinates;
+  previousPosition: Coordinates | null;
 };
 
 export function findNearestArrivedPlaceMarker({
@@ -30,7 +30,9 @@ export function findNearestArrivedPlaceMarker({
     }
 
     const distance = distanceMeters(position, place.position);
-    const wasInside = distanceMeters(previousPosition, place.position) <= arrivalRadiusMeters;
+    const wasInside =
+      previousPosition !== null &&
+      distanceMeters(previousPosition, place.position) <= arrivalRadiusMeters;
 
     if (!wasInside && distance <= arrivalRadiusMeters && distance < nearestDistance) {
       nearestPlace = place;

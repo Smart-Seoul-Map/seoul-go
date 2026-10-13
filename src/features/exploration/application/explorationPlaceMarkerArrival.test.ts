@@ -69,6 +69,17 @@ describe("findNearestArrivedPlaceMarker", () => {
     expect(place?.id).toBe("farther-place");
   });
 
+  it("returns the nearest marker in range when there is no previous position", () => {
+    const place = findNearestArrivedPlaceMarker({
+      arrivalRadiusMeters: 25,
+      placeMarkers: createPlaceMarkers(),
+      position,
+      previousPosition: null,
+    });
+
+    expect(place?.id).toBe("nearest-place");
+  });
+
   it("returns null while the character stays inside every marker in range", () => {
     const place = findNearestArrivedPlaceMarker({
       arrivalRadiusMeters: 25,
