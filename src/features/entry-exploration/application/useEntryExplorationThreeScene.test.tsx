@@ -89,8 +89,10 @@ vi.mock("./entryExplorationIntroFloor", async () => {
   return {
     createEntryExplorationIntroFloor: () => ({
       applyLayout: mocks.introFloorApplyLayout,
+      getCenter: () => ({ x: 0, z: 0 }),
       object: mocks.introFloorObject,
     }),
+    isEntryExplorationIntroTitleUv: () => true,
   };
 });
 
@@ -131,6 +133,10 @@ vi.mock("./useEntryExplorationSceneInteractionRegistry", async () => {
     useEntryExplorationSceneInteractionRegistry: () => mocks.registry,
   };
 });
+
+function startIntro(): void {
+  mocks.domElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+}
 
 function createContainerRef(): RefObject<HTMLDivElement | null> {
   const container = document.createElement("div");
@@ -206,7 +212,6 @@ describe("useEntryExplorationThreeScene", () => {
   });
 
   test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
-    let startIntro: (() => boolean) | undefined;
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
@@ -214,9 +219,6 @@ describe("useEntryExplorationThreeScene", () => {
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onPlacePanelDismiss: dismiss,
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -224,7 +226,7 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
     act(() => {
@@ -247,7 +249,6 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
   });
   test("starts at the intro destination without opening a place card", async () => {
-    let startIntro: (() => boolean) | undefined;
     const onOpenChange = vi.fn();
     const placeVisits = {
       [ENTRY_TEST_PLACES[1].id]: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
@@ -262,9 +263,6 @@ describe("useEntryExplorationThreeScene", () => {
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         placeVisits,
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -272,7 +270,7 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const target = mocks.movement.moveTo.mock.calls[0]?.[0] as { x: number; z: number };
     const destination = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
@@ -286,15 +284,11 @@ describe("useEntryExplorationThreeScene", () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
   test("moves to a clicked model's approach point instead of the floor behind it", async () => {
-    let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -302,7 +296,7 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
     act(() => {
@@ -328,18 +322,14 @@ describe("useEntryExplorationThreeScene", () => {
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
   });
 
-  test("starts once from the exposed intro control and keeps the camera locked while the character enters", async () => {
+  test("starts once however many times it is requested and keeps the camera locked while the character enters", async () => {
     const containerRef = createContainerRef();
-    let startIntro: (() => boolean) | null = null;
 
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro ?? null;
-        },
       })
     );
 
@@ -350,8 +340,8 @@ describe("useEntryExplorationThreeScene", () => {
     expect(mocks.introFloorObject?.parent).toBeTruthy();
 
     act(() => {
-      startIntro?.();
-      startIntro?.();
+      startIntro();
+      startIntro();
     });
 
     expect(mocks.domElement.getAttribute("aria-busy")).toBe("true");
@@ -364,15 +354,11 @@ describe("useEntryExplorationThreeScene", () => {
 
   test("positions the hanok using the viewport at start and keeps both landmarks fixed after resizing", async () => {
     const containerRef = createContainerRef();
-    let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     await act(async () => {
@@ -392,7 +378,7 @@ describe("useEntryExplorationThreeScene", () => {
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
 
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
@@ -408,7 +394,7 @@ describe("useEntryExplorationThreeScene", () => {
     act(() => {
       window.dispatchEvent(new Event("resize"));
       mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
-      startIntro?.();
+      startIntro();
     });
     expect(hanok.position.equals(placedPosition)).toBe(true);
     expect(tower.position.equals(placedTowerPosition)).toBe(true);
@@ -418,15 +404,11 @@ describe("useEntryExplorationThreeScene", () => {
 
   test("applies the resolved layout to the intro floor and interactions on mount and intro start but not on resize", async () => {
     const containerRef = createContainerRef();
-    let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -442,7 +424,7 @@ describe("useEntryExplorationThreeScene", () => {
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const introLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
     expect(mocks.registry.setSceneInteractionLayout).toHaveBeenCalledTimes(2);
@@ -460,15 +442,11 @@ describe("useEntryExplorationThreeScene", () => {
 
   test("draws the guide only after intro arrival and disposes it on unmount", async () => {
     const containerRef = createContainerRef();
-    let startIntro: (() => boolean) | undefined;
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -476,7 +454,7 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const guide = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-arrow");
     expect(guide).toBeDefined();
@@ -503,7 +481,6 @@ describe("useEntryExplorationThreeScene", () => {
     const onFirstPlaceOpenChange = vi.fn();
     const placeVisit = createEntryExplorationPlaceVisit({ radius: 1.2, onOpenChange });
     const containerRef = createContainerRef();
-    let startIntro: (() => boolean) | undefined;
     mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
@@ -517,9 +494,6 @@ describe("useEntryExplorationThreeScene", () => {
             onOpenChange: onFirstPlaceOpenChange,
           }),
         },
-        onSceneControlsReady: (controls) => {
-          startIntro = controls?.startIntro;
-        },
       })
     );
     onTestFinished(unmount);
@@ -527,7 +501,7 @@ describe("useEntryExplorationThreeScene", () => {
       await Promise.resolve();
     });
     act(() => {
-      startIntro?.();
+      startIntro();
     });
     const firstPlace = mocks.introFloorObject?.parent?.getObjectByName(
       `entry-place-${ENTRY_TEST_PLACES[0].id}`

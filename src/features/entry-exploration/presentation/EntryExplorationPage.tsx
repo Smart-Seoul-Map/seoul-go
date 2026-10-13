@@ -17,7 +17,6 @@ import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
-import { EntryExplorationIntroOverlay } from "./EntryExplorationIntroOverlay";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
@@ -46,9 +45,8 @@ export function EntryExplorationPage({
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
   const {
-    isReady,
-    isVisible,
-    handleStart,
+    hasStarted,
+    handleIntroStart,
     handleSceneControlsReady,
     handleDeactivateActiveInteraction,
   } = useEntryExplorationIntro();
@@ -99,6 +97,7 @@ export function EntryExplorationPage({
     containerRef,
     createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
+    onIntroStart: handleIntroStart,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
   });
@@ -120,9 +119,6 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {isVisible ? (
-        <EntryExplorationIntroOverlay disabled={!isReady} onStart={handleStart} />
-      ) : null}
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
@@ -139,11 +135,11 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
-      {!isVisible && slot.state.status === "closed" && (
+      {hasStarted && slot.state.status === "closed" && (
         <EntryCollectedNumbersPanel numbers={collectedNumbers} />
       )}
-      {!isVisible && renderPlacePanel?.(panelProps)}
-      {!isVisible && <EntrySlotOverlay {...slot} />}
+      {hasStarted && renderPlacePanel?.(panelProps)}
+      {hasStarted && <EntrySlotOverlay {...slot} />}
     </main>
   );
 }

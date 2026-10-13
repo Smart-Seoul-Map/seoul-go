@@ -3,6 +3,7 @@ import {
   approachIntroPlace,
   INTRO_PLACE_NAME,
   INTRO_PLACE_ID,
+  startIntro,
 } from "./helpers/introEdition";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -11,9 +12,7 @@ test.beforeEach(async ({ page }) => mockIntroEdition(page));
 const REWARD_STORAGE_KEY = "seoul-go:entry-number-rewards:v1";
 
 async function startExploration(page: Page) {
-  const start = page.getByRole("button", { name: "탐방 시작", exact: true });
-  await expect(start).toBeEnabled({ timeout: 45000 });
-  await start.click();
+  await startIntro(page);
   const canvas = page.getByLabel("서울 탐방 공간", { exact: true });
   await expect(canvas).not.toHaveAttribute("aria-busy", "true", { timeout: 45000 });
   await expect(canvas).toBeEnabled();

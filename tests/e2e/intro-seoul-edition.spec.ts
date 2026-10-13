@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { startIntro } from "./helpers/introEdition";
+
 const THEME = "1786321258890";
 const SELECTION_KEY = "seoul-go:entry-edition-selection:v1";
 const MODELED_PLACE_IDS = [
@@ -22,9 +24,7 @@ const MODEL_PATHS = [
 test.use({ launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
 async function startExploration(page: Page) {
-  const start = page.getByRole("button", { name: "탐방 시작", exact: true });
-  await expect(start).toBeEnabled({ timeout: 45000 });
-  await start.click();
+  await startIntro(page);
   await expect(page.getByLabel("서울 탐방 공간", { exact: true })).not.toHaveAttribute(
     "aria-busy",
     "true",

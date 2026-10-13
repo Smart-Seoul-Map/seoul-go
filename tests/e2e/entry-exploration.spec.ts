@@ -1,4 +1,9 @@
-import { mockIntroEdition, approachIntroPlace, INTRO_PLACE_NAME } from "./helpers/introEdition";
+import {
+  mockIntroEdition,
+  approachIntroPlace,
+  startIntro,
+  INTRO_PLACE_NAME,
+} from "./helpers/introEdition";
 import { expect, test as base, type Page } from "@playwright/test";
 
 const DESKTOP = { width: 1366, height: 900 };
@@ -81,20 +86,7 @@ async function waitForCameraToSettle(page: Page): Promise<void> {
 
 async function startExploration(page: Page): Promise<void> {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("img", { name: "서울탐방 GO", exact: true })).toBeVisible();
-  await expect
-    .poll(
-      () =>
-        page
-          .getByRole("img", { name: "서울탐방 GO", exact: true })
-          .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0),
-      { timeout: 45_000 }
-    )
-    .toBe(true);
-  const start = page.getByRole("button", { name: "탐방 시작", exact: true });
-  await expect(start).toBeEnabled({ timeout: 45_000 });
-  await start.click();
-  await expect(start).toHaveCount(0);
+  await startIntro(page);
   await expect(scene(page)).toBeVisible({ timeout: 20_000 });
   // The canvas is visible while the intro movement still blocks input.
   await expect(scene(page)).not.toHaveAttribute("aria-busy", "true", { timeout: 45_000 });

@@ -26,17 +26,13 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
   floorTextureRepeat: 150,
   intro: {
     camera: {
-      focusPosition: {
-        x: -0.9,
-        z: -0.9,
-      },
       offset: {
-        x: 11,
-        y: 13,
-        z: 11,
+        x: 0.05,
+        y: 20,
+        z: 0.05,
       },
       transitionDurationMs: 1_600,
-      zoom: 2.3,
+      zoom: 1,
     },
     characterSpawnPosition: {
       x: -14,
