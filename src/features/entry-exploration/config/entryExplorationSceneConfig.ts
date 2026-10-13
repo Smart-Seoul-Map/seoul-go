@@ -32,7 +32,7 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
         z: 0.05,
       },
       transitionDurationMs: 1_600,
-      zoom: 1.35,
+      zoom: 1.2,
     },
     characterSpawnPosition: {
       x: -14,

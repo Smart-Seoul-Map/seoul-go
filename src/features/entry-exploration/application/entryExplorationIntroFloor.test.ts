@@ -9,13 +9,11 @@ import {
   isEntryExplorationIntroTitleUv,
 } from "./entryExplorationIntroFloor";
 
-const { camera, targetPosition } = ENTRY_EXPLORATION_SCENE_CONFIG.intro;
-
 test.each([
   [1920, 1080],
   [1440, 900],
 ])("keeps the full intro background width at %ix%i", (width, height) => {
-  expect(getIntroBackgroundWidth(width / height)).toBeGreaterThanOrEqual(20);
+  expect(getIntroBackgroundWidth(width / height)).toBe(22);
 });
 
 test.each([
@@ -24,13 +22,13 @@ test.each([
   [820, 1180],
 ])("fits the intro background inside the visible width at %ix%i", (width, height) => {
   const aspect = width / height;
-  const visibleWidth = (ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect) / camera.zoom;
+  const visibleWidth = ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect;
 
   expect(getIntroBackgroundWidth(aspect)).toBeLessThan(visibleWidth);
   expect(getIntroBackgroundWidth(aspect)).toBeLessThan(22);
 });
 
-test("scales the intro background around the arrival point so the title button stays under it", () => {
+test("scales the intro background plane and moves it to its layout point", () => {
   const introFloor = createEntryExplorationIntroFloor();
   const aspect = 390 / 844;
 
@@ -38,12 +36,19 @@ test("scales the intro background around the arrival point so the title button s
 
   const [mesh] = introFloor.object.children;
   const point = ENTRY_INTRO_LAYOUTS.mobile.objects["intro-background"];
-  const scale = getIntroBackgroundWidth(aspect) / 22;
   expect(mesh).toBeInstanceOf(THREE.Mesh);
-  expect(mesh.scale.x).toBeCloseTo(scale);
-  expect(mesh.scale.y).toBeCloseTo(scale);
-  expect(mesh.position.x).toBeCloseTo(targetPosition.x + (point.x - targetPosition.x) * scale);
-  expect(mesh.position.z).toBeCloseTo(targetPosition.z + (point.z - targetPosition.z) * scale);
+  expect(mesh.position.x).toBe(point.x);
+  expect(mesh.position.z).toBe(point.z);
+  expect(mesh.scale.x).toBeCloseTo(getIntroBackgroundWidth(aspect) / 22);
+  expect(mesh.scale.y).toBeCloseTo(mesh.scale.x);
+});
+
+test("exposes the intro background position as the intro center", () => {
+  const introFloor = createEntryExplorationIntroFloor();
+
+  introFloor.applyLayout(ENTRY_INTRO_LAYOUTS.mobile, 390 / 844);
+
+  const [mesh] = introFloor.object.children;
   expect(introFloor.getCenter()).toEqual({ x: mesh.position.x, z: mesh.position.z });
 });
 

@@ -32,10 +32,9 @@ export type EntryExplorationIntroFloor = {
 };
 
 export function getIntroBackgroundWidth(aspect: number): number {
-  const { cameraViewSize, intro } = ENTRY_EXPLORATION_SCENE_CONFIG;
   const { viewWidthRatio, width } = INTRO_FLOOR_CONFIG.introBackground;
 
-  return Math.min(width, (cameraViewSize * aspect * viewWidthRatio) / intro.camera.zoom);
+  return Math.min(width, ENTRY_EXPLORATION_SCENE_CONFIG.cameraViewSize * aspect * viewWidthRatio);
 }
 
 export function isEntryExplorationIntroTitleUv(uv: { x: number; y: number }): boolean {
@@ -59,13 +58,11 @@ export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
     object,
     applyLayout(layout, aspect) {
       const point = layout.objects["intro-background"];
-      const { targetPosition } = ENTRY_EXPLORATION_SCENE_CONFIG.intro;
-      const scale = getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width;
 
-      introBackgroundMesh.position
-        .setX(targetPosition.x + (point.x - targetPosition.x) * scale)
-        .setZ(targetPosition.z + (point.z - targetPosition.z) * scale);
-      introBackgroundMesh.scale.setScalar(scale);
+      introBackgroundMesh.position.setX(point.x).setZ(point.z);
+      introBackgroundMesh.scale.setScalar(
+        getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width
+      );
     },
     getCenter: () => ({ x: introBackgroundMesh.position.x, z: introBackgroundMesh.position.z }),
   };
