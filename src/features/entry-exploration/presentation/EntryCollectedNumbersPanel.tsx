@@ -6,8 +6,8 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppText } from "@shared/ui/typography";
 
-import closeIcon from "../../../assets/close.svg";
-import dicesIcon from "../../../assets/dices.svg";
+import closeIcon from "../../../assets/icons/close.svg";
+import dicesIcon from "../../../assets/icons/dices.svg";
 
 import "./EntryCollectedNumbersPanel.css";
 

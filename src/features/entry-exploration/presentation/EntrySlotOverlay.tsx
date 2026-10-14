@@ -5,7 +5,7 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppText } from "@shared/ui/typography";
 
-import closeIcon from "../../../assets/close.svg";
+import closeIcon from "../../../assets/icons/close.svg";
 import type { EntrySlotState, EntrySlotViewportBounds } from "../application/entrySlotInteraction";
 
 import "./EntrySlotOverlay.css";

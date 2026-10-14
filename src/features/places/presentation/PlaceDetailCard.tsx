@@ -110,18 +110,7 @@ export function PlaceDetailCard({
           py="spacing.5"
           px="spacing.8"
         >
-          <svg
-            className="PlaceDetailCardLocationIcon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              fill="currentColor"
-              fillRule="evenodd"
-              d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
-            />
-          </svg>
+          <span className="PlaceDetailCardLocationIcon" aria-hidden="true" />
           <AppText role="detailSupporting" tone="muted">
             {address}
           </AppText>

@@ -21,7 +21,7 @@ import { AppIconButton } from "@shared/ui/button";
 import { AppHStack } from "@shared/ui/layout";
 import { AppText } from "@shared/ui/typography";
 
-import closeIcon from "../../assets/close.svg";
+import closeIcon from "../../assets/icons/close.svg";
 
 import "./EntryExplorationRoute.css";
 

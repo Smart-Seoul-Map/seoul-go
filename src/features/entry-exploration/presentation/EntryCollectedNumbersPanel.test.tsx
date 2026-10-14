@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 
-vi.mock("../../../assets/dices.svg", () => ({
+vi.mock("../../../assets/icons/dices.svg", () => ({
   default: "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg'%3e%3c/svg%3e",
 }));
 
