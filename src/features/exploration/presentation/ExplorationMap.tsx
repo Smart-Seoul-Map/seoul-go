@@ -15,6 +15,7 @@ import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport"
 import {
   disableExplorationMapDragInteractions,
   setExplorationMapZoomEnabled,
+  blockExplorationMapTrackpadWheel,
 } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
@@ -60,16 +61,11 @@ type ExplorationMapProps = {
   revealedPlaceIds?: ReadonlySet<string>;
 };
 
-const ZOOM_LEVEL_DECIMAL_DIGITS = 1;
 const EMPTY_MARKERS = createEmptyMapMarkerFeatureCollection();
 const DEFAULT_INITIAL_CENTER: Coordinates = {
   lng: EXPLORATION_MAP_CENTER[0],
   lat: EXPLORATION_MAP_CENTER[1],
 };
-
-function formatMapZoomLevel(zoomLevel: number): string {
-  return zoomLevel.toFixed(ZOOM_LEVEL_DECIMAL_DIGITS).replace(/\.0$/, "");
-}
 
 export function ExplorationMap({
   districtId,
@@ -254,8 +250,8 @@ export function ExplorationMap({
     disableExplorationMapDragInteractions(map);
     setExplorationMapZoomEnabled(map, !characterMovementRef.current.getIsMoving());
     map.addControl(
-      new maplibregl.NavigationControl({ showZoom: true, visualizePitch: true }),
-      "top-right"
+      new maplibregl.NavigationControl({ showCompass: false, showZoom: true }),
+      "bottom-right"
     );
 
     const updateMapZoomLevel = () => {
@@ -264,6 +260,7 @@ export function ExplorationMap({
 
     updateMapZoomLevel();
     map.on("zoom", updateMapZoomLevel);
+    const unblockTrackpadWheel = blockExplorationMapTrackpadWheel(container);
 
     const addModelLayer = () => {
       if (!map.getLayer(modelLayer.id)) map.addLayer(modelLayer);
@@ -293,6 +290,7 @@ export function ExplorationMap({
 
     return () => {
       map.off("zoom", updateMapZoomLevel);
+      unblockTrackpadWheel();
       map.remove();
       mapRef.current = null;
       modelLayerRef.current = null;
@@ -352,8 +350,6 @@ export function ExplorationMap({
     };
   }, [markerMap, symbolMarkers, placeMarkerPresentation]);
 
-  const zoomLevelLabel = mapZoomLevel === null ? null : formatMapZoomLevel(mapZoomLevel);
-
   return (
     <div className="map-canvas-stack" data-mobile={isMobileViewport}>
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
@@ -373,11 +369,6 @@ export function ExplorationMap({
           />
         ))}
       <ExplorationOffscreenIndicators indicators={offscreenIndicators} />
-      {zoomLevelLabel ? (
-        <div className="map-zoom-debug-label" aria-label={`map zoom level ${zoomLevelLabel}`}>
-          zoom: {zoomLevelLabel}
-        </div>
-      ) : null}
       <CharacterModelOverlay
         headingRadians={characterMovement.headingRadians}
         mapZoomLevel={mapZoomLevel ?? undefined}

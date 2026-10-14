@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
 import {
+  blockExplorationMapTrackpadWheel,
   disableExplorationMapDragInteractions,
   setExplorationMapZoomEnabled,
 } from "./explorationMapInteractions";
@@ -52,5 +53,39 @@ describe("탐색 지도 인터랙션", () => {
 
     expect(map.scrollZoom.enable).toHaveBeenCalledWith({ around: "center" });
     expect(nativeZoom.zoomIn).toHaveBeenCalledOnce();
+  });
+});
+
+describe("blockExplorationMapTrackpadWheel", () => {
+  function dispatchWheel(container: HTMLElement, init: { ctrlKey?: boolean; wheelDeltaY: number }) {
+    const event = new WheelEvent("wheel", { cancelable: true, ctrlKey: init.ctrlKey });
+    Object.defineProperty(event, "wheelDeltaY", { value: init.wheelDeltaY });
+    container.dispatchEvent(event);
+
+    return event;
+  }
+
+  test("blocks trackpad pinch and swipe", () => {
+    const container = document.createElement("div");
+    blockExplorationMapTrackpadWheel(container);
+
+    expect(dispatchWheel(container, { ctrlKey: true, wheelDeltaY: 120 }).defaultPrevented).toBe(
+      true
+    );
+    expect(dispatchWheel(container, { wheelDeltaY: -37 }).defaultPrevented).toBe(true);
+  });
+
+  test("lets mouse wheel notches through", () => {
+    const container = document.createElement("div");
+    blockExplorationMapTrackpadWheel(container);
+
+    expect(dispatchWheel(container, { wheelDeltaY: -120 }).defaultPrevented).toBe(false);
+  });
+
+  test("stops blocking after the listener is removed", () => {
+    const container = document.createElement("div");
+    blockExplorationMapTrackpadWheel(container)();
+
+    expect(dispatchWheel(container, { wheelDeltaY: -37 }).defaultPrevented).toBe(false);
   });
 });

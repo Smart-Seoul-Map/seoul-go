@@ -147,6 +147,7 @@ vi.mock("./ExplorationImageYearMarker", () => ({
 vi.mock("../application/explorationMapInteractions", () => ({
   disableExplorationMapDragInteractions: vi.fn(),
   setExplorationMapZoomEnabled: vi.fn(),
+  blockExplorationMapTrackpadWheel: vi.fn(() => vi.fn()),
 }));
 
 vi.mock("../application/explorationPlaceMarkers", () => placeMarkerLayerMock);

@@ -16,6 +16,26 @@ export function disableExplorationMapDragInteractions(map: DragLockableMap): voi
   map.dragRotate.disable();
 }
 
+const MOUSE_WHEEL_NOTCH = 120;
+
+export function blockExplorationMapTrackpadWheel(container: HTMLElement): () => void {
+  const handleWheel = (event: WheelEvent) => {
+    const { wheelDeltaY } = event as WheelEvent & { wheelDeltaY: number };
+    const isTrackpadWheel = event.ctrlKey || wheelDeltaY % MOUSE_WHEEL_NOTCH !== 0;
+
+    if (!isTrackpadWheel) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  container.addEventListener("wheel", handleWheel, { capture: true, passive: false });
+
+  return () => container.removeEventListener("wheel", handleWheel, { capture: true });
+}
+
 export function setExplorationMapZoomEnabled(map: MapLibreMap, enabled: boolean): void {
   if (enabled) {
     map.scrollZoom.enable({ around: "center" });
