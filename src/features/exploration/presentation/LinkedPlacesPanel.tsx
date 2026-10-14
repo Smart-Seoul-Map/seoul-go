@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from "react";
 
 import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
+import { track } from "@shared/lib/analytics/analytics";
 import { AppBadge } from "@shared/ui/badge";
 import { AppButton } from "@shared/ui/button";
 import { AppTabs } from "@shared/ui/tabs";
@@ -75,7 +76,11 @@ function NearbyPlaceList({
   return (
     <ul className="LinkedPlacesList" aria-label="근처 연계 장소">
       {places.map((place) => (
-        <li className="LinkedPlacesCard" key={place.id}>
+        <li
+          className="LinkedPlacesCard"
+          key={place.id}
+          onClick={() => track({ name: "linked_place_card_press", placeId: place.id })}
+        >
           <span className="LinkedPlacesReferenceLabel">{selected?.name} 기준</span>
           <h3>{place.name}</h3>
           <div className="LinkedPlacesCardMeta">

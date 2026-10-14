@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from "react";
 
+import { track } from "@shared/lib/analytics/analytics";
 import { AppButton, AppTextButton } from "@shared/ui/button";
 import { useAppToast } from "@shared/ui/toast";
 import {
@@ -62,6 +63,7 @@ function StampCourseFooter({
         className="StampCourseAction"
         data-action="naver"
         disabled={isEmpty || isEditing}
+        onClick={() => track({ name: "course_unavailable_action_press", action: "naver" })}
         aria-label="네이버 도보길찾기"
         title="네이버 도보길찾기"
         aria-disabled="true"
@@ -82,6 +84,7 @@ function StampCourseFooter({
         className="StampCourseAction"
         data-action="share"
         disabled={isEmpty || isEditing}
+        onClick={() => track({ name: "course_unavailable_action_press", action: "share" })}
         aria-label="링크 공유"
         aria-disabled="true"
       >
