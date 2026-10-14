@@ -67,6 +67,7 @@
     "html-to-image": "^1.11.13",
     "ky": "^2.0.2",
     "maplibre-gl": "^5.24.0",
+    "posthog-js": "^1.438.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1",

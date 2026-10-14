@@ -60,6 +60,7 @@ const smartSeoulPlaceImageProxy = () => ({
 export default defineConfig(() => {
   return {
     base: "/",
+    envPrefix: ["VITE_", "CF_PAGES_"],
     plugins: [react(), smartSeoulPlaceImageProxy()],
     resolve: {
       alias: {
