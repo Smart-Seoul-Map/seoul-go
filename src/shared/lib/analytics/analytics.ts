@@ -7,8 +7,10 @@ let client: AnalyticsClient | null = null;
 
 export function initAnalytics(): void {
   const apiKey = import.meta.env.VITE_POSTHOG_KEY;
+  const branch = import.meta.env.CF_PAGES_BRANCH;
+  const isAnalyticsBranch = branch === "dev" || branch === "main";
 
-  if (!apiKey) {
+  if (!apiKey || !isAnalyticsBranch) {
     return;
   }
 
@@ -17,7 +19,7 @@ export function initAnalytics(): void {
       apiKey,
       apiHost: import.meta.env.VITE_POSTHOG_HOST || DEFAULT_POSTHOG_HOST,
       appCommit: import.meta.env.CF_PAGES_COMMIT_SHA || LOCAL_BUILD_LABEL,
-      appBranch: import.meta.env.CF_PAGES_BRANCH || LOCAL_BUILD_LABEL,
+      appBranch: branch,
     });
   });
 }

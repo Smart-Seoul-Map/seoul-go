@@ -33,7 +33,20 @@ describe("analytics", () => {
     expect(capture).not.toHaveBeenCalled();
   });
 
-  test("sends events with the build commit and branch when a key is set", async () => {
+  test("does not load PostHog on a feature branch build even with a key", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    vi.stubEnv("CF_PAGES_BRANCH", "setting/152-posthog-analytics");
+    const { initAnalytics, track } = await loadAnalytics();
+
+    initAnalytics();
+    await vi.dynamicImportSettled();
+    track({ name: "entry_intro_start" });
+
+    expect(createPosthogAnalyticsClient).not.toHaveBeenCalled();
+    expect(capture).not.toHaveBeenCalled();
+  });
+
+  test("sends events with the build commit and branch on the dev build", async () => {
     vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
     vi.stubEnv("CF_PAGES_COMMIT_SHA", "abc1234");
     vi.stubEnv("CF_PAGES_BRANCH", "dev");

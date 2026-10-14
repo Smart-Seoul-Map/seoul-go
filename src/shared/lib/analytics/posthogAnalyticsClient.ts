@@ -20,6 +20,7 @@ export function createPosthogAnalyticsClient({
     defaults: "2026-05-30",
     person_profiles: "identified_only",
     capture_exceptions: true,
+    disable_session_recording: true,
   });
   posthog.register({ app_commit: appCommit, app_branch: appBranch });
 
