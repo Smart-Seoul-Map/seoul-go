@@ -212,28 +212,12 @@
   border-radius: var(--sg-radius-full);
 }
 
-.StampCourseRemoveButton::before {
-  content: "";
-  position: absolute;
-  box-sizing: border-box;
-  width: var(--sg-spacing-4_5);
-  height: var(--sg-spacing-4_5);
-  border: var(--sg-focus-ring-width) solid var(--sg-course-remove-fg);
-  border-radius: var(--sg-radius-full);
-  background: var(--sg-course-remove-bg);
-}
-
-.StampCourseRemoveButton:hover::before,
-.StampCourseRemoveButton:active::before {
-  background: var(--sg-course-remove-bg-pressed);
-}
-
 .StampCourseRemoveIcon {
   z-index: 1;
-  width: var(--sg-spacing-3);
-  height: var(--sg-spacing-3);
-  background: currentColor;
-  mask: url("../../../assets/minus.svg") center / contain no-repeat;
+  /* Figma asset size: includes the drop-shadow margin around the 26px circle. */
+  width: 34px;
+  height: 34px;
+  background: url("../../../assets/icons/minus.svg") center / contain no-repeat;
 }
 
 .StampCoursePlaceName {
@@ -294,14 +278,14 @@
   width: var(--sg-spacing-4);
   height: var(--sg-spacing-4);
   background: currentColor;
-  mask: url("../../../assets/external-link.svg") center / contain no-repeat;
+  mask: url("../../../assets/icons/external-link.svg") center / contain no-repeat;
 }
 
 .StampCourseActionIcon[data-icon="download"] {
-  mask-image: url("../../../assets/download.svg");
+  mask-image: url("../../../assets/icons/download.svg");
 }
 .StampCourseActionIcon[data-icon="link"] {
-  mask-image: url("../../../assets/link.svg");
+  mask-image: url("../../../assets/icons/link.svg");
 }
 
 .StampCoursePanel[data-presentation="side-panel"] {

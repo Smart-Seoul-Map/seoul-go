@@ -15,6 +15,8 @@ import {
 import { createPortal } from "react-dom";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
+import closeIcon from "../../../assets/icons/close.svg";
+
 import { PanelContext, usePanelContext } from "./panelContext";
 import type {
   AppResponsivePanelBodyProps,
@@ -327,7 +329,7 @@ function MountedContent({
         </header>
         {showCloseButton && (
           <CloseButton aria-label="닫기" title="닫기" className="AppResponsivePanelClose">
-            <span aria-hidden="true">×</span>
+            <img src={closeIcon} alt="" width="20" height="20" />
           </CloseButton>
         )}
         {children}

@@ -8,7 +8,7 @@ import { AppStack } from "@shared/ui/layout";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 import { AppHeading, AppText } from "@shared/ui/typography";
 
-import closeIcon from "../../../assets/close.svg";
+import closeIcon from "../../../assets/icons/close.svg";
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartGuide.css";

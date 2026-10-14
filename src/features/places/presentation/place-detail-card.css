@@ -70,7 +70,8 @@
   flex: none;
   width: var(--sg-detail-location-icon-size);
   height: var(--sg-detail-location-icon-size);
-  color: var(--sg-color-text-brand);
+  background: var(--sg-color-text-brand);
+  mask: url("../../../assets/icons/pin_location.svg") center / contain no-repeat;
 }
 .PlaceDetailCardAddress .AppText {
   min-width: 0;

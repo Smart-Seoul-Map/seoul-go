@@ -417,7 +417,6 @@
   --sg-panel-handle-offset: var(--sg-spacing-1_5);
   --sg-panel-handle-color: var(--sg-color-text-placeholder);
   --sg-panel-close-size: var(--sg-icon-button-size-nav);
-  --sg-panel-close-glyph-size: var(--sg-font-size-11);
   --sg-panel-divider-width: 1px;
   --sg-focus-ring-width: 2px;
   --sg-focus-ring-offset: 2px;
@@ -483,8 +482,6 @@
   --sg-course-seal-empty-bg: var(--sg-color-bg-floating);
   --sg-course-seal-empty-fg: var(--sg-color-text-info);
   --sg-course-seal-stroke: var(--sg-color-text-muted);
-  --sg-course-remove-bg: var(--sg-color-bg-neutral-strong);
-  --sg-course-remove-bg-pressed: var(--sg-v3-ink-700);
   --sg-course-remove-fg: var(--sg-color-text-inverted);
   --sg-course-route-color: var(--sg-v3-blue-500);
   --sg-course-board-top: color-mix(in srgb, var(--sg-v3-pink-500) 25%, var(--sg-color-bg-floating));

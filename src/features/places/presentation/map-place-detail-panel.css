@@ -75,7 +75,7 @@
   width: var(--place-detail-icon-size);
   height: var(--place-detail-icon-size);
   background: currentColor;
-  mask: url("../../../assets/search.svg") center / contain no-repeat;
+  mask: url("../../../assets/icons/search.svg") center / contain no-repeat;
 }
 
 .MapPlaceDetailPanel .AppResponsivePanelIconClose {

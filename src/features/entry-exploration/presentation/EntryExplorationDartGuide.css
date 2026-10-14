@@ -75,7 +75,7 @@
   width: var(--sg-spacing-6_5);
   height: var(--sg-spacing-6_5);
   background: currentColor;
-  mask: url("../../../assets/entry-exploration/icon-sync.svg") no-repeat center / contain;
+  mask: url("../../../assets/icons/retry.svg") no-repeat center / contain;
 }
 
 @media (min-width: 768px) {
