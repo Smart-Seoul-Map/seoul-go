@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import * as THREE from "three";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
+import { track } from "@shared/lib/analytics/analytics";
 import {
   playCharacterAnimationClips,
   stopCharacterAnimationActions,
@@ -462,6 +463,7 @@ export function useEntryExplorationThreeScene({
 
       if (introStatusRef.current === "waiting") {
         if (isPointerOnIntroTitle()) hasPendingIntroStart = !startIntro(performance.now());
+        else track({ name: "entry_intro_miss_click" });
         return;
       }
 

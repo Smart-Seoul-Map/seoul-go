@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 
+import { track } from "@shared/lib/analytics/analytics";
+
 import type { EntryExplorationThreeSceneControls } from "./useEntryExplorationThreeScene";
 
 export function useEntryExplorationIntro() {
@@ -13,7 +15,10 @@ export function useEntryExplorationIntro() {
     []
   );
 
-  const handleIntroStart = useCallback(() => setHasStarted(true), []);
+  const handleIntroStart = useCallback(() => {
+    track({ name: "entry_intro_start" });
+    setHasStarted(true);
+  }, []);
 
   const handleDeactivateActiveInteraction = useCallback((): void => {
     deactivateActiveInteractionRef.current?.();

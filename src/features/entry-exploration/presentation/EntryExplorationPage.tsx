@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { createDistrictExplorationPath } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
+import { track } from "@shared/lib/analytics/analytics";
 import { useAppToast } from "@shared/ui/toast";
 
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
@@ -61,6 +62,7 @@ export function EntryExplorationPage({
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(places, {
     onVisit: (placeId) => {
       const reward = visitPlace(placeId);
+      track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
       if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
     },
     onDismiss: (placeId) => {
@@ -84,7 +86,10 @@ export function EntryExplorationPage({
   } = useEntryExplorationDartShot();
   const { createSceneInteractionControllers } = useEntryExplorationSceneInteractionControllers({
     collectedNumbers,
-    onDartEntryBlocked: () => showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE }),
+    onDartEntryBlocked: () => {
+      track({ name: "entry_dart_blocked" });
+      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+    },
     createExtraSceneInteractionControllers: createSlotInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,
@@ -109,6 +114,7 @@ export function EntryExplorationPage({
       return;
     }
 
+    track({ name: "entry_district_start", districtId: district.id });
     navigate(createDistrictExplorationPath(district.id, toSeoulGridCellCenter(result.cell)));
   };
 
