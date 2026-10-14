@@ -15,6 +15,7 @@ import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport"
 import {
   disableExplorationMapDragInteractions,
   setExplorationMapZoomEnabled,
+  blockExplorationMapTrackpadWheel,
 } from "../application/explorationMapInteractions";
 import { createExplorationMapOptions } from "../application/explorationMapCreation";
 import { calculateCharacterHeadingRadians } from "../application/explorationMovementFrame";
@@ -264,6 +265,7 @@ export function ExplorationMap({
 
     updateMapZoomLevel();
     map.on("zoom", updateMapZoomLevel);
+    const unblockTrackpadWheel = blockExplorationMapTrackpadWheel(container);
 
     const addModelLayer = () => {
       if (!map.getLayer(modelLayer.id)) map.addLayer(modelLayer);
@@ -293,6 +295,7 @@ export function ExplorationMap({
 
     return () => {
       map.off("zoom", updateMapZoomLevel);
+      unblockTrackpadWheel();
       map.remove();
       mapRef.current = null;
       modelLayerRef.current = null;
