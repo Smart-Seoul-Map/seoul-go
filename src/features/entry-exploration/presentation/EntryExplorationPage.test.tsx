@@ -152,7 +152,7 @@ describe("EntryExplorationPage", () => {
       String(reward.number)
     );
     expect(screen.queryByRole("button", { name: "다시 돌리기" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     expect(slotClose).toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
@@ -218,7 +218,7 @@ describe("EntryExplorationPage", () => {
     act(() => {
       slotStateChange?.({ status: "result", result: String(saved[1].number) });
     });
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       `추첨 번호40추첨 번호${saved[1].number}`
@@ -245,7 +245,7 @@ describe("EntryExplorationPage", () => {
     act(() => {
       slotStateChange?.({ status: "result", result: String(reward.number) });
     });
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     act(() => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 0 }, { x: 0, z: 0 });
       placeVisits?.[FIRST_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });

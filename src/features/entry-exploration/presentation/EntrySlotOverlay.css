@@ -4,14 +4,6 @@
   pointer-events: none;
 }
 
-.entry-slot-close {
-  position: absolute;
-  top: var(--sg-spacing-3);
-  right: var(--sg-spacing-4);
-  display: flex;
-  pointer-events: auto;
-}
-
 .entry-slot-controls {
   position: absolute;
   bottom: max(var(--sg-spacing-4), env(safe-area-inset-bottom, 0px), 6%);

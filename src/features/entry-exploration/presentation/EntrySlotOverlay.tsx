@@ -2,10 +2,9 @@ import { useEffect, useLayoutEffect, useRef, type ReactElement } from "react";
 
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
-import { AppButton, AppIconButton } from "@shared/ui/button";
+import { AppButton } from "@shared/ui/button";
 import { AppText } from "@shared/ui/typography";
 
-import closeIcon from "../../../assets/icons/close.svg";
 import type { EntrySlotState, EntrySlotViewportBounds } from "../application/entrySlotInteraction";
 
 import "./EntrySlotOverlay.css";
@@ -94,11 +93,6 @@ export function EntrySlotOverlay({
       aria-label="숫자 슬롯"
       data-state={state.status}
     >
-      <div className="entry-slot-close">
-        <AppIconButton ariaLabel="슬롯 닫기" size="sm" disabled={!canClose} onClick={onClose}>
-          <img src={closeIcon} alt="" width="20" height="20" />
-        </AppIconButton>
-      </div>
       <AppBox
         ref={summaryRef}
         className="entry-slot-summary"
