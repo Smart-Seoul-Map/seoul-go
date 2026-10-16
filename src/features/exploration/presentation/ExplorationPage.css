@@ -186,7 +186,6 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
     top: auto;
     left: auto;
     align-self: flex-start;
-    pointer-events: auto;
   }
 
   .exploration-map-notice-actions .exploration-linked-places-button {
