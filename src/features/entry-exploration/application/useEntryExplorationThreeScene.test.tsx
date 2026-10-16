@@ -172,7 +172,7 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
-  test("passes decorations and other games as surroundings without hiding the floor or the active model", () => {
+  test("passes decorations and other games as surroundings without hiding the floor or the active model", async () => {
     let surroundings: readonly THREE.Object3D[] = [];
     const createController = (): EntryExplorationSceneInteractionController => ({
       object: new THREE.Group(),
@@ -200,6 +200,12 @@ describe("useEntryExplorationThreeScene", () => {
       })
     );
     onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
     expect(surroundings).toContain(dart.object);
     expect(surroundings).not.toContain(slot.object);
     expect(surroundings).not.toContain(mocks.floor);
@@ -364,27 +370,29 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
-    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[0].id}`
-    );
-    const tower = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[1].id}`
-    );
-    if (!hanok || !tower || !containerRef.current) {
+    if (!containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
-    const originalPosition = hanok.position.clone();
+    expect(
+      mocks.introFloorObject?.parent?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)
+    ).toBeUndefined();
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
 
     act(() => {
       startIntro();
     });
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
+    if (!hanok || !tower) {
+      throw new Error("The entry scene is missing.");
+    }
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
-    expect({ x: originalPosition.x, z: originalPosition.z }).toEqual(
-      resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100).edition[0]
-    );
     const placedLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
     expect({ x: placedPosition.x, z: placedPosition.z }).toEqual(placedLayout.edition[0]);
     expect({ x: placedTowerPosition.x, z: placedTowerPosition.z }).toEqual(placedLayout.edition[1]);

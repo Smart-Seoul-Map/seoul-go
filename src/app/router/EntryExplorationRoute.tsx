@@ -2,7 +2,6 @@ import { useEffect, useState, type ReactElement } from "react";
 
 import {
   EntryExplorationPage,
-  EntryExplorationIntroOverlay,
   ENTRY_HANOK_PLACE,
   ENTRY_HANOK_PLACE_ID,
   useEntryEditionSelection,
@@ -85,30 +84,19 @@ export function EntryExplorationRoute(): ReactElement {
   const query = useSeoulEditionPlacesQuery();
   const places = useEntryEditionSelection(query.data);
 
-  if (!places) {
-    const canRetry =
-      !query.isFetching && (query.isError || query.isSuccess || query.fetchStatus === "idle");
-    return (
-      <main className="entry-exploration-page">
-        <EntryExplorationIntroOverlay
-          disabled={!canRetry}
-          onStart={() => {
-            void query.refetch();
-          }}
-          actionLabel={canRetry ? "장소 다시 불러오기" : "탐방 시작"}
-        />
-      </main>
-    );
-  }
+  const handleIntroBlocked = () => {
+    void query.refetch({ cancelRefetch: false });
+  };
 
   return (
     <EntryExplorationPage
       places={places}
+      onIntroBlocked={handleIntroBlocked}
       renderPlacePanel={({ placeId, ...props }) => {
         if (placeId === ENTRY_HANOK_PLACE_ID) {
           return <EntryPlacePanel key={placeId} place={ENTRY_HANOK_PLACE} {...props} />;
         }
-        const place = places.find((candidate) => candidate.id === placeId);
+        const place = places?.find((candidate) => candidate.id === placeId);
         return place ? (
           <EntryPlacePanel
             key={placeId}
