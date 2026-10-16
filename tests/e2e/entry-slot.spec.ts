@@ -174,7 +174,6 @@ for (const viewport of [
       await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
       await expect(canvas).toHaveCSS("opacity", "1");
       await expect(panel).toHaveCount(0);
-      // The number panel opens by itself once the slot closes.
       await expect(page.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toHaveAttribute(
         "aria-expanded",
         "true"

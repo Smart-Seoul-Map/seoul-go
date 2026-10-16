@@ -37,18 +37,14 @@ export function EntryCollectedNumbersPanel({
   const isOpen = openState !== "closed";
   const countLabel = `${numbers.length}개 획득`;
 
-  // Open automatically when the panel shows again with a newly added number.
   if (!isHidden && numbers.length !== seenCount) {
     setSeenCount(numbers.length);
     if (numbers.length > seenCount) setOpenState("autoOpen");
   }
-  // Open automatically when the dart view starts, so the numbers to aim at stay visible.
   if (isDartViewActive !== wasDartViewActive) {
     setWasDartViewActive(isDartViewActive);
     if (isDartViewActive && openState === "closed") setOpenState("autoOpen");
   }
-  // Only an automatic open collapses when the character starts moving. The dart view walks the
-  // character to the map by itself, so it does not count.
   if (isCharacterMoving !== wasCharacterMoving) {
     setWasCharacterMoving(isCharacterMoving);
     if (isCharacterMoving && openState === "autoOpen" && !isDartViewActive) {
