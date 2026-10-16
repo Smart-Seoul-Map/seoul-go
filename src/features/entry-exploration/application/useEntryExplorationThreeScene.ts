@@ -69,14 +69,14 @@ type SceneHandles = {
 };
 
 type EntryExplorationIntroStatus = "entering" | "ready" | "waiting";
-const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
 
 export type UseEntryExplorationThreeSceneOptions = {
-  places?: readonly EntryEditionPlace[];
+  places?: readonly EntryEditionPlace[] | null;
   containerRef: RefObject<HTMLDivElement | null>;
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
   onSceneControlsReady?: (controls: EntryExplorationThreeSceneControls | null) => void;
   onIntroStart?: () => void;
+  onIntroBlocked?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
 };
@@ -86,11 +86,12 @@ export type EntryExplorationThreeSceneControls = {
 };
 
 export function useEntryExplorationThreeScene({
-  places = EMPTY_ENTRY_PLACES,
+  places = null,
   containerRef,
   createSceneInteractionControllers,
   onSceneControlsReady,
   onIntroStart,
+  onIntroBlocked,
   placeVisits,
   onPlacePanelDismiss,
 }: UseEntryExplorationThreeSceneOptions): void {
@@ -99,6 +100,13 @@ export function useEntryExplorationThreeScene({
   onIntroStartRef.current = onIntroStart;
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
+  const onIntroBlockedRef = useRef(onIntroBlocked);
+  onIntroBlockedRef.current = onIntroBlocked;
+  const placesRef = useRef(places);
+  placesRef.current = places;
+  const placeVisitsRef = useRef(placeVisits);
+  placeVisitsRef.current = placeVisits;
+  const startPendingIntroRef = useRef<(() => void) | null>(null);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
@@ -221,6 +229,11 @@ export function useEntryExplorationThreeScene({
   }, [deactivateActiveSceneInteraction, restoreCameraToCurrentPosition]);
 
   useEffect(() => {
+    placesRef.current = places;
+    startPendingIntroRef.current?.();
+  }, [places]);
+
+  useEffect(() => {
     onSceneControlsReady?.({ deactivateActiveInteraction });
 
     return () => {
@@ -276,19 +289,15 @@ export function useEntryExplorationThreeScene({
     const width = Math.max(rect.width, 1);
     const height = Math.max(rect.height, 1);
     const scene = new THREE.Scene();
-    Object.values(placeVisits ?? {}).forEach((visit) => visit.reset());
+    Object.values(placeVisitsRef.current ?? {}).forEach((visit) => visit.reset());
     const camera = createEntryExplorationCamera(width, height);
     const renderer = createEntryExplorationRenderer(width, height);
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
     const scenery = createEntryExplorationScenery();
-    const editionScenery = createEntryEditionScenery(places, (destination) => {
-      if (introStatusRef.current !== "ready" || hasActiveSceneInteraction()) return;
-      if (onPlacePanelDismissRef.current?.()) return;
-      movementRef.current.moveTo({ x: destination.x, z: destination.z });
-    });
+    let editionScenery: ReturnType<typeof createEntryEditionScenery> | null = null;
     const hanok = scenery.object.getObjectByName(`entry-scenery-${ENTRY_HANOK_PLACE_ID}`);
-    const visitLandmarks = new Map<string, THREE.Object3D>(editionScenery.landmarks);
+    const visitLandmarks = new Map<string, THREE.Object3D>();
     if (hanok) visitLandmarks.set(ENTRY_HANOK_PLACE_ID, hanok);
     const labels = new CSS2DRenderer();
     labels.setSize(width, height);
@@ -322,7 +331,7 @@ export function useEntryExplorationThreeScene({
       });
       setSceneInteractionLayout(layout);
 
-      return editionScenery.applyLayout(layout);
+      return editionScenery?.applyLayout(layout) ?? null;
     };
 
     container.append(renderer.domElement);
@@ -334,17 +343,12 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    surroundings.add(introFloor.object, scenery.object, editionScenery.object, archeryRange.object);
+    surroundings.add(introFloor.object, scenery.object, archeryRange.object);
     sceneObjectMeshes.forEach((mesh) => {
       surroundings.add(mesh);
     });
     scene.add(surroundings);
-    const introHiddenObjects = [
-      scenery.object,
-      editionScenery.object,
-      archeryRange.object,
-      ...sceneObjectMeshes,
-    ];
+    const introHiddenObjects = [scenery.object, archeryRange.object, ...sceneObjectMeshes];
     introHiddenObjects.forEach((object) => (object.visible = false));
     registerSceneInteractionControllers(sceneInteractionControllers);
     addSceneInteractionObjects(scene, renderer);
@@ -394,9 +398,25 @@ export function useEntryExplorationThreeScene({
     };
 
     const startIntro = (time: number): boolean => {
+      const entryPlaces = placesRef.current;
+
       if (introStatusRef.current !== "waiting" || !sceneHandlesRef.current?.character) {
         return false;
       }
+
+      if (!entryPlaces) {
+        return false;
+      }
+
+      editionScenery = createEntryEditionScenery(entryPlaces, (destination) => {
+        if (introStatusRef.current !== "ready" || hasActiveSceneInteraction()) return;
+        if (onPlacePanelDismissRef.current?.()) return;
+        movementRef.current.moveTo({ x: destination.x, z: destination.z });
+      });
+      surroundings.add(editionScenery.object);
+      editionScenery.landmarks.forEach((landmark, placeId) =>
+        visitLandmarks.set(placeId, landmark)
+      );
 
       const entryRect = container.getBoundingClientRect();
       const guideDestination = applyLayout(
@@ -452,6 +472,20 @@ export function useEntryExplorationThreeScene({
       return true;
     };
 
+    const requestIntroStart = (): boolean => {
+      hasPendingIntroStart = !startIntro(performance.now());
+
+      if (hasPendingIntroStart && !placesRef.current) {
+        onIntroBlockedRef.current?.();
+      }
+
+      return !hasPendingIntroStart;
+    };
+
+    startPendingIntroRef.current = () => {
+      if (hasPendingIntroStart) hasPendingIntroStart = !startIntro(performance.now());
+    };
+
     const isPointerOnIntroTitle = (): boolean => {
       const uv = raycaster.intersectObject(introFloor.object, true)[0]?.uv;
 
@@ -462,7 +496,7 @@ export function useEntryExplorationThreeScene({
       updateRaycasterFromPointerEvent(event);
 
       if (introStatusRef.current === "waiting") {
-        if (isPointerOnIntroTitle()) hasPendingIntroStart = !startIntro(performance.now());
+        if (isPointerOnIntroTitle()) requestIntroStart();
         else track({ name: "entry_intro_miss_click" });
         return;
       }
@@ -489,12 +523,12 @@ export function useEntryExplorationThreeScene({
 
       const approachDestination = getSceneInteractionPointerDestination(raycaster);
       if (approachDestination) {
-        Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
+        Object.values(placeVisitsRef.current ?? {}).forEach((visit) => visit.dismiss());
         movementRef.current.moveTo(approachDestination);
         return;
       }
 
-      const placeDestination = editionScenery.getPointerDestination(raycaster);
+      const placeDestination = editionScenery?.getPointerDestination(raycaster);
       if (placeDestination) {
         movementRef.current.moveTo(placeDestination);
         return;
@@ -511,7 +545,7 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
-      Object.values(placeVisits ?? {}).forEach((visit) => visit.dismiss());
+      Object.values(placeVisitsRef.current ?? {}).forEach((visit) => visit.dismiss());
       movementRef.current.moveTo({
         x: floorHit.point.x,
         z: floorHit.point.z,
@@ -547,9 +581,12 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
-      if (startIntro(performance.now())) {
-        event.preventDefault();
+      if (introStatusRef.current !== "waiting") {
+        return;
       }
+
+      event.preventDefault();
+      requestIntroStart();
     };
 
     void loadEntryExplorationGltf(ENTRY_EXPLORATION_CHARACTER_MODEL_MANIFEST.mesh).then((gltf) => {
@@ -593,7 +630,7 @@ export function useEntryExplorationThreeScene({
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
         for (const [placeId, landmark] of visitLandmarks) {
-          if (placeVisits?.[placeId]?.update(characterPosition, landmark.position)) {
+          if (placeVisitsRef.current?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
           }
         }
@@ -651,8 +688,9 @@ export function useEntryExplorationThreeScene({
       cancelAnimationFrame(frameId);
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
+      startPendingIntroRef.current = null;
       scenery.dispose();
-      editionScenery.dispose();
+      editionScenery?.dispose();
       labels.domElement.remove();
       archeryRange.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
@@ -679,8 +717,6 @@ export function useEntryExplorationThreeScene({
     handleSceneInteractionPointerUp,
     hasActiveSceneInteraction,
     playAnimation,
-    places,
-    placeVisits,
     releaseInactiveSceneInteraction,
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
