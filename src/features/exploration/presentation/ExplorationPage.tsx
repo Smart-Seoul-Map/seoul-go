@@ -128,6 +128,15 @@ export function ExplorationPage({
     }
     return stage?.querySelector<HTMLElement>(".maplibregl-canvas") ?? stage;
   };
+  const handleClosePlacePanel = () => {
+    const isFirstLinkedEntry = !hasLinkedPlaceReference && selectedPlace;
+    if (isFirstLinkedEntry && onActivateLinkedPlaces?.(selectedPlace) && renderLinkedPlacesPanel) {
+      openPanel({ type: "linked" });
+      return;
+    }
+
+    closePanel();
+  };
   const lifecycle = {
     open: isPanelOpen,
     onClose: closePanel,
@@ -231,6 +240,7 @@ export function ExplorationPage({
           {selectedPlace &&
             renderPlacePanel?.({
               ...lifecycle,
+              onClose: handleClosePlacePanel,
               place: selectedPlace,
               onAddToCourse: onAddPlaceToCourse ? handleAddPlaceToCourse : undefined,
               onOpenCourse: renderCoursePanel ? openCoursePanel : undefined,
