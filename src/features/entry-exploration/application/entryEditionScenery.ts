@@ -73,8 +73,11 @@ export function createEntryEditionScenery(
     landmarks,
     applyLayout(layout: EntryIntroLayout): EntryExplorationScenePoint | null {
       places.forEach((place, index) => {
-        const point = layout.edition[index];
-        landmarks.get(place.id)?.position.set(point.x, 0.06, point.z);
+        const placement = layout.edition[index];
+        const landmark = landmarks.get(place.id);
+        landmark?.position.set(placement.x, 0.06, placement.z);
+        landmark?.scale.setScalar(placement.scale);
+        landmark?.rotation.set(0, THREE.MathUtils.degToRad(placement.rotation), 0);
       });
       return places.length ? layout.edition[0] : null;
     },

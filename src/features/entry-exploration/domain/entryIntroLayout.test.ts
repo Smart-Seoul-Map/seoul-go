@@ -7,17 +7,21 @@ import {
 } from "../config/entryEditionModels";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import {
+  ENTRY_INTRO_LAYOUT_OBJECT_IDS,
   ENTRY_INTRO_LAYOUTS,
   type EntryIntroLayout,
-  type EntryIntroLayoutObjectId,
-  type EntryIntroLayouts,
+  type EntryIntroLayoutDocument,
+  type EntryIntroLayoutViewData,
 } from "../config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "./entryExplorationSceneMath";
 import { createEntryExplorationGuideRoute } from "./entryExplorationGuideRoute";
 import {
+  composeEntryIntroLayoutPlacement,
+  decomposeEntryIntroLayoutPlacement,
   getEntryIntroLayoutBlend,
   keepFirstEditionPlaceOnScreen,
   resolveEntryIntroLayout,
+  resolveEntryIntroLayoutView,
 } from "./entryIntroLayout";
 
 const MOBILE_ASPECT = 390 / 844;
@@ -26,7 +30,7 @@ const { cameraOffset, cameraViewSize, intro } = ENTRY_EXPLORATION_SCENE_CONFIG;
 const cameraGroundLength = Math.hypot(cameraOffset.x, cameraOffset.z);
 const FORWARD = { x: cameraOffset.x / cameraGroundLength, z: cameraOffset.z / cameraGroundLength };
 const RIGHT = { x: FORWARD.z, z: -FORWARD.x };
-const OBJECT_IDS = Object.keys(ENTRY_INTRO_LAYOUTS.pc.objects) as EntryIntroLayoutObjectId[];
+const OBJECT_IDS = ENTRY_INTRO_LAYOUT_OBJECT_IDS;
 
 function toScreenAxes(point: EntryExplorationScenePoint): { across: number; ahead: number } {
   const dx = point.x - intro.targetPosition.x;
@@ -68,7 +72,13 @@ function expectPointClose(
   expect(actual.z).toBeCloseTo(expected.z, 6);
 }
 
-function expectLayoutClose(actual: EntryIntroLayout, expected: EntryIntroLayout) {
+function expectLayoutClose(
+  actual: EntryIntroLayout,
+  expected: {
+    edition: readonly EntryExplorationScenePoint[];
+    objects: Readonly<Record<string, EntryExplorationScenePoint>>;
+  }
+) {
   expect(Object.keys(actual.objects)).toEqual(Object.keys(expected.objects));
   OBJECT_IDS.forEach((id) => expectPointClose(actual.objects[id], expected.objects[id]));
   expect(actual.edition).toHaveLength(expected.edition.length);
@@ -138,8 +148,11 @@ describe("resolveEntryIntroLayout", () => {
   test("keeps the first place of a synthetic overflowing layout on screen", () => {
     const aspect = 1;
     const edition = createSyntheticEdition(getMaxAcross(aspect) + 6, 4);
-    const synthetic: EntryIntroLayout = { edition, objects: ENTRY_INTRO_LAYOUTS.pc.objects };
-    const layouts: EntryIntroLayouts = { mobile: synthetic, pc: synthetic };
+    const synthetic: EntryIntroLayoutViewData = {
+      edition,
+      objects: ENTRY_INTRO_LAYOUTS.pc.objects,
+    };
+    const layouts: EntryIntroLayoutDocument = { nodes: [], mobile: synthetic, pc: synthetic };
     const resolved = resolveEntryIntroLayout(layouts, aspect);
 
     expect(toScreenAxes(resolved.edition[0]).across).toBeCloseTo(getMaxAcross(aspect), 6);
@@ -200,15 +213,20 @@ describe("intro layout schema", () => {
     expect(ENTRY_INTRO_LAYOUTS[view].edition).toHaveLength(ENTRY_EDITION_PLACE_COUNT);
   });
 
-  test.each(["pc", "mobile"] as const)("stores every %s point as finite x and z", (view) => {
-    const { edition, objects } = ENTRY_INTRO_LAYOUTS[view];
+  test.each(["pc", "mobile"] as const)(
+    "stores every %s transform as finite x and z with only optional scale and rotation",
+    (view) => {
+      const { edition, objects } = ENTRY_INTRO_LAYOUTS[view];
 
-    [...edition, ...Object.values(objects)].forEach((point) => {
-      expect(Object.keys(point)).toEqual(["x", "z"]);
-      expect(Number.isFinite(point.x)).toBe(true);
-      expect(Number.isFinite(point.z)).toBe(true);
-    });
-  });
+      [...edition, ...Object.values(objects)].forEach((transform) => {
+        Object.keys(transform).forEach((key) =>
+          expect(["x", "z", "scale", "rotation"]).toContain(key)
+        );
+        expect(Number.isFinite(transform.x)).toBe(true);
+        expect(Number.isFinite(transform.z)).toBe(true);
+      });
+    }
+  );
 });
 
 describe("resolved intro layout placement", () => {
@@ -267,5 +285,128 @@ describe("resolved intro layout placement", () => {
         }
       }
     }
+  });
+});
+
+function createDocument(
+  nodes: EntryIntroLayoutDocument["nodes"],
+  extraObjects: EntryIntroLayoutViewData["objects"],
+  editionOverrides: Partial<Record<number, EntryIntroLayoutViewData["edition"][number]>> = {}
+): EntryIntroLayoutDocument {
+  const view = (source: EntryIntroLayoutViewData): EntryIntroLayoutViewData => ({
+    edition: source.edition.map((transform, index) => editionOverrides[index] ?? transform),
+    objects: { ...source.objects, ...extraObjects },
+  });
+
+  return { nodes, mobile: view(ENTRY_INTRO_LAYOUTS.mobile), pc: view(ENTRY_INTRO_LAYOUTS.pc) };
+}
+
+describe("intro layout hierarchy", () => {
+  test("keeps the stored layout unchanged with scale 1 and rotation 0 everywhere", () => {
+    const layout = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc");
+
+    [...layout.edition, ...Object.values(layout.objects)].forEach((placement) => {
+      expect(placement.scale).toBe(1);
+      expect(placement.rotation).toBe(0);
+    });
+    expect(layout.stickers).toEqual([]);
+  });
+
+  test("composes a child placement from its parent's position, scale and rotation", () => {
+    const parent = { x: 10, z: -4, scale: 2, rotation: 90 };
+    const local = { x: 1, z: 0, scale: 0.5, rotation: 15 };
+    const world = composeEntryIntroLayoutPlacement(parent, local);
+    const rotated = new THREE.Vector3(
+      local.x * parent.scale,
+      0,
+      local.z * parent.scale
+    ).applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(parent.rotation));
+
+    expect(world.x).toBeCloseTo(parent.x + rotated.x, 10);
+    expect(world.z).toBeCloseTo(parent.z + rotated.z, 10);
+    expect(world.scale).toBeCloseTo(1, 10);
+    expect(world.rotation).toBeCloseTo(105, 10);
+
+    const back = decomposeEntryIntroLayoutPlacement(parent, world);
+    expect(back.x).toBeCloseTo(local.x, 10);
+    expect(back.z).toBeCloseTo(local.z, 10);
+    expect(back.scale).toBeCloseTo(local.scale, 10);
+    expect(back.rotation).toBeCloseTo(local.rotation, 10);
+  });
+
+  test("moves every child with its group and stacks nested groups", () => {
+    const document = (x: number) =>
+      createDocument(
+        [
+          { id: "zone", kind: "group" },
+          { id: "inner", kind: "group", parent: "zone" },
+          { id: "hanok", parent: "inner" },
+        ],
+        {
+          zone: { x, z: 0, rotation: 90 },
+          inner: { x: 2, z: 0 },
+          hanok: { x: 0, z: 3, scale: 2 },
+        }
+      );
+    const before = resolveEntryIntroLayoutView(document(5), "pc").objects.hanok;
+    const after = resolveEntryIntroLayoutView(document(9), "pc").objects.hanok;
+
+    expect(before.x).toBeCloseTo(5 + 3, 10);
+    expect(before.z).toBeCloseTo(-2, 10);
+    expect(before.scale).toBe(2);
+    expect(before.rotation).toBe(90);
+    expect(after.x - before.x).toBeCloseTo(4, 10);
+    expect(after.z).toBeCloseTo(before.z, 10);
+  });
+
+  test("lists stickers in node order at their world placement", () => {
+    const document = createDocument(
+      [
+        { id: "zone", kind: "group" },
+        { id: "star", kind: "sticker", asset: "star.png", parent: "zone" },
+        { id: "leaf", kind: "sticker", asset: "leaf.png" },
+      ],
+      { zone: { x: 4, z: 4 }, star: { x: 1, z: -1, rotation: 10 }, leaf: { x: -3, z: 2 } }
+    );
+
+    expect(resolveEntryIntroLayoutView(document, "pc").stickers).toEqual([
+      { id: "star", asset: "star.png", placement: { x: 5, z: 3, scale: 1, rotation: 10 } },
+      { id: "leaf", asset: "leaf.png", placement: { x: -3, z: 2, scale: 1, rotation: 0 } },
+    ]);
+  });
+
+  test("keeps a sticker attached to a place slot when the slot is pulled back on screen", () => {
+    const aspect = 1;
+    const overflowing = createSyntheticEdition(getMaxAcross(aspect) + 6, 4);
+    const document = createDocument(
+      [{ id: "mark", kind: "sticker", asset: "mark.png", parent: "edition-0" }],
+      { mark: { x: 1, z: 2 } },
+      Object.fromEntries(overflowing.map((point, index) => [index, point]))
+    );
+    const layout = resolveEntryIntroLayout(document, aspect);
+    const slot = layout.edition[0];
+    const mark = layout.stickers[0].placement;
+
+    expect(toScreenAxes(slot).across).toBeCloseTo(getMaxAcross(aspect), 6);
+    expect(mark.x - slot.x).toBeCloseTo(1, 10);
+    expect(mark.z - slot.z).toBeCloseTo(2, 10);
+  });
+
+  test("blends scale and rotation between the mobile and PC layouts", () => {
+    const aspect = 1440 / 900;
+    const blend = getEntryIntroLayoutBlend(aspect);
+    const withBench = (
+      source: EntryIntroLayoutViewData,
+      bench: EntryIntroLayoutViewData["objects"][string]
+    ): EntryIntroLayoutViewData => ({ ...source, objects: { ...source.objects, bench } });
+    const document: EntryIntroLayoutDocument = {
+      ...ENTRY_INTRO_LAYOUTS,
+      mobile: withBench(ENTRY_INTRO_LAYOUTS.mobile, { x: 0, z: 0 }),
+      pc: withBench(ENTRY_INTRO_LAYOUTS.pc, { x: 0, z: 0, scale: 3, rotation: 40 }),
+    };
+    const bench = resolveEntryIntroLayout(document, aspect).objects.bench;
+
+    expect(bench.scale).toBeCloseTo(1 + 2 * blend, 10);
+    expect(bench.rotation).toBeCloseTo(40 * blend, 10);
   });
 });

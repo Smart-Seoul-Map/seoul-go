@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import {
   createEntryExplorationIntroFloor,
   getIntroBackgroundWidth,
@@ -34,7 +35,7 @@ test("scales the intro background plane and moves it to its layout point", () =>
   const introFloor = createEntryExplorationIntroFloor();
   const aspect = 390 / 844;
 
-  introFloor.applyLayout(ENTRY_INTRO_LAYOUTS.mobile, aspect);
+  introFloor.applyLayout(resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "mobile"), aspect);
 
   const [mesh] = introFloor.object.children;
   const point = ENTRY_INTRO_LAYOUTS.mobile.objects["intro-background"];
@@ -48,7 +49,7 @@ test("scales the intro background plane and moves it to its layout point", () =>
 test("exposes the intro background position as the intro center", () => {
   const introFloor = createEntryExplorationIntroFloor();
 
-  introFloor.applyLayout(ENTRY_INTRO_LAYOUTS.mobile, 390 / 844);
+  introFloor.applyLayout(resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "mobile"), 390 / 844);
 
   const [mesh] = introFloor.object.children;
   expect(introFloor.getCenter()).toEqual({ x: mesh.position.x, z: mesh.position.z });

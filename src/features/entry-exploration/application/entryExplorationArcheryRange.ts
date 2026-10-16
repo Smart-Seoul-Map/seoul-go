@@ -58,9 +58,11 @@ export function createEntryExplorationArcheryRange() {
   return {
     object,
     applyLayout(layout: EntryIntroLayout): void {
-      const point = layout.objects["archery-range"];
+      const placement = layout.objects["archery-range"];
 
-      object.position.setX(point.x).setZ(point.z);
+      object.position.setX(placement.x).setZ(placement.z);
+      object.scale.setScalar(placement.scale);
+      object.rotation.y = THREE.MathUtils.degToRad(placement.rotation);
     },
     dispose(): void {
       disposed = true;

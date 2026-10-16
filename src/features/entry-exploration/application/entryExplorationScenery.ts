@@ -6,17 +6,39 @@ import manifest from "../../../assets/entry-exploration/intro-atlas.json";
 import atlasUrl from "../../../assets/entry-exploration/intro-atlas.png";
 import { ENTRY_EXPLORATION_SCENERY_OBJECTS } from "../config/entryExplorationSceneryObjects";
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
-import type { EntryIntroLayout } from "../config/entryIntroLayout";
+import type { EntryIntroLayout, EntryIntroLayoutPlacement } from "../config/entryIntroLayout";
 
-export function createEntryExplorationScenery() {
+const DEGREES_TO_RADIANS = Math.PI / 180;
+const SCREEN_AXIS = new THREE.Vector3(0, 0, 1);
+
+export function createEntryExplorationFacing(): THREE.Quaternion {
   const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
-  const facing = new THREE.Quaternion().setFromRotationMatrix(
+
+  return new THREE.Quaternion().setFromRotationMatrix(
     new THREE.Matrix4().lookAt(
       new THREE.Vector3(cameraOffset.x, cameraOffset.y, cameraOffset.z),
       new THREE.Vector3(),
       new THREE.Vector3(0, 1, 0)
     )
   );
+}
+
+export function placeEntryExplorationStandingObject(
+  object: THREE.Object3D,
+  facing: THREE.Quaternion,
+  placement: EntryIntroLayoutPlacement
+): void {
+  object.position.setX(placement.x).setZ(placement.z);
+  object.scale.setScalar(placement.scale);
+  object.quaternion
+    .copy(facing)
+    .multiply(
+      new THREE.Quaternion().setFromAxisAngle(SCREEN_AXIS, placement.rotation * DEGREES_TO_RADIANS)
+    );
+}
+
+export function createEntryExplorationScenery() {
+  const facing = createEntryExplorationFacing();
   const scenery = createAtlasScenery({
     atlasUrl,
     manifest,
@@ -35,10 +57,9 @@ export function createEntryExplorationScenery() {
     ...scenery,
     applyLayout(layout: EntryIntroLayout): void {
       ENTRY_EXPLORATION_SCENERY_OBJECTS.forEach(({ key }) => {
-        const point = layout.objects[key];
         const sprite = scenery.object.getObjectByName(`entry-scenery-${key}`);
 
-        sprite?.position.setX(point.x).setZ(point.z);
+        if (sprite) placeEntryExplorationStandingObject(sprite, facing, layout.objects[key]);
       });
     },
   };

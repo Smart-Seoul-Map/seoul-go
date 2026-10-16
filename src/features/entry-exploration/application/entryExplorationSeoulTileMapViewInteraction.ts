@@ -15,6 +15,7 @@ import {
 } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { ENTRY_INTRO_LAYOUTS, type EntryIntroLayout } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
 import {
   getEntryExplorationSceneDistance,
@@ -125,7 +126,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     mapMesh.position.setX(mapPosition.x).setZ(mapPosition.z);
   };
 
-  setLayout(ENTRY_INTRO_LAYOUTS.pc);
+  setLayout(resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc"));
   mapMesh.add(selectableLayer.object, hitMarker.object);
 
   const toCellLocalPosition = (cell: SeoulGridCell, zOffset: number): THREE.Vector3 => {

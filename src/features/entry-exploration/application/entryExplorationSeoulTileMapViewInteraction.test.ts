@@ -7,6 +7,7 @@ import {
 } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
 import { toSeoulGridCell, toSeoulGridCellKm, type SeoulGridCell } from "../domain/seoulGridNumber";
 import { isSeoulGridCellOnNumberLine } from "../domain/seoulGridNumberLines";
@@ -16,8 +17,9 @@ import {
   type EntryExplorationDartViewControls,
 } from "./entryExplorationSeoulTileMapViewInteraction";
 
-const MAP_POSITION = ENTRY_INTRO_LAYOUTS.pc.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
-const TRIGGER_POSITION = ENTRY_INTRO_LAYOUTS.pc.objects["archery-range"];
+const PC_LAYOUT = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc");
+const MAP_POSITION = PC_LAYOUT.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+const TRIGGER_POSITION = PC_LAYOUT.objects["archery-range"];
 const MAP_SIZE = (
   ENTRY_EXPLORATION_SCENE_OBJECTS.find(
     (object) => object.id === ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
@@ -268,13 +270,17 @@ describe("entry exploration seoul tile map view interaction", () => {
       cameraTransitionDurationMs,
       characterDestinationOffset,
     } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
-    const movedMapPosition = { x: MAP_POSITION.x - 25, z: MAP_POSITION.z + 30 };
-    const movedTriggerPosition = { x: TRIGGER_POSITION.x - 25, z: TRIGGER_POSITION.z + 30 };
+    const movedMapPosition = { ...MAP_POSITION, x: MAP_POSITION.x - 25, z: MAP_POSITION.z + 30 };
+    const movedTriggerPosition = {
+      ...TRIGGER_POSITION,
+      x: TRIGGER_POSITION.x - 25,
+      z: TRIGGER_POSITION.z + 30,
+    };
 
     controller.setLayout?.({
-      ...ENTRY_INTRO_LAYOUTS.pc,
+      ...PC_LAYOUT,
       objects: {
-        ...ENTRY_INTRO_LAYOUTS.pc.objects,
+        ...PC_LAYOUT.objects,
         [ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID]: movedMapPosition,
         "archery-range": movedTriggerPosition,
       },

@@ -382,12 +382,16 @@ describe("useEntryExplorationThreeScene", () => {
     });
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
-    expect({ x: originalPosition.x, z: originalPosition.z }).toEqual(
-      resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100).edition[0]
-    );
+    expect(resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100).edition[0]).toMatchObject({
+      x: originalPosition.x,
+      z: originalPosition.z,
+    });
     const placedLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
-    expect({ x: placedPosition.x, z: placedPosition.z }).toEqual(placedLayout.edition[0]);
-    expect({ x: placedTowerPosition.x, z: placedTowerPosition.z }).toEqual(placedLayout.edition[1]);
+    expect(placedLayout.edition[0]).toMatchObject({ x: placedPosition.x, z: placedPosition.z });
+    expect(placedLayout.edition[1]).toMatchObject({
+      x: placedTowerPosition.x,
+      z: placedTowerPosition.z,
+    });
     const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
 
     viewport.mockReturnValue(new DOMRect(0, 0, 1440, 900));

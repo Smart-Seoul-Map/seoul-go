@@ -40,6 +40,7 @@ import {
   isEntryExplorationIntroTitleUv,
 } from "./entryExplorationIntroFloor";
 import { createEntryExplorationScenery } from "./entryExplorationScenery";
+import { createEntryExplorationStickers } from "./entryExplorationStickers";
 import { createEntryEditionScenery } from "./entryEditionScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
@@ -282,6 +283,7 @@ export function useEntryExplorationThreeScene({
     const floor = createEntryExplorationFloorMesh();
     const introFloor = createEntryExplorationIntroFloor();
     const scenery = createEntryExplorationScenery();
+    const stickers = createEntryExplorationStickers();
     const editionScenery = createEntryEditionScenery(places, (destination) => {
       if (introStatusRef.current !== "ready" || hasActiveSceneInteraction()) return;
       if (onPlacePanelDismissRef.current?.()) return;
@@ -315,6 +317,7 @@ export function useEntryExplorationThreeScene({
 
       introFloor.applyLayout(layout, aspect);
       scenery.applyLayout(layout);
+      stickers.applyLayout(layout);
       archeryRange.applyLayout(layout);
       staticSceneObjects.forEach((object, index) => {
         const point = layout.objects[object.id];
@@ -334,13 +337,20 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    surroundings.add(introFloor.object, scenery.object, editionScenery.object, archeryRange.object);
+    surroundings.add(
+      introFloor.object,
+      scenery.object,
+      stickers.object,
+      editionScenery.object,
+      archeryRange.object
+    );
     sceneObjectMeshes.forEach((mesh) => {
       surroundings.add(mesh);
     });
     scene.add(surroundings);
     const introHiddenObjects = [
       scenery.object,
+      stickers.object,
       editionScenery.object,
       archeryRange.object,
       ...sceneObjectMeshes,
@@ -652,6 +662,7 @@ export function useEntryExplorationThreeScene({
       guideArrowRef.current?.dispose();
       guideArrowRef.current = null;
       scenery.dispose();
+      stickers.dispose();
       editionScenery.dispose();
       labels.domElement.remove();
       archeryRange.dispose();

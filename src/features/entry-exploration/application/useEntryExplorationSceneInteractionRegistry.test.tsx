@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { describe, expect, test, vi } from "vitest";
 
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import {
   type EntryExplorationSceneInteractionController,
   useEntryExplorationSceneInteractionRegistry,
@@ -57,12 +58,14 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
       createSceneInteractionController({ setLayout: secondSetLayout }),
     ]);
 
-    result.current.setSceneInteractionLayout(ENTRY_INTRO_LAYOUTS.mobile);
+    const layout = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "mobile");
+
+    result.current.setSceneInteractionLayout(layout);
 
     expect(firstSetLayout).toHaveBeenCalledOnce();
-    expect(firstSetLayout).toHaveBeenCalledWith(ENTRY_INTRO_LAYOUTS.mobile);
+    expect(firstSetLayout).toHaveBeenCalledWith(layout);
     expect(secondSetLayout).toHaveBeenCalledOnce();
-    expect(secondSetLayout).toHaveBeenCalledWith(ENTRY_INTRO_LAYOUTS.mobile);
+    expect(secondSetLayout).toHaveBeenCalledWith(layout);
   });
 
   test("prepares renderer-dependent resources only for controllers that request it", () => {

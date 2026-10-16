@@ -1,18 +1,80 @@
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
-import entryIntroLayouts from "./entryIntroLayout.json";
+import { ENTRY_EDITION_PLACE_COUNT } from "./entryEditionModels";
+import {
+  ENTRY_EXPLORATION_SCENE_OBJECTS,
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+} from "./entryExplorationSceneObjects";
+import { ENTRY_EXPLORATION_SCENERY_OBJECTS } from "./entryExplorationSceneryObjects";
+import entryIntroLayoutDocument from "./entryIntroLayout.json";
 
 export type EntryIntroLayoutView = "mobile" | "pc";
 
-export type EntryIntroLayoutObjectId = keyof typeof entryIntroLayouts.pc.objects;
+export const ENTRY_INTRO_LAYOUT_OBJECT_IDS = [
+  ...ENTRY_EXPLORATION_SCENERY_OBJECTS.map(({ key }) => key),
+  "intro-background",
+  "archery-range",
+  ...ENTRY_EXPLORATION_SCENE_OBJECTS.map(({ id }) => id),
+] as const;
 
-export type EntryIntroLayout = {
-  edition: readonly EntryExplorationScenePoint[];
-  objects: Readonly<Record<EntryIntroLayoutObjectId, EntryExplorationScenePoint>>;
+export type EntryIntroLayoutObjectId = (typeof ENTRY_INTRO_LAYOUT_OBJECT_IDS)[number];
+
+export const ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS: readonly string[] = [
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+];
+
+export const ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX = "edition-";
+
+export const ENTRY_INTRO_LAYOUT_EDITION_IDS: readonly string[] = Array.from(
+  { length: ENTRY_EDITION_PLACE_COUNT },
+  (_, index) => `${ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX}${index}`
+);
+
+export type EntryIntroLayoutTransform = EntryExplorationScenePoint & {
+  scale?: number;
+  rotation?: number;
 };
 
-export type EntryIntroLayouts = Readonly<Record<EntryIntroLayoutView, EntryIntroLayout>>;
+export type EntryIntroLayoutNodeKind = "group" | "sticker";
 
-export const ENTRY_INTRO_LAYOUTS: EntryIntroLayouts = entryIntroLayouts;
+export type EntryIntroLayoutNode = {
+  id: string;
+  kind?: EntryIntroLayoutNodeKind;
+  parent?: string;
+  asset?: string;
+  name?: string;
+};
+
+export type EntryIntroLayoutViewData = {
+  edition: readonly EntryIntroLayoutTransform[];
+  objects: Readonly<Record<string, EntryIntroLayoutTransform>>;
+};
+
+export type EntryIntroLayoutDocument = {
+  nodes: readonly EntryIntroLayoutNode[];
+  mobile: EntryIntroLayoutViewData;
+  pc: EntryIntroLayoutViewData;
+};
+
+export type EntryIntroLayoutPlacement = EntryExplorationScenePoint & {
+  scale: number;
+  rotation: number;
+};
+
+export type EntryIntroLayoutSticker = {
+  id: string;
+  asset: string;
+  placement: EntryIntroLayoutPlacement;
+};
+
+export type EntryIntroLayout = {
+  edition: readonly EntryIntroLayoutPlacement[];
+  objects: Readonly<Record<EntryIntroLayoutObjectId, EntryIntroLayoutPlacement>>;
+  stickers: readonly EntryIntroLayoutSticker[];
+};
+
+export const ENTRY_INTRO_LAYOUTS = entryIntroLayoutDocument as EntryIntroLayoutDocument;
 
 export const ENTRY_INTRO_LAYOUT_VIEWPORTS = {
   mobile: { width: 390, height: 844 },

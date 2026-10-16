@@ -17,8 +17,8 @@ test("shows API images without captions and connects image buttons to scene dest
   const destination = scenery.applyLayout(layout);
   const first = scenery.landmarks.get(ENTRY_TEST_PLACES[0].id)!;
   const second = scenery.landmarks.get(ENTRY_TEST_PLACES[1].id)!;
-  expect({ x: first.position.x, z: first.position.z }).toEqual(layout.edition[0]);
-  expect({ x: second.position.x, z: second.position.z }).toEqual(layout.edition[1]);
+  expect(layout.edition[0]).toMatchObject({ x: first.position.x, z: first.position.z });
+  expect(layout.edition[1]).toMatchObject({ x: second.position.x, z: second.position.z });
   const element = first.children[0] as THREE.Object3D & { element: HTMLButtonElement };
   expect(element.element.textContent).toBe("");
   expect(element.element.getAttribute("aria-label")).toBe(`${ENTRY_TEST_PLACES[0].name} 방문`);
@@ -27,7 +27,7 @@ test("shows API images without captions and connects image buttons to scene dest
   );
   element.element.click();
   expect(approach).toHaveBeenCalledWith(first.position);
-  expect(destination).toEqual({ x: first.position.x, z: first.position.z });
+  expect(destination).toMatchObject({ x: first.position.x, z: first.position.z });
   expect(loadEntryExplorationGltf).not.toHaveBeenCalled();
   scenery.dispose();
   expect(scenery.landmarks.size).toBe(0);

@@ -51,18 +51,21 @@ export function isEntryExplorationIntroTitleUv(uv: { x: number; y: number }): bo
 export function createEntryExplorationIntroFloor(): EntryExplorationIntroFloor {
   const object = new THREE.Group();
   const introBackgroundMesh = createIntroBackgroundMesh();
+  const baseRotationZ = introBackgroundMesh.rotation.z;
 
   object.add(introBackgroundMesh);
 
   return {
     object,
     applyLayout(layout, aspect) {
-      const point = layout.objects["intro-background"];
+      const placement = layout.objects["intro-background"];
 
-      introBackgroundMesh.position.setX(point.x).setZ(point.z);
+      introBackgroundMesh.position.setX(placement.x).setZ(placement.z);
       introBackgroundMesh.scale.setScalar(
-        getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width
+        (getIntroBackgroundWidth(aspect) / INTRO_FLOOR_CONFIG.introBackground.width) *
+          placement.scale
       );
+      introBackgroundMesh.rotation.z = baseRotationZ + THREE.MathUtils.degToRad(placement.rotation);
     },
     getCenter: () => ({ x: introBackgroundMesh.position.x, z: introBackgroundMesh.position.z }),
   };
