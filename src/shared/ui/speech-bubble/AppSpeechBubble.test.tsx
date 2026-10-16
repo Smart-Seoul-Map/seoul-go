@@ -13,7 +13,7 @@ describe("AppSpeechBubble", () => {
       <AppSpeechBubble speaker="해치" message="아래 화살을 눌러 발사!" />
     );
 
-    expect(screen.getByText("해치")).toHaveClass("AppSpeechBubble-speaker");
+    expect(screen.getByText("해치").closest(".AppSpeechBubble-speaker .AppBadge")).not.toBeNull();
     expect(screen.getByText("아래 화살을 눌러 발사!")).toHaveClass("AppSpeechBubble-message");
     expect(container.firstElementChild?.textContent).toBe("해치아래 화살을 눌러 발사!");
   });

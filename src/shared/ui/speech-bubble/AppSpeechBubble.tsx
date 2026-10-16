@@ -1,5 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactElement, ReactNode } from "react";
 
+import { AppBadge } from "../badge";
+
 import "./speech-bubble.css";
 
 type SpeechBubbleCapSide = "start" | "end";
@@ -39,7 +41,11 @@ export function AppSpeechBubble({
         <span className="AppSpeechBubble-body" />
         <SpeechBubbleCap side="end" />
       </span>
-      <span className="AppSpeechBubble-speaker">{speaker}</span>
+      <span className="AppSpeechBubble-speaker">
+        <AppBadge size="xs" tone="brand" variant="solid">
+          {speaker}
+        </AppBadge>
+      </span>
       <p className="AppSpeechBubble-message">{message}</p>
     </div>
   );
