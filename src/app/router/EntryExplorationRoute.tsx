@@ -85,9 +85,7 @@ export function EntryExplorationRoute(): ReactElement {
   const places = useEntryEditionSelection(query.data);
 
   const handleIntroBlocked = () => {
-    const canRetry =
-      !query.isFetching && (query.isError || query.isSuccess || query.fetchStatus === "idle");
-    if (canRetry) void query.refetch();
+    void query.refetch({ cancelRefetch: false });
   };
 
   return (
