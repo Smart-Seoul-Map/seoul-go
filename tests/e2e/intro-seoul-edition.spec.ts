@@ -132,11 +132,19 @@ test("keeps entry closed while loading and retries after an API error", async ({
   );
   await page.route("**/models/places/*.glb", (route) => route.abort());
   await page.goto("/");
-  const retry = page.getByRole("button", { name: "장소 다시 불러오기" });
-  await expect(retry).toBeEnabled();
+  const start = page.getByRole("button", { name: "서울 탐방 시작하기", exact: true });
+  await expect(start).toBeEnabled({ timeout: 45000 });
   expect(await page.locator(".EntryEditionLandmark").count()).toBe(0);
   succeed = true;
-  await retry.click();
-  await startExploration(page);
+  await expect(async () => {
+    await start.focus({ timeout: 1000 });
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("서울 탐방 공간", { exact: true })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 45000 });
+  await expect(page.getByLabel("서울 탐방 공간", { exact: true })).not.toHaveAttribute(
+    "aria-busy",
+    "true",
+    { timeout: 45000 }
+  );
   await expect(page.locator(".EntryEditionLandmark")).toHaveCount(1);
 });

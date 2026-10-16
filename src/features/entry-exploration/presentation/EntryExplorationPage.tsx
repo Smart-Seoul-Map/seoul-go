@@ -27,7 +27,8 @@ import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardC
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
-  places: readonly EntryEditionPlace[];
+  places: readonly EntryEditionPlace[] | null;
+  onIntroBlocked?: () => void;
   renderPlacePanel?: (props: {
     open: boolean;
     onClose: () => void;
@@ -35,8 +36,11 @@ export type EntryExplorationPageProps = {
   }) => ReactNode;
 };
 
+const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
+
 export function EntryExplorationPage({
   places,
+  onIntroBlocked,
   renderPlacePanel,
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -60,18 +64,21 @@ export function EntryExplorationPage({
       return next;
     });
   });
-  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(places, {
-    onVisit: (placeId) => {
-      const reward = visitPlace(placeId);
-      track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
-      if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
-    },
-    onDismiss: (placeId) => {
-      const reward = pendingRewards.get(placeId);
-      if (!reward) return;
-      showReward(reward);
-    },
-  });
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
+    places ?? EMPTY_ENTRY_PLACES,
+    {
+      onVisit: (placeId) => {
+        const reward = visitPlace(placeId);
+        track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
+        if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
+      },
+      onDismiss: (placeId) => {
+        const reward = pendingRewards.get(placeId);
+        if (!reward) return;
+        showReward(reward);
+      },
+    }
+  );
   const collectedNumbers = rewards
     .filter((reward) => !pendingRewards.has(reward.placeId))
     .map((reward) => reward.number);
@@ -104,6 +111,7 @@ export function EntryExplorationPage({
     createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
     onIntroStart: handleIntroStart,
+    onIntroBlocked,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
     onCharacterMovingChange: setIsCharacterMoving,

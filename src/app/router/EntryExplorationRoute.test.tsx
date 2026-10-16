@@ -14,7 +14,11 @@ vi.mock("@features/entry-exploration", async (importOriginal) => ({
     renderPlacePanel,
     places,
   }: ComponentProps<typeof EntryExplorationPage>) =>
-    renderPlacePanel?.({ placeId: panelSelection.placeId ?? places[0].id, open: true, onClose }),
+    renderPlacePanel?.({
+      placeId: panelSelection.placeId ?? places?.[0].id ?? "",
+      open: true,
+      onClose,
+    }),
 }));
 vi.mock("@features/places", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@features/places")>()),

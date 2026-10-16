@@ -249,8 +249,8 @@ describe("resolved intro layout placement", () => {
         ).getLength() +
         point(route.bendEnd).distanceTo(point(route.destination));
       const seconds = length / ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond;
-      expect(seconds).toBeGreaterThanOrEqual(2);
-      expect(seconds).toBeLessThanOrEqual(3);
+      expect(seconds).toBeGreaterThanOrEqual(1.4);
+      expect(seconds).toBeLessThanOrEqual(2.1);
     }
   );
 

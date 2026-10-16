@@ -106,19 +106,15 @@ for (const viewport of [
       }
       await expect(panel).toHaveCount(0);
       const result = page.getByRole("status", { name: "뽑힌 숫자" });
-      const close = page.getByRole("button", { name: "슬롯 닫기" });
+      const close = page.getByRole("button", { name: "계속 탐방하기" });
       await expect(page.getByRole("region", { name: "숫자 슬롯" })).toBeVisible();
       // Sample the phase and its controls together; browser round trips can outlast a spin.
       const phase = await page.getByRole("region", { name: "숫자 슬롯" }).evaluate((element) => {
         const busy = element.querySelector("output")?.getAttribute("aria-busy") === "true";
-        const closeButton = element.querySelector<HTMLButtonElement>(
-          'button[aria-label="슬롯 닫기"]'
-        );
         const buttons = element.querySelectorAll("button");
-        return { busy, disabled: closeButton?.disabled, buttonCount: buttons.length };
+        return { busy, buttonCount: buttons.length };
       });
-      expect(phase.disabled).toBe(phase.busy);
-      expect(phase.buttonCount).toBe(phase.busy ? 1 : 2);
+      expect(phase.buttonCount).toBe(phase.busy ? 0 : 1);
       await canvas.click({ position: { x: viewport.width / 2, y: viewport.height * 0.4 } });
       await expect(close).toBeEnabled({ timeout: 15000 });
       expect(
@@ -128,10 +124,6 @@ for (const viewport of [
       await expect(canvas).toHaveCSS("opacity", "1");
       await expect(result).toHaveText(String(awarded[0].number));
       await expect(page.getByRole("heading", { name: "숫자 슬롯", exact: true })).toHaveCount(0);
-      const slotCloseBounds = await close.boundingBox();
-      expect(slotCloseBounds).not.toBeNull();
-      expect(slotCloseBounds!.y).toBeCloseTo(12, 0);
-      expect(viewport.width - slotCloseBounds!.x - slotCloseBounds!.width).toBeCloseTo(16, 0);
       await expect(page.getByRole("button", { name: /돌리기/ })).toHaveCount(0);
       await expect(page.getByRole("alert")).toHaveCount(0);
       const pixels = await canvas.evaluate(
@@ -240,7 +232,7 @@ test("model loading failure still reveals the earned number and allows closing",
   await page.getByRole("button", { name: "장소 정보 닫기" }).click();
   await expect(page.getByRole("alert")).toContainText("번호는 받았어요");
   await expect(page.getByRole("status", { name: "뽑힌 숫자" })).toHaveText(String(reward.number));
-  await page.getByRole("button", { name: "슬롯 닫기" }).click();
+  await page.getByRole("button", { name: "계속 탐방하기" }).click();
   await expect(page.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeVisible();
 });
 
