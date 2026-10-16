@@ -16,21 +16,17 @@ describe("EntrySlotOverlay", () => {
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
   });
 
-  test("keeps the close button without a visible slot heading", () => {
+  test("has no X close button and no visible slot heading", () => {
     render(<EntrySlotOverlay {...handlers} state={{ status: "result", result: "40" }} />);
     expect(screen.queryByRole("heading", { name: "숫자 슬롯" })).toBeNull();
     expect(screen.getByRole("region", { name: "숫자 슬롯" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "슬롯 닫기" }).closest("header")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
-    expect(handlers.onClose).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "슬롯 닫기" })).toBeNull();
   });
 
   test.each(["loading", "covering", "focusing", "lever", "spinning"] as const)(
     "locks close and Escape during %s without offering a spin button",
     (status) => {
       render(<EntrySlotOverlay {...handlers} state={{ status }} />);
-      expect(screen.getByRole("button", { name: "슬롯 닫기" }).hasAttribute("disabled")).toBe(true);
-      fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
       fireEvent.keyDown(window, { key: "Escape" });
       expect(handlers.onClose).not.toHaveBeenCalled();
       expect(screen.queryByRole("button", { name: /돌리기/ })).toBeNull();
@@ -57,7 +53,6 @@ describe("EntrySlotOverlay", () => {
       />
     );
     expect(screen.getByRole("alert").textContent).toContain("57");
-    expect(screen.getByRole("button", { name: "슬롯 닫기" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: "계속 탐방하기" })).toBeTruthy();
     fireEvent.keyDown(window, { key: "Escape" });
     expect(handlers.onClose).toHaveBeenCalledOnce();
@@ -72,11 +67,9 @@ describe("EntrySlotOverlay", () => {
     rerender(<EntrySlotOverlay {...handlers} state={{ status: "result", result: "40" }} />);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "계속 탐방하기" }));
     fireEvent.keyDown(window, { key: "Tab", shiftKey: true });
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "슬롯 닫기" }));
-    fireEvent.keyDown(window, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "계속 탐방하기" }));
     fireEvent.keyDown(window, { key: "Tab" });
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "슬롯 닫기" }));
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "계속 탐방하기" }));
   });
 
   test("keeps the models between the result above and the exit controls on resize", () => {

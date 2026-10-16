@@ -32,7 +32,8 @@ import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechM
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
-  places: readonly EntryEditionPlace[];
+  places: readonly EntryEditionPlace[] | null;
+  onIntroBlocked?: () => void;
   renderPlacePanel?: (props: {
     open: boolean;
     onClose: () => void;
@@ -40,8 +41,11 @@ export type EntryExplorationPageProps = {
   }) => ReactNode;
 };
 
+const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
+
 export function EntryExplorationPage({
   places,
+  onIntroBlocked,
   renderPlacePanel,
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -50,6 +54,7 @@ export function EntryExplorationPage({
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
+  const [isCharacterMoving, setIsCharacterMoving] = useState(false);
   const {
     hasStarted,
     handleIntroStart,
@@ -64,18 +69,21 @@ export function EntryExplorationPage({
       return next;
     });
   });
-  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(places, {
-    onVisit: (placeId) => {
-      const reward = visitPlace(placeId);
-      track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
-      if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
-    },
-    onDismiss: (placeId) => {
-      const reward = pendingRewards.get(placeId);
-      if (!reward) return;
-      showReward(reward);
-    },
-  });
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
+    places ?? EMPTY_ENTRY_PLACES,
+    {
+      onVisit: (placeId) => {
+        const reward = visitPlace(placeId);
+        track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
+        if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
+      },
+      onDismiss: (placeId) => {
+        const reward = pendingRewards.get(placeId);
+        if (!reward) return;
+        showReward(reward);
+      },
+    }
+  );
   const collectedNumbers = rewards
     .filter((reward) => !pendingRewards.has(reward.placeId))
     .map((reward) => reward.number);
@@ -113,9 +121,13 @@ export function EntryExplorationPage({
     createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
     onIntroStart: handleIntroStart,
+    onIntroBlocked,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
-    onCharacterMovingChange: characterSpeech.handleCharacterMovingChange,
+    onCharacterMovingChange: (isMoving) => {
+      setIsCharacterMoving(isMoving);
+      characterSpeech.handleCharacterMovingChange(isMoving);
+    },
     characterSpeechAnchor: characterSpeech.anchor,
   });
 
@@ -153,8 +165,13 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
-      {hasStarted && slot.state.status === "closed" && (
-        <EntryCollectedNumbersPanel numbers={collectedNumbers} />
+      {hasStarted && (
+        <EntryCollectedNumbersPanel
+          numbers={collectedNumbers}
+          isHidden={slot.state.status !== "closed"}
+          isCharacterMoving={isCharacterMoving}
+          isDartViewActive={dartShot.isGuideVisible}
+        />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}
       {hasStarted && <EntrySlotOverlay {...slot} />}

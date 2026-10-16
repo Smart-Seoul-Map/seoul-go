@@ -13,17 +13,46 @@ import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
   numbers: readonly number[];
+  isHidden?: boolean;
+  isCharacterMoving?: boolean;
+  isDartViewActive?: boolean;
 };
+
+type OpenState = "closed" | "open" | "autoOpen";
 
 export function EntryCollectedNumbersPanel({
   numbers,
+  isHidden = false,
+  isCharacterMoving = false,
+  isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
-  const [isOpen, setIsOpen] = useState(false);
+  const [openState, setOpenState] = useState<OpenState>("closed");
+  const [seenCount, setSeenCount] = useState(numbers.length);
+  const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
+  const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const hasOpenedRef = useRef(false);
+  const listRef = useRef<HTMLElement>(null);
+  const isOpen = openState !== "closed";
   const countLabel = `${numbers.length}개 획득`;
+
+  if (!isHidden && numbers.length !== seenCount) {
+    setSeenCount(numbers.length);
+    if (numbers.length > seenCount) setOpenState("autoOpen");
+  }
+  if (isDartViewActive !== wasDartViewActive) {
+    setWasDartViewActive(isDartViewActive);
+    if (isDartViewActive && openState === "closed") setOpenState("autoOpen");
+  }
+  if (isCharacterMoving !== wasCharacterMoving) {
+    setWasCharacterMoving(isCharacterMoving);
+    if (isCharacterMoving && openState === "autoOpen" && !isDartViewActive) {
+      setOpenState("closed");
+    }
+  }
+
+  const setIsOpen = (open: boolean): void => setOpenState(open ? "open" : "closed");
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -43,13 +72,15 @@ export function EntryCollectedNumbersPanel({
   }, []);
 
   useLayoutEffect(() => {
-    if (isOpen) {
-      hasOpenedRef.current = true;
+    if (openState === "open") {
       panelRef.current?.focus({ preventScroll: true });
-    } else if (hasOpenedRef.current) {
+    } else if (openState === "autoOpen") {
+      const list = listRef.current;
+      if (list) list.scrollTop = list.scrollHeight;
+    } else if (panelRef.current?.contains(document.activeElement)) {
       triggerRef.current?.focus({ preventScroll: true });
     }
-  }, [isOpen]);
+  }, [openState]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
     event.stopPropagation();
@@ -73,6 +104,9 @@ export function EntryCollectedNumbersPanel({
       boxShadow="shadow.raised"
       className="entry-collected-numbers"
       data-open={isOpen}
+      data-hidden={isHidden}
+      aria-hidden={isHidden || undefined}
+      inert={isHidden}
       onClick={stopSceneInput}
       onPointerDown={stopSceneInput}
       onWheel={stopSceneInput}
@@ -88,7 +122,7 @@ export function EntryCollectedNumbersPanel({
           aria-controls={`${id}-content`}
           title="내 번호"
           className="entry-collected-numbers-trigger"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={() => setIsOpen(!isOpen)}
         >
           <NumbersIcon />
           <span className="entry-collected-numbers-trigger-label">
@@ -119,6 +153,9 @@ export function EntryCollectedNumbersPanel({
           ) : (
             <AppBox
               as="ul"
+              ref={(element) => {
+                listRef.current = element;
+              }}
               aria-label="획득한 숫자"
               tabIndex={0}
               className="entry-collected-numbers-list"

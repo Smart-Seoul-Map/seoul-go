@@ -50,6 +50,7 @@ vi.mock("../application/entrySlotInteraction", () => ({
 let introStartHandler: UseEntryExplorationThreeSceneOptions["onIntroStart"];
 let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
 let dismissPlaceFromBackground: UseEntryExplorationThreeSceneOptions["onPlacePanelDismiss"];
+let characterMovingChange: UseEntryExplorationThreeSceneOptions["onCharacterMovingChange"];
 
 vi.mock("../application/createEntryExplorationSceneInteractionControllers", () => ({
   createEntryExplorationSceneInteractionControllers: vi.fn((options) => {
@@ -65,10 +66,12 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     onIntroStart,
     placeVisits: visits,
     onPlacePanelDismiss,
+    onCharacterMovingChange,
   }: UseEntryExplorationThreeSceneOptions) => {
     placeVisits = visits;
     introStartHandler = onIntroStart;
     dismissPlaceFromBackground = onPlacePanelDismiss;
+    characterMovingChange = onCharacterMovingChange;
     useEffect(() => {
       const controllers = createSceneInteractionControllers();
       return () => controllers.forEach((controller) => controller.dispose());
@@ -152,15 +155,38 @@ describe("EntryExplorationPage", () => {
       String(reward.number)
     );
     expect(screen.queryByRole("button", { name: "다시 돌리기" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     expect(slotClose).toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
+    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toContain(
       String(reward.number)
     );
     expect(loadEntryNumberRewards()).toEqual([reward]);
     expect(router.state.location.pathname).toBe("/");
+  });
+
+  test("collapses the automatically opened number panel when the character starts moving", () => {
+    renderEntryExplorationPage();
+    startExploration();
+    act(() => {
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    const reward = entryNumberRewardStore.getState().rewards[0];
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    act(() => {
+      slotStateChange?.({ status: "result", result: String(reward.number) });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
+    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
+
+    act(() => characterMovingChange?.(true));
+    expect(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeTruthy();
+
+    act(() => characterMovingChange?.(false));
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
+    act(() => characterMovingChange?.(true));
+    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
   });
   test("visiting hanok opens its panel but grants no reward and never starts the slot", () => {
     renderEntryExplorationPage();
@@ -218,8 +244,8 @@ describe("EntryExplorationPage", () => {
     act(() => {
       slotStateChange?.({ status: "result", result: String(saved[1].number) });
     });
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
-    fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
+    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       `추첨 번호40추첨 번호${saved[1].number}`
     );
@@ -245,7 +271,7 @@ describe("EntryExplorationPage", () => {
     act(() => {
       slotStateChange?.({ status: "result", result: String(reward.number) });
     });
-    fireEvent.click(screen.getByRole("button", { name: "슬롯 닫기" }));
+    fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     act(() => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 0 }, { x: 0, z: 0 });
       placeVisits?.[FIRST_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });

@@ -42,6 +42,10 @@
   box-shadow: none;
 }
 
+.entry-collected-numbers[data-hidden="true"] {
+  visibility: hidden;
+}
+
 .entry-collected-numbers-header {
   position: relative;
   display: flex;

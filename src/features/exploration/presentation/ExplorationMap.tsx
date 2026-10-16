@@ -54,6 +54,7 @@ type ExplorationMapProps = {
   hasActivePanel?: boolean;
   initialCenter?: Coordinates;
   onMapMoveRequest?: () => void;
+  onCharacterMovingChange?: (isMoving: boolean) => void;
   onPlaceMarkerSelect?: (place: ExplorationPlaceMarkerSelection) => void;
   placeMarkers?: MapMarkerFeatureCollection;
   linkedPlaceMarkers?: MapMarkerFeatureCollection;
@@ -72,6 +73,7 @@ export function ExplorationMap({
   hasActivePanel = false,
   initialCenter,
   onMapMoveRequest,
+  onCharacterMovingChange,
   onPlaceMarkerSelect,
   placeMarkers = createEmptyMapMarkerFeatureCollection(),
   linkedPlaceMarkers = EMPTY_MARKERS,
@@ -117,6 +119,8 @@ export function ExplorationMap({
   hasActivePanelRef.current = hasActivePanel;
   const onPlaceMarkerSelectRef = useRef(onPlaceMarkerSelect);
   onPlaceMarkerSelectRef.current = onPlaceMarkerSelect;
+  const onCharacterMovingChangeRef = useRef(onCharacterMovingChange);
+  onCharacterMovingChangeRef.current = onCharacterMovingChange;
   const revealedPlaceIdsRef = useRef(revealedPlaceIds);
   revealedPlaceIdsRef.current = revealedPlaceIds;
   const previousPositionRef = useRef(initialPosition);
@@ -213,6 +217,7 @@ export function ExplorationMap({
     if (map) {
       setExplorationMapZoomEnabled(map, characterMovement.modelKey !== "walk");
     }
+    onCharacterMovingChangeRef.current?.(characterMovement.modelKey === "walk");
   }, [characterMovement.modelKey]);
 
   useEffect(() => {
