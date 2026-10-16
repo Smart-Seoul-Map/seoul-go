@@ -79,6 +79,8 @@ export type UseEntryExplorationThreeSceneOptions = {
   onIntroStart?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
+  onCharacterMovingChange?: (isMoving: boolean) => void;
+  characterSpeechAnchor?: THREE.Object3D;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -93,12 +95,16 @@ export function useEntryExplorationThreeScene({
   onIntroStart,
   placeVisits,
   onPlacePanelDismiss,
+  onCharacterMovingChange,
+  characterSpeechAnchor,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onIntroStartRef = useRef(onIntroStart);
   onIntroStartRef.current = onIntroStart;
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
+  const onCharacterMovingChangeRef = useRef(onCharacterMovingChange);
+  onCharacterMovingChangeRef.current = onCharacterMovingChange;
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
@@ -253,6 +259,7 @@ export function useEntryExplorationThreeScene({
   useEffect(() => {
     currentModelKeyRef.current = movement.modelKey;
     void playAnimation(movement.modelKey);
+    onCharacterMovingChangeRef.current?.(movement.modelKey === "walk");
   }, [movement.modelKey, playAnimation]);
 
   useEffect(() => {
@@ -560,6 +567,11 @@ export function useEntryExplorationThreeScene({
       const model = gltf.scene;
 
       fitEntryExplorationCharacterModel(model);
+      if (characterSpeechAnchor) {
+        characterSpeechAnchor.position.y =
+          new THREE.Box3().setFromObject(model).max.y / model.scale.y;
+        model.add(characterSpeechAnchor);
+      }
       model.rotation.y = toCharacterModelRotationRadians(headingRadiansRef.current);
       model.visible = introStatusRef.current !== "waiting";
       model.traverse((object) => {
@@ -668,6 +680,7 @@ export function useEntryExplorationThreeScene({
     activateReadySceneInteraction,
     addSceneInteractionObjects,
     applyScenePosition,
+    characterSpeechAnchor,
     clearSceneInteractionControllers,
     containerRef,
     createSceneInteractionControllers,
