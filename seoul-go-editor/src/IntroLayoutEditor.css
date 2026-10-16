@@ -1,0 +1,327 @@
+.IntroLayoutEditor {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr) 380px;
+  height: 100%;
+  background: #eef0f3;
+  font-size: 14px;
+}
+
+.IntroLayoutEditor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #d0d4da;
+}
+
+.IntroLayoutEditor-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px;
+}
+
+.IntroLayoutEditor-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.IntroLayoutEditor-heading {
+  margin: 0;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.IntroLayoutEditor-section,
+.IntroLayoutEditor-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.IntroLayoutEditor-group {
+  gap: 4px;
+}
+
+.IntroLayoutEditor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.IntroLayoutEditor-text,
+.IntroLayoutEditor-warning {
+  margin: 0;
+}
+
+.IntroLayoutEditor-warning {
+  color: #b42318;
+}
+
+.IntroLayoutEditor button {
+  padding: 6px 10px;
+  border: 1px solid #c3c8cf;
+  border-radius: 6px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.IntroLayoutEditor button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.IntroLayoutEditor button[aria-pressed="true"] {
+  border-color: #1f6feb;
+  background: #e7f0ff;
+}
+
+.IntroLayoutEditor .IntroLayoutEditor-save {
+  border-color: #1f6feb;
+  background: #1f6feb;
+  color: #ffffff;
+}
+
+.IntroLayoutEditor .IntroLayoutEditor-item {
+  text-align: left;
+}
+
+.IntroLayoutCoordinateInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.IntroLayoutCoordinateInput input {
+  width: 100px;
+  padding: 4px 6px;
+  font: inherit;
+}
+
+.IntroLayoutEditor-stage {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.IntroLayoutStageFrame {
+  display: flex;
+  grid-area: 1 / 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.IntroLayoutStageFrame[data-hidden="true"] {
+  visibility: hidden;
+}
+
+.IntroLayoutStageFrame-box {
+  flex: none;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #c3c8cf;
+}
+
+.IntroLayoutStageFrame iframe {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+}
+
+.IntroLayoutEditor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.IntroLayoutEditor-fields .IntroLayoutCoordinateInput input {
+  width: 100%;
+  min-width: 0;
+}
+
+.IntroLayoutEditor select {
+  padding: 6px;
+  border: 1px solid #c3c8cf;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.IntroLayoutEditor-preview {
+  display: grid;
+  flex: none;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  height: 280px;
+}
+
+.IntroLayoutLayerTree-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.IntroLayoutLayerTree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.IntroLayoutLayerTree-row:hover {
+  background: #f3f4f6;
+}
+
+.IntroLayoutLayerTree-item[aria-selected="true"] > .IntroLayoutLayerTree-row {
+  background: #e7f0ff;
+}
+
+.IntroLayoutLayerTree-row[data-dragging="true"] {
+  opacity: 0.4;
+}
+
+.IntroLayoutLayerTree-row[data-drop="inside"] {
+  box-shadow: inset 0 0 0 2px #1f6feb;
+}
+
+.IntroLayoutLayerTree-row[data-drop="before"] {
+  box-shadow: inset 0 2px 0 #1f6feb;
+}
+
+.IntroLayoutLayerTree-row[data-drop="after"] {
+  box-shadow: inset 0 -2px 0 #1f6feb;
+}
+
+.IntroLayoutEditor .IntroLayoutLayerTree-toggle {
+  width: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.IntroLayoutEditor .IntroLayoutLayerTree-toggle:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.IntroLayoutLayerTree-kind {
+  flex: none;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: #eef0f3;
+  color: #4b5563;
+  font-size: 11px;
+}
+
+.IntroLayoutLayerTree-row[data-kind="group"] .IntroLayoutLayerTree-kind {
+  background: #f1e8ff;
+  color: #8250df;
+}
+
+.IntroLayoutLayerTree-row[data-kind="sticker"] .IntroLayoutLayerTree-kind {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+.IntroLayoutLayerTree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.IntroLayoutFloorPanel-patterns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.IntroLayoutEditor .IntroLayoutFloorPanel-pattern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  font-size: 12px;
+}
+
+.IntroLayoutFloorPanel-pattern img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.IntroLayoutFloorPanel-color {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.IntroLayoutFloorPanel-color > span {
+  flex: none;
+  width: 80px;
+}
+
+.IntroLayoutFloorPanel-color input[type="text"] {
+  width: 90px;
+  padding: 4px 6px;
+  font: inherit;
+}
+
+.IntroLayoutFloorPanel-color input[aria-invalid="true"] {
+  border-color: #b42318;
+  outline-color: #b42318;
+}
+
+.IntroLayoutFloorPanel-color input[type="color"] {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #c3c8cf;
+}
+
+.IntroLayoutFloorPanel-tile {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px #c3c8cf;
+}
+
+.IntroLayoutFloorPanel-combos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.IntroLayoutFloorPanel-combos li {
+  display: flex;
+  gap: 4px;
+}
+
+.IntroLayoutEditor .IntroLayoutFloorPanel-combos li > button:first-child {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.IntroLayoutFloorPanel-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px #c3c8cf;
+}
