@@ -1,10 +1,13 @@
 import { useRef, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import { createDistrictExplorationPath } from "@shared/constants/path";
 import { getSeoulDistrictById } from "@shared/constants/seoulDistrict";
 import { track } from "@shared/lib/analytics/analytics";
+import { HAECHI_CHARACTER_NAME } from "@shared/lib/character/haechiCharacterModel";
+import { AppSpeechBubble } from "@shared/ui/speech-bubble";
 import { useAppToast } from "@shared/ui/toast";
 
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
@@ -24,6 +27,8 @@ import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import type { EntryNumberReward } from "../domain/entryNumberReward";
 import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardConfig";
+import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
+import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
@@ -104,6 +109,11 @@ export function EntryExplorationPage({
     onDartViewActiveChange,
     onDartViewControlsReady,
   });
+  const characterSpeech = useEntryCharacterSpeech({
+    hasStarted,
+    slotStatus: slot.state.status,
+    isDartActive: dartShot.isGuideVisible,
+  });
 
   useEntryExplorationThreeScene({
     places,
@@ -114,7 +124,11 @@ export function EntryExplorationPage({
     onIntroBlocked,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
-    onCharacterMovingChange: setIsCharacterMoving,
+    onCharacterMovingChange: (isMoving) => {
+      setIsCharacterMoving(isMoving);
+      characterSpeech.handleCharacterMovingChange(isMoving);
+    },
+    characterSpeechAnchor: characterSpeech.anchor,
   });
 
   const handleStartGridExploration = (result: EntryExplorationDartThrowResult): void => {
@@ -161,6 +175,14 @@ export function EntryExplorationPage({
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}
       {hasStarted && <EntrySlotOverlay {...slot} />}
+      {characterSpeech.speechKey &&
+        createPortal(
+          <AppSpeechBubble
+            speaker={HAECHI_CHARACTER_NAME}
+            message={ENTRY_CHARACTER_SPEECH_MESSAGES[characterSpeech.speechKey]}
+          />,
+          characterSpeech.anchor.element
+        )}
     </main>
   );
 }
