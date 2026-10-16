@@ -79,6 +79,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   onIntroBlocked?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
+  onCharacterMovingChange?: (isMoving: boolean) => void;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -94,12 +95,15 @@ export function useEntryExplorationThreeScene({
   onIntroBlocked,
   placeVisits,
   onPlacePanelDismiss,
+  onCharacterMovingChange,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onIntroStartRef = useRef(onIntroStart);
   onIntroStartRef.current = onIntroStart;
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
+  const onCharacterMovingChangeRef = useRef(onCharacterMovingChange);
+  onCharacterMovingChangeRef.current = onCharacterMovingChange;
   const onIntroBlockedRef = useRef(onIntroBlocked);
   onIntroBlockedRef.current = onIntroBlocked;
   const placesRef = useRef(places);
@@ -266,6 +270,7 @@ export function useEntryExplorationThreeScene({
   useEffect(() => {
     currentModelKeyRef.current = movement.modelKey;
     void playAnimation(movement.modelKey);
+    onCharacterMovingChangeRef.current?.(movement.modelKey === "walk");
   }, [movement.modelKey, playAnimation]);
 
   useEffect(() => {

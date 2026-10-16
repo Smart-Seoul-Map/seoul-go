@@ -88,13 +88,63 @@
   color: var(--sg-color-text-muted);
   overflow-wrap: anywhere;
 }
-.AppCallout.LinkedPlacesCallout {
+.ExplorationMapCallout {
+  --map-callout-expanded-width: min(390px, calc(100vw - var(--sg-spacing-14)));
+  --map-callout-collapsed-width: calc(var(--sg-spacing-3_5) * 2 + var(--sg-spacing-10));
+  --map-callout-motion-duration: var(--sg-motion-duration-5);
   position: absolute;
   top: calc(var(--sg-spacing-7) + var(--sg-spacing-12) + var(--sg-spacing-4));
   left: var(--sg-spacing-7);
   z-index: 4;
-  width: min(390px, calc(100% - var(--sg-spacing-14)));
+  pointer-events: none;
+}
+.AppCallout.LinkedPlacesCallout {
+  width: var(--map-callout-expanded-width);
+  overflow: hidden;
   border-radius: var(--sg-radius-5);
+  transition:
+    width var(--map-callout-motion-duration) var(--sg-motion-easing-standard),
+    background-color var(--map-callout-motion-duration) var(--sg-motion-easing-standard),
+    box-shadow var(--map-callout-motion-duration) var(--sg-motion-easing-standard);
+}
+.ExplorationMapCallout[data-open="false"] .AppCallout.LinkedPlacesCallout {
+  width: var(--map-callout-collapsed-width);
+  background-color: transparent;
+  box-shadow: none;
+}
+.LinkedPlacesCallout .AppCallout-content {
+  flex: none;
+  width: calc(
+    var(--map-callout-expanded-width) - var(--map-callout-collapsed-width) - var(--sg-spacing-3)
+  );
+  transition: opacity var(--map-callout-motion-duration) var(--sg-motion-easing-standard);
+}
+.ExplorationMapCallout[data-open="false"] .LinkedPlacesCallout .AppCallout-content {
+  opacity: 0;
+}
+.ExplorationMapCallout-toggle {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--sg-radius-5);
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.ExplorationMapCallout[data-open="false"] .ExplorationMapCallout-toggle {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: var(--sg-spacing-3_5);
+  width: var(--sg-spacing-10);
+  height: var(--sg-spacing-10);
+  border-radius: var(--sg-radius-full);
+  transform: translateY(-50%);
+}
+.ExplorationMapCallout-toggle:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
 }
 .LinkedPlacesCallout .AppCallout-description > span {
   display: block;
@@ -107,9 +157,14 @@
   background: var(--callout-icon-bg);
 }
 @media (max-width: 860px) {
-  .AppCallout.LinkedPlacesCallout {
+  .ExplorationMapCallout {
+    --map-callout-expanded-width: calc(100vw - var(--sg-spacing-6));
     left: var(--sg-spacing-3);
     top: calc(var(--sg-spacing-4) + var(--sg-spacing-10) + var(--sg-spacing-2));
-    width: calc(100% - var(--sg-spacing-6));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ExplorationMapCallout {
+    --map-callout-motion-duration: 0ms;
   }
 }
