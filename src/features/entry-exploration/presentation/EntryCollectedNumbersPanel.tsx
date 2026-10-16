@@ -15,6 +15,7 @@ type EntryCollectedNumbersPanelProps = {
   numbers: readonly number[];
   isHidden?: boolean;
   isCharacterMoving?: boolean;
+  isDartViewActive?: boolean;
 };
 
 type OpenState = "closed" | "open" | "autoOpen";
@@ -23,10 +24,12 @@ export function EntryCollectedNumbersPanel({
   numbers,
   isHidden = false,
   isCharacterMoving = false,
+  isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
   const [seenCount, setSeenCount] = useState(numbers.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
+  const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -39,10 +42,18 @@ export function EntryCollectedNumbersPanel({
     setSeenCount(numbers.length);
     if (numbers.length > seenCount) setOpenState("autoOpen");
   }
-  // Only an automatic open collapses when the character starts moving.
+  // Open automatically when the dart view starts, so the numbers to aim at stay visible.
+  if (isDartViewActive !== wasDartViewActive) {
+    setWasDartViewActive(isDartViewActive);
+    if (isDartViewActive && openState === "closed") setOpenState("autoOpen");
+  }
+  // Only an automatic open collapses when the character starts moving. The dart view walks the
+  // character to the map by itself, so it does not count.
   if (isCharacterMoving !== wasCharacterMoving) {
     setWasCharacterMoving(isCharacterMoving);
-    if (isCharacterMoving && openState === "autoOpen") setOpenState("closed");
+    if (isCharacterMoving && openState === "autoOpen" && !isDartViewActive) {
+      setOpenState("closed");
+    }
   }
 
   const setIsOpen = (open: boolean): void => setOpenState(open ? "open" : "closed");

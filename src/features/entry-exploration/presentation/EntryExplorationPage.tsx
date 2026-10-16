@@ -148,6 +148,7 @@ export function EntryExplorationPage({
           numbers={collectedNumbers}
           isHidden={slot.state.status !== "closed"}
           isCharacterMoving={isCharacterMoving}
+          isDartViewActive={dartShot.isGuideVisible}
         />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}

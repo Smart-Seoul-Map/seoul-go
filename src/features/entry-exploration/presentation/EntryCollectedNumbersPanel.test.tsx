@@ -185,6 +185,23 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(onWheel).not.toHaveBeenCalled();
     expect(onKeyUp).toHaveBeenCalledOnce();
   });
+
+  test("opens when the dart view starts and stays open while the character walks to the map", () => {
+    const { rerender } = render(<EntryCollectedNumbersPanel numbers={[40]} />);
+    rerender(<EntryCollectedNumbersPanel numbers={[40]} isDartViewActive />);
+
+    const trigger = screen.getByRole("button", { name: "내 번호 접기, 1개 획득" });
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(document.activeElement).toBe(document.body);
+
+    rerender(<EntryCollectedNumbersPanel numbers={[40]} isDartViewActive isCharacterMoving />);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+
+    rerender(<EntryCollectedNumbersPanel numbers={[40]} />);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    rerender(<EntryCollectedNumbersPanel numbers={[40]} isCharacterMoving />);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
 });
 
 function getTrigger(count: number): HTMLElement {
