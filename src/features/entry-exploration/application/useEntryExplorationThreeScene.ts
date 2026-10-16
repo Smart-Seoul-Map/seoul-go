@@ -79,6 +79,7 @@ export type UseEntryExplorationThreeSceneOptions = {
   onIntroStart?: () => void;
   placeVisits?: Record<EntryExplorationPlaceId, EntryExplorationPlaceVisit>;
   onPlacePanelDismiss?: () => boolean;
+  onCharacterMovingChange?: (isMoving: boolean) => void;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -93,12 +94,15 @@ export function useEntryExplorationThreeScene({
   onIntroStart,
   placeVisits,
   onPlacePanelDismiss,
+  onCharacterMovingChange,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onIntroStartRef = useRef(onIntroStart);
   onIntroStartRef.current = onIntroStart;
   const onPlacePanelDismissRef = useRef(onPlacePanelDismiss);
   onPlacePanelDismissRef.current = onPlacePanelDismiss;
+  const onCharacterMovingChangeRef = useRef(onCharacterMovingChange);
+  onCharacterMovingChangeRef.current = onCharacterMovingChange;
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
   const guideArrowRef = useRef<ReturnType<typeof createEntryExplorationGuideArrow> | null>(null);
@@ -253,6 +257,7 @@ export function useEntryExplorationThreeScene({
   useEffect(() => {
     currentModelKeyRef.current = movement.modelKey;
     void playAnimation(movement.modelKey);
+    onCharacterMovingChangeRef.current?.(movement.modelKey === "walk");
   }, [movement.modelKey, playAnimation]);
 
   useEffect(() => {

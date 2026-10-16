@@ -45,6 +45,7 @@ export function EntryExplorationPage({
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
+  const [isCharacterMoving, setIsCharacterMoving] = useState(false);
   const {
     hasStarted,
     handleIntroStart,
@@ -105,6 +106,7 @@ export function EntryExplorationPage({
     onIntroStart: handleIntroStart,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
+    onCharacterMovingChange: setIsCharacterMoving,
   });
 
   const handleStartGridExploration = (result: EntryExplorationDartThrowResult): void => {
@@ -141,8 +143,12 @@ export function EntryExplorationPage({
         shot={dartShot.shotResult}
       />
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
-      {hasStarted && slot.state.status === "closed" && (
-        <EntryCollectedNumbersPanel numbers={collectedNumbers} />
+      {hasStarted && (
+        <EntryCollectedNumbersPanel
+          numbers={collectedNumbers}
+          isHidden={slot.state.status !== "closed"}
+          isCharacterMoving={isCharacterMoving}
+        />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}
       {hasStarted && <EntrySlotOverlay {...slot} />}

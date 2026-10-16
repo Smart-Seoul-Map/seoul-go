@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -56,7 +57,7 @@ type ExplorationPageProps = {
   onActivateLinkedPlaces?: (place: ExplorationPlaceMarkerSelection) => boolean;
   linkedPlaceMarkers?: MapMarkerFeatureCollection;
   hasLinkedPlaceReference?: boolean;
-  mapNotice?: ReactNode;
+  renderMapNotice?: (props: { isCharacterMoving: boolean }) => ReactNode;
   districtId?: number;
   districtName?: string;
   initialCenter?: Coordinates;
@@ -77,7 +78,7 @@ export function ExplorationPage({
   onActivateLinkedPlaces,
   linkedPlaceMarkers,
   hasLinkedPlaceReference = false,
-  mapNotice,
+  renderMapNotice,
   districtId,
   districtName,
   initialCenter,
@@ -92,6 +93,7 @@ export function ExplorationPage({
   const { state: panel, openPanel, closePanel, finishExit } = useExplorationPanel();
   const mapStageRef = useRef<HTMLElement | null>(null);
   const linkedPlacesButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isCharacterMoving, setIsCharacterMoving] = useState(false);
   const content = panel.status === "closed" ? null : panel.content;
   const selectedPlace = content?.type === "place" ? content.place : null;
   const isCoursePanelOpen = content?.type === "course";
@@ -178,6 +180,7 @@ export function ExplorationPage({
           hasActivePanel={isPanelOpen || isSwitching}
           initialCenter={initialCenter}
           onMapMoveRequest={closePanel}
+          onCharacterMovingChange={setIsCharacterMoving}
           onPlaceMarkerSelect={selectPlace}
           placeMarkers={displayedPlaceMarkers}
           linkedPlaceMarkers={displayedLinkedPlaceMarkers}
@@ -185,7 +188,7 @@ export function ExplorationPage({
           revealedPlaceIds={revealedPlaceIds}
         />
         <div className="exploration-map-notice-actions">
-          {mapNotice}
+          {renderMapNotice?.({ isCharacterMoving })}
           {hasLinkedPlaceReference && renderLinkedPlacesPanel && (
             <AppButton
               ref={linkedPlacesButtonRef}
