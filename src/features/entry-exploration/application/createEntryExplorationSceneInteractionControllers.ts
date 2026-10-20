@@ -1,4 +1,5 @@
 import { createEntryExplorationSeoulTileMapViewInteractionController } from "./entryExplorationSeoulTileMapViewInteraction";
+import { createEntrySlotInteraction } from "./entrySlotInteraction";
 import type {
   EntryExplorationDartThrowResult,
   EntryExplorationDartViewControls,
@@ -31,5 +32,6 @@ export function createEntryExplorationSceneInteractionControllers({
       onDartThrowResult,
       onTargetHoverChange: onDartTargetHoverChange,
     }),
+    createEntrySlotInteraction(),
   ];
 }

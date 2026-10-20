@@ -356,7 +356,12 @@ export function useEntryExplorationThreeScene({
       surroundings.add(mesh);
     });
     scene.add(surroundings);
-    const introHiddenObjects = [scenery.object, archeryRange.object, ...sceneObjectMeshes];
+    const introHiddenObjects = [
+      scenery.object,
+      archeryRange.object,
+      ...sceneObjectMeshes,
+      ...sceneInteractionControllers.map((controller) => controller.object),
+    ];
     introHiddenObjects.forEach((object) => (object.visible = false));
     registerSceneInteractionControllers(sceneInteractionControllers);
     addSceneInteractionObjects(scene, renderer);

@@ -5,6 +5,10 @@ import { createEntryExplorationSceneInteractionControllers } from "./createEntry
 import { useEntryExplorationSceneInteractionControllers } from "./useEntryExplorationSceneInteractionControllers";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 
+vi.mock("./entryExplorationGltfLoader", () => ({
+  loadEntryExplorationGltf: vi.fn(() => new Promise(() => {})),
+}));
+
 describe("createEntryExplorationSceneInteractionControllers", () => {
   beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
@@ -24,8 +28,9 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(1);
-    expect(controllers.every((controller) => (controller.priority ?? 0) > 0)).toBe(true);
+    expect(controllers).toHaveLength(2);
+    expect(controllers[0].priority ?? 0).toBeGreaterThan(0);
+    expect(controllers[1].object.name).toBe("entry-slot-machine");
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
 
     controllers.forEach((controller) => {

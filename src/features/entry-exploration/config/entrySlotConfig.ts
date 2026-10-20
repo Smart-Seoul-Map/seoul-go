@@ -3,6 +3,8 @@ export const ENTRY_SLOT_CONFIG = {
   height: 3.6,
   position: { x: -0.5, z: 7.5 },
   rotationY: -Math.PI / 4,
+  approachOffset: 2.2,
+  triggerRadius: 1.1,
   loadTimeoutMs: 10_000,
   stopFeedbackDistance: 0.018,
   presentation: {
