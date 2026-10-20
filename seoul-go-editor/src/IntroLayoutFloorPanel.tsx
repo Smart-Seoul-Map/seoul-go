@@ -1,16 +1,19 @@
-import { useEffect, useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactElement } from "react";
 
 import {
   EMPTY_INTRO_LAYOUT_FLOOR_COLORS,
   INTRO_LAYOUT_CURRENT_FLOOR_PATTERN_ID,
   INTRO_LAYOUT_FLOOR_PATTERNS,
   createIntroLayoutFloorTextureUrl,
+  createIntroLayoutUploadedFloorPattern,
   getIntroLayoutFloorFileName,
+  isIntroLayoutUploadedFloorPattern,
   normalizeIntroLayoutHexColor,
   readIntroLayoutFloorState,
   writeIntroLayoutFloorState,
   type IntroLayoutFloorColors,
   type IntroLayoutFloorCombo,
+  type IntroLayoutFloorPattern,
   type IntroLayoutFloorState,
 } from "./introLayoutFloor";
 
@@ -31,9 +34,11 @@ export function IntroLayoutFloorPanel({
 }: IntroLayoutFloorPanelProps): ReactElement {
   const [floor, setFloor] = useState<IntroLayoutFloorState>(readIntroLayoutFloorState);
   const [tileUrl, setTileUrl] = useState<string | null>(null);
-  const pattern =
-    INTRO_LAYOUT_FLOOR_PATTERNS.find(({ id }) => id === floor.patternId) ??
-    INTRO_LAYOUT_FLOOR_PATTERNS[0];
+  const [uploadedPatterns, setUploadedPatterns] = useState<readonly IntroLayoutFloorPattern[]>([]);
+  const uploadInputRef = useRef<HTMLInputElement | null>(null);
+  const patterns = [...INTRO_LAYOUT_FLOOR_PATTERNS, ...uploadedPatterns];
+  const pattern = patterns.find(({ id }) => id === floor.patternId) ?? patterns[0];
+  const combos = floor.combos.filter((combo) => patterns.some(({ id }) => id === combo.patternId));
   const colors = { ...EMPTY_INTRO_LAYOUT_FLOOR_COLORS, ...floor.colors[pattern.id] };
   const base = normalizeIntroLayoutHexColor(colors.base);
   const line = normalizeIntroLayoutHexColor(colors.line);
@@ -108,6 +113,19 @@ export function IntroLayoutFloorPanel({
     }));
   };
 
+  const handleUpload = (event: ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) return;
+
+    const uploaded = createIntroLayoutUploadedFloorPattern(file.name, URL.createObjectURL(file));
+
+    setUploadedPatterns((current) => [...current.filter(({ id }) => id !== uploaded.id), uploaded]);
+    setFloor((current) => ({ ...current, patternId: uploaded.id }));
+  };
+
   const exportTile = (): void => {
     if (!tileUrl) return;
 
@@ -122,7 +140,7 @@ export function IntroLayoutFloorPanel({
     <section className="IntroLayoutEditor-section" aria-label="바닥 타일">
       <h2 className="IntroLayoutEditor-heading">바닥 타일</h2>
       <div className="IntroLayoutFloorPanel-patterns" aria-label="패턴">
-        {INTRO_LAYOUT_FLOOR_PATTERNS.map((candidate) => (
+        {patterns.map((candidate) => (
           <button
             key={candidate.id}
             type="button"
@@ -131,9 +149,25 @@ export function IntroLayoutFloorPanel({
             onClick={() => setFloor((current) => ({ ...current, patternId: candidate.id }))}
           >
             <img src={candidate.url} alt="" />
-            <span>{candidate.label}</span>
+            <span>
+              {isIntroLayoutUploadedFloorPattern(candidate)
+                ? `내 파일 · ${candidate.label}`
+                : candidate.label}
+            </span>
           </button>
         ))}
+      </div>
+      <div className="IntroLayoutEditor-row">
+        <button type="button" onClick={() => uploadInputRef.current?.click()}>
+          내 파일 올리기
+        </button>
+        <input
+          ref={uploadInputRef}
+          type="file"
+          accept="image/png,image/webp,image/jpeg"
+          hidden
+          onChange={handleUpload}
+        />
       </div>
       {COLOR_FIELDS.map(({ field, label }) => (
         <label key={field} className="IntroLayoutFloorPanel-color">
@@ -172,9 +206,9 @@ export function IntroLayoutFloorPanel({
           지금 앱 바닥으로
         </button>
       </div>
-      {floor.combos.length > 0 && (
+      {combos.length > 0 && (
         <ul className="IntroLayoutFloorPanel-combos" aria-label="저장한 조합">
-          {floor.combos.map((combo) => (
+          {combos.map((combo) => (
             <li key={`${combo.patternId}-${combo.base}-${combo.line}`}>
               <button
                 type="button"
@@ -183,11 +217,11 @@ export function IntroLayoutFloorPanel({
               >
                 <ColorSwatch color={combo.base} />
                 <ColorSwatch color={combo.line} />
-                {formatCombo(combo)}
+                {formatCombo(combo, patterns)}
               </button>
               <button
                 type="button"
-                aria-label={`${formatCombo(combo)} 삭제`}
+                aria-label={`${formatCombo(combo, patterns)} 삭제`}
                 onClick={() => removeCombo(combo)}
               >
                 삭제
@@ -210,9 +244,11 @@ function isSameCombo(a: IntroLayoutFloorCombo, b: IntroLayoutFloorCombo): boolea
   return a.patternId === b.patternId && a.base === b.base && a.line === b.line;
 }
 
-function formatCombo(combo: IntroLayoutFloorCombo): string {
-  const label =
-    INTRO_LAYOUT_FLOOR_PATTERNS.find(({ id }) => id === combo.patternId)?.label ?? combo.patternId;
+function formatCombo(
+  combo: IntroLayoutFloorCombo,
+  patterns: readonly IntroLayoutFloorPattern[]
+): string {
+  const label = patterns.find(({ id }) => id === combo.patternId)?.label ?? combo.patternId;
 
   return [label, combo.base || "원래 색", combo.line].filter(Boolean).join(" · ");
 }

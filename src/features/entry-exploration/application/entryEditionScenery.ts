@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
-import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
+import { ENTRY_EDITION_MODELS, type EntryEditionModel } from "../config/entryEditionModels";
 import type { EntryIntroLayout } from "../config/entryIntroLayout";
 import type { EntryEditionPlace } from "../domain/entryEditionPlace";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
@@ -10,7 +10,8 @@ import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 
 export function createEntryEditionScenery(
   places: readonly EntryEditionPlace[],
-  onApproach: (destination: EntryExplorationScenePoint) => void
+  onApproach: (destination: EntryExplorationScenePoint) => void,
+  models: Readonly<Record<string, EntryEditionModel>> = ENTRY_EDITION_MODELS
 ) {
   const object = new THREE.Group();
   object.name = "entry-edition-places";
@@ -53,7 +54,7 @@ export function createEntryEditionScenery(
         button.remove();
       });
     };
-    const asset = ENTRY_EDITION_MODELS[place.id];
+    const asset = models[place.id];
     if (!asset) {
       showImage();
       continue;

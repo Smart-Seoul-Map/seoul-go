@@ -325,3 +325,28 @@
   border-radius: 3px;
   box-shadow: 0 0 0 1px #c3c8cf;
 }
+
+.IntroLayoutModelPanel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.IntroLayoutModelPanel-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.IntroLayoutModelPanel-name {
+  overflow-wrap: anywhere;
+}
+
+.IntroLayoutModelPanel-upload {
+  color: #1a7f37;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}

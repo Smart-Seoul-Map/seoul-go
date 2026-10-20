@@ -4,6 +4,7 @@ import {
   type EntryIntroLayoutView,
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
+import type { IntroLayoutModelUrls } from "./introLayoutModels";
 
 const INTRO_LAYOUT_EDITOR_CHANNEL = "seoul-go:intro-layout-editor";
 
@@ -24,7 +25,8 @@ export type IntroLayoutShellMessage =
     }
   | { type: "focus"; arrivalId: IntroLayoutItemId | null }
   | { type: "camera"; preset: IntroLayoutCameraPreset }
-  | { type: "floor"; textureUrl: string | null };
+  | { type: "floor"; textureUrl: string | null }
+  | { type: "models"; urls: IntroLayoutModelUrls };
 
 export type IntroLayoutStageMessage =
   | { type: "ready"; arrivalTargets: readonly IntroLayoutArrivalTarget[] }

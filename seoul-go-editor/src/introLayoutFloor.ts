@@ -28,6 +28,7 @@ const CANDIDATE_URLS_BY_PATH = import.meta.glob<string>(
   { eager: true, import: "default", query: "?url" }
 );
 const FLOOR_STATE_STORAGE_KEY = "seoul-go:intro-layout-editor:floor";
+const UPLOADED_FLOOR_PATTERN_ID_PREFIX = "upload:";
 const SINGLE_COLOR_SHADE = 0.55;
 const HEX_COLOR_PATTERN = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -43,12 +44,27 @@ export const INTRO_LAYOUT_FLOOR_PATTERNS: readonly IntroLayoutFloorPattern[] = [
     .map(([path, url]) => {
       const fileName = path.slice(path.lastIndexOf("/") + 1);
 
-      return { id: fileName, label: fileName.replace(/\.[^.]+$/, ""), url };
+      return { id: fileName, label: removeFileExtension(fileName), url };
     })
     .sort((a, b) => a.label.localeCompare(b.label)),
 ];
 
 export const EMPTY_INTRO_LAYOUT_FLOOR_COLORS: IntroLayoutFloorColors = { base: "", line: "" };
+
+export function createIntroLayoutUploadedFloorPattern(
+  fileName: string,
+  url: string
+): IntroLayoutFloorPattern {
+  return {
+    id: `${UPLOADED_FLOOR_PATTERN_ID_PREFIX}${fileName}`,
+    label: removeFileExtension(fileName),
+    url,
+  };
+}
+
+export function isIntroLayoutUploadedFloorPattern(pattern: IntroLayoutFloorPattern): boolean {
+  return pattern.id.startsWith(UPLOADED_FLOOR_PATTERN_ID_PREFIX);
+}
 
 export function parseIntroLayoutHexColor(value: string): IntroLayoutRgb | null {
   const match = HEX_COLOR_PATTERN.exec(value.trim());
@@ -188,6 +204,10 @@ export function writeIntroLayoutFloorState(state: IntroLayoutFloorState): void {
   } catch {
     return;
   }
+}
+
+function removeFileExtension(fileName: string): string {
+  return fileName.replace(/\.[^.]+$/, "");
 }
 
 function loadImage(url: string): Promise<HTMLImageElement> {

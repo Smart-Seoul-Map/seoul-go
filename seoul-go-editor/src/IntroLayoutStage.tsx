@@ -161,6 +161,9 @@ export function IntroLayoutStage({ view }: IntroLayoutStageProps): ReactElement 
         case "floor":
           scene.setFloorTexture(message.textureUrl);
           return;
+        case "models":
+          scene.setModelUrls(message.urls);
+          return;
         default: {
           const unhandled: never = message;
           return unhandled;

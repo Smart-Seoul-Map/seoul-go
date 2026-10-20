@@ -39,6 +39,7 @@ import {
   type IntroLayoutCameraPreset,
   type IntroLayoutItemId,
 } from "./introLayoutEditorMessages";
+import { getIntroLayoutEditionModels, type IntroLayoutModelUrls } from "./introLayoutModels";
 import type { IntroLayoutItemKind } from "./introLayoutTree";
 
 type IntroLayoutEditorSceneOptions = {
@@ -129,7 +130,9 @@ export function createIntroLayoutEditorScene({
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  let editionScenery = createEntryEditionScenery([], ignoreApproach);
+  let places: readonly EntryEditionPlace[] = [];
+  let modelUrls: IntroLayoutModelUrls = {};
+  let editionScenery = createEntryEditionScenery(places, ignoreApproach);
   let guideArrow: ReturnType<typeof createEntryExplorationGuideArrow> | null = null;
   let layout = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc");
   let selectedId: IntroLayoutItemId | null = null;
@@ -238,9 +241,13 @@ export function createIntroLayoutEditorScene({
     placeGuideArrow(editionScenery.applyLayout(layout));
   };
 
-  const setPlaces = (places: readonly EntryEditionPlace[]): void => {
+  const renderPlaces = (): void => {
     editionScenery.dispose();
-    editionScenery = createEntryEditionScenery(places, ignoreApproach);
+    editionScenery = createEntryEditionScenery(
+      places,
+      ignoreApproach,
+      getIntroLayoutEditionModels(modelUrls)
+    );
     places.forEach((place, index) => {
       const landmark = editionScenery.landmarks.get(place.id);
 
@@ -248,6 +255,16 @@ export function createIntroLayoutEditorScene({
     });
     scene.add(editionScenery.object);
     placeGuideArrow(editionScenery.applyLayout(layout));
+  };
+
+  const setPlaces = (nextPlaces: readonly EntryEditionPlace[]): void => {
+    places = nextPlaces;
+    renderPlaces();
+  };
+
+  const setModelUrls = (urls: IntroLayoutModelUrls): void => {
+    modelUrls = urls;
+    renderPlaces();
   };
 
   const setFloorTexture = (url: string | null): void => {
@@ -467,6 +484,7 @@ export function createIntroLayoutEditorScene({
   return {
     setLayout: applyLayout,
     setPlaces,
+    setModelUrls,
     setSelection,
     setFloorTexture,
     showCameraPreset(preset: IntroLayoutCameraPreset): void {

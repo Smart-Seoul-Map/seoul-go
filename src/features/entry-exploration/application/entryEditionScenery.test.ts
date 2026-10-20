@@ -48,3 +48,13 @@ test("keeps a place visitable with its API image when its mapped GLB fails", asy
   );
   scenery.dispose();
 });
+
+test("loads the given model URL instead of the registered one", () => {
+  vi.mocked(loadEntryExplorationGltf).mockReturnValue(new Promise(() => {}));
+  const place = { ...ENTRY_TEST_PLACES[0], id: "smart-seoul:1786321258890:25_edition25_24" };
+  const scenery = createEntryEditionScenery([place], vi.fn(), {
+    [place.id]: { url: "blob:designer-model", size: 5.5, rotationY: 0 },
+  });
+  expect(loadEntryExplorationGltf).toHaveBeenCalledWith("blob:designer-model");
+  scenery.dispose();
+});

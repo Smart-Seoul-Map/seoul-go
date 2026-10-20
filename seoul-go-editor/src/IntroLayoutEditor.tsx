@@ -17,6 +17,7 @@ import { validateEntryIntroLayoutDocument } from "../../src/features/entry-explo
 import { IntroLayoutCoordinateInput } from "./IntroLayoutCoordinateInput";
 import { IntroLayoutFloorPanel } from "./IntroLayoutFloorPanel";
 import { IntroLayoutLayerTree } from "./IntroLayoutLayerTree";
+import { IntroLayoutModelPanel } from "./IntroLayoutModelPanel";
 import { IntroLayoutStageFrame } from "./IntroLayoutStageFrame";
 import { getEntryIntroLayoutSaveErrorMessage, postEntryIntroLayouts } from "./introLayoutEditorApi";
 import {
@@ -43,6 +44,7 @@ import {
   writeIntroLayoutEditorSession,
 } from "./introLayoutEditorSession";
 import { createMobileLayoutFromPc } from "./introLayoutMobileFromPc";
+import type { IntroLayoutModelUrls } from "./introLayoutModels";
 import {
   addIntroLayoutSticker,
   canIntroLayoutHaveChildren,
@@ -98,6 +100,7 @@ export function IntroLayoutEditor(): ReactElement {
   const [arrivalTargets, setArrivalTargets] = useState<readonly IntroLayoutArrivalTarget[]>([]);
   const [stickerAsset, setStickerAsset] = useState(ENTRY_EXPLORATION_STICKER_ASSETS[0] ?? "");
   const [floorTextureUrl, setFloorTextureUrl] = useState<string | null>(null);
+  const [modelUrls, setModelUrls] = useState<IntroLayoutModelUrls>({});
   const pcFrameRef = useRef<HTMLIFrameElement | null>(null);
   const mobileFrameRef = useRef<HTMLIFrameElement | null>(null);
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
@@ -152,6 +155,7 @@ export function IntroLayoutEditor(): ReactElement {
         setArrivalTargets(message.arrivalTargets);
         postIntroLayoutShellMessage(source, { type: "state", document: draft, selectedIds });
         postIntroLayoutShellMessage(source, { type: "floor", textureUrl: floorTextureUrl });
+        postIntroLayoutShellMessage(source, { type: "models", urls: modelUrls });
         return;
       case "select":
         setSelectedIds([message.id]);
@@ -178,6 +182,10 @@ export function IntroLayoutEditor(): ReactElement {
   useEffect(() => {
     broadcast({ type: "floor", textureUrl: floorTextureUrl });
   }, [floorTextureUrl]);
+
+  useEffect(() => {
+    broadcast({ type: "models", urls: modelUrls });
+  }, [modelUrls]);
 
   useEffect(() => {
     writeIntroLayoutEditorSession({ view, selectedIds, previewPresetId, saveResult });
@@ -212,7 +220,7 @@ export function IntroLayoutEditor(): ReactElement {
     window.addEventListener("message", handleMessage);
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [draft, floorTextureUrl, selectedIds]);
+  }, [draft, floorTextureUrl, modelUrls, selectedIds]);
 
   const handleTreeSelect = (id: IntroLayoutItemId, isAdditive: boolean): void => {
     if (!isAdditive) {
@@ -545,6 +553,7 @@ export function IntroLayoutEditor(): ReactElement {
           />
         </div>
         <IntroLayoutFloorPanel onTextureChange={setFloorTextureUrl} />
+        <IntroLayoutModelPanel onUrlsChange={setModelUrls} />
       </aside>
     </div>
   );

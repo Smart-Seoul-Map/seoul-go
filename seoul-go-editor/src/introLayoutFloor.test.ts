@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  INTRO_LAYOUT_FLOOR_PATTERNS,
+  createIntroLayoutUploadedFloorPattern,
   getIntroLayoutFloorFileName,
+  isIntroLayoutUploadedFloorPattern,
   normalizeIntroLayoutHexColor,
   recolorIntroLayoutPatternPixels,
 } from "./introLayoutFloor";
@@ -41,5 +44,31 @@ describe("intro layout floor colors", () => {
         { base: "#AbC", line: "" }
       )
     ).toBe("floor-brick-aabbcc.png");
+  });
+});
+
+describe("intro layout uploaded floor tiles", () => {
+  test("names an uploaded tile after its file and keeps it apart from built-in tiles", () => {
+    const uploaded = createIntroLayoutUploadedFloorPattern("floor.webp", "blob:tile");
+
+    expect(uploaded).toMatchObject({ label: "floor", url: "blob:tile" });
+    expect(INTRO_LAYOUT_FLOOR_PATTERNS.some(({ id }) => id === uploaded.id)).toBe(false);
+    expect(isIntroLayoutUploadedFloorPattern(uploaded)).toBe(true);
+    expect(INTRO_LAYOUT_FLOOR_PATTERNS.some(isIntroLayoutUploadedFloorPattern)).toBe(false);
+  });
+
+  test("gives the same file name the same id so its colors and combos come back", () => {
+    expect(createIntroLayoutUploadedFloorPattern("my tile.png", "blob:a").id).toBe(
+      createIntroLayoutUploadedFloorPattern("my tile.png", "blob:b").id
+    );
+  });
+
+  test("exports an uploaded tile under its file name", () => {
+    expect(
+      getIntroLayoutFloorFileName(createIntroLayoutUploadedFloorPattern("my-tile.png", "blob:a"), {
+        base: "",
+        line: "",
+      })
+    ).toBe("floor-my-tile.png");
   });
 });
