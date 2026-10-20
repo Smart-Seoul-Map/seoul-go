@@ -20,6 +20,7 @@ type EntryExplorationDartShotHookResult = {
   onDartViewActiveChange: (isActive: boolean) => void;
   onDartViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onFlightEnd: () => void;
+  onOpenRouletteView: () => void;
   onRetryThrow: () => void;
 };
 
@@ -57,6 +58,10 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     viewControlsRef.current?.throwAtRandomCell();
   }, []);
 
+  const onOpenRouletteView = useCallback(() => {
+    viewControlsRef.current?.requestRouletteView();
+  }, []);
+
   const onRetryThrow = useCallback(() => {
     shotResultRef.current = null;
     setShotResult(null);
@@ -79,6 +84,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
+    onOpenRouletteView,
     onRetryThrow,
   };
 }

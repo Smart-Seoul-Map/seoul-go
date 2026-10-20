@@ -23,6 +23,7 @@ import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
+import { StartPointPickerButton } from "./StartPointPickerButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import type { EntryNumberReward } from "../domain/entryNumberReward";
@@ -95,6 +96,7 @@ export function EntryExplorationPage({
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
+    onOpenRouletteView,
     onRetryThrow,
   } = useEntryExplorationDartShot();
   const { createSceneInteractionControllers } = useEntryExplorationSceneInteractionControllers({
@@ -171,6 +173,12 @@ export function EntryExplorationPage({
           isHidden={slot.state.status !== "closed"}
           isCharacterMoving={isCharacterMoving}
           isDartViewActive={dartShot.isGuideVisible}
+        />
+      )}
+      {hasStarted && (
+        <StartPointPickerButton
+          isHidden={slot.state.status !== "closed" || dartShot.isGuideVisible}
+          onClick={onOpenRouletteView}
         />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}

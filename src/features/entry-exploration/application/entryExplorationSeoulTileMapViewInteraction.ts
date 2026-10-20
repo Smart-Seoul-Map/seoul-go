@@ -38,6 +38,7 @@ import {
 } from "../domain/seoulGridNumberLines";
 import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 import { createEntryExplorationDartHitMarker } from "./entryExplorationDartHitMarker";
+import { createEntryExplorationDartRoulette } from "./entryExplorationDartRoulette";
 import { createEntryExplorationDartSelectableLayer } from "./entryExplorationDartSelectableLayer";
 import {
   createEntryExplorationSceneObject,
@@ -59,6 +60,7 @@ export type EntryExplorationDartThrowResult = {
 };
 
 export type EntryExplorationDartViewControls = {
+  requestRouletteView: () => void;
   resetThrow: () => void;
   setHitCell: (cell: SeoulGridCell | null) => void;
   throwAtRandomCell: () => void;
@@ -116,6 +118,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let hasThrown = false;
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
+  let isRouletteView = false;
   let mapPosition: EntryExplorationScenePoint;
   let triggerPosition: EntryExplorationScenePoint;
 
@@ -186,8 +189,24 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     onDartThrowResult?.(toThrowResult(cell, camera));
   };
 
+  const roulette = createEntryExplorationDartRoulette({
+    getCells: () => selectableCells,
+    onHighlight: (cell) => selectableLayer.setFlashCell(cell),
+    onPicked: (cell) => {
+      if (isEngaged && !hasThrown && activeCamera) {
+        throwAtCell(cell, activeCamera);
+      }
+    },
+  });
+
   const throwAtRandomCell = (): void => {
-    if (!isEngaged || hasThrown || cameraTransitionStartedAt !== null || !activeCamera) {
+    if (
+      !isEngaged ||
+      hasThrown ||
+      roulette.isRunning() ||
+      cameraTransitionStartedAt !== null ||
+      !activeCamera
+    ) {
       return;
     }
 
@@ -211,11 +230,32 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const resetThrow = (): void => {
+    selectableLayer.setFlashCell(null);
     hasThrown = false;
     setHitCell(null);
   };
 
-  onControlsReady?.({ resetThrow, setHitCell, throwAtRandomCell });
+  const requestRouletteView = (): void => {
+    if (isEngaged) {
+      return;
+    }
+
+    if (getCollectedNumbers().length === 0) {
+      onEntryBlocked?.();
+
+      return;
+    }
+
+    isRouletteView = true;
+  };
+
+  const startRoulette = (): void => {
+    if (isRouletteView && isEngaged && !hasThrown && cameraTransitionStartedAt === null) {
+      roulette.start();
+    }
+  };
+
+  onControlsReady?.({ requestRouletteView, resetThrow, setHitCell, throwAtRandomCell });
 
   const activate = (time: number): void => {
     if (isEngaged || getCollectedNumbers().length === 0) {
@@ -236,6 +276,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const deactivate = (): void => {
+    roulette.cancel();
+    isRouletteView = false;
     isEngaged = false;
     selectableLayer.object.visible = false;
     waitsForTriggerExit = true;
@@ -245,6 +287,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransitionStartedAt = null;
     setTargetHover(false);
     selectableLayer.setHoveredCell(null);
+    selectableLayer.setFlashCell(null);
     onActiveChange?.(false);
   };
 
@@ -384,9 +427,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     activate,
     canActivate: () =>
       !isEngaged &&
-      isCharacterInTrigger &&
-      !waitsForTriggerExit &&
-      getCollectedNumbers().length > 0,
+      getCollectedNumbers().length > 0 &&
+      (isRouletteView || (isCharacterInTrigger && !waitsForTriggerExit)),
     deactivate,
     dispose: () => {
       selectableLayer.dispose();
@@ -398,7 +440,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      if (cameraTransitionStartedAt !== null || hasThrown) {
+      if (cameraTransitionStartedAt !== null || hasThrown || roulette.isRunning()) {
         return true;
       }
 
@@ -417,7 +459,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      if (cameraTransitionStartedAt !== null) {
+      if (cameraTransitionStartedAt !== null || roulette.isRunning()) {
         setTargetHover(false);
         selectableLayer.setHoveredCell(null);
 
@@ -439,7 +481,10 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       characterModel = character;
     },
     setLayout,
-    update: faceCharacterTowardMap,
+    update: () => {
+      faceCharacterTowardMap();
+      startRoulette();
+    },
     updateCamera,
     updateTriggerState,
   };

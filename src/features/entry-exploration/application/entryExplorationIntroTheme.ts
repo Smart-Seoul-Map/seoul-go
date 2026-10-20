@@ -14,6 +14,7 @@ type EntryExplorationIntroTheme = {
     textColor: string;
   };
   dart: {
+    flashColor: string;
     hitAccentColor: string;
     hitBorderColor: string;
     hitCellColor: string;
@@ -37,6 +38,7 @@ export function getEntryExplorationIntroTheme(): EntryExplorationIntroTheme {
       textColor: readCssToken("--sg-button-primary-fg", "#ffffff"),
     },
     dart: {
+      flashColor: readCssToken("--sg-v3-blue-600", "#0082ff"),
       hitAccentColor: readCssToken("--sg-v3-blue-600", "#0082ff"),
       hitBorderColor: readCssToken("--sg-color-bg-floating", "#ffffff"),
       hitCellColor: readCssToken("--sg-v3-blue-500", "#08b2f0"),
