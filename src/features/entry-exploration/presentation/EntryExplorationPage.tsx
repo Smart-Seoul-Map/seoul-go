@@ -124,7 +124,6 @@ export function EntryExplorationPage({
   });
   const characterSpeech = useEntryCharacterSpeech({
     hasStarted,
-    slotStatus: slot.state.status,
     isDartActive: dartShot.isGuideVisible,
   });
 

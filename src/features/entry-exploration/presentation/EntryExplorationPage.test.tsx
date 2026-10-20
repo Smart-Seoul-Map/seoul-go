@@ -190,7 +190,6 @@ describe("EntryExplorationPage", () => {
     expect(slotRequestReward).not.toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     expect(getSpeechText()).toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.intro);
-    expect(getSpeechText()).not.toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.slot);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(router.state.location.pathname).toBe("/");
   });
