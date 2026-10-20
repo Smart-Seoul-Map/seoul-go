@@ -25,7 +25,7 @@ test("places every atlas sprite at its layout point and follows a moved hanok wh
   expect(hanok?.position.x).toBe(movedHanok.x);
   expect(hanok?.position.z).toBe(movedHanok.z);
   expect(hanok?.position.y).toBe(height);
-  for (const key of ["tower", "pin", "emphasis", "office", "city"]) {
+  for (const key of ["tower", "pin", "emphasis", "office", "city", "bicycle"]) {
     expect(scenery.object.getObjectByName(`entry-scenery-${key}`)).toBeUndefined();
   }
   scenery.dispose();
