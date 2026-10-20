@@ -1,3 +1,5 @@
+export const HAECHI_CHARACTER_NAME = "해치";
+
 export const HAECHI_CHARACTER_MODEL_MANIFEST = {
   mesh: "/models/haechi_v1.glb",
   animations: {

@@ -1,5 +1,5 @@
 ---
-name: QA
+name: QA Feedback
 about: QA 피드백 반영 이슈
 title: ""
 labels: ""

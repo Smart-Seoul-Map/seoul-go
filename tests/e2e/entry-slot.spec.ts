@@ -166,7 +166,10 @@ for (const viewport of [
       await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
       await expect(canvas).toHaveCSS("opacity", "1");
       await expect(panel).toHaveCount(0);
-      await page.getByRole("button", { name: "내 번호 열기, 1개 획득" }).click();
+      await expect(page.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toHaveAttribute(
+        "aria-expanded",
+        "true"
+      );
       await expect(page.getByRole("list", { name: "획득한 숫자" })).toHaveText(
         `추첨 번호${awarded[0].number}`
       );
@@ -230,7 +233,7 @@ test("model loading failure still reveals the earned number and allows closing",
   await expect(page.getByRole("alert")).toContainText("번호는 받았어요");
   await expect(page.getByRole("status", { name: "뽑힌 숫자" })).toHaveText(String(reward.number));
   await page.getByRole("button", { name: "계속 탐방하기" }).click();
-  await expect(page.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeVisible();
 });
 
 test("shipped slot GLB has separate reels and embedded resources", async ({ request }) => {
