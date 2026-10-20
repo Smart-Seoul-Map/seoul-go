@@ -25,7 +25,7 @@ const PATHS_WITHOUT_E2E = [
 const E2E_SPECS_BY_PATH = [
   {
     path: /^(src\/features\/entry-exploration|public\/models\/places)\//,
-    specs: ["entry-exploration", "intro-seoul-edition"],
+    specs: ["entry-exploration", "entry-slot", "intro-seoul-edition"],
   },
   {
     path: /^(src\/features\/exploration|public\/models\/markers)\//,

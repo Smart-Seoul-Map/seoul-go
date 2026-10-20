@@ -10,6 +10,7 @@ import {
 const SPECS = [
   "tests/e2e/app-smoke.spec.ts",
   "tests/e2e/entry-exploration.spec.ts",
+  "tests/e2e/entry-slot.spec.ts",
   "tests/e2e/intro-seoul-edition.spec.ts",
   "tests/e2e/linked-place-exploration.spec.ts",
   "tests/e2e/place-query-cache.spec.ts",
@@ -17,6 +18,7 @@ const SPECS = [
 ];
 const INTRO_SPECS = [
   "tests/e2e/entry-exploration.spec.ts",
+  "tests/e2e/entry-slot.spec.ts",
   "tests/e2e/intro-seoul-edition.spec.ts",
 ];
 const UNMAPPED_SPEC = "tests/e2e/app-smoke.spec.ts";
@@ -76,8 +78,8 @@ test("runs a newly added spec missing from the path rules whenever source code c
 });
 
 test("runs only a changed spec when no source code changes", () => {
-  expect(selectE2eSpecs(["tests/e2e/entry-exploration.spec.ts"], SPECS)).toEqual([
-    "tests/e2e/entry-exploration.spec.ts",
+  expect(selectE2eSpecs(["tests/e2e/entry-slot.spec.ts"], SPECS)).toEqual([
+    "tests/e2e/entry-slot.spec.ts",
   ]);
   expect(selectE2eSpecs(["tests/e2e/removed.spec.ts"], SPECS)).toEqual([]);
 });
