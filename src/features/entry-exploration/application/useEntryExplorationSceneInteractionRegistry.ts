@@ -20,7 +20,6 @@ export type EntryExplorationSceneInteractionController = {
   prepare?: (renderer: THREE.WebGLRenderer) => void;
   setCharacter?: (character: THREE.Object3D | null) => void;
   setLayout?: (layout: EntryIntroLayout) => void;
-  setSurroundings?: (objects: readonly THREE.Object3D[]) => void;
   takeRequestedCharacterDestination?: () => EntryExplorationScenePoint | null;
   update: (time: number) => void;
   updateCamera: (
