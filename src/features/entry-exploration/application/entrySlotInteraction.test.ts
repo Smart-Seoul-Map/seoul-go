@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
+import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
+import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntrySlotInteraction } from "./entrySlotInteraction";
 
@@ -13,10 +15,17 @@ const FRONT = new THREE.Vector3(
   0,
   -Math.sin(ENTRY_SLOT_CONFIG.rotationY)
 );
-const APPROACH_POINT = {
-  x: ENTRY_SLOT_CONFIG.position.x + FRONT.x * ENTRY_SLOT_CONFIG.approachOffset,
-  z: ENTRY_SLOT_CONFIG.position.z + FRONT.z * ENTRY_SLOT_CONFIG.approachOffset,
-};
+const DOWN = new THREE.Vector3(0, -1, 0);
+const SLOT_POSITION = ENTRY_INTRO_LAYOUTS.pc.objects["slot-machine"];
+
+function toApproachPoint({ x, z }: EntryExplorationScenePoint): EntryExplorationScenePoint {
+  return {
+    x: x + FRONT.x * ENTRY_SLOT_CONFIG.approachOffset,
+    z: z + FRONT.z * ENTRY_SLOT_CONFIG.approachOffset,
+  };
+}
+
+const APPROACH_POINT = toApproachPoint(SLOT_POSITION);
 const AWAY = { x: 100, z: 100 };
 const SPIN_STARTED_AT = ENTRY_SLOT_CONFIG.lever.pullMs + ENTRY_SLOT_CONFIG.lever.holdMs;
 
@@ -53,23 +62,39 @@ function arrive(controller: ReturnType<typeof createEntrySlotInteraction>, time:
 }
 
 describe("intro slot machine", () => {
-  test("stands in the intro scene and sends a click on it to the front of the machine", async () => {
+  test("stands at its layout point and sends a click on it to the front of the machine", async () => {
     const controller = await setup();
     controller.object.updateMatrixWorld(true);
-    const { x, z } = ENTRY_SLOT_CONFIG.position;
-    const down = new THREE.Vector3(0, -1, 0);
+    const { x, z } = SLOT_POSITION;
 
     expect(controller.object.visible).toBe(true);
     expect(controller.object.position.x).toBe(x);
     expect(controller.object.position.z).toBe(z);
     expect(
-      controller.getPointerDestination?.(new THREE.Raycaster(new THREE.Vector3(x, 20, z), down))
+      controller.getPointerDestination?.(new THREE.Raycaster(new THREE.Vector3(x, 20, z), DOWN))
     ).toEqual(APPROACH_POINT);
     expect(
       controller.getPointerDestination?.(
-        new THREE.Raycaster(new THREE.Vector3(x + 50, 20, z), down)
+        new THREE.Raycaster(new THREE.Vector3(x + 50, 20, z), DOWN)
       )
     ).toBeNull();
+    controller.dispose();
+  });
+
+  test("moves to the slot point of the active intro layout", async () => {
+    const controller = await setup();
+    const mobile = ENTRY_INTRO_LAYOUTS.mobile.objects["slot-machine"];
+
+    controller.setLayout?.(ENTRY_INTRO_LAYOUTS.mobile);
+    controller.object.updateMatrixWorld(true);
+
+    expect(controller.object.position.x).toBe(mobile.x);
+    expect(controller.object.position.z).toBe(mobile.z);
+    expect(
+      controller.getPointerDestination?.(
+        new THREE.Raycaster(new THREE.Vector3(mobile.x, 20, mobile.z), DOWN)
+      )
+    ).toEqual(toApproachPoint(mobile));
     controller.dispose();
   });
 

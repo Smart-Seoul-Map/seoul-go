@@ -1,7 +1,6 @@
 export const ENTRY_SLOT_CONFIG = {
   modelUrl: "/models/slot_v1.glb",
   height: 3.6,
-  position: { x: -0.5, z: 7.5 },
   rotationY: -Math.PI / 4,
   approachOffset: 2.2,
   triggerRadius: 1.1,

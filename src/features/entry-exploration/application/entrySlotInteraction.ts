@@ -4,6 +4,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { easeInOutCubic, easeOutCubic } from "@shared/lib/animation/easing";
 import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 
+import { ENTRY_INTRO_LAYOUTS, type EntryIntroLayout } from "../config/entryIntroLayout";
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 import {
@@ -26,16 +27,12 @@ export type EntrySlotInteraction = EntryExplorationSceneInteractionController & 
 export function createEntrySlotInteraction(): EntrySlotInteraction {
   const object = new THREE.Group();
   object.name = "entry-slot-machine";
-  object.position.set(ENTRY_SLOT_CONFIG.position.x, 0, ENTRY_SLOT_CONFIG.position.z);
   const front = new THREE.Vector3(
     Math.cos(ENTRY_SLOT_CONFIG.rotationY),
     0,
     -Math.sin(ENTRY_SLOT_CONFIG.rotationY)
   );
-  const approachPoint: EntryExplorationScenePoint = {
-    x: object.position.x + front.x * ENTRY_SLOT_CONFIG.approachOffset,
-    z: object.position.z + front.z * ENTRY_SLOT_CONFIG.approachOffset,
-  };
+  let approachPoint: EntryExplorationScenePoint;
   let model: ReturnType<typeof createEntrySlotModel> | null = null;
   let renderer: THREE.WebGLRenderer | null = null;
   let environment: THREE.WebGLRenderTarget | null = null;
@@ -46,6 +43,17 @@ export function createEntrySlotInteraction(): EntrySlotInteraction {
   let spinAnimation: EntrySlotSpin | null = null;
   let angles: SlotReelAngles = [0, 0, 0];
   let reducedMotion = false;
+
+  const setLayout = (layout: EntryIntroLayout): void => {
+    const { x, z } = layout.objects["slot-machine"];
+    object.position.set(x, 0, z);
+    approachPoint = {
+      x: x + front.x * ENTRY_SLOT_CONFIG.approachOffset,
+      z: z + front.z * ENTRY_SLOT_CONFIG.approachOffset,
+    };
+  };
+
+  setLayout(ENTRY_INTRO_LAYOUTS.pc);
 
   const prepareEnvironment = () => {
     if (!renderer || !model || environment) return;
@@ -81,6 +89,7 @@ export function createEntrySlotInteraction(): EntrySlotInteraction {
     handlePointerDown: () => false,
     handlePointerMove: () => false,
     handlePointerUp: () => false,
+    setLayout,
     prepare(value) {
       renderer = value;
       prepareEnvironment();
