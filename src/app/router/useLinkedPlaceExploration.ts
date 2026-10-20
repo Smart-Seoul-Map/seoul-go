@@ -18,21 +18,24 @@ export function useLinkedPlaceExploration(sourcePlaces: readonly SmartSeoulTheme
   const savedPlaces = useStampCourseStore((state) => state.places);
   const unlockedReferences = useUnlockedLinkedPlaceStore((state) => state.references);
   const unlockReferences = useUnlockedLinkedPlaceStore((state) => state.unlockReferences);
-  const [visitedReference, setVisitedReference] = useState<LinkedPlaceReference | null>(null);
+  const [visitedReferences, setVisitedReferences] = useState<LinkedPlaceReference[]>([]);
   const savedReferences = useMemo(
     () => createLinkedPlaceReferences(savedPlaces, sourcePlaces),
     [savedPlaces, sourcePlaces]
   );
   useEffect(() => {
-    if (savedReferences.some(({ id }) => id === visitedReference?.id)) setVisitedReference(null);
-  }, [savedReferences, visitedReference?.id]);
-  const references = useMemo(() => {
-    if (!visitedReference || savedReferences.some(({ id }) => id === visitedReference.id)) {
-      return savedReferences;
-    }
+    const savedIds = new Set(savedReferences.map(({ id }) => id));
+    setVisitedReferences((previous) => {
+      const remaining = previous.filter(({ id }) => !savedIds.has(id));
 
-    return [...savedReferences, visitedReference];
-  }, [savedReferences, visitedReference]);
+      return remaining.length === previous.length ? previous : remaining;
+    });
+  }, [savedReferences]);
+  const references = useMemo(() => {
+    const savedIds = new Set(savedReferences.map(({ id }) => id));
+
+    return [...savedReferences, ...visitedReferences.filter(({ id }) => !savedIds.has(id))];
+  }, [savedReferences, visitedReferences]);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => savedReferences.at(-1)?.id ?? null
   );
@@ -58,14 +61,17 @@ export function useLinkedPlaceExploration(sourcePlaces: readonly SmartSeoulTheme
   const markers = useMemo(() => createPlacesFeatureCollection(mapPlaces), [mapPlaces]);
   const activate = useCallback((place: ExplorationPlaceMarkerSelection) => {
     if (place.themeId !== SEOUL_EDITION25_THEME_ID) return false;
-    setVisitedReference({
-      id: place.id,
-      name: place.name,
-      imageUrl: place.imageUrl,
-      position: place.position,
-      addedAt: new Date().toISOString(),
-      selectionYear: place.selectionYear,
-    });
+    setVisitedReferences((previous) => [
+      ...previous.filter(({ id }) => id !== place.id),
+      {
+        id: place.id,
+        name: place.name,
+        imageUrl: place.imageUrl,
+        position: place.position,
+        addedAt: new Date().toISOString(),
+        selectionYear: place.selectionYear,
+      },
+    ]);
     setSelectedId(place.id);
     return true;
   }, []);
