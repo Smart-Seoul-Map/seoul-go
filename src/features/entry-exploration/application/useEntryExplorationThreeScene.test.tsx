@@ -35,6 +35,9 @@ const mocks = vi.hoisted(() => {
     registerSceneInteractionControllers: vi.fn(),
     setSceneInteractionCharacter: vi.fn(),
     setSceneInteractionLayout: vi.fn(),
+    takeSceneInteractionCharacterDestination: vi.fn<() => { x: number; z: number } | null>(
+      () => null
+    ),
     updateActiveSceneInteractionCamera: vi.fn(),
     updateSceneInteractions: vi.fn(),
     updateSceneInteractionTriggers: vi.fn(),
@@ -314,6 +317,38 @@ describe("useEntryExplorationThreeScene", () => {
       mocks.domElement.dispatchEvent(new MouseEvent("pointerdown", { clientX: 50, clientY: 50 }));
     });
     expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
+  });
+  test("walks to a destination requested by a scene interaction on the next frame", async () => {
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+    mocks.registry.takeSceneInteractionCharacterDestination.mockReturnValueOnce({ x: 7, z: 8 });
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.registry.takeSceneInteractionCharacterDestination).not.toHaveBeenCalled();
+
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: 7, z: 8 });
   });
   beforeEach(() => {
     vi.clearAllMocks();

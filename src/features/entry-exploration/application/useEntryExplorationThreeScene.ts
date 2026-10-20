@@ -138,6 +138,7 @@ export function useEntryExplorationThreeScene({
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
+    takeSceneInteractionCharacterDestination,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,
@@ -641,6 +642,8 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        const requestedDestination = takeSceneInteractionCharacterDestination();
+        if (requestedDestination) movementRef.current.moveTo(requestedDestination);
         for (const [placeId, landmark] of visitLandmarks) {
           if (placeVisitsRef.current?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
@@ -734,6 +737,7 @@ export function useEntryExplorationThreeScene({
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
+    takeSceneInteractionCharacterDestination,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,

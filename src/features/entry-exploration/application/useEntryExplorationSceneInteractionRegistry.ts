@@ -21,6 +21,7 @@ export type EntryExplorationSceneInteractionController = {
   setCharacter?: (character: THREE.Object3D | null) => void;
   setLayout?: (layout: EntryIntroLayout) => void;
   setSurroundings?: (objects: readonly THREE.Object3D[]) => void;
+  takeRequestedCharacterDestination?: () => EntryExplorationScenePoint | null;
   update: (time: number) => void;
   updateCamera: (
     camera: THREE.OrthographicCamera,
@@ -85,6 +86,15 @@ export function useEntryExplorationSceneInteractionRegistry() {
     if (activeSceneInteractionRef.current) return null;
     for (const controller of sceneInteractionControllersRef.current) {
       const destination = controller.getPointerDestination?.(raycaster);
+      if (destination) return destination;
+    }
+
+    return null;
+  }, []);
+
+  const takeSceneInteractionCharacterDestination = useCallback(() => {
+    for (const controller of sceneInteractionControllersRef.current) {
+      const destination = controller.takeRequestedCharacterDestination?.();
       if (destination) return destination;
     }
 
@@ -216,6 +226,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
+    takeSceneInteractionCharacterDestination,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,
