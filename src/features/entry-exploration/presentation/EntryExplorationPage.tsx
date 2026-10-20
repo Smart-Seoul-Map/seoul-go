@@ -25,8 +25,17 @@ import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
-import type { EntryNumberReward } from "../domain/entryNumberReward";
-import { ENTRY_GRID_NUMBER_REQUIRED_MESSAGE } from "../config/entryNumberRewardConfig";
+import {
+  getEntryDartNumbers,
+  getEntryNumberRewardRows,
+  type EntryNumberReward,
+} from "../domain/entryNumberReward";
+import {
+  ENTRY_GRID_NUMBER_REQUIRED_MESSAGE,
+  ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
+  ENTRY_NUMBER_REWARD_TOAST_DURATION_MS,
+  getEntryNumberRewardToastMessage,
+} from "../config/entryNumberRewardConfig";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
 import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
 import "./entry-edition-places.css";
@@ -50,10 +59,10 @@ export function EntryExplorationPage({
 }: EntryExplorationPageProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-  const { showToast } = useAppToast();
+  const { showToast, clearToasts } = useAppToast();
   const rewards = useEntryNumberRewardStore((state) => state.rewards);
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
-  const [pendingRewards, setPendingRewards] = useState(() => new Map<string, EntryNumberReward>());
+  const [pendingPlaceIds, setPendingPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
   const [isCharacterMoving, setIsCharacterMoving] = useState(false);
   const {
     hasStarted,
@@ -61,32 +70,7 @@ export function EntryExplorationPage({
     handleSceneControlsReady,
     handleDeactivateActiveInteraction,
   } = useEntryExplorationIntro();
-  const { createSlotInteractionControllers, showReward, ...slot } = useEntrySlot((placeId) => {
-    setPendingRewards((previous) => {
-      if (!previous.has(placeId)) return previous;
-      const next = new Map(previous);
-      next.delete(placeId);
-      return next;
-    });
-  });
-  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
-    places ?? EMPTY_ENTRY_PLACES,
-    {
-      onVisit: (placeId) => {
-        const reward = visitPlace(placeId);
-        track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
-        if (reward) setPendingRewards((previous) => new Map(previous).set(placeId, reward));
-      },
-      onDismiss: (placeId) => {
-        const reward = pendingRewards.get(placeId);
-        if (!reward) return;
-        showReward(reward);
-      },
-    }
-  );
-  const collectedNumbers = rewards
-    .filter((reward) => !pendingRewards.has(reward.placeId))
-    .map((reward) => reward.number);
+  const slot = useEntrySlot(() => {});
   const {
     dartShot,
     onArrowThrow,
@@ -96,14 +80,50 @@ export function EntryExplorationPage({
     onDartViewControlsReady,
     onFlightEnd,
     onRetryThrow,
+    requestDartView,
   } = useEntryExplorationDartShot();
+  const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
+    places ?? EMPTY_ENTRY_PLACES,
+    {
+      onVisit: (placeId) => {
+        const place = places?.find((candidate) => candidate.id === placeId);
+        const reward = place ? visitPlace(place) : null;
+        track({ name: "entry_place_visit", placeId, rewarded: Boolean(reward) });
+        if (reward) setPendingPlaceIds((previous) => new Set(previous).add(placeId));
+      },
+      onDismiss: (placeId) => {
+        if (!pendingPlaceIds.has(placeId)) return;
+        setPendingPlaceIds((previous) => {
+          const next = new Set(previous);
+          next.delete(placeId);
+          return next;
+        });
+        const reward = rewards.find((candidate) => candidate.placeId === placeId);
+        if (reward) showNumberRewardToast(reward);
+      },
+    }
+  );
+  const showNumberRewardToast = (reward: EntryNumberReward): void => {
+    showToast({
+      message: getEntryNumberRewardToastMessage(reward),
+      status: "success",
+      actionLabel: ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
+      durationMs: ENTRY_NUMBER_REWARD_TOAST_DURATION_MS,
+      onAction: () => {
+        dismissOpenPanel();
+        clearToasts();
+        requestDartView();
+      },
+    });
+  };
+  const visibleRewards = rewards.filter((reward) => !pendingPlaceIds.has(reward.placeId));
   const { createSceneInteractionControllers } = useEntryExplorationSceneInteractionControllers({
-    collectedNumbers,
+    collectedNumbers: getEntryDartNumbers(visibleRewards),
     onDartEntryBlocked: () => {
       track({ name: "entry_dart_blocked" });
       showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
     },
-    createExtraSceneInteractionControllers: createSlotInteractionControllers,
+    createExtraSceneInteractionControllers: slot.createSlotInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,
     onDartViewActiveChange,
@@ -167,14 +187,20 @@ export function EntryExplorationPage({
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {hasStarted && (
         <EntryCollectedNumbersPanel
-          numbers={collectedNumbers}
+          rows={getEntryNumberRewardRows(visibleRewards)}
           isHidden={slot.state.status !== "closed"}
           isCharacterMoving={isCharacterMoving}
           isDartViewActive={dartShot.isGuideVisible}
         />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}
-      {hasStarted && <EntrySlotOverlay {...slot} />}
+      {hasStarted && (
+        <EntrySlotOverlay
+          state={slot.state}
+          onClose={slot.onClose}
+          onViewportBoundsChange={slot.onViewportBoundsChange}
+        />
+      )}
       {characterSpeech.speechKey &&
         createPortal(
           <AppSpeechBubble
