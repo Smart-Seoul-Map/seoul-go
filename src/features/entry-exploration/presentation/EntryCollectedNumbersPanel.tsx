@@ -173,7 +173,7 @@ export function EntryCollectedNumbersPanel({
                   <span aria-hidden="true" className="entry-collected-numbers-separator">
                     |
                   </span>
-                  <AppBadge size="number-sm" tone="info" variant="solid" textPolicy="singleLine">
+                  <AppBadge size="number-sm" tone="brand" variant="solid" textPolicy="singleLine">
                     {row.number}
                   </AppBadge>
                 </AppBox>

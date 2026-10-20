@@ -134,7 +134,7 @@
   flex: none;
   width: var(--sg-spacing-6);
   height: var(--sg-spacing-6);
-  background: var(--sg-badge-info-color);
+  background: var(--sg-badge-brand-color);
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
