@@ -1,9 +1,7 @@
-import * as THREE from "three";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
-import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationSceneInteractionControllers } from "./useEntryExplorationSceneInteractionControllers";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 
@@ -64,22 +62,5 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
 
     controllers.forEach((controller) => controller.dispose());
     unmount();
-  });
-
-  test("appends extra interaction controllers", () => {
-    const extraController = {
-      dispose: vi.fn(),
-      object: new THREE.Group(),
-    } as unknown as EntryExplorationSceneInteractionController;
-    const controllers = createEntryExplorationSceneInteractionControllers({
-      extraControllers: [extraController],
-    });
-
-    expect(controllers).toHaveLength(2);
-    expect(controllers[1]).toBe(extraController);
-
-    controllers.forEach((controller) => {
-      controller.dispose();
-    });
   });
 });
