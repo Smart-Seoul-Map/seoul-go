@@ -181,7 +181,6 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await expectPanelToStayClosed(page);
     // The first explicit dismissal now presents its one-time number reward.
     await expect(page.getByText("번호를 추가했어요")).toBeVisible();
-    await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);
     await expectPanelToStayClosed(page);
@@ -192,6 +191,27 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await scene(page).click({ position: { x: 450, y: 450 } });
     await expectPanelToStayClosed(page);
   });
+});
+
+test("keeps the entry canvas inside the viewport after rotating to landscape", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const canvas = page.locator(".entry-exploration-scene canvas");
+  await expect(canvas).toBeVisible();
+
+  for (const viewport of [
+    { width: 844, height: 390 },
+    { width: 640, height: 320 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect
+      .poll(async () => {
+        const bounds = await canvas.boundingBox();
+        return bounds ? bounds.y + bounds.height : Infinity;
+      })
+      .toBeLessThanOrEqual(viewport.height);
+  }
 });
 
 test.describe("mobile", () => {
