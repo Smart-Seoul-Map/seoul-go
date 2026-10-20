@@ -1,6 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useEffect } from "react";
-import * as THREE from "three";
 import type { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -19,31 +18,10 @@ const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시�
 const SECOND_REWARD = { placeId: SECOND_PLACE_ID, placeName: "리움미술관", east: 55, north: 48 };
 const TOAST_MESSAGE = "번호를 추가했어요";
 const DART_TOAST_ACTION = "다트게임하기";
-import type { EntrySlotState } from "../application/entrySlotInteraction";
 import type { CreateEntryExplorationSceneInteractionControllersOptions } from "../application/createEntryExplorationSceneInteractionControllers";
 import { createEntryNumberRewardStore } from "../application/entryNumberRewardStore";
 
 let gridOptions: CreateEntryExplorationSceneInteractionControllersOptions;
-
-const slotRequestReward = vi.fn();
-
-vi.mock("../application/entrySlotInteraction", () => ({
-  createEntrySlotInteraction: ({
-    onStateChange,
-  }: {
-    onStateChange: (state: EntrySlotState) => void;
-  }) => ({
-    object: new THREE.Group(),
-    requestReward: (digits: readonly number[]) => {
-      slotRequestReward(digits);
-      onStateChange({ status: "focusing" });
-      return true;
-    },
-    setViewportBounds: vi.fn(),
-    deactivate: () => onStateChange({ status: "closed" }),
-    dispose: vi.fn(),
-  }),
-}));
 
 let introStartHandler: UseEntryExplorationThreeSceneOptions["onIntroStart"];
 let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
@@ -148,13 +126,11 @@ describe("EntryExplorationPage", () => {
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([54, 49]);
     expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
-    expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
     act(() => placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 }));
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
-    expect(slotRequestReward).not.toHaveBeenCalled();
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
   });
 
@@ -168,7 +144,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByText("아직 획득한 번호가 없어요.")).toBeTruthy();
   });
 
-  test("saves on first visit and shows the toast and place rows when the panel closes without the slot", () => {
+  test("saves on first visit and shows the toast and place rows when the panel closes", () => {
     const { router } = renderEntryExplorationPage();
     startExploration();
     act(() => characterMovingChange?.(false));
@@ -187,8 +163,6 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
-    expect(slotRequestReward).not.toHaveBeenCalled();
-    expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     expect(getSpeechText()).toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.intro);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(router.state.location.pathname).toBe("/");
@@ -262,7 +236,6 @@ describe("EntryExplorationPage", () => {
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(screen.getByRole("button", { name: /2개 획득/ })).toBeTruthy();
-    expect(slotRequestReward).not.toHaveBeenCalled();
   });
 
   test("collapses the automatically opened number panel when the character starts moving", () => {
@@ -283,7 +256,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
   });
 
-  test("visiting hanok opens its panel but grants no reward and shows neither a toast nor the slot", () => {
+  test("visiting hanok opens its panel but grants no reward and shows no toast", () => {
     renderEntryExplorationPage();
     startExploration();
     act(() => {
@@ -292,8 +265,6 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
     expect(entryNumberRewardStore.getState().rewards).toEqual([]);
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(slotRequestReward).not.toHaveBeenCalled();
-    expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     act(() => {
       placeVisits?.[ENTRY_HANOK_PLACE_ID].update({ x: 10, z: 0 }, { x: 0, z: 0 });
@@ -301,7 +272,6 @@ describe("EntryExplorationPage", () => {
     });
     expect(screen.getByRole("dialog", { name: ENTRY_HANOK_PLACE.title })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(slotRequestReward).not.toHaveBeenCalled();
     expect(entryNumberRewardStore.getState().rewards).toEqual([]);
     expect(loadEntryNumberRewards()).toEqual([]);
     expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
@@ -316,7 +286,6 @@ describe("EntryExplorationPage", () => {
     });
     expect(screen.getByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(slotRequestReward).not.toHaveBeenCalled();
     expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
@@ -365,7 +334,6 @@ describe("EntryExplorationPage", () => {
     act(() => {
       expect(dismissPlaceFromBackground?.()).toBe(true);
     });
-    expect(slotRequestReward).not.toHaveBeenCalled();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
     expect(screen.getByRole("button", { name: /2개 획득/ })).toBeTruthy();
   });
@@ -373,7 +341,6 @@ describe("EntryExplorationPage", () => {
   beforeEach(() => {
     sessionStorage.clear();
     entryNumberRewardStore.setState({ rewards: [] });
-    slotRequestReward.mockClear();
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       arc: vi.fn(),
       beginPath: vi.fn(),

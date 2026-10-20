@@ -21,8 +21,6 @@ import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
-import { useEntrySlot } from "../application/useEntrySlot";
-import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import { getEntryDartNumbers, getEntryNumberRewardRows } from "../domain/entryNumberReward";
@@ -65,7 +63,6 @@ export function EntryExplorationPage({
     handleSceneControlsReady,
     handleDeactivateActiveInteraction,
   } = useEntryExplorationIntro();
-  const slot = useEntrySlot(() => {});
   const {
     dartShot,
     onArrowThrow,
@@ -116,7 +113,6 @@ export function EntryExplorationPage({
       track({ name: "entry_dart_blocked" });
       showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
     },
-    createExtraSceneInteractionControllers: slot.createSlotInteractionControllers,
     onDartTargetHoverChange,
     onDartThrowResult,
     onDartViewActiveChange,
@@ -185,13 +181,6 @@ export function EntryExplorationPage({
         />
       )}
       {hasStarted && renderPlacePanel?.(panelProps)}
-      {hasStarted && (
-        <EntrySlotOverlay
-          state={slot.state}
-          onClose={slot.onClose}
-          onViewportBoundsChange={slot.onViewportBoundsChange}
-        />
-      )}
       {characterSpeech.speechKey &&
         createPortal(
           <AppSpeechBubble
