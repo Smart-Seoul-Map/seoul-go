@@ -33,7 +33,7 @@
 }
 
 @media (min-width: 861px) {
-  body:has(.entry-collected-numbers:not([data-hidden="true"])) .AppToastViewport {
+  body:has(.entry-collected-numbers) .AppToastViewport {
     padding-left: calc(240px + var(--sg-spacing-4) * 2 + env(safe-area-inset-left, 0px));
   }
 }

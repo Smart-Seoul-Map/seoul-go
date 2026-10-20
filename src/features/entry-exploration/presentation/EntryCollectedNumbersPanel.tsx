@@ -14,7 +14,6 @@ import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
   rows: readonly EntryNumberRewardRow[];
-  isHidden?: boolean;
   isCharacterMoving?: boolean;
   isDartViewActive?: boolean;
 };
@@ -23,7 +22,6 @@ type OpenState = "closed" | "open" | "autoOpen";
 
 export function EntryCollectedNumbersPanel({
   rows,
-  isHidden = false,
   isCharacterMoving = false,
   isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
@@ -38,7 +36,7 @@ export function EntryCollectedNumbersPanel({
   const isOpen = openState !== "closed";
   const countLabel = `${rows.length}개 획득`;
 
-  if (!isHidden && rows.length !== seenCount) {
+  if (rows.length !== seenCount) {
     setSeenCount(rows.length);
     if (rows.length > seenCount) setOpenState("autoOpen");
   }
@@ -105,9 +103,6 @@ export function EntryCollectedNumbersPanel({
       boxShadow="shadow.raised"
       className="entry-collected-numbers"
       data-open={isOpen}
-      data-hidden={isHidden}
-      aria-hidden={isHidden || undefined}
-      inert={isHidden}
       onClick={stopSceneInput}
       onPointerDown={stopSceneInput}
       onWheel={stopSceneInput}

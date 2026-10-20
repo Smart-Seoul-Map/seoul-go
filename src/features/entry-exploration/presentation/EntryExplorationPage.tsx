@@ -180,7 +180,6 @@ export function EntryExplorationPage({
       {hasStarted && (
         <EntryCollectedNumbersPanel
           rows={getEntryNumberRewardRows(visibleRewards)}
-          isHidden={slot.state.status !== "closed"}
           isCharacterMoving={isCharacterMoving}
           isDartViewActive={dartShot.isGuideVisible}
         />
