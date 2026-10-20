@@ -65,6 +65,20 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     expect(secondSetLayout).toHaveBeenCalledWith(ENTRY_INTRO_LAYOUTS.mobile);
   });
 
+  test("prepares renderer-dependent resources only for controllers that request it", () => {
+    const prepare = vi.fn();
+    const controller = createSceneInteractionController({ prepare });
+    const scene = new THREE.Scene();
+    const renderer = {} as THREE.WebGLRenderer;
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([
+      controller,
+      createSceneInteractionController(),
+    ]);
+    result.current.addSceneInteractionObjects(scene, renderer);
+    expect(prepare).toHaveBeenCalledWith(renderer);
+    expect(scene.children).toHaveLength(2);
+  });
   test("registers interaction controllers and activates the first ready one", () => {
     const inactiveController = createSceneInteractionController();
     const readyController = createSceneInteractionController({

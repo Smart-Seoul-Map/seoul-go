@@ -359,7 +359,15 @@ export function useEntryExplorationThreeScene({
     const introHiddenObjects = [scenery.object, archeryRange.object, ...sceneObjectMeshes];
     introHiddenObjects.forEach((object) => (object.visible = false));
     registerSceneInteractionControllers(sceneInteractionControllers);
-    addSceneInteractionObjects(scene);
+    addSceneInteractionObjects(scene, renderer);
+    sceneInteractionControllers.forEach((controller) => {
+      controller.setSurroundings?.([
+        surroundings,
+        ...sceneInteractionControllers
+          .filter((other) => other !== controller)
+          .map((other) => other.object),
+      ]);
+    });
     applyLayout(width / height);
     updateEntryExplorationCameraView(
       camera,

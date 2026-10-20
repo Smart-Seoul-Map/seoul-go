@@ -8,6 +8,7 @@ import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneC
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
+import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -174,6 +175,51 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
+  test("passes decorations and other games as surroundings without hiding the floor or the active model", async () => {
+    let surroundings: readonly THREE.Object3D[] = [];
+    const createController = (): EntryExplorationSceneInteractionController => ({
+      object: new THREE.Group(),
+      activate: () => {},
+      canActivate: () => false,
+      dispose: () => {},
+      handlePointerDown: () => false,
+      handlePointerMove: () => false,
+      handlePointerUp: () => false,
+      isActive: () => false,
+      update: () => {},
+      updateCamera: () => {},
+      updateTriggerState: () => {},
+    });
+    const slot = createController();
+    slot.setSurroundings = (objects) => {
+      surroundings = objects;
+    };
+    const dart = createController();
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [slot, dart],
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
+    expect(surroundings).toContain(dart.object);
+    expect(surroundings).not.toContain(slot.object);
+    expect(surroundings).not.toContain(mocks.floor);
+    const decorations = surroundings.find((object) =>
+      object.children.includes(mocks.introFloorObject!)
+    );
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)).toBeTruthy();
+    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[1].id}`)).toBeTruthy();
+    expect(decorations?.children).not.toContain(mocks.floor);
+  });
+
   test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
