@@ -17,8 +17,7 @@ const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시장", east: 54, north: 49 };
 const SECOND_REWARD = { placeId: SECOND_PLACE_ID, placeName: "리움미술관", east: 55, north: 48 };
-const FIRST_TOAST_MESSAGE = "54 · 49 획득!";
-const SECOND_TOAST_MESSAGE = "55 · 48 획득!";
+const TOAST_MESSAGE = "번호를 추가했어요";
 const DART_TOAST_ACTION = "다트게임하기";
 import type { EntrySlotState } from "../application/entrySlotInteraction";
 import type { CreateEntryExplorationSceneInteractionControllersOptions } from "../application/createEntryExplorationSceneInteractionControllers";
@@ -148,13 +147,13 @@ describe("EntryExplorationPage", () => {
     renderEntryExplorationPage();
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([54, 49]);
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
     act(() => placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 }));
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(slotRequestReward).not.toHaveBeenCalled();
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
   });
@@ -179,11 +178,11 @@ describe("EntryExplorationPage", () => {
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
 
-    const toastMessage = screen.getByText(FIRST_TOAST_MESSAGE);
+    const toastMessage = screen.getByText(TOAST_MESSAGE);
     expect(toastMessage.closest(".AppToast")?.getAttribute("data-status")).toBe("success");
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
@@ -216,7 +215,7 @@ describe("EntryExplorationPage", () => {
 
     expect(screen.queryByRole("dialog", { name: "해방촌신흥시장" })).toBeNull();
     expect(dartViewControls.requestApproach).toHaveBeenCalledOnce();
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
   });
@@ -237,8 +236,7 @@ describe("EntryExplorationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: DART_TOAST_ACTION }));
 
     expect(screen.queryByRole("dialog", { name: "리움미술관" })).toBeNull();
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
-    expect(screen.queryByText(SECOND_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([54, 49, 55, 48]);
     expect(dartViewControls.requestApproach).toHaveBeenCalledOnce();
   });
@@ -251,7 +249,7 @@ describe("EntryExplorationPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     fireEvent.click(screen.getByRole("button", { name: DART_TOAST_ACTION }));
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
 
     act(() => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 20 }, { x: 10, z: 20 });
@@ -260,7 +258,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
 
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
@@ -320,7 +318,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("dialog", { name: "해방촌신흥시장" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     expect(slotRequestReward).not.toHaveBeenCalled();
-    expect(screen.queryByText(FIRST_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
   });
@@ -338,9 +336,9 @@ describe("EntryExplorationPage", () => {
       "해방촌신흥시장|54해방촌신흥시장|49"
     );
     expect(screen.getByLabelText(/2개 획득/)).toBeTruthy();
-    expect(screen.queryByText(SECOND_TOAST_MESSAGE)).toBeNull();
+    expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(screen.getByText(SECOND_TOAST_MESSAGE)).toBeTruthy();
+    expect(screen.getByText(TOAST_MESSAGE)).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 4개 획득" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       "해방촌신흥시장|54해방촌신흥시장|49리움미술관|55리움미술관|48"
@@ -359,7 +357,7 @@ describe("EntryExplorationPage", () => {
       expect(dismissPlaceFromBackground?.()).toBe(false);
     });
     expect(screen.queryByRole("dialog", { name: "해방촌신흥시장" })).toBeNull();
-    expect(screen.getByText(FIRST_TOAST_MESSAGE)).toBeTruthy();
+    expect(screen.getByText(TOAST_MESSAGE)).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     act(() => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 0 }, { x: 0, z: 0 });

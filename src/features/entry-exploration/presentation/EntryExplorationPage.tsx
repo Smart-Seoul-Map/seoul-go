@@ -25,16 +25,11 @@ import { useEntrySlot } from "../application/useEntrySlot";
 import { EntrySlotOverlay } from "./EntrySlotOverlay";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
-import {
-  getEntryDartNumbers,
-  getEntryNumberRewardRows,
-  type EntryNumberReward,
-} from "../domain/entryNumberReward";
+import { getEntryDartNumbers, getEntryNumberRewardRows } from "../domain/entryNumberReward";
 import {
   ENTRY_GRID_NUMBER_REQUIRED_MESSAGE,
   ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
-  ENTRY_NUMBER_REWARD_TOAST_DURATION_MS,
-  getEntryNumberRewardToastMessage,
+  ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
 } from "../config/entryNumberRewardConfig";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
 import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
@@ -98,17 +93,15 @@ export function EntryExplorationPage({
           next.delete(placeId);
           return next;
         });
-        const reward = rewards.find((candidate) => candidate.placeId === placeId);
-        if (reward) showNumberRewardToast(reward);
+        showNumberRewardToast();
       },
     }
   );
-  const showNumberRewardToast = (reward: EntryNumberReward): void => {
+  const showNumberRewardToast = (): void => {
     showToast({
-      message: getEntryNumberRewardToastMessage(reward),
+      message: ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
       status: "success",
       actionLabel: ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
-      durationMs: ENTRY_NUMBER_REWARD_TOAST_DURATION_MS,
       onAction: () => {
         dismissOpenPanel();
         clearToasts();
