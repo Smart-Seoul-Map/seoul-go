@@ -43,3 +43,23 @@ test("places stickers from the layout, skips unknown images and removes stickers
   expect(stickers.object.children).toHaveLength(0);
   stickers.dispose();
 });
+
+test("loads images from the given URLs instead of the sticker folder", () => {
+  const load = vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
+  const stickers = createEntryExplorationStickers({ "pine.png": "blob:designer-sticker" });
+  const layout = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc");
+  const placement = { x: 0, z: 0, scale: 1, rotation: 0 };
+
+  stickers.applyLayout({
+    ...layout,
+    stickers: [
+      { id: "sticker-1", asset: "pine.png", placement },
+      { id: "sticker-2", asset: "star.png", placement },
+    ],
+  });
+
+  expect(load).toHaveBeenCalledTimes(1);
+  expect(load.mock.calls[0][0]).toBe("blob:designer-sticker");
+  expect(stickers.object.children).toHaveLength(1);
+  stickers.dispose();
+});

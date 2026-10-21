@@ -46,6 +46,11 @@ import {
 import { createMobileLayoutFromPc } from "./introLayoutMobileFromPc";
 import type { IntroLayoutModelUrls } from "./introLayoutModels";
 import {
+  getIntroLayoutStickerAssets,
+  getMissingIntroLayoutStickerAssets,
+  type IntroLayoutStickerUrls,
+} from "./introLayoutStickers";
+import {
   addIntroLayoutSticker,
   canIntroLayoutHaveChildren,
   canIntroLayoutMove,
@@ -101,16 +106,19 @@ export function IntroLayoutEditor(): ReactElement {
   const [stickerAsset, setStickerAsset] = useState(ENTRY_EXPLORATION_STICKER_ASSETS[0] ?? "");
   const [floorTextureUrl, setFloorTextureUrl] = useState<string | null>(null);
   const [modelUrls, setModelUrls] = useState<IntroLayoutModelUrls>({});
+  const [uploadedStickers, setUploadedStickers] = useState<IntroLayoutStickerUrls>({});
   const pcFrameRef = useRef<HTMLIFrameElement | null>(null);
   const mobileFrameRef = useRef<HTMLIFrameElement | null>(null);
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const stickerUploadInputRef = useRef<HTMLInputElement | null>(null);
   const shouldConfirmLeaveRef = useRef(false);
   const stageFrameRefs = { pc: pcFrameRef, mobile: mobileFrameRef };
   const previewPreset =
     INTRO_LAYOUT_PREVIEW_PRESETS.find(({ id }) => id === previewPresetId) ??
     INTRO_LAYOUT_PREVIEW_PRESETS[0];
   const isDirty = JSON.stringify(draft) !== JSON.stringify(savedLayouts);
+  const stickerAssets = getIntroLayoutStickerAssets(uploadedStickers);
   const primaryId = selectedIds.at(-1) ?? null;
   const primaryKind = primaryId ? getIntroLayoutItemKind(draft, primaryId) : null;
   const primaryNode = primaryId ? getIntroLayoutNode(draft, primaryId) : undefined;
@@ -156,6 +164,7 @@ export function IntroLayoutEditor(): ReactElement {
         postIntroLayoutShellMessage(source, { type: "state", document: draft, selectedIds });
         postIntroLayoutShellMessage(source, { type: "floor", textureUrl: floorTextureUrl });
         postIntroLayoutShellMessage(source, { type: "models", urls: modelUrls });
+        postIntroLayoutShellMessage(source, { type: "stickers", urls: uploadedStickers });
         return;
       case "select":
         setSelectedIds([message.id]);
@@ -186,6 +195,10 @@ export function IntroLayoutEditor(): ReactElement {
   useEffect(() => {
     broadcast({ type: "models", urls: modelUrls });
   }, [modelUrls]);
+
+  useEffect(() => {
+    broadcast({ type: "stickers", urls: uploadedStickers });
+  }, [uploadedStickers]);
 
   useEffect(() => {
     writeIntroLayoutEditorSession({ view, selectedIds, previewPresetId, saveResult });
@@ -220,7 +233,7 @@ export function IntroLayoutEditor(): ReactElement {
     window.addEventListener("message", handleMessage);
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [draft, floorTextureUrl, modelUrls, selectedIds]);
+  }, [draft, floorTextureUrl, modelUrls, selectedIds, uploadedStickers]);
 
   const handleTreeSelect = (id: IntroLayoutItemId, isAdditive: boolean): void => {
     if (!isAdditive) {
@@ -283,6 +296,19 @@ export function IntroLayoutEditor(): ReactElement {
 
     setDraft(addIntroLayoutSticker(draft, { id, asset: stickerAsset, parentId: stickerParentId }));
     setSelectedIds([id]);
+  };
+
+  const handleStickerUpload = (event: ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setUploadedStickers((current) => ({ ...current, [file.name]: URL.createObjectURL(file) }));
+    setStickerAsset(file.name);
   };
 
   const handleArrivalOpen = (): void => {
@@ -359,12 +385,18 @@ export function IntroLayoutEditor(): ReactElement {
     const errors =
       value === undefined
         ? ["JSON 형식이 아닙니다."]
-        : validateEntryIntroLayoutDocument(value, ENTRY_EXPLORATION_STICKER_ASSETS);
+        : validateEntryIntroLayoutDocument(value, stickerAssets);
 
     setDocumentErrors(errors);
 
     if (errors.length) {
-      setSaveResult(`${file.name}을(를) 불러오지 않았습니다.`);
+      const missingStickers = getMissingIntroLayoutStickerAssets(value, stickerAssets);
+
+      setSaveResult(
+        missingStickers.length
+          ? `스티커 이미지 ${missingStickers.join(", ")}을(를) 먼저 올려 주세요.`
+          : `${file.name}을(를) 불러오지 않았습니다.`
+      );
       return;
     }
 
@@ -435,24 +467,36 @@ export function IntroLayoutEditor(): ReactElement {
               삭제
             </button>
           </div>
-          {ENTRY_EXPLORATION_STICKER_ASSETS.length > 0 && (
-            <div className="IntroLayoutEditor-row">
+          <div className="IntroLayoutEditor-row">
+            {stickerAssets.length > 0 && (
               <select
                 aria-label="스티커 이미지"
                 value={stickerAsset}
                 onChange={(event) => setStickerAsset(event.target.value)}
               >
-                {ENTRY_EXPLORATION_STICKER_ASSETS.map((asset) => (
+                {stickerAssets.map((asset) => (
                   <option key={asset} value={asset}>
-                    {asset}
+                    {uploadedStickers[asset] ? `내 파일 · ${asset}` : asset}
                   </option>
                 ))}
               </select>
-              <button type="button" disabled={!stickerAsset} onClick={handleAddSticker}>
-                스티커 추가
-              </button>
-            </div>
-          )}
+            )}
+            <button type="button" disabled={!stickerAsset} onClick={handleAddSticker}>
+              스티커 추가
+            </button>
+          </div>
+          <div className="IntroLayoutEditor-row">
+            <button type="button" onClick={() => stickerUploadInputRef.current?.click()}>
+              스티커 이미지 올리기
+            </button>
+            <input
+              ref={stickerUploadInputRef}
+              type="file"
+              accept="image/png,image/webp"
+              hidden
+              onChange={handleStickerUpload}
+            />
+          </div>
         </section>
         <section className="IntroLayoutEditor-section" aria-label="저장">
           {INTRO_LAYOUT_EDITOR_CAN_SAVE && (

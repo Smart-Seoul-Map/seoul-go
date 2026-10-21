@@ -41,6 +41,7 @@ import {
   type IntroLayoutItemId,
 } from "./introLayoutEditorMessages";
 import { getIntroLayoutEditionModels, type IntroLayoutModelUrls } from "./introLayoutModels";
+import { getIntroLayoutStickerUrls, type IntroLayoutStickerUrls } from "./introLayoutStickers";
 import type { IntroLayoutItemKind } from "./introLayoutTree";
 
 type IntroLayoutEditorSceneOptions = {
@@ -110,7 +111,7 @@ export function createIntroLayoutEditorScene({
   const originalFloorMap = floorMaterial.map;
   const introFloor = createEntryExplorationIntroFloor();
   const scenery = createEntryExplorationScenery();
-  const stickers = createEntryExplorationStickers();
+  let stickers = createEntryExplorationStickers();
   const archeryRange = createEntryExplorationArcheryRange();
   const slotMachine = createEntrySlotInteraction();
   const overlays = ENTRY_EXPLORATION_SCENE_OBJECTS.map((object) => ({
@@ -269,6 +270,13 @@ export function createIntroLayoutEditorScene({
   const setModelUrls = (urls: IntroLayoutModelUrls): void => {
     modelUrls = urls;
     renderPlaces();
+  };
+
+  const setStickerUrls = (urls: IntroLayoutStickerUrls): void => {
+    stickers.dispose();
+    stickers = createEntryExplorationStickers(getIntroLayoutStickerUrls(urls));
+    scene.add(stickers.object);
+    stickers.applyLayout(layout);
   };
 
   const setFloorTexture = (url: string | null): void => {
@@ -497,6 +505,7 @@ export function createIntroLayoutEditorScene({
     setLayout: applyLayout,
     setPlaces,
     setModelUrls,
+    setStickerUrls,
     setSelection,
     setFloorTexture,
     showCameraPreset(preset: IntroLayoutCameraPreset): void {

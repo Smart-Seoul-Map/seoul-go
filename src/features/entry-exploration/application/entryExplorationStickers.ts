@@ -27,7 +27,9 @@ export function getEntryExplorationStickerId(object: THREE.Object3D): string | n
     : null;
 }
 
-export function createEntryExplorationStickers() {
+export function createEntryExplorationStickers(
+  urls: Readonly<Record<string, string>> = ENTRY_EXPLORATION_STICKER_URLS
+) {
   const facing = createEntryExplorationFacing();
   const object = new THREE.Group();
   object.name = "entry-stickers";
@@ -49,7 +51,7 @@ export function createEntryExplorationStickers() {
 
     if (known) return known;
 
-    const url = ENTRY_EXPLORATION_STICKER_URLS[key];
+    const url = urls[key];
 
     if (!url) return null;
 
