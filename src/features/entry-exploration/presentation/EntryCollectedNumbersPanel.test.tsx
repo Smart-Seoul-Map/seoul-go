@@ -25,6 +25,19 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(document.activeElement).toBe(getTrigger(1));
   });
 
+  test("opens the notice dialog from the ! button and closes it without closing the panel", () => {
+    render(<EntryCollectedNumbersPanel numbers={[40]} />);
+    fireEvent.click(getTrigger(1));
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "번호 안내" }));
+    expect(screen.getByRole("dialog", { name: "내 번호" })).toBeTruthy();
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
+  });
+
   test("retains the animating content but excludes it from interaction while collapsed", () => {
     const { container } = render(<EntryCollectedNumbersPanel numbers={[40]} />);
     const body = container.querySelector(".entry-collected-numbers-body");
