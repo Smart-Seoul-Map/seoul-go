@@ -1,4 +1,5 @@
 import { createEntryExplorationSeoulTileMapViewInteractionController } from "./entryExplorationSeoulTileMapViewInteraction";
+import { createEntrySlotInteraction } from "./entrySlotInteraction";
 import type {
   EntryExplorationDartThrowResult,
   EntryExplorationDartViewControls,
@@ -8,7 +9,6 @@ import type { EntryExplorationSceneInteractionController } from "./useEntryExplo
 export type CreateEntryExplorationSceneInteractionControllersOptions = {
   getCollectedNumbers?: () => readonly number[];
   onDartEntryBlocked?: () => void;
-  extraControllers?: readonly EntryExplorationSceneInteractionController[];
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
@@ -18,7 +18,6 @@ export type CreateEntryExplorationSceneInteractionControllersOptions = {
 export function createEntryExplorationSceneInteractionControllers({
   getCollectedNumbers,
   onDartEntryBlocked,
-  extraControllers = [],
   onDartThrowResult,
   onDartTargetHoverChange,
   onDartViewActiveChange,
@@ -33,6 +32,6 @@ export function createEntryExplorationSceneInteractionControllers({
       onDartThrowResult,
       onTargetHoverChange: onDartTargetHoverChange,
     }),
-    ...extraControllers,
+    createEntrySlotInteraction(),
   ];
 }

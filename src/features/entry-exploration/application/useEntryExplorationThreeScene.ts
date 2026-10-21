@@ -138,6 +138,7 @@ export function useEntryExplorationThreeScene({
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
+    takeSceneInteractionCharacterDestination,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,
@@ -355,18 +356,15 @@ export function useEntryExplorationThreeScene({
       surroundings.add(mesh);
     });
     scene.add(surroundings);
-    const introHiddenObjects = [scenery.object, archeryRange.object, ...sceneObjectMeshes];
+    const introHiddenObjects = [
+      scenery.object,
+      archeryRange.object,
+      ...sceneObjectMeshes,
+      ...sceneInteractionControllers.map((controller) => controller.object),
+    ];
     introHiddenObjects.forEach((object) => (object.visible = false));
     registerSceneInteractionControllers(sceneInteractionControllers);
     addSceneInteractionObjects(scene, renderer);
-    sceneInteractionControllers.forEach((controller) => {
-      controller.setSurroundings?.([
-        surroundings,
-        ...sceneInteractionControllers
-          .filter((other) => other !== controller)
-          .map((other) => other.object),
-      ]);
-    });
     applyLayout(width / height);
     updateEntryExplorationCameraView(
       camera,
@@ -641,6 +639,8 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        const requestedDestination = takeSceneInteractionCharacterDestination();
+        if (requestedDestination) movementRef.current.moveTo(requestedDestination);
         for (const [placeId, landmark] of visitLandmarks) {
           if (placeVisitsRef.current?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
@@ -734,6 +734,7 @@ export function useEntryExplorationThreeScene({
     registerSceneInteractionControllers,
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
+    takeSceneInteractionCharacterDestination,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,

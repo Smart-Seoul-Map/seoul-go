@@ -42,10 +42,6 @@
   box-shadow: none;
 }
 
-.entry-collected-numbers[data-hidden="true"] {
-  visibility: hidden;
-}
-
 .entry-collected-numbers-header {
   position: relative;
   display: flex;
@@ -161,7 +157,7 @@
   flex: none;
   width: var(--sg-spacing-6);
   height: var(--sg-spacing-6);
-  background: var(--sg-badge-info-color);
+  background: var(--sg-badge-brand-color);
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
@@ -199,6 +195,18 @@
 
 .entry-collected-numbers-row:last-child {
   border-bottom: 0;
+}
+
+.entry-collected-numbers-place {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-collected-numbers-separator {
+  flex: none;
+  color: var(--sg-color-text-muted);
 }
 
 .entry-collected-numbers-empty {

@@ -180,9 +180,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await panel(page).getByRole("button", { name: "장소 정보 닫기", exact: true }).click();
     await expectPanelToStayClosed(page);
     // The first explicit dismissal now presents its one-time number reward.
-    const slotClose = page.getByRole("button", { name: "계속 탐방하기" });
-    await expect(slotClose).toBeEnabled({ timeout: 15000 });
-    await slotClose.click();
+    await expect(page.getByText("번호를 추가했어요")).toBeVisible();
     await expect(page.getByRole("region", { name: "숫자 슬롯" })).toHaveCount(0);
     await scene(page).click({ position: { x: 450, y: 450 } });
     await waitForCameraToSettle(page);

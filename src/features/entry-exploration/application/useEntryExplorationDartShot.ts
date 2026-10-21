@@ -21,6 +21,7 @@ type EntryExplorationDartShotHookResult = {
   onDartViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onFlightEnd: () => void;
   onRetryThrow: () => void;
+  requestDartView: () => void;
 };
 
 export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResult {
@@ -71,6 +72,10 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     viewControlsRef.current?.setHitCell(landed?.cell ?? null);
   }, []);
 
+  const requestDartView = useCallback(() => {
+    viewControlsRef.current?.requestApproach();
+  }, []);
+
   return {
     dartShot: { isGuideVisible, isTargetHovered, landedResult, shotResult },
     onArrowThrow,
@@ -80,5 +85,6 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     onDartViewControlsReady,
     onFlightEnd,
     onRetryThrow,
+    requestDartView,
   };
 }

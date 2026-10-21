@@ -1,6 +1,6 @@
 import { createStore } from "zustand/vanilla";
 
-import type { EntryExplorationPlaceId } from "../domain/entryEditionPlace";
+import type { EntryEditionPlace } from "../domain/entryEditionPlace";
 import { isEntryNumberRewardPlaceId } from "../config/entryNumberRewardConfig";
 import {
   loadEntryNumberRewards,
@@ -11,23 +11,21 @@ import { grantEntryNumberReward, type EntryNumberReward } from "../domain/entryN
 
 export type EntryNumberRewardStoreState = {
   rewards: readonly EntryNumberReward[];
-  visitPlace: (placeId: EntryExplorationPlaceId) => EntryNumberReward | null;
+  visitPlace: (place: EntryEditionPlace) => EntryNumberReward | null;
 };
 
 export function createEntryNumberRewardStore({
   storage,
-  random = Math.random,
 }: {
   storage?: EntryNumberRewardStorage | null;
-  random?: () => number;
 } = {}) {
   return createStore<EntryNumberRewardStoreState>()((set, get) => {
     return {
       rewards: loadEntryNumberRewards(storage),
-      visitPlace: (placeId) => {
-        if (!isEntryNumberRewardPlaceId(placeId)) return null;
+      visitPlace: (place) => {
+        if (!isEntryNumberRewardPlaceId(place.id)) return null;
         const previous = get().rewards;
-        const rewards = grantEntryNumberReward(previous, placeId, random);
+        const rewards = grantEntryNumberReward(previous, place);
         if (rewards === previous) return null;
         saveEntryNumberRewards(rewards, storage);
         set({ rewards });

@@ -6,6 +6,7 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppText } from "@shared/ui/typography";
 
+import type { EntryNumberRewardRow } from "../domain/entryNumberReward";
 import closeIcon from "../../../assets/icons/close.svg";
 import dicesIcon from "../../../assets/icons/dices.svg";
 
@@ -14,8 +15,7 @@ import { EntryCollectedNumbersGuideDialog } from "./EntryCollectedNumbersGuideDi
 import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
-  numbers: readonly number[];
-  isHidden?: boolean;
+  rows: readonly EntryNumberRewardRow[];
   isCharacterMoving?: boolean;
   isDartViewActive?: boolean;
 };
@@ -23,14 +23,13 @@ type EntryCollectedNumbersPanelProps = {
 type OpenState = "closed" | "open" | "autoOpen";
 
 export function EntryCollectedNumbersPanel({
-  numbers,
-  isHidden = false,
+  rows,
   isCharacterMoving = false,
   isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  const [seenCount, setSeenCount] = useState(numbers.length);
+  const [seenCount, setSeenCount] = useState(rows.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
   const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
   const id = useId();
@@ -38,11 +37,11 @@ export function EntryCollectedNumbersPanel({
   const panelRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLElement>(null);
   const isOpen = openState !== "closed";
-  const countLabel = `${numbers.length}개 획득`;
+  const countLabel = `${rows.length}개 획득`;
 
-  if (!isHidden && numbers.length !== seenCount) {
-    setSeenCount(numbers.length);
-    if (numbers.length > seenCount) setOpenState("autoOpen");
+  if (rows.length !== seenCount) {
+    setSeenCount(rows.length);
+    if (rows.length > seenCount) setOpenState("autoOpen");
   }
   if (isDartViewActive !== wasDartViewActive) {
     setWasDartViewActive(isDartViewActive);
@@ -110,9 +109,6 @@ export function EntryCollectedNumbersPanel({
         boxShadow="shadow.raised"
         className="entry-collected-numbers"
         data-open={isOpen}
-        data-hidden={isHidden}
-        aria-hidden={isHidden || undefined}
-        inert={isHidden}
         onClick={stopSceneInput}
         onPointerDown={stopSceneInput}
         onWheel={stopSceneInput}
@@ -163,7 +159,7 @@ export function EntryCollectedNumbersPanel({
           inert={!isOpen}
         >
           <div className="entry-collected-numbers-content">
-            {numbers.length === 0 ? (
+            {rows.length === 0 ? (
               <AppBox px="spacing.4" py="spacing.5" className="entry-collected-numbers-empty">
                 <AppText role="supporting" tone="muted">
                   아직 획득한 번호가 없어요.
@@ -181,13 +177,18 @@ export function EntryCollectedNumbersPanel({
                 px="spacing.4"
                 py="spacing.1"
               >
-                {numbers.map((number) => (
-                  <AppBox as="li" key={number} className="entry-collected-numbers-row">
-                    <AppText as="span" role="supporting">
-                      추첨 번호
-                    </AppText>
-                    <AppBadge size="number-sm" tone="info" variant="solid" textPolicy="singleLine">
-                      {number}
+                {rows.map((row) => (
+                  <AppBox as="li" key={row.key} className="entry-collected-numbers-row">
+                    <span className="entry-collected-numbers-place">
+                      <AppText as="span" role="supporting">
+                        {row.placeName}
+                      </AppText>
+                    </span>
+                    <span aria-hidden="true" className="entry-collected-numbers-separator">
+                      |
+                    </span>
+                    <AppBadge size="number-sm" tone="brand" variant="solid" textPolicy="singleLine">
+                      {row.number}
                     </AppBadge>
                   </AppBox>
                 ))}

@@ -2,7 +2,6 @@ import { Buffer } from "node:buffer";
 import { expect, type Page } from "@playwright/test";
 
 export const INTRO_PLACE_NAME = "해방촌신흥시장";
-export const INTRO_PLACE_ID = "smart-seoul:1786321258890:25_edition25_24";
 const INTRO_PLACE_MODEL_PATH = "**/models/places/namsan_baekbeom_square.glb";
 
 export async function mockIntroEdition(page: Page): Promise<void> {
