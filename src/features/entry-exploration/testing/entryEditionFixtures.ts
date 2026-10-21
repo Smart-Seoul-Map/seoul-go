@@ -9,6 +9,7 @@ export const ENTRY_TEST_PLACES: readonly EntryEditionPlace[] = [
     imageUrl: "/test-market.png",
     address: "서울특별시 용산구 신흥로 95-9",
     selectionYear: 2025,
+    position: { lat: 37.54532375, lng: 126.985085516 },
   },
   {
     id: "smart-seoul:1786321258890:26_edition25_21",
@@ -17,6 +18,7 @@ export const ENTRY_TEST_PLACES: readonly EntryEditionPlace[] = [
     imageUrl: "/test-museum.png",
     address: "서울특별시 용산구 이태원로55길 60-16",
     selectionYear: 2026,
+    position: { lat: 37.538461285, lng: 126.999294107 },
   },
 ];
 

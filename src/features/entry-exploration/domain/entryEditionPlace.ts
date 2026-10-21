@@ -5,6 +5,7 @@ export type EntryEditionPlace = {
   imageUrl: string;
   address: string;
   selectionYear?: number;
+  position: { lat: number; lng: number };
 };
 
 export type EntryExplorationPlaceId = string;
