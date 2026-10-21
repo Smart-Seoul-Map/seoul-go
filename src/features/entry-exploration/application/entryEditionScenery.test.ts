@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import { afterEach, expect, test, vi } from "vitest";
 
+import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
-import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
+import { ENTRY_MODELED_TEST_PLACES, ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { createEntryEditionScenery } from "./entryEditionScenery";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 
@@ -47,4 +48,27 @@ test("keeps a place visitable with its API image when its mapped GLB fails", asy
     "/models/places/namsan_baekbeom_square.glb"
   );
   scenery.dispose();
+});
+
+test("puts each modeled place in its own edition slot and guides to the first filled slot", () => {
+  vi.mocked(loadEntryExplorationGltf).mockReturnValue(new Promise(() => {}));
+  const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 390 / 844);
+  const places = [...ENTRY_MODELED_TEST_PLACES].reverse();
+  const scenery = createEntryEditionScenery(places, vi.fn());
+
+  expect(scenery.applyLayout(layout)).toEqual(layout.edition[0]);
+  for (const place of places) {
+    const landmark = scenery.landmarks.get(place.id)!;
+    expect({ x: landmark.position.x, z: landmark.position.z }).toEqual(
+      layout.edition[ENTRY_EDITION_MODELS[place.id].editionIndex]
+    );
+  }
+  scenery.dispose();
+
+  const withoutFirstSlot = places.filter(
+    (place) => ENTRY_EDITION_MODELS[place.id].editionIndex !== 0
+  );
+  const partial = createEntryEditionScenery(withoutFirstSlot, vi.fn());
+  expect(partial.applyLayout(layout)).toEqual(layout.edition[1]);
+  partial.dispose();
 });

@@ -7,7 +7,7 @@ import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 
 afterEach(() => vi.restoreAllMocks());
 
-test("places every atlas sprite at its layout point and follows a moved hanok while leaving the tower unused", () => {
+test("places every atlas sprite at its layout point and follows a moved hanok while leaving unused frames out", () => {
   vi.spyOn(THREE.TextureLoader.prototype, "load").mockReturnValue(new THREE.Texture());
   const scenery = createEntryExplorationScenery();
   const layout = ENTRY_INTRO_LAYOUTS.pc;
@@ -25,6 +25,8 @@ test("places every atlas sprite at its layout point and follows a moved hanok wh
   expect(hanok?.position.x).toBe(movedHanok.x);
   expect(hanok?.position.z).toBe(movedHanok.z);
   expect(hanok?.position.y).toBe(height);
-  expect(scenery.object.getObjectByName("entry-scenery-tower")).toBeUndefined();
+  for (const key of ["tower", "pin", "emphasis", "office", "city", "bicycle"]) {
+    expect(scenery.object.getObjectByName(`entry-scenery-${key}`)).toBeUndefined();
+  }
   scenery.dispose();
 });

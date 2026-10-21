@@ -60,6 +60,7 @@ export type EntryExplorationDartThrowResult = {
 };
 
 export type EntryExplorationDartViewControls = {
+  requestApproach: () => void;
   requestRouletteView: () => void;
   resetThrow: () => void;
   setHitCell: (cell: SeoulGridCell | null) => void;
@@ -119,6 +120,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
   let isRouletteView = false;
+  let requestedCharacterDestination: EntryExplorationScenePoint | null = null;
   let mapPosition: EntryExplorationScenePoint;
   let triggerPosition: EntryExplorationScenePoint;
 
@@ -235,6 +237,14 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     setHitCell(null);
   };
 
+  const requestApproach = (): void => {
+    if (isEngaged || getCollectedNumbers().length === 0) {
+      return;
+    }
+
+    requestedCharacterDestination = triggerPosition;
+  };
+
   const requestRouletteView = (): void => {
     if (isEngaged) {
       return;
@@ -255,7 +265,13 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     }
   };
 
-  onControlsReady?.({ requestRouletteView, resetThrow, setHitCell, throwAtRandomCell });
+  onControlsReady?.({
+    requestApproach,
+    requestRouletteView,
+    resetThrow,
+    setHitCell,
+    throwAtRandomCell,
+  });
 
   const activate = (time: number): void => {
     if (isEngaged || getCollectedNumbers().length === 0) {
@@ -435,6 +451,12 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       disposeEntryExplorationObject3D(mapMesh);
     },
     getActivationCharacterDestination: getCharacterDestination,
+    takeRequestedCharacterDestination: () => {
+      const destination = requestedCharacterDestination;
+      requestedCharacterDestination = null;
+
+      return destination;
+    },
     handlePointerDown: (raycaster) => {
       if (!isEngaged) {
         return false;

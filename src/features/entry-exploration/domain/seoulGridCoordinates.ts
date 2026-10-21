@@ -21,6 +21,43 @@ export function toSeoulGridCellCenter(cell: SeoulGridCell): SeoulGridGeoPoint {
   return toGeoPoint(originUtmk.x + eastKm * 1000 + 500, originUtmk.y + northKm * 1000 + 500);
 }
 
+export function toSeoulGridCellFromGeoPoint(point: SeoulGridGeoPoint): SeoulGridCell | null {
+  const { columns, originKm, originUtmk, rows } = SEOUL_GRID_MAP_CONFIG;
+  const { x, y } = toUtmk(point);
+  const column = Math.floor((x - originUtmk.x) / 1000) - originKm.x;
+  const row = rows - 1 - (Math.floor((y - originUtmk.y) / 1000) - originKm.y);
+  const isOnBoard = column >= 0 && column < columns && row >= 0 && row < rows;
+
+  return isOnBoard ? { column, row } : null;
+}
+
+function toUtmk({ lat, lng }: SeoulGridGeoPoint): { x: number; y: number } {
+  const phi = toRadians(lat);
+  const n = semiMajorAxis / Math.sqrt(1 - eccentricitySquared * Math.sin(phi) ** 2);
+  const t = Math.tan(phi) ** 2;
+  const c = secondEccentricitySquared * Math.cos(phi) ** 2;
+  const a = (toRadians(lng) - toRadians(longitudeOrigin)) * Math.cos(phi);
+  const x =
+    falseEasting +
+    scaleFactor *
+      n *
+      (a +
+        ((1 - t + c) * a ** 3) / 6 +
+        ((5 - 18 * t + t ** 2 + 72 * c - 58 * secondEccentricitySquared) * a ** 5) / 120);
+  const y =
+    falseNorthing +
+    scaleFactor *
+      (meridionalArc(lat) -
+        meridionalArc(latitudeOrigin) +
+        n *
+          Math.tan(phi) *
+          (a ** 2 / 2 +
+            ((5 - t + 9 * c + 4 * c ** 2) * a ** 4) / 24 +
+            ((61 - 58 * t + t ** 2 + 600 * c - 330 * secondEccentricitySquared) * a ** 6) / 720));
+
+  return { x, y };
+}
+
 function toGeoPoint(x: number, y: number): SeoulGridGeoPoint {
   const e1 = (1 - Math.sqrt(1 - eccentricitySquared)) / (1 + Math.sqrt(1 - eccentricitySquared));
   const meridional = (y - falseNorthing) / scaleFactor + meridionalArc(latitudeOrigin);
