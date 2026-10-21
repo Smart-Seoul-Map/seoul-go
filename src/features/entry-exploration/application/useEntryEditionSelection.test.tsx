@@ -103,7 +103,7 @@ test("still selects places when localStorage is blocked", async () => {
 
 function registerExtraModels(ids: readonly string[]) {
   for (const id of ids) {
-    models.map[id] = { url: `/models/test/${id}.glb`, size: 1, rotationY: 0 };
+    models.map[id] = { url: `/models/test/${id}.glb`, size: 1, rotationY: 0, editionIndex: 0 };
     models.extraIds.push(id);
   }
 }
