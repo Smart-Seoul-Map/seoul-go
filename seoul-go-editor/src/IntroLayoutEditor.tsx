@@ -44,7 +44,7 @@ import {
   writeIntroLayoutEditorSession,
 } from "./introLayoutEditorSession";
 import { createMobileLayoutFromPc } from "./introLayoutMobileFromPc";
-import type { IntroLayoutModelUrls } from "./introLayoutModels";
+import { INTRO_LAYOUT_MODEL_SLOTS, type IntroLayoutModelUrls } from "./introLayoutModels";
 import {
   getIntroLayoutStickerAssets,
   getMissingIntroLayoutStickerAssets,
@@ -258,6 +258,12 @@ export function IntroLayoutEditor(): ReactElement {
     setDraft((current) => setIntroLayoutLocal(current, view, primaryId, { [field]: value }));
   };
 
+  const handleGuideChange = (event: ChangeEvent<HTMLSelectElement>): void => {
+    const guidePlaceId = event.target.value;
+
+    setDraft((current) => ({ ...current, guidePlaceId }));
+  };
+
   const handleRename = (event: ChangeEvent<HTMLInputElement>): void => {
     if (primaryId) {
       setDraft((current) => renameIntroLayoutNode(current, primaryId, event.target.value));
@@ -451,6 +457,19 @@ export function IntroLayoutEditor(): ReactElement {
               시작 시점
             </button>
           </div>
+        </section>
+        <section className="IntroLayoutEditor-section" aria-label="화살표">
+          <label className="IntroLayoutCoordinateInput">
+            <span>화살표 장소</span>
+            <select value={draft.guidePlaceId} onChange={handleGuideChange}>
+              {INTRO_LAYOUT_MODEL_SLOTS.map(({ placeId, fileName }) => (
+                <option key={placeId} value={placeId}>
+                  {arrivalTargets.find(({ id }) => id === toEntryIntroLayoutModelId(placeId))
+                    ?.name ?? fileName}
+                </option>
+              ))}
+            </select>
+          </label>
         </section>
         <section className="IntroLayoutEditor-section" aria-label="레이어 편집">
           <div className="IntroLayoutEditor-row">
