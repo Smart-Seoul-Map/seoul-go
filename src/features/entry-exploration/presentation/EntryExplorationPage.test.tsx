@@ -158,7 +158,7 @@ describe("EntryExplorationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
     expect(slotClose).toHaveBeenCalled();
     expect(screen.queryByRole("region", { name: "숫자 슬롯" })).toBeNull();
-    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toContain(
       String(reward.number)
     );
@@ -178,7 +178,7 @@ describe("EntryExplorationPage", () => {
       slotStateChange?.({ status: "result", result: String(reward.number) });
     });
     fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
-    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
 
     act(() => characterMovingChange?.(true));
     expect(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" })).toBeTruthy();
@@ -186,7 +186,7 @@ describe("EntryExplorationPage", () => {
     act(() => characterMovingChange?.(false));
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 1개 획득" }));
     act(() => characterMovingChange?.(true));
-    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
   });
   test("visiting hanok opens its panel but grants no reward and never starts the slot", () => {
     renderEntryExplorationPage();
@@ -239,13 +239,12 @@ describe("EntryExplorationPage", () => {
     const saved = loadEntryNumberRewards();
     expect(saved).toHaveLength(2);
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe("추첨 번호40");
-    expect(screen.getByLabelText(/1개 획득/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     act(() => {
       slotStateChange?.({ status: "result", result: String(saved[1].number) });
     });
     fireEvent.click(screen.getByRole("button", { name: "계속 탐방하기" }));
-    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       `추첨 번호40추첨 번호${saved[1].number}`
     );

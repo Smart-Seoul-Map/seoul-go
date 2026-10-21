@@ -10,22 +10,19 @@ vi.mock("../../../assets/icons/dices.svg", () => ({
 afterEach(cleanup);
 
 describe("EntryCollectedNumbersPanel", () => {
-  test("expands the existing header without replacing its button, icon, or title", () => {
+  test("replaces the trigger button with a plain title once open", () => {
     render(<EntryCollectedNumbersPanel numbers={[40]} />);
-    const trigger = getTrigger(1);
-    const icon = trigger.querySelector(".entry-collected-numbers-icon");
-    const title = within(trigger).getByText("번호");
+    fireEvent.click(getTrigger(1));
 
-    fireEvent.click(trigger);
-    expect(screen.getByRole("button", { name: "내 번호 접기, 1개 획득" })).toBe(trigger);
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(trigger.querySelector(".entry-collected-numbers-icon")).toBe(icon);
-    expect(within(trigger).getByText("번호")).toBe(title);
+    const panel = screen.getByRole("region", { name: "번호" });
+    expect(screen.queryByRole("button", { name: /내 번호 열기/ })).toBeNull();
+    expect(within(panel).getByText("번호").closest("button")).toBeNull();
+    expect(screen.getByRole("button", { name: "번호 안내" })).toBeTruthy();
+    expect(panel.querySelector(".entry-collected-numbers-icon")).toBeTruthy();
 
-    fireEvent.click(trigger);
-    expect(getTrigger(1)).toBe(trigger);
-    expect(document.activeElement).toBe(trigger);
-    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(screen.getByRole("button", { name: "내 번호 접기" }));
+    expect(getTrigger(1)).toBeTruthy();
+    expect(document.activeElement).toBe(getTrigger(1));
   });
 
   test("retains the animating content but excludes it from interaction while collapsed", () => {
@@ -80,7 +77,6 @@ describe("EntryCollectedNumbersPanel", () => {
     );
 
     expect(document.activeElement).toBe(scene);
-    expect(getTrigger(0).getAttribute("aria-expanded")).toBe("false");
     expect(screen.queryByRole("region", { name: "번호" })).toBeNull();
   });
 
@@ -105,7 +101,7 @@ describe("EntryCollectedNumbersPanel", () => {
         .map((row) => row.textContent)
     ).toEqual(["추첨 번호40", "추첨 번호57", "추첨 번호65"]);
     expect(within(list).queryByRole("button")).toBeNull();
-    expect(screen.getByRole("button", { name: "내 번호 접기, 3개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(panel.getAttribute("aria-modal")).toBeNull();
   });
 
@@ -190,17 +186,16 @@ describe("EntryCollectedNumbersPanel", () => {
     const { rerender } = render(<EntryCollectedNumbersPanel numbers={[40]} />);
     rerender(<EntryCollectedNumbersPanel numbers={[40]} isDartViewActive />);
 
-    const trigger = screen.getByRole("button", { name: "내 번호 접기, 1개 획득" });
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(document.activeElement).toBe(document.body);
 
     rerender(<EntryCollectedNumbersPanel numbers={[40]} isDartViewActive isCharacterMoving />);
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
 
     rerender(<EntryCollectedNumbersPanel numbers={[40]} />);
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     rerender(<EntryCollectedNumbersPanel numbers={[40]} isCharacterMoving />);
-    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("region", { name: "번호" })).toBeNull();
   });
 });
 
