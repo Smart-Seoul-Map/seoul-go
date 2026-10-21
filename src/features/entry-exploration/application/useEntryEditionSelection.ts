@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
-import {
-  loadPreviousEntryEditionIds,
-  savePreviousEntryEditionIds,
-} from "../data/entryEditionSelectionStorage";
 import type { EntryEditionPlace } from "../domain/entryEditionPlace";
 import { selectEntryEditionPlaces } from "../domain/selectEntryEditionPlaces";
 
@@ -14,10 +9,8 @@ export function useEntryEditionSelection(source: readonly EntryEditionPlace[] | 
 
   useEffect(() => {
     if (!source?.length || selectedRef.current) return;
-    const modeledPlaces = source.filter((place) => Object.hasOwn(ENTRY_EDITION_MODELS, place.id));
-    const selected = selectEntryEditionPlaces(modeledPlaces, loadPreviousEntryEditionIds());
+    const selected = selectEntryEditionPlaces(source);
     selectedRef.current = selected;
-    savePreviousEntryEditionIds(selected.map((place) => place.id));
     setPlaces(selected);
   }, [source]);
 
