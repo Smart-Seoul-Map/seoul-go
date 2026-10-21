@@ -13,6 +13,7 @@ import {
   createEntryExplorationStickers,
   getEntryExplorationStickerId,
 } from "../../src/features/entry-exploration/application/entryExplorationStickers";
+import { createEntrySlotInteraction } from "../../src/features/entry-exploration/application/entrySlotInteraction";
 import {
   addEntryExplorationLights,
   createEntryExplorationCamera,
@@ -111,6 +112,7 @@ export function createIntroLayoutEditorScene({
   const scenery = createEntryExplorationScenery();
   const stickers = createEntryExplorationStickers();
   const archeryRange = createEntryExplorationArcheryRange();
+  const slotMachine = createEntrySlotInteraction();
   const overlays = ENTRY_EXPLORATION_SCENE_OBJECTS.map((object) => ({
     id: object.id,
     mesh: createEntryExplorationSceneObject(object),
@@ -149,6 +151,7 @@ export function createIntroLayoutEditorScene({
     if (sprite) itemIds.set(sprite, key);
   });
   itemIds.set(archeryRange.object, "archery-range");
+  itemIds.set(slotMachine.object, "slot-machine");
   itemIds.set(introFloor.object, "intro-background");
   overlays.forEach(({ id, mesh }) => itemIds.set(mesh, id));
 
@@ -232,6 +235,7 @@ export function createIntroLayoutEditorScene({
     scenery.applyLayout(layout);
     stickers.applyLayout(layout);
     archeryRange.applyLayout(layout);
+    slotMachine.setLayout?.(layout);
     overlays.forEach(({ id, mesh }) => {
       const placement = layout.objects[id];
 
@@ -330,7 +334,13 @@ export function createIntroLayoutEditorScene({
   const pickItemId = (): IntroLayoutItemId | null => {
     const targetGroups = [
       [handleGroup],
-      [scenery.object, stickers.object, editionScenery.object, archeryRange.object],
+      [
+        scenery.object,
+        stickers.object,
+        editionScenery.object,
+        archeryRange.object,
+        slotMachine.object,
+      ],
       [introFloor.object, ...overlays.map(({ mesh }) => mesh)],
     ];
 
@@ -468,9 +478,11 @@ export function createIntroLayoutEditorScene({
     stickers.object,
     editionScenery.object,
     archeryRange.object,
+    slotMachine.object,
     ...overlays.map(({ mesh }) => mesh),
     handleGroup
   );
+  slotMachine.prepare(renderer);
   applyLayout(layout, new Map());
   applyCameraView(cameraView);
   window.addEventListener("resize", resize);
@@ -509,6 +521,7 @@ export function createIntroLayoutEditorScene({
       stickers.dispose();
       editionScenery.dispose();
       archeryRange.dispose();
+      slotMachine.dispose();
       floorOverride?.dispose();
       [floor, introFloor.object, ...overlays.map(({ mesh }) => mesh)].forEach(
         disposeEntryExplorationObject3D
