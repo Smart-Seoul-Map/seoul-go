@@ -16,6 +16,10 @@ export function createEntryEditionScenery(
   const object = new THREE.Group();
   object.name = "entry-edition-places";
   const landmarks = new Map<string, THREE.Group>();
+  const editionIndexes = places.map(
+    (place, index) => ENTRY_EDITION_MODELS[place.id]?.editionIndex ?? index
+  );
+  const guideEditionIndex = Math.min(...editionIndexes);
   const disposers: (() => void)[] = [];
   let disposed = false;
 
@@ -74,13 +78,13 @@ export function createEntryEditionScenery(
     landmarks,
     applyLayout(layout: EntryIntroLayout): EntryExplorationScenePoint | null {
       places.forEach((place, index) => {
-        const placement = layout.edition[index];
+        const placement = layout.edition[editionIndexes[index]];
         const landmark = landmarks.get(place.id);
         landmark?.position.set(placement.x, 0.06, placement.z);
         landmark?.scale.setScalar(placement.scale);
         landmark?.rotation.set(0, THREE.MathUtils.degToRad(placement.rotation), 0);
       });
-      return places.length ? layout.edition[0] : null;
+      return places.length ? layout.edition[guideEditionIndex] : null;
     },
     getPointerDestination(raycaster: THREE.Raycaster): EntryExplorationScenePoint | null {
       const hit = raycaster.intersectObject(object, true)[0];

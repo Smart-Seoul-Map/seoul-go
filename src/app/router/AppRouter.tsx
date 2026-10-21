@@ -74,9 +74,13 @@ function DistrictExplorationRouteContent({
       linkedPlaceMarkers={linked.markers}
       hasLinkedPlaceReference={linked.selected !== null}
       onActivateLinkedPlaces={linked.activate}
-      mapNotice={
-        <ExplorationMapNotice initialPlacesReady={isSuccess && places.length > 0} linked={linked} />
-      }
+      renderMapNotice={({ isCharacterMoving }) => (
+        <ExplorationMapNotice
+          initialPlacesReady={isSuccess && places.length > 0}
+          isCharacterMoving={isCharacterMoving}
+          linked={linked}
+        />
+      )}
       renderLinkedPlacesPanel={(lifecycle) => (
         <LinkedPlacesPanel
           {...lifecycle}

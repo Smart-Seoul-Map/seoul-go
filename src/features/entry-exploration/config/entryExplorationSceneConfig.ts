@@ -21,7 +21,7 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
   cameraTransitionDurationMs: 900,
   cameraViewSize: 19,
   characterHeight: 2.3,
-  characterSpeedPerSecond: 7,
+  characterSpeedPerSecond: 10,
   floorSize: 1000,
   floorTextureRepeat: 150,
   intro: {

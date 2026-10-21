@@ -1,0 +1,66 @@
+.AppSpeechBubble {
+  --speech-bubble-cap-width: var(--sg-spacing-16);
+  --speech-bubble-stroke-width: var(--sg-spacing-0_5);
+  --speech-bubble-stroke: var(--sg-v3-pink-500);
+  --speech-bubble-bg: var(--sg-color-bg-floating);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: calc(var(--speech-bubble-cap-width) * 2);
+  max-width: 100%;
+  padding: var(--sg-spacing-9) var(--sg-spacing-9) var(--sg-spacing-8);
+}
+
+.AppSpeechBubble-frame {
+  position: absolute;
+  inset: calc(var(--speech-bubble-stroke-width) / 2);
+  z-index: -1;
+  display: flex;
+  pointer-events: none;
+}
+
+.AppSpeechBubble-cap {
+  position: relative;
+  flex: none;
+  width: var(--speech-bubble-cap-width);
+  height: 100%;
+  overflow: visible;
+  fill: var(--speech-bubble-bg);
+  stroke: var(--speech-bubble-stroke);
+  stroke-width: var(--speech-bubble-stroke-width);
+}
+
+.AppSpeechBubble-cap path {
+  vector-effect: non-scaling-stroke;
+}
+
+.AppSpeechBubble-cap[data-side="end"] {
+  transform: scaleX(-1);
+}
+
+.AppSpeechBubble-body {
+  flex: 1;
+  margin: calc(var(--speech-bubble-stroke-width) / -2);
+  border-block: var(--speech-bubble-stroke-width) solid var(--speech-bubble-stroke);
+  background: var(--speech-bubble-bg);
+}
+
+.AppSpeechBubble-speaker {
+  position: absolute;
+  top: calc(var(--sg-spacing-2) * -1);
+  left: var(--sg-spacing-4);
+  display: flex;
+  transform: rotate(-8deg);
+}
+
+.AppSpeechBubble-message {
+  margin: 0;
+  color: var(--sg-color-text-default);
+  font-family: var(--sg-font-namsan);
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-bold);
+  line-height: var(--sg-line-height-2);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}

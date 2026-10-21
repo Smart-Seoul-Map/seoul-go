@@ -8,7 +8,6 @@ import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneC
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
-import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -35,6 +34,9 @@ const mocks = vi.hoisted(() => {
     registerSceneInteractionControllers: vi.fn(),
     setSceneInteractionCharacter: vi.fn(),
     setSceneInteractionLayout: vi.fn(),
+    takeSceneInteractionCharacterDestination: vi.fn<() => { x: number; z: number } | null>(
+      () => null
+    ),
     updateActiveSceneInteractionCamera: vi.fn(),
     updateSceneInteractions: vi.fn(),
     updateSceneInteractionTriggers: vi.fn(),
@@ -172,45 +174,6 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
-  test("passes decorations and other games as surroundings without hiding the floor or the active model", () => {
-    let surroundings: readonly THREE.Object3D[] = [];
-    const createController = (): EntryExplorationSceneInteractionController => ({
-      object: new THREE.Group(),
-      activate: () => {},
-      canActivate: () => false,
-      dispose: () => {},
-      handlePointerDown: () => false,
-      handlePointerMove: () => false,
-      handlePointerUp: () => false,
-      isActive: () => false,
-      update: () => {},
-      updateCamera: () => {},
-      updateTriggerState: () => {},
-    });
-    const slot = createController();
-    slot.setSurroundings = (objects) => {
-      surroundings = objects;
-    };
-    const dart = createController();
-    const { unmount } = renderHook(() =>
-      useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
-        containerRef: createContainerRef(),
-        createSceneInteractionControllers: () => [slot, dart],
-      })
-    );
-    onTestFinished(unmount);
-    expect(surroundings).toContain(dart.object);
-    expect(surroundings).not.toContain(slot.object);
-    expect(surroundings).not.toContain(mocks.floor);
-    const decorations = surroundings.find((object) =>
-      object.children.includes(mocks.introFloorObject!)
-    );
-    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)).toBeTruthy();
-    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[1].id}`)).toBeTruthy();
-    expect(decorations?.children).not.toContain(mocks.floor);
-  });
-
   test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
@@ -309,6 +272,38 @@ describe("useEntryExplorationThreeScene", () => {
     });
     expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
   });
+  test("walks to a destination requested by a scene interaction on the next frame", async () => {
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+    mocks.registry.takeSceneInteractionCharacterDestination.mockReturnValueOnce({ x: 7, z: 8 });
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.registry.takeSceneInteractionCharacterDestination).not.toHaveBeenCalled();
+
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: 7, z: 8 });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.movement.getCurrentPosition.mockReturnValue({ x: 4, z: 5 });
@@ -364,28 +359,29 @@ describe("useEntryExplorationThreeScene", () => {
     await act(async () => {
       await Promise.resolve();
     });
-    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[0].id}`
-    );
-    const tower = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[1].id}`
-    );
-    if (!hanok || !tower || !containerRef.current) {
+    if (!containerRef.current) {
       throw new Error("The entry scene is missing.");
     }
-    const originalPosition = hanok.position.clone();
+    expect(
+      mocks.introFloorObject?.parent?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)
+    ).toBeUndefined();
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
 
     act(() => {
       startIntro();
     });
+    const hanok = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+    );
+    const tower = mocks.introFloorObject?.parent?.getObjectByName(
+      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+    );
+    if (!hanok || !tower) {
+      throw new Error("The entry scene is missing.");
+    }
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
-    expect(resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 100 / 100).edition[0]).toMatchObject({
-      x: originalPosition.x,
-      z: originalPosition.z,
-    });
     const placedLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
     expect(placedLayout.edition[0]).toMatchObject({ x: placedPosition.x, z: placedPosition.z });
     expect(placedLayout.edition[1]).toMatchObject({

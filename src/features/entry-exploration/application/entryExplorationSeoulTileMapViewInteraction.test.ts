@@ -96,6 +96,50 @@ describe("entry exploration seoul tile map view interaction", () => {
     controller.dispose();
   });
 
+  test("asks the character to walk to the dart trigger and opens only after arrival", () => {
+    let viewControls: EntryExplorationDartViewControls | null = null;
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      onControlsReady: (controls) => {
+        viewControls = controls;
+      },
+      getCollectedNumbers: () => [40],
+    });
+
+    controller.updateTriggerState({ x: 100, z: 100 });
+    viewControls!.requestApproach();
+
+    expect(controller.canActivate()).toBe(false);
+    expect(controller.takeRequestedCharacterDestination?.()).toEqual(TRIGGER_POSITION);
+    expect(controller.takeRequestedCharacterDestination?.()).toBeNull();
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(controller.canActivate()).toBe(true);
+
+    controller.dispose();
+  });
+
+  test("ignores a walk request without collected numbers or while the dart view is open", () => {
+    let viewControls: EntryExplorationDartViewControls | null = null;
+    let numbers: readonly number[] = [];
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      onControlsReady: (controls) => {
+        viewControls = controls;
+      },
+      getCollectedNumbers: () => numbers,
+    });
+
+    viewControls!.requestApproach();
+    expect(controller.takeRequestedCharacterDestination?.()).toBeNull();
+
+    numbers = [CENTER_NUMBER];
+    controller.updateTriggerState(TRIGGER_POSITION);
+    controller.activate(0);
+    viewControls!.requestApproach();
+    expect(controller.takeRequestedCharacterDestination?.()).toBeNull();
+
+    controller.dispose();
+  });
+
   test("blocks pointers until the camera transition finishes", () => {
     const onDartThrowResult = vi.fn();
     const onTargetHoverChange = vi.fn();

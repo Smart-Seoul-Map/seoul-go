@@ -4,7 +4,7 @@ import dartCrosshairUrl from "../../../assets/entry-exploration/dart-crosshair.p
 import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.webp";
 import seoulTileMapBackgroundUrl from "../../../assets/entry-exploration/seoul-grid-map-background.webp";
 import seoulTileMapUrl from "../../../assets/entry-exploration/seoul-grid-map.svg";
-import floorTextureUrl from "../../../assets/textures/brown_tile.png";
+import floorTextureUrl from "../../../assets/textures/floor_tile.webp";
 
 type EntryExplorationTextureAsset = {
   src: string;

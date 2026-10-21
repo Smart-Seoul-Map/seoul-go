@@ -5,11 +5,29 @@ import {
   loadEntryNumberRewards,
   saveEntryNumberRewards,
 } from "./entryNumberRewardStorage";
+import type { EntryNumberReward } from "../domain/entryNumberReward";
 
-const rewards = [
-  { placeId: "tower", number: 57 },
-  { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 41 },
-];
+const LEGACY_STORAGE_KEY = "seoul-go:entry-number-rewards:v1";
+
+const HAEBANGCHON: EntryNumberReward = {
+  placeId: "smart-seoul:1786321258890:25_edition25_21",
+  placeName: "해방촌신흥시장",
+  east: 54,
+  north: 49,
+};
+const EULJIRO: EntryNumberReward = {
+  placeId: "smart-seoul:1786321258890:26_edition25_24",
+  placeName: "을지로 골목",
+  east: 55,
+  north: 52,
+};
+const SEOSUNRA: EntryNumberReward = {
+  placeId: "smart-seoul:1786321258890:26_edition25_23",
+  placeName: "서순라길",
+  east: 55,
+  north: 52,
+};
+const rewards = [HAEBANGCHON, EULJIRO];
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -17,37 +35,48 @@ beforeEach(() => {
 });
 
 describe("entry reward session storage", () => {
-  test("restores legacy and API place IDs in the same session without losing numbers", () => {
-    const mixed = [
-      ...rewards,
-      { placeId: "smart-seoul:1786321258890:25_edition25_12", number: 42 },
-    ];
-    saveEntryNumberRewards(mixed);
-    expect(loadEntryNumberRewards()).toEqual(mixed);
-  });
-  test("round trips place numbers only through sessionStorage", () => {
+  test("round trips place rewards only through sessionStorage under the v2 key", () => {
+    expect(ENTRY_NUMBER_REWARD_STORAGE_KEY).toBe("seoul-go:entry-number-rewards:v2");
     expect(saveEntryNumberRewards(rewards)).toBe(true);
     expect(loadEntryNumberRewards()).toEqual(rewards);
+    expect(JSON.parse(sessionStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)!)).toEqual({
+      version: 2,
+      rewards,
+    });
     expect(localStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)).toBeNull();
   });
 
-  test("preserves legacy rewards while discarding the presentation flag", () => {
+  test("keeps rewards from different places even when their numbers are the same", () => {
+    saveEntryNumberRewards([EULJIRO, SEOSUNRA]);
+    expect(loadEntryNumberRewards()).toEqual([EULJIRO, SEOSUNRA]);
+  });
+
+  test("discards random number rewards saved by the previous version", () => {
+    sessionStorage.setItem(
+      LEGACY_STORAGE_KEY,
+      JSON.stringify({ version: 1, rewards: [{ placeId: HAEBANGCHON.placeId, number: 40 }] })
+    );
+    expect(loadEntryNumberRewards()).toEqual([]);
+
+    sessionStorage.setItem(
+      ENTRY_NUMBER_REWARD_STORAGE_KEY,
+      JSON.stringify({ version: 1, rewards: [HAEBANGCHON] })
+    );
+    expect(loadEntryNumberRewards()).toEqual([]);
+  });
+
+  test("drops extra fields while restoring rewards", () => {
     sessionStorage.setItem(
       ENTRY_NUMBER_REWARD_STORAGE_KEY,
       JSON.stringify({
-        version: 1,
+        version: 2,
         rewards: rewards.map((reward, index) => ({ ...reward, revealed: index === 0 })),
       })
     );
     expect(loadEntryNumberRewards()).toEqual(rewards);
-    saveEntryNumberRewards(loadEntryNumberRewards());
-    expect(JSON.parse(sessionStorage.getItem(ENTRY_NUMBER_REWARD_STORAGE_KEY)!)).toEqual({
-      version: 1,
-      rewards,
-    });
   });
 
-  test.each(["not json", "null", '{"version":2,"rewards":[]}', '{"version":1,"rewards":{}}'])(
+  test.each(["not json", "null", '{"rewards":[]}', '{"version":2,"rewards":{}}'])(
     "ignores malformed data: %s",
     (raw) => {
       sessionStorage.setItem(ENTRY_NUMBER_REWARD_STORAGE_KEY, raw);
@@ -55,41 +84,48 @@ describe("entry reward session storage", () => {
     }
   );
 
-  test("filters invalid values and duplicate places or numbers without losing valid rewards", () => {
+  test("filters invalid values and duplicate places without losing valid rewards", () => {
+    const boundary = {
+      placeId: "smart-seoul:1786321258890:25_edition25_1",
+      placeName: "경계 번호 장소",
+      east: 0,
+      north: 99,
+    };
     sessionStorage.setItem(
       ENTRY_NUMBER_REWARD_STORAGE_KEY,
       JSON.stringify({
-        version: 1,
+        version: 2,
         rewards: [
-          rewards[0],
-          { placeId: "smart-seoul:1786321258890:25_edition25_24", number: 57 },
-          { placeId: "tower", number: 55 },
-          { placeId: "tower", number: 72 },
-          { placeId: "tower", number: 36.5 },
-          { placeId: "tower", number: "57" },
-          { placeId: "missing", number: 58 },
-          rewards[1],
+          HAEBANGCHON,
+          { ...EULJIRO, placeId: HAEBANGCHON.placeId },
+          { ...EULJIRO, placeId: "hanok" },
+          { ...EULJIRO, placeId: "tower" },
+          { ...EULJIRO, placeName: "" },
+          { ...EULJIRO, placeName: "   " },
+          { ...EULJIRO, placeName: 7 },
+          { ...EULJIRO, east: 100 },
+          { ...EULJIRO, north: -1 },
+          { ...EULJIRO, east: 54.5 },
+          { ...EULJIRO, north: "52" },
+          { placeId: EULJIRO.placeId, number: 40 },
+          null,
+          EULJIRO,
+          boundary,
         ],
       })
     );
-    expect(loadEntryNumberRewards()).toEqual(rewards);
+    expect(loadEntryNumberRewards()).toEqual([HAEBANGCHON, EULJIRO, boundary]);
   });
 
-  test("restores at most ten saved rewards and drops anything beyond", () => {
-    const stored = Array.from({ length: 10 }, (_, index) => ({
+  test("restores every saved place reward without a count limit", () => {
+    const stored = Array.from({ length: 12 }, (_, index) => ({
       placeId: `smart-seoul:1786321258890:25_edition25_${index + 1}`,
-      number: 36 + index,
+      placeName: `장소 ${index + 1}`,
+      east: 40 + index,
+      north: 50,
     }));
-    saveEntryNumberRewards([
-      ...stored,
-      { placeId: "smart-seoul:1786321258890:25_edition25_11", number: 46 },
-    ]);
+    saveEntryNumberRewards(stored);
     expect(loadEntryNumberRewards()).toEqual(stored);
-  });
-
-  test("drops a hanok reward saved by an earlier version and keeps the other rewards", () => {
-    saveEntryNumberRewards([{ placeId: "hanok", number: 40 }, ...rewards]);
-    expect(loadEntryNumberRewards()).toEqual(rewards);
   });
 
   test("handles storage permission and quota errors", () => {

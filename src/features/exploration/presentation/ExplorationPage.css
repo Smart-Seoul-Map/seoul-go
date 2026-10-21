@@ -181,10 +181,11 @@ body:has(.MapPlaceDetailPanel[data-presentation="bottom-sheet"]) .exploration-ma
     pointer-events: none;
   }
 
-  .exploration-map-notice-actions .AppCallout.LinkedPlacesCallout {
-    position: static;
-    width: 100%;
-    pointer-events: auto;
+  .exploration-map-notice-actions .ExplorationMapCallout {
+    position: relative;
+    top: auto;
+    left: auto;
+    align-self: flex-start;
   }
 
   .exploration-map-notice-actions .exploration-linked-places-button {

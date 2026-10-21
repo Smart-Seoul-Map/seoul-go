@@ -6,24 +6,52 @@ import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppText } from "@shared/ui/typography";
 
+import type { EntryNumberRewardRow } from "../domain/entryNumberReward";
 import closeIcon from "../../../assets/icons/close.svg";
 import dicesIcon from "../../../assets/icons/dices.svg";
 
 import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
-  numbers: readonly number[];
+  rows: readonly EntryNumberRewardRow[];
+  isCharacterMoving?: boolean;
+  isDartViewActive?: boolean;
 };
 
+type OpenState = "closed" | "open" | "autoOpen";
+
 export function EntryCollectedNumbersPanel({
-  numbers,
+  rows,
+  isCharacterMoving = false,
+  isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
-  const [isOpen, setIsOpen] = useState(false);
+  const [openState, setOpenState] = useState<OpenState>("closed");
+  const [seenCount, setSeenCount] = useState(rows.length);
+  const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
+  const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const hasOpenedRef = useRef(false);
-  const countLabel = `${numbers.length}개 획득`;
+  const listRef = useRef<HTMLElement>(null);
+  const isOpen = openState !== "closed";
+  const countLabel = `${rows.length}개 획득`;
+
+  if (rows.length !== seenCount) {
+    setSeenCount(rows.length);
+    if (rows.length > seenCount) setOpenState("autoOpen");
+  }
+  if (isDartViewActive !== wasDartViewActive) {
+    setWasDartViewActive(isDartViewActive);
+    if (isDartViewActive && openState === "closed") setOpenState("autoOpen");
+  }
+  if (isCharacterMoving !== wasCharacterMoving) {
+    setWasCharacterMoving(isCharacterMoving);
+    if (isCharacterMoving && openState === "autoOpen" && !isDartViewActive) {
+      setOpenState("closed");
+    }
+  }
+
+  const setIsOpen = (open: boolean): void => setOpenState(open ? "open" : "closed");
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -43,13 +71,15 @@ export function EntryCollectedNumbersPanel({
   }, []);
 
   useLayoutEffect(() => {
-    if (isOpen) {
-      hasOpenedRef.current = true;
+    if (openState === "open") {
       panelRef.current?.focus({ preventScroll: true });
-    } else if (hasOpenedRef.current) {
+    } else if (openState === "autoOpen") {
+      const list = listRef.current;
+      if (list) list.scrollTop = list.scrollHeight;
+    } else if (panelRef.current?.contains(document.activeElement)) {
       triggerRef.current?.focus({ preventScroll: true });
     }
-  }, [isOpen]);
+  }, [openState]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
     event.stopPropagation();
@@ -88,7 +118,7 @@ export function EntryCollectedNumbersPanel({
           aria-controls={`${id}-content`}
           title="내 번호"
           className="entry-collected-numbers-trigger"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={() => setIsOpen(!isOpen)}
         >
           <NumbersIcon />
           <span className="entry-collected-numbers-trigger-label">
@@ -110,7 +140,7 @@ export function EntryCollectedNumbersPanel({
         inert={!isOpen}
       >
         <div className="entry-collected-numbers-content">
-          {numbers.length === 0 ? (
+          {rows.length === 0 ? (
             <AppBox px="spacing.4" py="spacing.5" className="entry-collected-numbers-empty">
               <AppText role="supporting" tone="muted">
                 아직 획득한 번호가 없어요.
@@ -119,19 +149,27 @@ export function EntryCollectedNumbersPanel({
           ) : (
             <AppBox
               as="ul"
+              ref={(element) => {
+                listRef.current = element;
+              }}
               aria-label="획득한 숫자"
               tabIndex={0}
               className="entry-collected-numbers-list"
               px="spacing.4"
               py="spacing.1"
             >
-              {numbers.map((number) => (
-                <AppBox as="li" key={number} className="entry-collected-numbers-row">
-                  <AppText as="span" role="supporting">
-                    추첨 번호
-                  </AppText>
-                  <AppBadge size="number-sm" tone="info" variant="solid" textPolicy="singleLine">
-                    {number}
+              {rows.map((row) => (
+                <AppBox as="li" key={row.key} className="entry-collected-numbers-row">
+                  <span className="entry-collected-numbers-place">
+                    <AppText as="span" role="supporting">
+                      {row.placeName}
+                    </AppText>
+                  </span>
+                  <span aria-hidden="true" className="entry-collected-numbers-separator">
+                    |
+                  </span>
+                  <AppBadge size="number-sm" tone="brand" variant="solid" textPolicy="singleLine">
+                    {row.number}
                   </AppBadge>
                 </AppBox>
               ))}
