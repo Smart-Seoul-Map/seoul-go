@@ -17,7 +17,6 @@ test("fits an offset model to the entry scene without mutating or disposing cach
     url: "/model.glb",
     size: 4,
     rotationY: Math.PI / 4,
-    editionIndex: 0,
   });
   const bounds = new THREE.Box3().setFromObject(instance.object);
   expect(bounds.min.y).toBeCloseTo(0);

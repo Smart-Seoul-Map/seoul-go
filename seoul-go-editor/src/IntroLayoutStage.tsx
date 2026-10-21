@@ -21,17 +21,17 @@ import {
   type EntryIntroLayoutView,
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
 import {
+  getEntryIntroLayoutModelPlaceId,
+  isEntryIntroLayoutModelId,
   resolveEntryIntroLayout,
   resolveEntryIntroLayoutView,
+  toEntryIntroLayoutModelId,
 } from "../../src/features/entry-exploration/domain/entryIntroLayout";
 import { IntroLayoutArrivalPanel } from "./IntroLayoutArrivalPanel";
 import type { IntroLayoutStageView } from "./introLayoutEditorConfig";
 import {
-  getEditionIndex,
-  isEditionItemId,
   postIntroLayoutStageMessage,
   readIntroLayoutShellMessage,
-  toEditionItemId,
   type IntroLayoutArrivalTarget,
   type IntroLayoutItemId,
 } from "./introLayoutEditorMessages";
@@ -246,7 +246,7 @@ function selectModeledEditionPlaces(
 
 function getArrivalTargets(places: readonly EntryEditionPlace[]): IntroLayoutArrivalTarget[] {
   return [
-    ...places.map((place, index) => ({ id: toEditionItemId(index), name: place.name })),
+    ...places.map((place) => ({ id: toEntryIntroLayoutModelId(place.id), name: place.name })),
     { id: ENTRY_HANOK_PLACE_ID, name: ENTRY_HANOK_PLACE.title },
   ];
 }
@@ -259,7 +259,8 @@ function getArrivalPlace(
     return ENTRY_HANOK_PLACE;
   }
 
-  const place = isEditionItemId(id) ? places[getEditionIndex(id)] : undefined;
+  const placeId = isEntryIntroLayoutModelId(id) ? getEntryIntroLayoutModelPlaceId(id) : null;
+  const place = places.find((candidate) => candidate.id === placeId);
 
   if (!place) {
     return null;

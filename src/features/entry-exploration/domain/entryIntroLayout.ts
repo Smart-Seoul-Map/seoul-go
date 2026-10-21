@@ -1,6 +1,7 @@
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneConfig";
 import {
-  ENTRY_INTRO_LAYOUT_EDITION_IDS,
+  ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX,
+  ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ENTRY_INTRO_LAYOUT_OBJECT_IDS,
   ENTRY_INTRO_LAYOUT_VIEWPORTS,
   type EntryIntroLayout,
@@ -13,9 +14,21 @@ import {
 } from "../config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "./entryExplorationSceneMath";
 
-const EDITION_FIRST_PLACE_SCREEN_RATIO = 0.45;
+const GUIDE_MODEL_SCREEN_RATIO = 0.45;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const DEFAULT_PLACEMENT: EntryIntroLayoutPlacement = { x: 0, z: 0, scale: 1, rotation: 0 };
+
+export function toEntryIntroLayoutModelId(placeId: string): string {
+  return `${ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX}${placeId}`;
+}
+
+export function isEntryIntroLayoutModelId(id: string): boolean {
+  return id.startsWith(ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX);
+}
+
+export function getEntryIntroLayoutModelPlaceId(id: string): string {
+  return id.slice(ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX.length);
+}
 
 export function getEntryIntroLayoutBlend(aspect: number): number {
   const { mobile, pc } = ENTRY_INTRO_LAYOUT_VIEWPORTS;
@@ -109,26 +122,17 @@ export function composeEntryIntroLayoutWorld(
 }
 
 export function createEntryIntroLayoutLocals(
-  edition: readonly EntryIntroLayoutPlacement[],
   objects: Readonly<Record<string, EntryIntroLayoutPlacement>>
 ): Map<string, EntryIntroLayoutPlacement> {
-  return new Map([
-    ...edition.map(
-      (placement, index) => [ENTRY_INTRO_LAYOUT_EDITION_IDS[index], placement] as const
-    ),
-    ...Object.entries(objects),
-  ]);
+  return new Map(Object.entries(objects));
 }
 
 export function resolveEntryIntroLayout(
   document: EntryIntroLayoutDocument,
   aspect: number
 ): EntryIntroLayout {
-  const { mobile, pc } = document;
+  const { guidePlaceId, mobile, pc } = document;
   const blend = getEntryIntroLayoutBlend(aspect);
-  const edition = pc.edition.map((transform, index) =>
-    blendPlacement(mobile.edition[index] ?? transform, transform, blend)
-  );
   const objects = Object.fromEntries(
     Object.entries(pc.objects).map(([id, transform]) => [
       id,
@@ -138,8 +142,8 @@ export function resolveEntryIntroLayout(
 
   return buildEntryIntroLayout(
     document.nodes,
-    keepFirstEditionPlaceOnScreen(edition, aspect),
-    objects
+    guidePlaceId,
+    keepGuideModelOnScreen(objects, guidePlaceId, aspect)
   );
 }
 
@@ -147,38 +151,49 @@ export function resolveEntryIntroLayoutView(
   document: EntryIntroLayoutDocument,
   view: EntryIntroLayoutView
 ): EntryIntroLayout {
-  const { edition, objects } = document[view];
+  const { objects } = document[view];
 
   return buildEntryIntroLayout(
     document.nodes,
-    edition.map(toEntryIntroLayoutPlacement),
+    document.guidePlaceId,
     Object.fromEntries(
       Object.entries(objects).map(([id, transform]) => [id, toEntryIntroLayoutPlacement(transform)])
     )
   );
 }
 
-export function keepFirstEditionPlaceOnScreen<Point extends EntryExplorationScenePoint>(
-  edition: readonly Point[],
+export function keepGuideModelOnScreen<Point extends EntryExplorationScenePoint>(
+  objects: Readonly<Record<string, Point>>,
+  guidePlaceId: string,
   aspect: number
-): readonly Point[] {
+): Record<string, Point> {
+  const guide = objects[toEntryIntroLayoutModelId(guidePlaceId)];
+
+  if (!guide) return { ...objects };
+
   const { cameraOffset, cameraViewSize, intro } = ENTRY_EXPLORATION_SCENE_CONFIG;
   const length = Math.hypot(cameraOffset.x, cameraOffset.z);
   const forward = { x: cameraOffset.x / length, z: cameraOffset.z / length };
   const right = { x: forward.z, z: -forward.x };
-  const first = edition[0];
   const across =
-    (first.x - intro.targetPosition.x) * right.x + (first.z - intro.targetPosition.z) * right.z;
-  const maxAcross = cameraViewSize * aspect * EDITION_FIRST_PLACE_SCREEN_RATIO;
+    (guide.x - intro.targetPosition.x) * right.x + (guide.z - intro.targetPosition.z) * right.z;
+  const maxAcross = cameraViewSize * aspect * GUIDE_MODEL_SCREEN_RATIO;
   const clampedAcross = Math.min(Math.max(across, -maxAcross), maxAcross);
   const shiftRight = clampedAcross - across;
   const shiftForward = Math.abs(across) - Math.abs(clampedAcross);
 
-  return edition.map((point) => ({
-    ...point,
-    x: point.x + right.x * shiftRight + forward.x * shiftForward,
-    z: point.z + right.z * shiftRight + forward.z * shiftForward,
-  }));
+  return Object.fromEntries(
+    Object.entries(objects).map(([id, point]) => [
+      id,
+      isEntryIntroLayoutModelId(id)
+        ? {
+            ...point,
+            x: point.x + right.x * shiftRight + forward.x * shiftForward,
+            z: point.z + right.z * shiftRight + forward.z * shiftForward,
+          }
+        : point,
+    ])
+  );
 }
 
 function blendPlacement(
@@ -199,14 +214,17 @@ function blendPlacement(
 
 function buildEntryIntroLayout(
   nodes: readonly EntryIntroLayoutNode[],
-  edition: readonly EntryIntroLayoutPlacement[],
+  guidePlaceId: string,
   objects: Readonly<Record<string, EntryIntroLayoutPlacement>>
 ): EntryIntroLayout {
-  const world = composeEntryIntroLayoutWorld(nodes, createEntryIntroLayoutLocals(edition, objects));
+  const world = composeEntryIntroLayoutWorld(nodes, createEntryIntroLayoutLocals(objects));
   const getWorld = (id: string): EntryIntroLayoutPlacement => world.get(id) ?? DEFAULT_PLACEMENT;
 
   return {
-    edition: edition.map((_, index) => getWorld(ENTRY_INTRO_LAYOUT_EDITION_IDS[index])),
+    guidePlaceId,
+    models: Object.fromEntries(
+      ENTRY_INTRO_LAYOUT_MODEL_IDS.map((id) => [getEntryIntroLayoutModelPlaceId(id), getWorld(id)])
+    ),
     objects: Object.fromEntries(
       ENTRY_INTRO_LAYOUT_OBJECT_IDS.map((id) => [id, getWorld(id)])
     ) as Record<EntryIntroLayoutObjectId, EntryIntroLayoutPlacement>,

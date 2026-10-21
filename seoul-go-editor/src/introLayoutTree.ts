@@ -1,6 +1,6 @@
 import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../../src/features/entry-exploration/config/entryExplorationSceneConfig";
 import {
-  ENTRY_INTRO_LAYOUT_EDITION_IDS,
+  ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ENTRY_INTRO_LAYOUT_OBJECT_IDS,
   ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS,
   type EntryIntroLayoutDocument,
@@ -18,7 +18,7 @@ import {
 } from "../../src/features/entry-exploration/domain/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 
-export type IntroLayoutItemKind = "slot" | "fixed" | "group" | "sticker";
+export type IntroLayoutItemKind = "model" | "fixed" | "group" | "sticker";
 
 export type IntroLayoutTreeItem = {
   id: string;
@@ -43,8 +43,8 @@ const NEW_CHILD_OFFSET = { x: 1, z: 1 };
 const NEW_ROOT_OFFSET = { x: 2, z: 2 };
 const FIXED_IDS: readonly string[] = ENTRY_INTRO_LAYOUT_OBJECT_IDS;
 
-export function isIntroLayoutSlotId(id: string): boolean {
-  return ENTRY_INTRO_LAYOUT_EDITION_IDS.includes(id);
+export function isIntroLayoutModelId(id: string): boolean {
+  return ENTRY_INTRO_LAYOUT_MODEL_IDS.includes(id);
 }
 
 export function isIntroLayoutPositionOnly(id: string): boolean {
@@ -55,7 +55,7 @@ export function getIntroLayoutItemKind(
   document: EntryIntroLayoutDocument,
   id: string
 ): IntroLayoutItemKind | null {
-  if (isIntroLayoutSlotId(id)) return "slot";
+  if (isIntroLayoutModelId(id)) return "model";
 
   if (FIXED_IDS.includes(id)) return "fixed";
 
@@ -66,7 +66,7 @@ export function getIntroLayoutItemKind(
 
 export function getIntroLayoutItemIds(document: EntryIntroLayoutDocument): string[] {
   return [
-    ...ENTRY_INTRO_LAYOUT_EDITION_IDS,
+    ...ENTRY_INTRO_LAYOUT_MODEL_IDS,
     ...FIXED_IDS,
     ...document.nodes.flatMap((node) => (node.kind ? [node.id] : [])),
   ];
@@ -188,7 +188,7 @@ export function getIntroLayoutTree(document: EntryIntroLayoutDocument): IntroLay
   const listedRootIds = document.nodes.flatMap((node) => (node.parent ? [] : [node.id]));
   const unlistedFixedIds = FIXED_IDS.filter((id) => !findNode(document, id));
 
-  return [...ENTRY_INTRO_LAYOUT_EDITION_IDS, ...listedRootIds, ...unlistedFixedIds].map(build);
+  return [...ENTRY_INTRO_LAYOUT_MODEL_IDS, ...listedRootIds, ...unlistedFixedIds].map(build);
 }
 
 export function canIntroLayoutMove(
@@ -196,7 +196,7 @@ export function canIntroLayoutMove(
   id: string,
   parentId: string | null
 ): boolean {
-  if (isIntroLayoutSlotId(id) || isIntroLayoutPositionOnly(id)) return false;
+  if (isIntroLayoutModelId(id) || isIntroLayoutPositionOnly(id)) return false;
 
   if (parentId === null) return true;
 
@@ -211,12 +211,11 @@ export function getIntroLayoutWorld(
   document: EntryIntroLayoutDocument,
   view: EntryIntroLayoutView
 ): Map<string, EntryIntroLayoutPlacement> {
-  const { edition, objects } = document[view];
+  const { objects } = document[view];
 
   return composeEntryIntroLayoutWorld(
     document.nodes,
     createEntryIntroLayoutLocals(
-      edition.map(toEntryIntroLayoutPlacement),
       Object.fromEntries(
         Object.entries(objects).map(([id, transform]) => [
           id,
@@ -359,6 +358,7 @@ export function removeIntroLayoutNode(
   );
 
   return {
+    ...lifted,
     nodes: lifted.nodes.filter((entry) => entry.id !== id),
     pc: removeTransform(lifted.pc, id),
     mobile: removeTransform(lifted.mobile, id),
@@ -447,9 +447,7 @@ function withParent(node: EntryIntroLayoutNode, parentId: string | null): EntryI
 }
 
 function getTransform(view: EntryIntroLayoutViewData, id: string): EntryIntroLayoutTransform {
-  const slotIndex = ENTRY_INTRO_LAYOUT_EDITION_IDS.indexOf(id);
-
-  return (slotIndex >= 0 ? view.edition[slotIndex] : view.objects[id]) ?? { x: 0, z: 0 };
+  return view.objects[id] ?? { x: 0, z: 0 };
 }
 
 function setTransform(
@@ -457,15 +455,6 @@ function setTransform(
   id: string,
   transform: EntryIntroLayoutTransform
 ): EntryIntroLayoutViewData {
-  const slotIndex = ENTRY_INTRO_LAYOUT_EDITION_IDS.indexOf(id);
-
-  if (slotIndex >= 0) {
-    return {
-      ...view,
-      edition: view.edition.map((current, index) => (index === slotIndex ? transform : current)),
-    };
-  }
-
   return { ...view, objects: { ...view.objects, [id]: transform } };
 }
 

@@ -7,9 +7,7 @@ import { ENTRY_MODELED_TEST_PLACES, ENTRY_TEST_PLACES } from "../testing/entryEd
 import type { EntryEditionPlace } from "../domain/entryEditionPlace";
 import { useEntryEditionSelection } from "./useEntryEditionSelection";
 
-const modeledIdsBySlot = Object.entries(ENTRY_EDITION_MODELS)
-  .sort(([, left], [, right]) => left.editionIndex - right.editionIndex)
-  .map(([id]) => id);
+const modeledIds = Object.keys(ENTRY_EDITION_MODELS);
 
 afterEach(() => {
   cleanup();
@@ -35,15 +33,15 @@ test("waits for data and keeps the selected records through query refreshes and 
   expect(result.current).toBe(selected);
 });
 
-test("selects only places with a GLB model in their edition slot order", async () => {
+test("selects only places with a GLB model in their registered order", async () => {
   const source = [
     ENTRY_TEST_PLACES[0],
     ...[...ENTRY_MODELED_TEST_PLACES].reverse(),
     ENTRY_TEST_PLACES[1],
   ];
   const { result } = renderHook(() => useEntryEditionSelection(source));
-  await waitFor(() => expect(result.current).toHaveLength(modeledIdsBySlot.length));
-  expect(result.current!.map((place) => place.id)).toEqual(modeledIdsBySlot);
+  await waitFor(() => expect(result.current).toHaveLength(modeledIds.length));
+  expect(result.current!.map((place) => place.id)).toEqual(modeledIds);
 });
 
 test("selects nothing when no place in the response has a GLB model", async () => {
@@ -54,12 +52,12 @@ test("selects nothing when no place in the response has a GLB model", async () =
 test("selects the same places in the same order after a remount", async () => {
   const wrapper = ({ children }: { children: ReactNode }) => <StrictMode>{children}</StrictMode>;
   const first = renderHook(() => useEntryEditionSelection(ENTRY_MODELED_TEST_PLACES), { wrapper });
-  await waitFor(() => expect(first.result.current).toHaveLength(modeledIdsBySlot.length));
+  await waitFor(() => expect(first.result.current).toHaveLength(modeledIds.length));
   const ids = first.result.current!.map((place) => place.id);
   first.unmount();
   const second = renderHook(() => useEntryEditionSelection(ENTRY_MODELED_TEST_PLACES), {
     wrapper,
   });
-  await waitFor(() => expect(second.result.current).toHaveLength(modeledIdsBySlot.length));
+  await waitFor(() => expect(second.result.current).toHaveLength(modeledIds.length));
   expect(second.result.current!.map((place) => place.id)).toEqual(ids);
 });

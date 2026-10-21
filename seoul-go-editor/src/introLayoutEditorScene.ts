@@ -31,15 +31,14 @@ import {
   ENTRY_INTRO_LAYOUTS,
   type EntryIntroLayout,
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
-import { resolveEntryIntroLayoutView } from "../../src/features/entry-exploration/domain/entryIntroLayout";
-import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 import {
-  getEditionIndex,
-  isEditionItemId,
-  toEditionItemId,
-  type IntroLayoutCameraPreset,
-  type IntroLayoutItemId,
-} from "./introLayoutEditorMessages";
+  getEntryIntroLayoutModelPlaceId,
+  isEntryIntroLayoutModelId,
+  resolveEntryIntroLayoutView,
+  toEntryIntroLayoutModelId,
+} from "../../src/features/entry-exploration/domain/entryIntroLayout";
+import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
+import { type IntroLayoutCameraPreset, type IntroLayoutItemId } from "./introLayoutEditorMessages";
 import { getIntroLayoutEditionModels, type IntroLayoutModelUrls } from "./introLayoutModels";
 import { getIntroLayoutStickerUrls, type IntroLayoutStickerUrls } from "./introLayoutStickers";
 import type { IntroLayoutItemKind } from "./introLayoutTree";
@@ -74,7 +73,7 @@ export type IntroLayoutEditorScene = ReturnType<typeof createIntroLayoutEditorSc
 
 const EDITOR_PIXEL_RATIO = 1;
 const HANDLE_COLORS: Record<IntroLayoutItemKind, number> = {
-  slot: 0x1f6feb,
+  model: 0x1f6feb,
   fixed: 0x1f6feb,
   group: 0x8250df,
   sticker: 0x1a7f37,
@@ -253,10 +252,10 @@ export function createIntroLayoutEditorScene({
       ignoreApproach,
       getIntroLayoutEditionModels(modelUrls)
     );
-    places.forEach((place, index) => {
+    places.forEach((place) => {
       const landmark = editionScenery.landmarks.get(place.id);
 
-      if (landmark) itemIds.set(landmark, toEditionItemId(index));
+      if (landmark) itemIds.set(landmark, toEntryIntroLayoutModelId(place.id));
     });
     scene.add(editionScenery.object);
     placeGuideArrow(editionScenery.applyLayout(layout));
@@ -513,7 +512,9 @@ export function createIntroLayoutEditorScene({
     },
     focusOnItem(id: IntroLayoutItemId): void {
       const objects: Readonly<Record<string, EntryExplorationScenePoint>> = layout.objects;
-      const point = isEditionItemId(id) ? layout.edition[getEditionIndex(id)] : objects[id];
+      const point = isEntryIntroLayoutModelId(id)
+        ? layout.models[getEntryIntroLayoutModelPlaceId(id)]
+        : objects[id];
 
       if (point) applyCameraView({ focus: point, offset: cameraOffset, zoom: 1 });
     },

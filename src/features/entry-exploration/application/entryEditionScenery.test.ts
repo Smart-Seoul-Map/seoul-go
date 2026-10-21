@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { afterEach, expect, test, vi } from "vitest";
 
-import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
 import { ENTRY_MODELED_TEST_PLACES, ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
@@ -13,19 +12,21 @@ afterEach(() => vi.resetAllMocks());
 
 test("shows API images without captions and connects image buttons to scene destinations", () => {
   const approach = vi.fn();
-  const scenery = createEntryEditionScenery(ENTRY_TEST_PLACES, approach);
+  const [firstPlace, secondPlace] = ENTRY_MODELED_TEST_PLACES;
+  const scenery = createEntryEditionScenery([firstPlace, secondPlace], approach, {});
   const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 390 / 844);
   const destination = scenery.applyLayout(layout);
-  const first = scenery.landmarks.get(ENTRY_TEST_PLACES[0].id)!;
-  const second = scenery.landmarks.get(ENTRY_TEST_PLACES[1].id)!;
-  expect(layout.edition[0]).toMatchObject({ x: first.position.x, z: first.position.z });
-  expect(layout.edition[1]).toMatchObject({ x: second.position.x, z: second.position.z });
+  const first = scenery.landmarks.get(firstPlace.id)!;
+  const second = scenery.landmarks.get(secondPlace.id)!;
+  expect(layout.models[firstPlace.id]).toMatchObject({ x: first.position.x, z: first.position.z });
+  expect(layout.models[secondPlace.id]).toMatchObject({
+    x: second.position.x,
+    z: second.position.z,
+  });
   const element = first.children[0] as THREE.Object3D & { element: HTMLButtonElement };
   expect(element.element.textContent).toBe("");
-  expect(element.element.getAttribute("aria-label")).toBe(`${ENTRY_TEST_PLACES[0].name} 방문`);
-  expect(element.element.querySelector("img")?.getAttribute("src")).toBe(
-    ENTRY_TEST_PLACES[0].imageUrl
-  );
+  expect(element.element.getAttribute("aria-label")).toBe(`${firstPlace.name} 방문`);
+  expect(element.element.querySelector("img")?.getAttribute("src")).toBe(firstPlace.imageUrl);
   element.element.click();
   expect(approach).toHaveBeenCalledWith(first.position);
   expect(destination).toMatchObject({ x: first.position.x, z: first.position.z });
@@ -54,32 +55,41 @@ test("loads the given model URL instead of the registered one", () => {
   vi.mocked(loadEntryExplorationGltf).mockReturnValue(new Promise(() => {}));
   const place = { ...ENTRY_TEST_PLACES[0], id: "smart-seoul:1786321258890:25_edition25_24" };
   const scenery = createEntryEditionScenery([place], vi.fn(), {
-    [place.id]: { url: "blob:designer-model", size: 5.5, rotationY: 0, editionIndex: 0 },
+    [place.id]: { url: "blob:designer-model", size: 5.5, rotationY: 0 },
   });
   expect(loadEntryExplorationGltf).toHaveBeenCalledWith("blob:designer-model");
   scenery.dispose();
 });
 
-test("puts each modeled place in its own edition slot and guides to the first filled slot", () => {
+test("puts each modeled place at its own model position and guides to the chosen guide model", () => {
   vi.mocked(loadEntryExplorationGltf).mockReturnValue(new Promise(() => {}));
   const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 390 / 844);
   const places = [...ENTRY_MODELED_TEST_PLACES].reverse();
   const scenery = createEntryEditionScenery(places, vi.fn());
 
-  expect(scenery.applyLayout(layout)).toEqual(layout.edition[0]);
+  expect(scenery.applyLayout(layout)).toEqual(layout.models[layout.guidePlaceId]);
   for (const place of places) {
     const landmark = scenery.landmarks.get(place.id)!;
-    expect(layout.edition[ENTRY_EDITION_MODELS[place.id].editionIndex]).toMatchObject({
+    expect(layout.models[place.id]).toMatchObject({
       x: landmark.position.x,
       z: landmark.position.z,
     });
   }
   scenery.dispose();
 
-  const withoutFirstSlot = places.filter(
-    (place) => ENTRY_EDITION_MODELS[place.id].editionIndex !== 0
+  const withoutGuide = ENTRY_MODELED_TEST_PLACES.filter(
+    (place) => place.id !== layout.guidePlaceId
   );
-  const partial = createEntryEditionScenery(withoutFirstSlot, vi.fn());
-  expect(partial.applyLayout(layout)).toEqual(layout.edition[1]);
+  const partial = createEntryEditionScenery(withoutGuide, vi.fn());
+  expect(partial.applyLayout(layout)).toEqual(layout.models[withoutGuide[0].id]);
   partial.dispose();
+});
+
+test("hides a place that has no model position in the layout", () => {
+  const scenery = createEntryEditionScenery([ENTRY_TEST_PLACES[0]], vi.fn());
+  const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 390 / 844);
+
+  expect(scenery.applyLayout(layout)).toBeNull();
+  expect(scenery.landmarks.get(ENTRY_TEST_PLACES[0].id)?.visible).toBe(false);
+  scenery.dispose();
 });

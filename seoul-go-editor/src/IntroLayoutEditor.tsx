@@ -10,7 +10,9 @@ import {
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 import {
-  keepFirstEditionPlaceOnScreen,
+  isEntryIntroLayoutModelId,
+  keepGuideModelOnScreen,
+  toEntryIntroLayoutModelId,
   toEntryIntroLayoutPlacement,
 } from "../../src/features/entry-exploration/domain/entryIntroLayout";
 import { validateEntryIntroLayoutDocument } from "../../src/features/entry-exploration/domain/entryIntroLayoutValidation";
@@ -29,8 +31,6 @@ import {
   INTRO_LAYOUT_PREVIEW_PRESETS,
 } from "./introLayoutEditorConfig";
 import {
-  getEditionIndex,
-  isEditionItemId,
   postIntroLayoutShellMessage,
   readIntroLayoutStageMessage,
   type IntroLayoutArrivalTarget,
@@ -135,14 +135,11 @@ export function IntroLayoutEditor(): ReactElement {
   const stickerParentId =
     primaryId && canIntroLayoutHaveChildren(draft, primaryId) ? primaryId : null;
   const canShowArrival = arrivalTargets.some(({ id }) => id === primaryId);
-  const firstPlaceWarnings = getFirstPlaceShiftWarnings(draft);
+  const guideModelWarnings = getGuideModelShiftWarnings(draft);
 
   const getItemLabel = (id: IntroLayoutItemId): string => {
-    if (isEditionItemId(id)) {
-      const slot = `${getEditionIndex(id) + 1}번 칸`;
-      const name = arrivalTargets.find((target) => target.id === id)?.name;
-
-      return name ? `${slot} · ${name}` : slot;
+    if (isEntryIntroLayoutModelId(id)) {
+      return arrivalTargets.find((target) => target.id === id)?.name ?? "3D 모델";
     }
 
     return getIntroLayoutNode(draft, id)?.name || INTRO_LAYOUT_FIXED_ITEM_LABELS[id] || id;
@@ -529,7 +526,7 @@ export function IntroLayoutEditor(): ReactElement {
               {saveResult}
             </p>
           )}
-          {[...documentErrors, ...firstPlaceWarnings].map((warning) => (
+          {[...documentErrors, ...guideModelWarnings].map((warning) => (
             <p key={warning} className="IntroLayoutEditor-warning">
               {warning}
             </p>
@@ -615,29 +612,41 @@ function parseJson(text: string): unknown {
   }
 }
 
-function getFirstPlaceShiftWarnings(layoutDocument: EntryIntroLayoutDocument): string[] {
+function getGuideModelShiftWarnings(layoutDocument: EntryIntroLayoutDocument): string[] {
   return LAYOUT_VIEW_TABS.flatMap(({ view, title }) => {
     const { width, height } = ENTRY_INTRO_LAYOUT_VIEWPORTS[view];
-    const edition = layoutDocument[view].edition.map(toEntryIntroLayoutPlacement);
-    const shifted = getShiftedFirstPlace(edition, width / height);
+    const objects = Object.fromEntries(
+      Object.entries(layoutDocument[view].objects).map(([id, transform]) => [
+        id,
+        toEntryIntroLayoutPlacement(transform),
+      ])
+    );
+    const shifted = getShiftedGuideModel(objects, layoutDocument.guidePlaceId, width / height);
 
     if (!shifted) {
       return [];
     }
 
     return [
-      `${title}: 1번 칸이 화면 밖이라 앱에서는 (${shifted.x.toFixed(2)}, ${shifted.z.toFixed(2)})로 옮겨 그립니다. 10칸이 함께 이동합니다.`,
+      `${title}: 화살표 장소 3D 모델이 화면 밖이라 앱에서는 (${shifted.x.toFixed(2)}, ${shifted.z.toFixed(2)})로 옮겨 그립니다. 3D 모델이 함께 이동합니다.`,
     ];
   });
 }
 
-function getShiftedFirstPlace(
-  edition: readonly EntryIntroLayoutPlacement[],
+function getShiftedGuideModel(
+  objects: Readonly<Record<string, EntryIntroLayoutPlacement>>,
+  guidePlaceId: string,
   aspect: number
 ): EntryExplorationScenePoint | null {
-  const [first] = edition;
-  const [shifted] = keepFirstEditionPlaceOnScreen(edition, aspect);
-  const distance = Math.hypot(shifted.x - first.x, shifted.z - first.z);
+  const id = toEntryIntroLayoutModelId(guidePlaceId);
+  const guide = objects[id];
+
+  if (!guide) {
+    return null;
+  }
+
+  const shifted = keepGuideModelOnScreen(objects, guidePlaceId, aspect)[id];
+  const distance = Math.hypot(shifted.x - guide.x, shifted.z - guide.z);
 
   return distance > INTRO_LAYOUT_FIRST_PLACE_SHIFT_TOLERANCE ? shifted : null;
 }

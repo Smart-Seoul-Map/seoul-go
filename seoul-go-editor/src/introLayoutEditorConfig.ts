@@ -47,7 +47,7 @@ export const INTRO_LAYOUT_FIXED_ITEM_LABELS: Readonly<Record<string, string>> = 
 };
 
 export const INTRO_LAYOUT_ITEM_KIND_LABELS: Readonly<Record<IntroLayoutItemKind, string>> = {
-  slot: "칸",
+  model: "3D",
   fixed: "물체",
   group: "그룹",
   sticker: "스티커",

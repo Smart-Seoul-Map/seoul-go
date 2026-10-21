@@ -1,5 +1,5 @@
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
-import { ENTRY_EDITION_PLACE_COUNT } from "./entryEditionModels";
+import { ENTRY_EDITION_MODELS } from "./entryEditionModels";
 import {
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
@@ -26,12 +26,11 @@ export const ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS: readonly string[] = [
   "slot-machine",
 ];
 
-export const ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX = "edition-";
+export const ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX = "model:";
 
-export const ENTRY_INTRO_LAYOUT_EDITION_IDS: readonly string[] = Array.from(
-  { length: ENTRY_EDITION_PLACE_COUNT },
-  (_, index) => `${ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX}${index}`
-);
+export const ENTRY_INTRO_LAYOUT_MODEL_IDS: readonly string[] = Object.keys(
+  ENTRY_EDITION_MODELS
+).map((placeId) => `${ENTRY_INTRO_LAYOUT_MODEL_ID_PREFIX}${placeId}`);
 
 export type EntryIntroLayoutTransform = EntryExplorationScenePoint & {
   scale?: number;
@@ -49,12 +48,12 @@ export type EntryIntroLayoutNode = {
 };
 
 export type EntryIntroLayoutViewData = {
-  edition: readonly EntryIntroLayoutTransform[];
   objects: Readonly<Record<string, EntryIntroLayoutTransform>>;
 };
 
 export type EntryIntroLayoutDocument = {
   nodes: readonly EntryIntroLayoutNode[];
+  guidePlaceId: string;
   mobile: EntryIntroLayoutViewData;
   pc: EntryIntroLayoutViewData;
 };
@@ -71,7 +70,8 @@ export type EntryIntroLayoutSticker = {
 };
 
 export type EntryIntroLayout = {
-  edition: readonly EntryIntroLayoutPlacement[];
+  guidePlaceId: string;
+  models: Readonly<Record<string, EntryIntroLayoutPlacement>>;
   objects: Readonly<Record<EntryIntroLayoutObjectId, EntryIntroLayoutPlacement>>;
   stickers: readonly EntryIntroLayoutSticker[];
 };

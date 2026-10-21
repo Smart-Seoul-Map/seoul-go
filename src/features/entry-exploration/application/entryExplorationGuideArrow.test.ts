@@ -69,8 +69,9 @@ test.each([
   [1440, 900],
   [375, 812],
   [390, 844],
-])("aligns the guide with the first API place at %ix%i", (width, height) => {
-  const destination = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, width / height).edition[0];
+])("aligns the guide with the guide model place at %ix%i", (width, height) => {
+  const layout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, width / height);
+  const destination = layout.models[layout.guidePlaceId];
   const guide = createEntryExplorationGuideArrow({ origin, destination, color: "#ff2e94" });
   onTestFinished(guide.dispose);
   const camera = createEntryExplorationCamera(width, height);

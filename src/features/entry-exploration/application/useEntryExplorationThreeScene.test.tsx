@@ -1,4 +1,4 @@
-import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
+import { ENTRY_MODELED_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import * as THREE from "three";
@@ -60,6 +60,8 @@ const mocks = vi.hoisted(() => {
     updateEntryExplorationCameraFocus,
   };
 });
+
+const TEST_PLACES = ENTRY_MODELED_TEST_PLACES.slice(0, 2);
 
 vi.mock("@shared/lib/character/useCharacterMovementController", () => ({
   useCharacterMovementController: (options: typeof mocks.movementOptions) => {
@@ -178,7 +180,7 @@ describe("useEntryExplorationThreeScene", () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         onPlacePanelDismiss: dismiss,
@@ -214,15 +216,15 @@ describe("useEntryExplorationThreeScene", () => {
   test("starts at the intro destination without opening a place card", async () => {
     const onOpenChange = vi.fn();
     const placeVisits = {
-      [ENTRY_TEST_PLACES[1].id]: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
-      [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+      [TEST_PLACES[1].id]: createEntryExplorationPlaceVisit({ radius: 2.4, onOpenChange }),
+      [TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
         radius: 1.2,
         onOpenChange: vi.fn(),
       }),
     };
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
         placeVisits,
@@ -249,7 +251,7 @@ describe("useEntryExplorationThreeScene", () => {
   test("moves to a clicked model's approach point instead of the floor behind it", async () => {
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
       })
@@ -275,7 +277,7 @@ describe("useEntryExplorationThreeScene", () => {
   test("walks to a destination requested by a scene interaction on the next frame", async () => {
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef: createContainerRef(),
         createSceneInteractionControllers: () => [],
       })
@@ -322,7 +324,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
@@ -351,7 +353,7 @@ describe("useEntryExplorationThreeScene", () => {
     const containerRef = createContainerRef();
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
@@ -363,7 +365,7 @@ describe("useEntryExplorationThreeScene", () => {
       throw new Error("The entry scene is missing.");
     }
     expect(
-      mocks.introFloorObject?.parent?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)
+      mocks.introFloorObject?.parent?.getObjectByName(`entry-place-${TEST_PLACES[0].id}`)
     ).toBeUndefined();
     const viewport = vi.spyOn(containerRef.current, "getBoundingClientRect");
     viewport.mockReturnValue(new DOMRect(0, 0, 375, 812));
@@ -372,10 +374,10 @@ describe("useEntryExplorationThreeScene", () => {
       startIntro();
     });
     const hanok = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+      `entry-place-${TEST_PLACES[0].id}`
     );
     const tower = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+      `entry-place-${TEST_PLACES[1].id}`
     );
     if (!hanok || !tower) {
       throw new Error("The entry scene is missing.");
@@ -383,8 +385,11 @@ describe("useEntryExplorationThreeScene", () => {
     const placedPosition = hanok.position.clone();
     const placedTowerPosition = tower.position.clone();
     const placedLayout = resolveEntryIntroLayout(ENTRY_INTRO_LAYOUTS, 375 / 812);
-    expect(placedLayout.edition[0]).toMatchObject({ x: placedPosition.x, z: placedPosition.z });
-    expect(placedLayout.edition[1]).toMatchObject({
+    expect(placedLayout.models[TEST_PLACES[0].id]).toMatchObject({
+      x: placedPosition.x,
+      z: placedPosition.z,
+    });
+    expect(placedLayout.models[TEST_PLACES[1].id]).toMatchObject({
       x: placedTowerPosition.x,
       z: placedTowerPosition.z,
     });
@@ -406,7 +411,7 @@ describe("useEntryExplorationThreeScene", () => {
     const containerRef = createContainerRef();
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
@@ -444,7 +449,7 @@ describe("useEntryExplorationThreeScene", () => {
     const containerRef = createContainerRef();
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
@@ -484,12 +489,12 @@ describe("useEntryExplorationThreeScene", () => {
     mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
     const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
         placeVisits: {
-          [ENTRY_TEST_PLACES[1].id]: placeVisit,
-          [ENTRY_TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
+          [TEST_PLACES[1].id]: placeVisit,
+          [TEST_PLACES[0].id]: createEntryExplorationPlaceVisit({
             radius: 1.2,
             onOpenChange: onFirstPlaceOpenChange,
           }),
@@ -504,10 +509,10 @@ describe("useEntryExplorationThreeScene", () => {
       startIntro();
     });
     const firstPlace = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[0].id}`
+      `entry-place-${TEST_PLACES[0].id}`
     );
     const secondPlace = mocks.introFloorObject?.parent?.getObjectByName(
-      `entry-place-${ENTRY_TEST_PLACES[1].id}`
+      `entry-place-${TEST_PLACES[1].id}`
     );
     if (!firstPlace || !secondPlace) throw new Error("The place landmarks are missing.");
     const firstDestination = { x: firstPlace.position.x, z: firstPlace.position.z };
@@ -582,7 +587,7 @@ describe("useEntryExplorationThreeScene", () => {
 
     renderHook(() =>
       useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
+        places: TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })

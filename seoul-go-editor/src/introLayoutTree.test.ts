@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID } from "../../src/features/entry-exploration/config/entryExplorationSceneObjects";
 import {
+  ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ENTRY_INTRO_LAYOUTS,
   type EntryIntroLayoutDocument,
   type EntryIntroLayoutView,
@@ -28,6 +29,7 @@ import {
 
 const VIEWS: readonly EntryIntroLayoutView[] = ["pc", "mobile"];
 const STICKERS = ["star.png"];
+const MODEL_IDS = ENTRY_INTRO_LAYOUT_MODEL_IDS;
 
 function expectWorldUnchanged(
   before: EntryIntroLayoutDocument,
@@ -103,12 +105,12 @@ describe("intro layout tree editing", () => {
     expectWorldUnchanged(ENTRY_INTRO_LAYOUTS, grouped, ["bench", "streetlamp"]);
   });
 
-  test("refuses moves that would create a cycle or detach fixed slots and the Seoul tile map", () => {
+  test("refuses moves that would create a cycle or detach 3D models and the Seoul tile map", () => {
     const nested = groupIntroLayoutNodes(withRotatedGroup(), ["zone"], "outer", "바깥");
 
     expect(moveIntroLayoutNode(nested, "outer", "zone")).toBe(nested);
     expect(moveIntroLayoutNode(nested, "zone", "zone")).toBe(nested);
-    expect(moveIntroLayoutNode(nested, "edition-0", "zone")).toBe(nested);
+    expect(moveIntroLayoutNode(nested, MODEL_IDS[0], "zone")).toBe(nested);
     expect(moveIntroLayoutNode(nested, ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID, "zone")).toBe(
       nested
     );
@@ -117,19 +119,19 @@ describe("intro layout tree editing", () => {
     );
   });
 
-  test("adds a sticker next to a place slot and removes it with its transforms", () => {
+  test("adds a sticker next to a 3D model and removes it with its transforms", () => {
     const id = createIntroLayoutNodeId(ENTRY_INTRO_LAYOUTS, "sticker");
     const added = addIntroLayoutSticker(ENTRY_INTRO_LAYOUTS, {
       id,
       asset: "star.png",
-      parentId: "edition-2",
+      parentId: MODEL_IDS[2],
     });
-    const slot = getIntroLayoutWorld(added, "pc").get("edition-2")!;
+    const model = getIntroLayoutWorld(added, "pc").get(MODEL_IDS[2])!;
     const sticker = getIntroLayoutWorld(added, "pc").get(id)!;
 
     expect(id).toBe("sticker-1");
-    expect(sticker.x - slot.x).toBeCloseTo(1, 5);
-    expect(sticker.z - slot.z).toBeCloseTo(1, 5);
+    expect(sticker.x - model.x).toBeCloseTo(1, 5);
+    expect(sticker.z - model.z).toBeCloseTo(1, 5);
     expect(validateEntryIntroLayoutDocument(added, STICKERS)).toEqual([]);
 
     const removed = removeIntroLayoutNode(added, id);
@@ -157,14 +159,14 @@ describe("intro layout tree editing", () => {
     });
   });
 
-  test("lists place slots first, then grouped items in order, then untouched fixed objects", () => {
+  test("lists 3D models first, then grouped items in order, then untouched fixed objects", () => {
     const grouped = groupIntroLayoutNodes(ENTRY_INTRO_LAYOUTS, ["bench", "sparkle"], "zone", "존");
     const reordered = moveIntroLayoutNode(grouped, "sparkle", "zone", "bench");
     const tree = getIntroLayoutTree(reordered);
     const zone = tree.find((item) => item.id === "zone")!;
 
-    expect(tree.slice(0, 10).every((item) => item.kind === "slot")).toBe(true);
-    expect(tree[10].id).toBe("zone");
+    expect(tree.slice(0, MODEL_IDS.length).every((item) => item.kind === "model")).toBe(true);
+    expect(tree[MODEL_IDS.length].id).toBe("zone");
     expect(zone.children.map((child) => child.id)).toEqual(["sparkle", "bench"]);
     expect(tree.some((item) => item.id === "bench")).toBe(false);
     expect(tree.at(-1)?.id).toBe(ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID);
@@ -194,7 +196,7 @@ describe("intro layout tree editing", () => {
         "inside"
       )
     ).toBeNull();
-    expect(getIntroLayoutDropTarget(document, ["edition-1"], "zone", "inside")).toBeNull();
+    expect(getIntroLayoutDropTarget(document, [MODEL_IDS[1]], "zone", "inside")).toBeNull();
   });
 
   test("moves several selected layers together in their selected order", () => {
@@ -225,7 +227,7 @@ describe("intro layout tree editing", () => {
     expect(grouped.pc).toEqual(withRotatedGroup().pc);
     expect(groupedWorld.get("bench")!.x).toBeCloseTo(flatWorld.get("bench")!.x, 1);
     expect(groupedWorld.get("bench")!.z).toBeCloseTo(flatWorld.get("bench")!.z, 1);
-    expect(groupedWorld.get("edition-3")).toEqual(flatWorld.get("edition-3"));
+    expect(groupedWorld.get(MODEL_IDS[3])).toEqual(flatWorld.get(MODEL_IDS[3]));
     expect(validateEntryIntroLayoutDocument(grouped, STICKERS)).toEqual([]);
   });
 });

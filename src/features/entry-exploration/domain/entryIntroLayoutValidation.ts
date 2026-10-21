@@ -1,12 +1,12 @@
-import { ENTRY_EDITION_PLACE_COUNT } from "../config/entryEditionModels";
+import { ENTRY_EDITION_MODELS } from "../config/entryEditionModels";
 import {
-  ENTRY_INTRO_LAYOUT_EDITION_IDS,
+  ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ENTRY_INTRO_LAYOUT_OBJECT_IDS,
   ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS,
 } from "../config/entryIntroLayout";
 
-const DOCUMENT_KEYS = ["nodes", "pc", "mobile"];
-const VIEW_KEYS = ["edition", "objects"];
+const DOCUMENT_KEYS = ["nodes", "guidePlaceId", "pc", "mobile"];
+const VIEW_KEYS = ["objects"];
 const NODE_KEYS = ["id", "kind", "parent", "asset", "name"];
 const TRANSFORM_KEYS = ["x", "z", "scale", "rotation"];
 const NODE_KINDS = ["group", "sticker"];
@@ -30,8 +30,16 @@ export function validateEntryIntroLayoutDocument(
     return [...errors, "nodes가 배열이 아닙니다."];
   }
 
+  if (
+    typeof value.guidePlaceId !== "string" ||
+    !Object.hasOwn(ENTRY_EDITION_MODELS, value.guidePlaceId)
+  ) {
+    errors.push(`화살표 장소 ${String(value.guidePlaceId)}는 3D 모델이 있는 장소가 아닙니다.`);
+  }
+
   const nodeIds = validateNodes(value.nodes, stickerAssets, errors);
   const expectedObjectIds = [
+    ...ENTRY_INTRO_LAYOUT_MODEL_IDS,
     ...ENTRY_INTRO_LAYOUT_OBJECT_IDS,
     ...value.nodes.flatMap((node) =>
       isPlainObject(node) && typeof node.id === "string" && node.kind !== undefined ? [node.id] : []
@@ -72,8 +80,8 @@ function validateNodes(
 
     ids.add(node.id);
 
-    if (ENTRY_INTRO_LAYOUT_EDITION_IDS.includes(node.id)) {
-      errors.push(`${node.id}: 서울에디션 칸은 nodes에 넣을 수 없습니다.`);
+    if (ENTRY_INTRO_LAYOUT_MODEL_IDS.includes(node.id)) {
+      errors.push(`${node.id}: 서울에디션 3D 모델은 nodes에 넣을 수 없습니다.`);
     }
 
     const isFixed = (ENTRY_INTRO_LAYOUT_OBJECT_IDS as readonly string[]).includes(node.id);
@@ -99,7 +107,7 @@ function validateNodes(
     }
 
     if (node.parent !== undefined && ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS.includes(node.id)) {
-      errors.push(`${node.id}: 서울 타일맵은 다른 항목 안에 넣을 수 없습니다.`);
+      errors.push(`${node.id}: 위치만 바꿀 수 있는 항목은 다른 항목 안에 넣을 수 없습니다.`);
     }
   });
 
@@ -111,7 +119,7 @@ function validateHierarchy(nodes: readonly unknown[], nodeIds: Set<string>, erro
   const knownIds = new Set([
     ...nodeIds,
     ...ENTRY_INTRO_LAYOUT_OBJECT_IDS,
-    ...ENTRY_INTRO_LAYOUT_EDITION_IDS,
+    ...ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ]);
 
   nodes.forEach((node) => {
@@ -161,14 +169,6 @@ function validateView(
 
   checkKeys(value, VIEW_KEYS, view, errors, true);
 
-  if (!Array.isArray(value.edition) || value.edition.length !== ENTRY_EDITION_PLACE_COUNT) {
-    errors.push(`${view}.edition은 ${ENTRY_EDITION_PLACE_COUNT}칸이어야 합니다.`);
-  } else {
-    value.edition.forEach((transform, index) =>
-      validateTransform(transform, `${view}.edition[${index}]`, false, errors)
-    );
-  }
-
   if (!isPlainObject(value.objects)) {
     errors.push(`${view}.objects가 객체가 아닙니다.`);
     return;
@@ -217,7 +217,7 @@ function validateTransform(
   }
 
   if (isPositionOnly && (value.scale !== undefined || value.rotation !== undefined)) {
-    errors.push(`${label}: 서울 타일맵은 위치만 바꿀 수 있습니다.`);
+    errors.push(`${label}: 위치만 바꿀 수 있는 항목입니다.`);
   }
 }
 

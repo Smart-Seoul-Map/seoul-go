@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_STICKER_ASSETS } from "../config/entryExplorationStickers";
 import {
+  ENTRY_INTRO_LAYOUT_MODEL_IDS,
   ENTRY_INTRO_LAYOUTS,
   type EntryIntroLayoutDocument,
   type EntryIntroLayoutViewData,
@@ -23,6 +24,7 @@ function withObjects(
 
   return {
     nodes,
+    guidePlaceId: ENTRY_INTRO_LAYOUTS.guidePlaceId,
     pc: view(ENTRY_INTRO_LAYOUTS.pc, views.includes("pc")),
     mobile: view(ENTRY_INTRO_LAYOUTS.mobile, views.includes("mobile")),
   };
@@ -38,7 +40,7 @@ describe("validateEntryIntroLayoutDocument", () => {
   test("accepts groups, stickers and a fixed object placed inside a group", () => {
     const document = withObjects(
       [
-        { id: "zone", kind: "group", name: "아차산 존", parent: "edition-2" },
+        { id: "zone", kind: "group", name: "아차산 존", parent: ENTRY_INTRO_LAYOUT_MODEL_IDS[4] },
         { id: "star-1", kind: "sticker", asset: "star.png", parent: "zone" },
         { id: "hanok", parent: "zone" },
       ],
@@ -84,7 +86,7 @@ describe("validateEntryIntroLayoutDocument", () => {
       "a sticker file that is not in the project",
       [{ id: "s", kind: "sticker", asset: "gone.png" }],
     ],
-    ["a node reusing a place slot id", [{ id: "edition-1", kind: "group" }]],
+    ["a node reusing a 3D model id", [{ id: ENTRY_INTRO_LAYOUT_MODEL_IDS[1], kind: "group" }]],
     ["an unknown fixed object", [{ id: "tower" }]],
     [
       "the Seoul tile map inside a group",
@@ -95,6 +97,28 @@ describe("validateEntryIntroLayoutDocument", () => {
     const objects = Object.fromEntries(ids.map((id) => [id, { x: 0, z: 0 }]));
 
     expect(validateEntryIntroLayoutDocument(withObjects(nodes, objects), STICKERS)).not.toEqual([]);
+  });
+
+  test("rejects a guide place that has no 3D model", () => {
+    const document = { ...ENTRY_INTRO_LAYOUTS, guidePlaceId: "smart-seoul:0:none" };
+
+    expect(validateEntryIntroLayoutDocument(document, STICKERS)).toContain(
+      "화살표 장소 smart-seoul:0:none는 3D 모델이 있는 장소가 아닙니다."
+    );
+  });
+
+  test("rejects a layout without a position for a 3D model", () => {
+    const [missing] = ENTRY_INTRO_LAYOUT_MODEL_IDS;
+    const withoutModel = (objects: EntryIntroLayoutViewData["objects"]) =>
+      Object.fromEntries(Object.entries(objects).filter(([id]) => id !== missing));
+    const document = {
+      ...ENTRY_INTRO_LAYOUTS,
+      pc: { objects: withoutModel(ENTRY_INTRO_LAYOUTS.pc.objects) },
+    };
+
+    expect(validateEntryIntroLayoutDocument(document, STICKERS)).toContain(
+      `pc.objects에 ${missing}가 없습니다.`
+    );
   });
 
   test("rejects a group that has a placement in only one view", () => {

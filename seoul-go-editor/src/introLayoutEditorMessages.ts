@@ -1,7 +1,6 @@
-import {
-  ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX,
-  type EntryIntroLayoutDocument,
-  type EntryIntroLayoutView,
+import type {
+  EntryIntroLayoutDocument,
+  EntryIntroLayoutView,
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 import type { IntroLayoutModelUrls } from "./introLayoutModels";
@@ -40,18 +39,6 @@ export type IntroLayoutStageMessage =
       point: EntryExplorationScenePoint;
     }
   | { type: "closeArrival" };
-
-export function toEditionItemId(index: number): IntroLayoutItemId {
-  return `${ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX}${index}`;
-}
-
-export function isEditionItemId(id: IntroLayoutItemId): boolean {
-  return id.startsWith(ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX);
-}
-
-export function getEditionIndex(id: IntroLayoutItemId): number {
-  return Number(id.slice(ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX.length));
-}
 
 export function postIntroLayoutShellMessage(
   target: Window,
