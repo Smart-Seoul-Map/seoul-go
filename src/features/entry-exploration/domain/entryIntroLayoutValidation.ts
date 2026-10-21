@@ -9,7 +9,8 @@ const DOCUMENT_KEYS = ["nodes", "guidePlaceId", "pc", "mobile"];
 const VIEW_KEYS = ["objects"];
 const NODE_KEYS = ["id", "kind", "parent", "asset", "name"];
 const TRANSFORM_KEYS = ["x", "z", "scale", "rotation"];
-const NODE_KINDS = ["group", "sticker"];
+const NODE_KINDS = ["group", "sticker", "draftModel"];
+const DRAFT_MODEL_FILE_PATTERN = /\.glb$/i;
 const VIEWS = ["pc", "mobile"] as const;
 
 type PlainObject = Record<string, unknown>;
@@ -98,8 +99,15 @@ function validateNodes(
       errors.push(`${node.id}: 스티커 파일 ${String(node.asset)}이 없습니다.`);
     }
 
-    if (node.kind !== "sticker" && node.asset !== undefined) {
-      errors.push(`${node.id}: asset은 스티커에만 쓸 수 있습니다.`);
+    if (
+      node.kind === "draftModel" &&
+      !(typeof node.asset === "string" && DRAFT_MODEL_FILE_PATTERN.test(node.asset))
+    ) {
+      errors.push(`${node.id}: 임시 3D 모델 파일은 .glb여야 합니다.`);
+    }
+
+    if (node.kind !== "sticker" && node.kind !== "draftModel" && node.asset !== undefined) {
+      errors.push(`${node.id}: asset은 스티커와 임시 3D 모델에만 쓸 수 있습니다.`);
     }
 
     if (node.name !== undefined && typeof node.name !== "string") {

@@ -37,7 +37,7 @@ export type EntryIntroLayoutTransform = EntryExplorationScenePoint & {
   rotation?: number;
 };
 
-export type EntryIntroLayoutNodeKind = "group" | "sticker";
+export type EntryIntroLayoutNodeKind = "group" | "sticker" | "draftModel";
 
 export type EntryIntroLayoutNode = {
   id: string;
@@ -69,11 +69,18 @@ export type EntryIntroLayoutSticker = {
   placement: EntryIntroLayoutPlacement;
 };
 
+export type EntryIntroLayoutDraftModel = {
+  id: string;
+  asset: string;
+  placement: EntryIntroLayoutPlacement;
+};
+
 export type EntryIntroLayout = {
   guidePlaceId: string;
   models: Readonly<Record<string, EntryIntroLayoutPlacement>>;
   objects: Readonly<Record<EntryIntroLayoutObjectId, EntryIntroLayoutPlacement>>;
   stickers: readonly EntryIntroLayoutSticker[];
+  draftModels: readonly EntryIntroLayoutDraftModel[];
 };
 
 export const ENTRY_INTRO_LAYOUTS = entryIntroLayoutDocument as EntryIntroLayoutDocument;

@@ -18,7 +18,7 @@ import {
 } from "../../src/features/entry-exploration/domain/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 
-export type IntroLayoutItemKind = "model" | "fixed" | "group" | "sticker";
+export type IntroLayoutItemKind = "model" | "fixed" | "group" | "sticker" | "draftModel";
 
 export type IntroLayoutTreeItem = {
   id: string;
@@ -369,6 +369,25 @@ export function addIntroLayoutSticker(
   document: EntryIntroLayoutDocument,
   { id, asset, parentId }: { id: string; asset: string; parentId: string | null }
 ): EntryIntroLayoutDocument {
+  return addIntroLayoutAssetNode(document, { id, kind: "sticker", asset, parentId });
+}
+
+export function addIntroLayoutDraftModel(
+  document: EntryIntroLayoutDocument,
+  { id, asset }: { id: string; asset: string }
+): EntryIntroLayoutDocument {
+  return addIntroLayoutAssetNode(document, { id, kind: "draftModel", asset, parentId: null });
+}
+
+function addIntroLayoutAssetNode(
+  document: EntryIntroLayoutDocument,
+  {
+    id,
+    kind,
+    asset,
+    parentId,
+  }: { id: string; kind: "sticker" | "draftModel"; asset: string; parentId: string | null }
+): EntryIntroLayoutDocument {
   if (findNode(document, id) || (parentId && !canIntroLayoutHaveChildren(document, parentId))) {
     return document;
   }
@@ -378,7 +397,7 @@ export function addIntroLayoutSticker(
     ? { ...NEW_CHILD_OFFSET }
     : { x: targetPosition.x + NEW_ROOT_OFFSET.x, z: targetPosition.z + NEW_ROOT_OFFSET.z };
   const node: EntryIntroLayoutNode = withParent(
-    { id, kind: "sticker", asset, name: getAssetName(asset) },
+    { id, kind, asset, name: getAssetName(asset) },
     parentId
   );
   const withNode = { ...document, nodes: [...document.nodes, node] };

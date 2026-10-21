@@ -50,6 +50,17 @@ describe("validateEntryIntroLayoutDocument", () => {
     expect(validateEntryIntroLayoutDocument(document, STICKERS)).toEqual([]);
   });
 
+  test("accepts a temporary 3D model with its GLB file name and position", () => {
+    const document = withObjects(
+      [{ id: "draft-model-1", kind: "draftModel", asset: "tower.glb" }],
+      {
+        "draft-model-1": { x: 3, z: -2, scale: 1.2 },
+      }
+    );
+
+    expect(validateEntryIntroLayoutDocument(document, STICKERS)).toEqual([]);
+  });
+
   test.each([
     ["a field other than position, size and angle", { bench: { x: 0, z: 0, color: "#fff" } }],
     ["a zero size", { bench: { x: 0, z: 0, scale: 0 } }],
@@ -88,6 +99,10 @@ describe("validateEntryIntroLayoutDocument", () => {
     ],
     ["a node reusing a 3D model id", [{ id: ENTRY_INTRO_LAYOUT_MODEL_IDS[1], kind: "group" }]],
     ["an unknown fixed object", [{ id: "tower" }]],
+    [
+      "a temporary 3D model that is not a GLB file",
+      [{ id: "draft-model-1", kind: "draftModel", asset: "tower.png" }],
+    ],
     [
       "the Seoul tile map inside a group",
       [{ id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID, parent: "hanok" }],

@@ -430,6 +430,26 @@ describe("intro layout hierarchy", () => {
     ]);
   });
 
+  test("lists temporary 3D models at their world placement without placing them as models", () => {
+    const document = createDocument(
+      [
+        { id: "zone", kind: "group" },
+        { id: "draft-model-1", kind: "draftModel", asset: "tower.glb", parent: "zone" },
+      ],
+      { zone: { x: 4, z: 4 }, "draft-model-1": { x: 1, z: -1, scale: 2 } }
+    );
+    const layout = resolveEntryIntroLayoutView(document, "pc");
+
+    expect(layout.draftModels).toEqual([
+      {
+        id: "draft-model-1",
+        asset: "tower.glb",
+        placement: { x: 5, z: 3, scale: 2, rotation: 0 },
+      },
+    ]);
+    expect(Object.keys(layout.models)).toEqual(MODEL_IDS.map(getEntryIntroLayoutModelPlaceId));
+  });
+
   test("keeps a sticker attached to the guide model when the model is pulled back on screen", () => {
     const aspect = 1;
     const document = createDocument(

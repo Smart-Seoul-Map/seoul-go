@@ -10,10 +10,12 @@ import {
 import { validateEntryIntroLayoutDocument } from "../../src/features/entry-exploration/domain/entryIntroLayoutValidation";
 import { createMobileLayoutFromPc } from "./introLayoutMobileFromPc";
 import {
+  addIntroLayoutDraftModel,
   addIntroLayoutSticker,
   createIntroLayoutNodeId,
   getIntroLayoutDropTarget,
   getIntroLayoutLocal,
+  getIntroLayoutNode,
   getIntroLayoutParent,
   getIntroLayoutTopSelection,
   getIntroLayoutTree,
@@ -117,6 +119,24 @@ describe("intro layout tree editing", () => {
     expect(moveIntroLayoutNode(nested, "hanok", ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID)).toBe(
       nested
     );
+  });
+
+  test("adds a temporary 3D model at the top level and removes it with its transforms", () => {
+    const added = addIntroLayoutDraftModel(ENTRY_INTRO_LAYOUTS, {
+      id: "draft-model-1",
+      asset: "tower.glb",
+    });
+
+    expect(getIntroLayoutNode(added, "draft-model-1")).toEqual({
+      id: "draft-model-1",
+      kind: "draftModel",
+      asset: "tower.glb",
+      name: "tower",
+    });
+    expect(getIntroLayoutParent(added, "draft-model-1")).toBeNull();
+    VIEWS.forEach((view) => expect(added[view].objects["draft-model-1"]).toBeDefined());
+    expect(validateEntryIntroLayoutDocument(added, STICKERS)).toEqual([]);
+    expect(removeIntroLayoutNode(added, "draft-model-1")).toEqual(ENTRY_INTRO_LAYOUTS);
   });
 
   test("adds a sticker next to a 3D model and removes it with its transforms", () => {

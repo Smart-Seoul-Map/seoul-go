@@ -3,7 +3,9 @@ import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
 import type { EntryEditionPlace } from "@features/entry-exploration";
 
+import { createEntryEditionModel } from "../../src/features/entry-exploration/application/entryEditionModel";
 import { createEntryEditionScenery } from "../../src/features/entry-exploration/application/entryEditionScenery";
+import { loadEntryExplorationGltf } from "../../src/features/entry-exploration/application/entryExplorationGltfLoader";
 import { createEntryExplorationArcheryRange } from "../../src/features/entry-exploration/application/entryExplorationArcheryRange";
 import { createEntryExplorationGuideArrow } from "../../src/features/entry-exploration/application/entryExplorationGuideArrow";
 import { createEntryExplorationIntroFloor } from "../../src/features/entry-exploration/application/entryExplorationIntroFloor";
@@ -39,6 +41,7 @@ import {
 } from "../../src/features/entry-exploration/domain/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
 import { type IntroLayoutCameraPreset, type IntroLayoutItemId } from "./introLayoutEditorMessages";
+import { INTRO_LAYOUT_DRAFT_MODEL, type IntroLayoutDraftModelUrls } from "./introLayoutDraftModels";
 import { getIntroLayoutEditionModels, type IntroLayoutModelUrls } from "./introLayoutModels";
 import { getIntroLayoutStickerUrls, type IntroLayoutStickerUrls } from "./introLayoutStickers";
 import type { IntroLayoutItemKind } from "./introLayoutTree";
@@ -48,6 +51,12 @@ type IntroLayoutEditorSceneOptions = {
   isEditable: boolean;
   onMove: (id: IntroLayoutItemId, point: EntryExplorationScenePoint) => void;
   onSelect: (id: IntroLayoutItemId) => void;
+};
+
+type DraftModelHolder = {
+  url: string;
+  holder: THREE.Group;
+  dispose: () => void;
 };
 
 export type IntroLayoutHandle = {
@@ -77,6 +86,7 @@ const HANDLE_COLORS: Record<IntroLayoutItemKind, number> = {
   fixed: 0x1f6feb,
   group: 0x8250df,
   sticker: 0x1a7f37,
+  draftModel: 0xbf8700,
 };
 const SELECTED_HANDLE_COLOR = 0xff5a1f;
 const RELATED_HANDLE_COLOR = 0xffb38a;
@@ -113,6 +123,8 @@ export function createIntroLayoutEditorScene({
   let stickers = createEntryExplorationStickers();
   const archeryRange = createEntryExplorationArcheryRange();
   const slotMachine = createEntrySlotInteraction();
+  const draftModels = new THREE.Group();
+  const draftHolders = new Map<string, DraftModelHolder>();
   const overlays = ENTRY_EXPLORATION_SCENE_OBJECTS.map((object) => ({
     id: object.id,
     mesh: createEntryExplorationSceneObject(object),
@@ -134,6 +146,7 @@ export function createIntroLayoutEditorScene({
   const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   let places: readonly EntryEditionPlace[] = [];
   let modelUrls: IntroLayoutModelUrls = {};
+  let draftModelUrls: IntroLayoutDraftModelUrls = {};
   let editionScenery = createEntryEditionScenery(places, ignoreApproach);
   let guideArrow: ReturnType<typeof createEntryExplorationGuideArrow> | null = null;
   let layout = resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc");
@@ -236,6 +249,7 @@ export function createIntroLayoutEditorScene({
     stickers.applyLayout(layout);
     archeryRange.applyLayout(layout);
     slotMachine.setLayout?.(layout);
+    syncDraftModels();
     overlays.forEach(({ id, mesh }) => {
       const placement = layout.objects[id];
 
@@ -269,6 +283,42 @@ export function createIntroLayoutEditorScene({
   const setModelUrls = (urls: IntroLayoutModelUrls): void => {
     modelUrls = urls;
     renderPlaces();
+  };
+
+  const syncDraftModels = (): void => {
+    const shownIds = new Set<string>();
+
+    layout.draftModels.forEach(({ id, asset, placement }) => {
+      const url = draftModelUrls[asset];
+
+      if (!url) return;
+
+      let entry = draftHolders.get(id);
+
+      if (entry?.url !== url) {
+        entry?.dispose();
+        entry = createDraftModelHolder(url);
+        itemIds.set(entry.holder, id);
+        draftModels.add(entry.holder);
+        draftHolders.set(id, entry);
+      }
+
+      entry.holder.position.set(placement.x, 0.06, placement.z);
+      entry.holder.scale.setScalar(placement.scale);
+      entry.holder.rotation.set(0, THREE.MathUtils.degToRad(placement.rotation), 0);
+      shownIds.add(id);
+    });
+    draftHolders.forEach((entry, id) => {
+      if (shownIds.has(id)) return;
+
+      entry.dispose();
+      draftHolders.delete(id);
+    });
+  };
+
+  const setDraftModelUrls = (urls: IntroLayoutDraftModelUrls): void => {
+    draftModelUrls = urls;
+    syncDraftModels();
   };
 
   const setStickerUrls = (urls: IntroLayoutStickerUrls): void => {
@@ -347,6 +397,7 @@ export function createIntroLayoutEditorScene({
         editionScenery.object,
         archeryRange.object,
         slotMachine.object,
+        draftModels,
       ],
       [introFloor.object, ...overlays.map(({ mesh }) => mesh)],
     ];
@@ -486,6 +537,7 @@ export function createIntroLayoutEditorScene({
     editionScenery.object,
     archeryRange.object,
     slotMachine.object,
+    draftModels,
     ...overlays.map(({ mesh }) => mesh),
     handleGroup
   );
@@ -505,6 +557,7 @@ export function createIntroLayoutEditorScene({
     setPlaces,
     setModelUrls,
     setStickerUrls,
+    setDraftModelUrls,
     setSelection,
     setFloorTexture,
     showCameraPreset(preset: IntroLayoutCameraPreset): void {
@@ -532,6 +585,8 @@ export function createIntroLayoutEditorScene({
       editionScenery.dispose();
       archeryRange.dispose();
       slotMachine.dispose();
+      draftHolders.forEach((entry) => entry.dispose());
+      draftHolders.clear();
       floorOverride?.dispose();
       [floor, introFloor.object, ...overlays.map(({ mesh }) => mesh)].forEach(
         disposeEntryExplorationObject3D
@@ -564,5 +619,32 @@ function roundScenePoint(point: EntryExplorationScenePoint): EntryExplorationSce
   return {
     x: Math.round(point.x * POINT_PRECISION) / POINT_PRECISION,
     z: Math.round(point.z * POINT_PRECISION) / POINT_PRECISION,
+  };
+}
+
+function createDraftModelHolder(url: string): DraftModelHolder {
+  const holder = new THREE.Group();
+  let disposeModel: (() => void) | null = null;
+  let disposed = false;
+
+  void loadEntryExplorationGltf(url)
+    .then((gltf) => {
+      if (disposed) return;
+
+      const model = createEntryEditionModel(gltf.scene, { ...INTRO_LAYOUT_DRAFT_MODEL, url });
+
+      holder.add(model.object);
+      disposeModel = model.dispose;
+    })
+    .catch(() => undefined);
+
+  return {
+    url,
+    holder,
+    dispose(): void {
+      disposed = true;
+      disposeModel?.();
+      holder.removeFromParent();
+    },
   };
 }

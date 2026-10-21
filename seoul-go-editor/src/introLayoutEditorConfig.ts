@@ -51,4 +51,5 @@ export const INTRO_LAYOUT_ITEM_KIND_LABELS: Readonly<Record<IntroLayoutItemKind,
   fixed: "물체",
   group: "그룹",
   sticker: "스티커",
+  draftModel: "3D 임시",
 };

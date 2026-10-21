@@ -233,5 +233,10 @@ function buildEntryIntroLayout(
         ? [{ id: node.id, asset: node.asset, placement: getWorld(node.id) }]
         : []
     ),
+    draftModels: nodes.flatMap((node) =>
+      node.kind === "draftModel" && node.asset
+        ? [{ id: node.id, asset: node.asset, placement: getWorld(node.id) }]
+        : []
+    ),
   };
 }

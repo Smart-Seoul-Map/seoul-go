@@ -167,6 +167,9 @@ export function IntroLayoutStage({ view }: IntroLayoutStageProps): ReactElement 
         case "stickers":
           scene.setStickerUrls(message.urls);
           return;
+        case "draftModels":
+          scene.setDraftModelUrls(message.urls);
+          return;
         default: {
           const unhandled: never = message;
           return unhandled;

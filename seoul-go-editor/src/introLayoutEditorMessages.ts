@@ -3,6 +3,7 @@ import type {
   EntryIntroLayoutView,
 } from "../../src/features/entry-exploration/config/entryIntroLayout";
 import type { EntryExplorationScenePoint } from "../../src/features/entry-exploration/domain/entryExplorationSceneMath";
+import type { IntroLayoutDraftModelUrls } from "./introLayoutDraftModels";
 import type { IntroLayoutModelUrls } from "./introLayoutModels";
 import type { IntroLayoutStickerUrls } from "./introLayoutStickers";
 
@@ -27,7 +28,8 @@ export type IntroLayoutShellMessage =
   | { type: "camera"; preset: IntroLayoutCameraPreset }
   | { type: "floor"; textureUrl: string | null }
   | { type: "models"; urls: IntroLayoutModelUrls }
-  | { type: "stickers"; urls: IntroLayoutStickerUrls };
+  | { type: "stickers"; urls: IntroLayoutStickerUrls }
+  | { type: "draftModels"; urls: IntroLayoutDraftModelUrls };
 
 export type IntroLayoutStageMessage =
   | { type: "ready"; arrivalTargets: readonly IntroLayoutArrivalTarget[] }

@@ -46,11 +46,16 @@ import {
 import { createMobileLayoutFromPc } from "./introLayoutMobileFromPc";
 import { INTRO_LAYOUT_MODEL_SLOTS, type IntroLayoutModelUrls } from "./introLayoutModels";
 import {
+  getMissingIntroLayoutDraftModelAssets,
+  type IntroLayoutDraftModelUrls,
+} from "./introLayoutDraftModels";
+import {
   getIntroLayoutStickerAssets,
   getMissingIntroLayoutStickerAssets,
   type IntroLayoutStickerUrls,
 } from "./introLayoutStickers";
 import {
+  addIntroLayoutDraftModel,
   addIntroLayoutSticker,
   canIntroLayoutHaveChildren,
   canIntroLayoutMove,
@@ -90,6 +95,7 @@ const TRANSFORM_FIELDS = [
 
 const GROUP_ID_PREFIX = "group";
 const STICKER_ID_PREFIX = "sticker";
+const DRAFT_MODEL_ID_PREFIX = "draft-model";
 const JSON_INDENT = 2;
 
 export function IntroLayoutEditor(): ReactElement {
@@ -107,11 +113,13 @@ export function IntroLayoutEditor(): ReactElement {
   const [floorTextureUrl, setFloorTextureUrl] = useState<string | null>(null);
   const [modelUrls, setModelUrls] = useState<IntroLayoutModelUrls>({});
   const [uploadedStickers, setUploadedStickers] = useState<IntroLayoutStickerUrls>({});
+  const [draftModelUrls, setDraftModelUrls] = useState<IntroLayoutDraftModelUrls>({});
   const pcFrameRef = useRef<HTMLIFrameElement | null>(null);
   const mobileFrameRef = useRef<HTMLIFrameElement | null>(null);
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const stickerUploadInputRef = useRef<HTMLInputElement | null>(null);
+  const draftModelUploadInputRef = useRef<HTMLInputElement | null>(null);
   const shouldConfirmLeaveRef = useRef(false);
   const stageFrameRefs = { pc: pcFrameRef, mobile: mobileFrameRef };
   const previewPreset =
@@ -130,7 +138,7 @@ export function IntroLayoutEditor(): ReactElement {
   const removableIds = getIntroLayoutTopSelection(draft, selectedIds).filter((id) => {
     const kind = getIntroLayoutItemKind(draft, id);
 
-    return kind === "group" || kind === "sticker";
+    return kind === "group" || kind === "sticker" || kind === "draftModel";
   });
   const stickerParentId =
     primaryId && canIntroLayoutHaveChildren(draft, primaryId) ? primaryId : null;
@@ -162,6 +170,7 @@ export function IntroLayoutEditor(): ReactElement {
         postIntroLayoutShellMessage(source, { type: "floor", textureUrl: floorTextureUrl });
         postIntroLayoutShellMessage(source, { type: "models", urls: modelUrls });
         postIntroLayoutShellMessage(source, { type: "stickers", urls: uploadedStickers });
+        postIntroLayoutShellMessage(source, { type: "draftModels", urls: draftModelUrls });
         return;
       case "select":
         setSelectedIds([message.id]);
@@ -198,6 +207,10 @@ export function IntroLayoutEditor(): ReactElement {
   }, [uploadedStickers]);
 
   useEffect(() => {
+    broadcast({ type: "draftModels", urls: draftModelUrls });
+  }, [draftModelUrls]);
+
+  useEffect(() => {
     writeIntroLayoutEditorSession({ view, selectedIds, previewPresetId, saveResult });
   }, [previewPresetId, saveResult, selectedIds, view]);
 
@@ -230,7 +243,7 @@ export function IntroLayoutEditor(): ReactElement {
     window.addEventListener("message", handleMessage);
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [draft, floorTextureUrl, modelUrls, selectedIds, uploadedStickers]);
+  }, [draft, draftModelUrls, floorTextureUrl, modelUrls, selectedIds, uploadedStickers]);
 
   const handleTreeSelect = (id: IntroLayoutItemId, isAdditive: boolean): void => {
     if (!isAdditive) {
@@ -312,6 +325,27 @@ export function IntroLayoutEditor(): ReactElement {
 
     setUploadedStickers((current) => ({ ...current, [file.name]: URL.createObjectURL(file) }));
     setStickerAsset(file.name);
+  };
+
+  const handleDraftModelUpload = (event: ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setDraftModelUrls((current) => ({ ...current, [file.name]: URL.createObjectURL(file) }));
+
+    if (draft.nodes.some((node) => node.kind === "draftModel" && node.asset === file.name)) {
+      return;
+    }
+
+    const id = createIntroLayoutNodeId(draft, DRAFT_MODEL_ID_PREFIX);
+
+    setDraft(addIntroLayoutDraftModel(draft, { id, asset: file.name }));
+    setSelectedIds([id]);
   };
 
   const handleArrivalOpen = (): void => {
@@ -404,10 +438,15 @@ export function IntroLayoutEditor(): ReactElement {
     }
 
     const layouts = value as EntryIntroLayoutDocument;
+    const missingDraftModels = getMissingIntroLayoutDraftModelAssets(layouts, draftModelUrls);
 
     setDraft(layouts);
     setSelectedIds([]);
-    setSaveResult(`${file.name}을(를) 불러왔습니다.`);
+    setSaveResult(
+      missingDraftModels.length
+        ? `${file.name}을(를) 불러왔습니다. 임시 3D 모델 ${missingDraftModels.join(", ")}을(를) 올리면 보여요.`
+        : `${file.name}을(를) 불러왔습니다.`
+    );
 
     if (!INTRO_LAYOUT_EDITOR_CAN_SAVE) {
       setSavedLayouts(layouts);
@@ -511,6 +550,18 @@ export function IntroLayoutEditor(): ReactElement {
               accept="image/png,image/webp"
               hidden
               onChange={handleStickerUpload}
+            />
+          </div>
+          <div className="IntroLayoutEditor-row">
+            <button type="button" onClick={() => draftModelUploadInputRef.current?.click()}>
+              새 3D 모델 올려 보기
+            </button>
+            <input
+              ref={draftModelUploadInputRef}
+              type="file"
+              accept=".glb,model/gltf-binary"
+              hidden
+              onChange={handleDraftModelUpload}
             />
           </div>
         </section>
