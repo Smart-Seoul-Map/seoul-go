@@ -3,7 +3,6 @@ import { expect, test, type Page } from "@playwright/test";
 import { startIntro } from "./helpers/introEdition";
 
 const THEME = "1786321258890";
-const SELECTION_KEY = "seoul-go:entry-edition-selection:v1";
 const MODELED_PLACE_IDS = [
   "25_edition25_24",
   "25_edition25_12",
@@ -23,6 +22,20 @@ const MODEL_PATHS = [
 
 test.use({ launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
+async function readLandmarkAnchors(page: Page): Promise<Record<string, [number, number]>> {
+  return page.locator(".EntryEditionLandmark").evaluateAll((buttons) =>
+    Object.fromEntries(
+      buttons.map((button) => {
+        const bounds = button.getBoundingClientRect();
+        return [
+          button.getAttribute("data-place-id") ?? "",
+          [Math.round(bounds.x + bounds.width / 2), Math.round(bounds.bottom)],
+        ];
+      })
+    )
+  );
+}
+
 async function startExploration(page: Page) {
   await startIntro(page);
   await expect(page.getByLabel("서울 탐방 공간", { exact: true })).not.toHaveAttribute(
@@ -32,7 +45,7 @@ async function startExploration(page: Page) {
   );
 }
 
-test("shows only places with a GLB model, falls back to images when models fail, and shares the query with district exploration", async ({
+test("shows only places with a GLB model in the same slots on every visit, falls back to images when models fail, and shares the query with district exploration", async ({
   page,
 }) => {
   test.setTimeout(120000);
@@ -75,6 +88,10 @@ test("shows only places with a GLB model, falls back to images when models fail,
     .locator(".EntryEditionLandmark")
     .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-place-id")));
   expect([...first].sort()).toEqual(MODELED_PLACE_IDS);
+  await expect
+    .poll(async () => new Set(Object.values(await readLandmarkAnchors(page)).map(String)).size)
+    .toBe(MODELED_PLACE_IDS.length);
+  const firstAnchors = await readLandmarkAnchors(page);
   expect([...modelRequests].sort()).toEqual(MODEL_PATHS);
   expect(calls).toHaveLength(1);
   await page.evaluate(() => {
@@ -93,12 +110,8 @@ test("shows only places with a GLB model, falls back to images when models fail,
     .locator(".EntryEditionLandmark")
     .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-place-id")));
   expect([...second].sort()).toEqual(MODELED_PLACE_IDS);
+  await expect.poll(() => readLandmarkAnchors(page)).toEqual(firstAnchors);
   expect(calls).toHaveLength(1);
-  const stored: string[] = await page.evaluate(
-    (key) => JSON.parse(localStorage.getItem(key) ?? "[]"),
-    SELECTION_KEY
-  );
-  expect([...stored].sort()).toEqual([...second].sort());
 });
 
 test("keeps entry closed while loading and retries after an API error", async ({ page }) => {
