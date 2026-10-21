@@ -102,12 +102,12 @@ export function createEntryExplorationDartSelectableLayer({
   object.position.z = selectableLayer.yOffset;
   object.visible = false;
 
-  const { flashColor, hoverColor, selectableColor } = getEntryExplorationIntroTheme().dart;
+  const { hitAccentColor, hoverColor, selectableColor } = getEntryExplorationIntroTheme().dart;
   const [selectableRed, selectableGreen, selectableBlue] = toColorBytes(selectableColor);
   const cells = getSeoulGridCells();
 
   uniforms.uHoverColor.value.set(...toColorBytes(hoverColor)).divideScalar(BYTE_MAX);
-  uniforms.uFlashColor.value.set(...toColorBytes(flashColor)).divideScalar(BYTE_MAX);
+  uniforms.uFlashColor.value.set(...toColorBytes(hitAccentColor)).divideScalar(BYTE_MAX);
 
   const setNumbers = (numbers: readonly number[]): void => {
     cells.forEach((cell) => {

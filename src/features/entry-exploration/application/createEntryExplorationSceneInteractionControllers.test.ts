@@ -28,9 +28,10 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(2);
+    expect(controllers).toHaveLength(3);
     expect(controllers[0].priority ?? 0).toBeGreaterThan(0);
-    expect(controllers[1].object.name).toBe("entry-slot-machine");
+    expect(controllers[1].priority ?? 0).toBeGreaterThan(0);
+    expect(controllers[2].object.name).toBe("entry-slot-machine");
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
 
     controllers.forEach((controller) => {

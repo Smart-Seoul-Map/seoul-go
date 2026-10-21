@@ -5,11 +5,15 @@ import type {
   EntryExplorationDartViewControls,
 } from "./entryExplorationSeoulTileMapViewInteraction";
 
+export type EntryExplorationDartViewKind = "arrow" | "roulette";
+
 export type EntryExplorationDartShotViewModel = {
   isGuideVisible: boolean;
+  isRouletteStarted: boolean;
   isTargetHovered: boolean;
   landedResult: EntryExplorationDartThrowResult | null;
   shotResult: EntryExplorationDartThrowResult | null;
+  viewKind: EntryExplorationDartViewKind;
 };
 
 type EntryExplorationDartShotHookResult = {
@@ -20,77 +24,136 @@ type EntryExplorationDartShotHookResult = {
   onDartViewActiveChange: (isActive: boolean) => void;
   onDartViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onFlightEnd: () => void;
-  onOpenRouletteView: () => void;
+  onRequestRouletteView: () => void;
   onRetryThrow: () => void;
+  onRouletteStart: () => void;
+  onRouletteThrowResult: (result: EntryExplorationDartThrowResult) => void;
+  onRouletteViewActiveChange: (isActive: boolean) => void;
+  onRouletteViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   requestDartView: () => void;
 };
 
 export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResult {
   const [isGuideVisible, setIsGuideVisible] = useState(false);
+  const [isRouletteStarted, setIsRouletteStarted] = useState(false);
   const [isTargetHovered, setIsTargetHovered] = useState(false);
   const [shotResult, setShotResult] = useState<EntryExplorationDartThrowResult | null>(null);
   const [landedResult, setLandedResult] = useState<EntryExplorationDartThrowResult | null>(null);
+  const [viewKind, setViewKind] = useState<EntryExplorationDartViewKind>("arrow");
   const shotResultRef = useRef<EntryExplorationDartThrowResult | null>(null);
-  const viewControlsRef = useRef<EntryExplorationDartViewControls | null>(null);
+  const viewKindRef = useRef<EntryExplorationDartViewKind>("arrow");
+  const viewControlsRef = useRef<
+    Record<EntryExplorationDartViewKind, EntryExplorationDartViewControls | null>
+  >({
+    arrow: null,
+    roulette: null,
+  });
 
   const onDartViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
-    viewControlsRef.current = controls;
+    viewControlsRef.current.arrow = controls;
   }, []);
 
-  const onDartViewActiveChange = useCallback((isActive: boolean) => {
-    setIsGuideVisible(isActive);
-
-    if (isActive) {
-      return;
-    }
-
-    setIsTargetHovered(false);
-    setShotResult(null);
-    setLandedResult(null);
-    viewControlsRef.current?.setHitCell(null);
+  const onRouletteViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
+    viewControlsRef.current.roulette = controls;
   }, []);
+
+  const handleViewActiveChange = useCallback(
+    (kind: EntryExplorationDartViewKind, isActive: boolean) => {
+      setIsGuideVisible(isActive);
+
+      if (isActive) {
+        viewKindRef.current = kind;
+        setViewKind(kind);
+
+        return;
+      }
+
+      setIsTargetHovered(false);
+      setIsRouletteStarted(false);
+      setShotResult(null);
+      setLandedResult(null);
+      viewControlsRef.current[kind]?.setHitCell(null);
+    },
+    []
+  );
+
+  const onDartViewActiveChange = useCallback(
+    (isActive: boolean) => handleViewActiveChange("arrow", isActive),
+    [handleViewActiveChange]
+  );
+
+  const onRouletteViewActiveChange = useCallback(
+    (isActive: boolean) => handleViewActiveChange("roulette", isActive),
+    [handleViewActiveChange]
+  );
 
   const onDartThrowResult = useCallback((result: EntryExplorationDartThrowResult) => {
     shotResultRef.current = result;
     setShotResult(result);
   }, []);
 
+  const onRouletteThrowResult = useCallback(
+    (result: EntryExplorationDartThrowResult) => {
+      onDartThrowResult(result);
+      setLandedResult(result);
+      viewControlsRef.current.roulette?.setHitCell(result.cell);
+    },
+    [onDartThrowResult]
+  );
+
   const onArrowThrow = useCallback(() => {
-    viewControlsRef.current?.throwAtRandomCell();
+    viewControlsRef.current.arrow?.throwAtRandomCell();
   }, []);
 
-  const onOpenRouletteView = useCallback(() => {
-    viewControlsRef.current?.requestRouletteView();
+  const onRouletteStart = useCallback(() => {
+    setIsRouletteStarted(true);
+    viewControlsRef.current.roulette?.startRoulette();
+  }, []);
+
+  const onRequestRouletteView = useCallback(() => {
+    viewControlsRef.current.roulette?.requestApproach();
   }, []);
 
   const onRetryThrow = useCallback(() => {
     shotResultRef.current = null;
     setShotResult(null);
     setLandedResult(null);
-    viewControlsRef.current?.resetThrow();
+    setIsRouletteStarted(false);
+    viewControlsRef.current[viewKindRef.current]?.resetThrow();
   }, []);
 
   const onFlightEnd = useCallback(() => {
     const landed = shotResultRef.current;
 
     setLandedResult(landed);
-    viewControlsRef.current?.setHitCell(landed?.cell ?? null);
+    viewControlsRef.current.arrow?.setHitCell(landed?.cell ?? null);
   }, []);
 
   const requestDartView = useCallback(() => {
-    viewControlsRef.current?.requestApproach();
+    viewControlsRef.current.arrow?.requestApproach();
   }, []);
 
   return {
-    dartShot: { isGuideVisible, isTargetHovered, landedResult, shotResult },
+    dartShot: {
+      isGuideVisible,
+      isRouletteStarted,
+      isTargetHovered,
+      landedResult,
+      shotResult,
+      viewKind,
+    },
     onArrowThrow,
     onDartTargetHoverChange: setIsTargetHovered,
     onDartThrowResult,
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
-    onOpenRouletteView,
+    onRequestRouletteView,
     onRetryThrow,
+    onRouletteStart,
+    onRouletteThrowResult,
+    onRouletteViewActiveChange,
+    onRouletteViewControlsReady,
     requestDartView,
   };
 }

@@ -14,6 +14,9 @@ export type UseEntryExplorationSceneInteractionControllersOptions = {
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewActiveChange?: (isActive: boolean) => void;
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
+  onRouletteThrowResult?: (result: EntryExplorationDartThrowResult) => void;
+  onRouletteViewActiveChange?: (isActive: boolean) => void;
+  onRouletteViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
 };
 
 type UseEntryExplorationSceneInteractionControllersResult = {
@@ -27,6 +30,9 @@ export function useEntryExplorationSceneInteractionControllers({
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
+  onRouletteThrowResult,
+  onRouletteViewActiveChange,
+  onRouletteViewControlsReady,
 }: UseEntryExplorationSceneInteractionControllersOptions = {}): UseEntryExplorationSceneInteractionControllersResult {
   const collectedNumbersRef = useRef(collectedNumbers);
   collectedNumbersRef.current = collectedNumbers;
@@ -44,6 +50,9 @@ export function useEntryExplorationSceneInteractionControllers({
         onDartThrowResult,
         onDartViewActiveChange,
         onDartViewControlsReady,
+        onRouletteThrowResult,
+        onRouletteViewActiveChange,
+        onRouletteViewControlsReady,
       }),
     [
       getCollectedNumbers,
@@ -52,6 +61,9 @@ export function useEntryExplorationSceneInteractionControllers({
       onDartThrowResult,
       onDartViewActiveChange,
       onDartViewControlsReady,
+      onRouletteThrowResult,
+      onRouletteViewActiveChange,
+      onRouletteViewControlsReady,
     ]
   );
 

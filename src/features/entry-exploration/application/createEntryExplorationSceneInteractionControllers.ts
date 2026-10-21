@@ -13,6 +13,9 @@ export type CreateEntryExplorationSceneInteractionControllersOptions = {
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartViewActiveChange?: (isActive: boolean) => void;
+  onRouletteThrowResult?: (result: EntryExplorationDartThrowResult) => void;
+  onRouletteViewActiveChange?: (isActive: boolean) => void;
+  onRouletteViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
 };
 
 export function createEntryExplorationSceneInteractionControllers({
@@ -22,6 +25,9 @@ export function createEntryExplorationSceneInteractionControllers({
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
+  onRouletteThrowResult,
+  onRouletteViewActiveChange,
+  onRouletteViewControlsReady,
 }: CreateEntryExplorationSceneInteractionControllersOptions = {}): EntryExplorationSceneInteractionController[] {
   return [
     createEntryExplorationSeoulTileMapViewInteractionController({
@@ -31,6 +37,14 @@ export function createEntryExplorationSceneInteractionControllers({
       onControlsReady: onDartViewControlsReady,
       onDartThrowResult,
       onTargetHoverChange: onDartTargetHoverChange,
+    }),
+    createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers,
+      mode: "roulette",
+      onEntryBlocked: onDartEntryBlocked,
+      onActiveChange: onRouletteViewActiveChange,
+      onControlsReady: onRouletteViewControlsReady,
+      onDartThrowResult: onRouletteThrowResult,
     }),
     createEntrySlotInteraction(),
   ];

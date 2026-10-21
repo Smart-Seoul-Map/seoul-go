@@ -114,6 +114,14 @@
       "seoul-tile-map-floor-sketch": {
         "x": 56.08,
         "z": 12.48
+      },
+      "seoul-tile-map-roulette-background-floor-sketch": {
+        "x": 70.49,
+        "z": 25.88
+      },
+      "seoul-tile-map-roulette-floor-sketch": {
+        "x": 70.58,
+        "z": 26.98
       }
     }
   },
@@ -232,6 +240,14 @@
       "seoul-tile-map-floor-sketch": {
         "x": 40.59,
         "z": 32.43
+      },
+      "seoul-tile-map-roulette-background-floor-sketch": {
+        "x": 55.13,
+        "z": 46.35
+      },
+      "seoul-tile-map-roulette-floor-sketch": {
+        "x": 55.09,
+        "z": 46.93
       }
     }
   }

@@ -21,7 +21,7 @@ import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
-import { StartPointPickerButton } from "./StartPointPickerButton";
+import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import { getEntryDartNumbers, getEntryNumberRewardRows } from "../domain/entryNumberReward";
@@ -72,8 +72,12 @@ export function EntryExplorationPage({
     onDartViewActiveChange,
     onDartViewControlsReady,
     onFlightEnd,
-    onOpenRouletteView,
+    onRequestRouletteView,
     onRetryThrow,
+    onRouletteStart,
+    onRouletteThrowResult,
+    onRouletteViewActiveChange,
+    onRouletteViewControlsReady,
     requestDartView,
   } = useEntryExplorationDartShot();
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
@@ -119,6 +123,9 @@ export function EntryExplorationPage({
     onDartThrowResult,
     onDartViewActiveChange,
     onDartViewControlsReady,
+    onRouletteThrowResult,
+    onRouletteViewActiveChange,
+    onRouletteViewControlsReady,
   });
   const characterSpeech = useEntryCharacterSpeech({
     hasStarted,
@@ -152,6 +159,8 @@ export function EntryExplorationPage({
     navigate(createDistrictExplorationPath(district.id, toSeoulGridCellCenter(result.cell)));
   };
 
+  const isRouletteView = dartShot.isGuideVisible && dartShot.viewKind === "roulette";
+
   return (
     <main className="entry-exploration-page" data-dart-target={dartShot.isTargetHovered}>
       <div
@@ -162,6 +171,7 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
+        viewKind={dartShot.viewKind}
         onClose={handleDeactivateActiveInteraction}
         onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
@@ -169,11 +179,19 @@ export function EntryExplorationPage({
       />
       <EntryExplorationDartArrow
         isTargetHovered={dartShot.isTargetHovered}
-        isVisible={dartShot.isGuideVisible}
+        isVisible={dartShot.isGuideVisible && !isRouletteView}
         onFlightEnd={onFlightEnd}
         onThrow={onArrowThrow}
         shot={dartShot.shotResult}
       />
+      <EntryExplorationSceneButton
+        isDisabled={dartShot.isRouletteStarted}
+        isVisible={isRouletteView && dartShot.shotResult === null}
+        onClick={onRouletteStart}
+        placement="bottom"
+      >
+        START
+      </EntryExplorationSceneButton>
       <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {hasStarted && (
         <EntryCollectedNumbersPanel
@@ -182,9 +200,13 @@ export function EntryExplorationPage({
           isDartViewActive={dartShot.isGuideVisible}
         />
       )}
-      {hasStarted && (
-        <StartPointPickerButton isHidden={dartShot.isGuideVisible} onClick={onOpenRouletteView} />
-      )}
+      <EntryExplorationSceneButton
+        isVisible={hasStarted && !dartShot.isGuideVisible}
+        onClick={onRequestRouletteView}
+        placement="corner"
+      >
+        시작 지점 뽑기
+      </EntryExplorationSceneButton>
       {hasStarted && renderPlacePanel?.(panelProps)}
       {characterSpeech.speechKey &&
         createPortal(
