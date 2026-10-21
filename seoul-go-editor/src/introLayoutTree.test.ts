@@ -158,20 +158,20 @@ describe("intro layout tree editing", () => {
   });
 
   test("lists place slots first, then grouped items in order, then untouched fixed objects", () => {
-    const grouped = groupIntroLayoutNodes(ENTRY_INTRO_LAYOUTS, ["bench", "pin"], "zone", "존");
-    const reordered = moveIntroLayoutNode(grouped, "pin", "zone", "bench");
+    const grouped = groupIntroLayoutNodes(ENTRY_INTRO_LAYOUTS, ["bench", "sparkle"], "zone", "존");
+    const reordered = moveIntroLayoutNode(grouped, "sparkle", "zone", "bench");
     const tree = getIntroLayoutTree(reordered);
     const zone = tree.find((item) => item.id === "zone")!;
 
     expect(tree.slice(0, 10).every((item) => item.kind === "slot")).toBe(true);
     expect(tree[10].id).toBe("zone");
-    expect(zone.children.map((child) => child.id)).toEqual(["pin", "bench"]);
+    expect(zone.children.map((child) => child.id)).toEqual(["sparkle", "bench"]);
     expect(tree.some((item) => item.id === "bench")).toBe(false);
     expect(tree.at(-1)?.id).toBe(ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID);
   });
 
   test("turns a layer drop into a parent and sibling position", () => {
-    const document = groupIntroLayoutNodes(ENTRY_INTRO_LAYOUTS, ["bench", "pin"], "zone", "존");
+    const document = groupIntroLayoutNodes(ENTRY_INTRO_LAYOUTS, ["bench", "sparkle"], "zone", "존");
 
     expect(getIntroLayoutDropTarget(document, ["hanok"], "zone", "inside")).toEqual({
       parentId: "zone",
@@ -183,7 +183,7 @@ describe("intro layout tree editing", () => {
     });
     expect(getIntroLayoutDropTarget(document, ["hanok"], "bench", "after")).toEqual({
       parentId: "zone",
-      beforeId: "pin",
+      beforeId: "sparkle",
     });
     expect(getIntroLayoutDropTarget(document, ["zone"], "bench", "inside")).toBeNull();
     expect(
@@ -199,14 +199,19 @@ describe("intro layout tree editing", () => {
 
   test("moves several selected layers together in their selected order", () => {
     const document = groupIntroLayoutNodes(withRotatedGroup(), ["streetlamp"], "outer", "바깥");
-    const ids = getIntroLayoutTopSelection(document, ["zone", "bench", "hanok", "pin"]);
+    const ids = getIntroLayoutTopSelection(document, ["zone", "bench", "hanok", "sparkle"]);
     const moved = moveIntroLayoutNodes(document, ids, { parentId: "outer", beforeId: null });
     const outer = getIntroLayoutTree(moved).find((item) => item.id === "outer")!;
 
-    expect(ids).toEqual(["zone", "hanok", "pin"]);
-    expect(outer.children.map((child) => child.id)).toEqual(["streetlamp", "zone", "hanok", "pin"]);
+    expect(ids).toEqual(["zone", "hanok", "sparkle"]);
+    expect(outer.children.map((child) => child.id)).toEqual([
+      "streetlamp",
+      "zone",
+      "hanok",
+      "sparkle",
+    ]);
     expect(getIntroLayoutParent(moved, "bench")).toBe("zone");
-    expectWorldUnchanged(document, moved, ["zone", "bench", "hanok", "pin", "streetlamp"]);
+    expectWorldUnchanged(document, moved, ["zone", "bench", "hanok", "sparkle", "streetlamp"]);
     expect(validateEntryIntroLayoutDocument(moved, STICKERS)).toEqual([]);
   });
 
