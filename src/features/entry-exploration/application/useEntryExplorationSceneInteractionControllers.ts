@@ -10,7 +10,6 @@ import type { EntryExplorationSceneInteractionController } from "./useEntryExplo
 export type UseEntryExplorationSceneInteractionControllersOptions = {
   collectedNumbers?: readonly number[];
   onDartEntryBlocked?: () => void;
-  createExtraSceneInteractionControllers?: () => readonly EntryExplorationSceneInteractionController[];
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewActiveChange?: (isActive: boolean) => void;
@@ -21,13 +20,9 @@ type UseEntryExplorationSceneInteractionControllersResult = {
   createSceneInteractionControllers: () => EntryExplorationSceneInteractionController[];
 };
 
-const createNoExtraSceneInteractionControllers =
-  (): readonly EntryExplorationSceneInteractionController[] => [];
-
 export function useEntryExplorationSceneInteractionControllers({
   collectedNumbers = [],
   onDartEntryBlocked,
-  createExtraSceneInteractionControllers = createNoExtraSceneInteractionControllers,
   onDartThrowResult,
   onDartTargetHoverChange,
   onDartViewActiveChange,
@@ -45,7 +40,6 @@ export function useEntryExplorationSceneInteractionControllers({
       createEntryExplorationSceneInteractionControllers({
         getCollectedNumbers,
         onDartEntryBlocked: handleDartEntryBlocked,
-        extraControllers: createExtraSceneInteractionControllers(),
         onDartTargetHoverChange,
         onDartThrowResult,
         onDartViewActiveChange,
@@ -54,7 +48,6 @@ export function useEntryExplorationSceneInteractionControllers({
     [
       getCollectedNumbers,
       handleDartEntryBlocked,
-      createExtraSceneInteractionControllers,
       onDartTargetHoverChange,
       onDartThrowResult,
       onDartViewActiveChange,

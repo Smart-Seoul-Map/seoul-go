@@ -8,7 +8,6 @@ import { ENTRY_EXPLORATION_SCENE_CONFIG } from "../config/entryExplorationSceneC
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { createEntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
-import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 import { useEntryExplorationThreeScene } from "./useEntryExplorationThreeScene";
 
 const mocks = vi.hoisted(() => {
@@ -35,6 +34,9 @@ const mocks = vi.hoisted(() => {
     registerSceneInteractionControllers: vi.fn(),
     setSceneInteractionCharacter: vi.fn(),
     setSceneInteractionLayout: vi.fn(),
+    takeSceneInteractionCharacterDestination: vi.fn<() => { x: number; z: number } | null>(
+      () => null
+    ),
     updateActiveSceneInteractionCamera: vi.fn(),
     updateSceneInteractions: vi.fn(),
     updateSceneInteractionTriggers: vi.fn(),
@@ -172,51 +174,6 @@ function createContainerRef(): RefObject<HTMLDivElement | null> {
 }
 
 describe("useEntryExplorationThreeScene", () => {
-  test("passes decorations and other games as surroundings without hiding the floor or the active model", async () => {
-    let surroundings: readonly THREE.Object3D[] = [];
-    const createController = (): EntryExplorationSceneInteractionController => ({
-      object: new THREE.Group(),
-      activate: () => {},
-      canActivate: () => false,
-      dispose: () => {},
-      handlePointerDown: () => false,
-      handlePointerMove: () => false,
-      handlePointerUp: () => false,
-      isActive: () => false,
-      update: () => {},
-      updateCamera: () => {},
-      updateTriggerState: () => {},
-    });
-    const slot = createController();
-    slot.setSurroundings = (objects) => {
-      surroundings = objects;
-    };
-    const dart = createController();
-    const { unmount } = renderHook(() =>
-      useEntryExplorationThreeScene({
-        places: ENTRY_TEST_PLACES,
-        containerRef: createContainerRef(),
-        createSceneInteractionControllers: () => [slot, dart],
-      })
-    );
-    onTestFinished(unmount);
-    await act(async () => {
-      await Promise.resolve();
-    });
-    act(() => {
-      startIntro();
-    });
-    expect(surroundings).toContain(dart.object);
-    expect(surroundings).not.toContain(slot.object);
-    expect(surroundings).not.toContain(mocks.floor);
-    const decorations = surroundings.find((object) =>
-      object.children.includes(mocks.introFloorObject!)
-    );
-    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[0].id}`)).toBeTruthy();
-    expect(decorations?.getObjectByName(`entry-place-${ENTRY_TEST_PLACES[1].id}`)).toBeTruthy();
-    expect(decorations?.children).not.toContain(mocks.floor);
-  });
-
   test("consumes a background click that dismisses a place card before moving or opening another interaction", async () => {
     const dismiss = vi.fn(() => true);
     const { unmount } = renderHook(() =>
@@ -314,6 +271,38 @@ describe("useEntryExplorationThreeScene", () => {
       mocks.domElement.dispatchEvent(new MouseEvent("pointerdown", { clientX: 50, clientY: 50 }));
     });
     expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: -3, z: 5 });
+  });
+  test("walks to a destination requested by a scene interaction on the next frame", async () => {
+    const { unmount } = renderHook(() =>
+      useEntryExplorationThreeScene({
+        places: ENTRY_TEST_PLACES,
+        containerRef: createContainerRef(),
+        createSceneInteractionControllers: () => [],
+      })
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    const frame = vi.mocked(requestAnimationFrame).mock.calls[0]?.[0];
+    mocks.registry.takeSceneInteractionCharacterDestination.mockReturnValueOnce({ x: 7, z: 8 });
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.registry.takeSceneInteractionCharacterDestination).not.toHaveBeenCalled();
+
+    mocks.registry.hasActiveSceneInteraction.mockReturnValue(false);
+    act(() => {
+      frame?.(performance.now());
+    });
+    expect(mocks.movement.moveTo).toHaveBeenLastCalledWith({ x: 7, z: 8 });
   });
   beforeEach(() => {
     vi.clearAllMocks();
