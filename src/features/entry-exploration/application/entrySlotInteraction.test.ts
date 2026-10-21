@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import { createEntrySlotInteraction } from "./entrySlotInteraction";
 
@@ -85,7 +86,7 @@ describe("intro slot machine", () => {
     const controller = await setup();
     const mobile = ENTRY_INTRO_LAYOUTS.mobile.objects["slot-machine"];
 
-    controller.setLayout?.(ENTRY_INTRO_LAYOUTS.mobile);
+    controller.setLayout?.(resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "mobile"));
     controller.object.updateMatrixWorld(true);
 
     expect(controller.object.position.x).toBe(mobile.x);

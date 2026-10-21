@@ -41,6 +41,7 @@ export const INTRO_LAYOUT_FIRST_PLACE_SHIFT_TOLERANCE = 0.001;
 export const INTRO_LAYOUT_FIXED_ITEM_LABELS: Readonly<Record<string, string>> = {
   "archery-range": "활쏘기장",
   "intro-background": "인트로 바닥 배경",
+  "slot-machine": "슬롯머신",
   [ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID]: "서울 타일맵 배경",
   [ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID]: "서울 타일맵",
 };

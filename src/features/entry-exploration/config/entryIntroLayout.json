@@ -48,10 +48,6 @@
         "x": 0.26,
         "z": 19.88
       },
-      "slot-machine": {
-        "x": -3.38,
-        "z": 22.95
-      },
       "bench": {
         "x": 8.98,
         "z": -5.67
@@ -107,6 +103,10 @@
       "archery-range": {
         "x": 50.67,
         "z": 5.44
+      },
+      "slot-machine": {
+        "x": -3.38,
+        "z": 22.95
       },
       "seoul-tile-map-background-floor-sketch": {
         "x": 55.99,
@@ -166,10 +166,6 @@
         "x": 1.37,
         "z": 15.08
       },
-      "slot-machine": {
-        "x": 0.96,
-        "z": 19.94
-      },
       "bench": {
         "x": 3.66,
         "z": -0.8
@@ -225,6 +221,10 @@
       "archery-range": {
         "x": 36.63,
         "z": 25.41
+      },
+      "slot-machine": {
+        "x": 0.96,
+        "z": 19.94
       },
       "seoul-tile-map-background-floor-sketch": {
         "x": 40.63,

@@ -7,6 +7,7 @@ import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 import { ENTRY_INTRO_LAYOUTS, type EntryIntroLayout } from "../config/entryIntroLayout";
 import { ENTRY_SLOT_CONFIG } from "../config/entrySlotConfig";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
+import { resolveEntryIntroLayoutView } from "../domain/entryIntroLayout";
 import {
   createEntrySlotSpin,
   getEntrySlotSpinFrame,
@@ -53,7 +54,7 @@ export function createEntrySlotInteraction(): EntrySlotInteraction {
     };
   };
 
-  setLayout(ENTRY_INTRO_LAYOUTS.pc);
+  setLayout(resolveEntryIntroLayoutView(ENTRY_INTRO_LAYOUTS, "pc"));
 
   const prepareEnvironment = () => {
     if (!renderer || !model || environment) return;

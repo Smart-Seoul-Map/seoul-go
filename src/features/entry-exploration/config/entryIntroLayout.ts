@@ -14,6 +14,7 @@ export const ENTRY_INTRO_LAYOUT_OBJECT_IDS = [
   ...ENTRY_EXPLORATION_SCENERY_OBJECTS.map(({ key }) => key),
   "intro-background",
   "archery-range",
+  "slot-machine",
   ...ENTRY_EXPLORATION_SCENE_OBJECTS.map(({ id }) => id),
 ] as const;
 
@@ -22,6 +23,7 @@ export type EntryIntroLayoutObjectId = (typeof ENTRY_INTRO_LAYOUT_OBJECT_IDS)[nu
 export const ENTRY_INTRO_LAYOUT_POSITION_ONLY_IDS: readonly string[] = [
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+  "slot-machine",
 ];
 
 export const ENTRY_INTRO_LAYOUT_EDITION_ID_PREFIX = "edition-";
