@@ -446,6 +446,8 @@ function getSpeechText(): string {
 function registerDartViewControls() {
   const controls = {
     requestApproach: vi.fn(),
+    startRoulette: vi.fn(),
+    requestRouletteView: vi.fn(),
     resetThrow: vi.fn(),
     setHitCell: vi.fn(),
     throwAtRandomCell: vi.fn(),

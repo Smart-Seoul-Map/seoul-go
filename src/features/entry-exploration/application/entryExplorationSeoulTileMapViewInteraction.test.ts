@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { describe, expect, test, vi } from "vitest";
 
 import {
+  ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID,
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
 } from "../config/entryExplorationSceneObjects";
@@ -348,6 +349,91 @@ describe("entry exploration seoul tile map view interaction", () => {
     expect(camera.position.z).toBeCloseTo(
       movedMapPosition.z + cameraFocusOffset.z + cameraOffset.z
     );
+
+    controller.dispose();
+  });
+
+  test("roulette mode lives on its own tile map below the arrow map", () => {
+    const { objects } = ENTRY_INTRO_LAYOUTS.pc;
+    const arrowMap = objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+    const rouletteMap = objects[ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID];
+    const rouletteTrigger = {
+      x: rouletteMap.x + TRIGGER_POSITION.x - arrowMap.x,
+      z: rouletteMap.z + TRIGGER_POSITION.z - arrowMap.z,
+    };
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [CENTER_NUMBER],
+      mode: "roulette",
+    });
+
+    expect(controller.object.position.x).toBeCloseTo(rouletteMap.x);
+    expect(controller.object.position.z).toBeCloseTo(rouletteMap.z);
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+    expect(controller.canActivate()).toBe(false);
+    controller.updateTriggerState(rouletteTrigger);
+    expect(controller.canActivate()).toBe(true);
+
+    controller.dispose();
+  });
+
+  test("roulette mode walks to its own trigger and ignores cell clicks", () => {
+    let viewControls: EntryExplorationDartViewControls | null = null;
+    const onDartThrowResult = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [CENTER_NUMBER],
+      mode: "roulette",
+      onControlsReady: (controls) => {
+        viewControls = controls;
+      },
+      onDartThrowResult,
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const raycaster = new THREE.Raycaster();
+    const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    viewControls!.requestApproach();
+    const destination = controller.takeRequestedCharacterDestination?.();
+
+    expect(destination).not.toBeNull();
+    expect(destination).not.toEqual(TRIGGER_POSITION);
+
+    controller.updateTriggerState(destination!);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs, destination!);
+    aimRaycasterAtCell(raycaster, controller.object, CENTER_CELL);
+
+    expect(controller.handlePointerDown(raycaster, 0)).toBe(true);
+    expect(onDartThrowResult).not.toHaveBeenCalled();
+
+    controller.dispose();
+  });
+
+  test("roulette mode refuses to start until the camera settles and then announces it", () => {
+    let viewControls: EntryExplorationDartViewControls | null = null;
+    const onCameraSettled = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [CENTER_NUMBER],
+      mode: "roulette",
+      onCameraSettled,
+      onControlsReady: (controls) => {
+        viewControls = controls;
+      },
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs / 2, TRIGGER_POSITION);
+
+    expect(viewControls!.startRoulette()).toBe(false);
+    expect(onCameraSettled).not.toHaveBeenCalled();
+
+    controller.updateCamera(camera, cameraTransitionDurationMs, TRIGGER_POSITION);
+
+    expect(onCameraSettled).toHaveBeenCalledTimes(1);
+    expect(viewControls!.startRoulette()).toBe(true);
 
     controller.dispose();
   });

@@ -9,9 +9,9 @@ import {
 import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 
 import {
+  ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID,
   ENTRY_EXPLORATION_SCENE_OBJECTS,
   ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
-  type EntryExplorationFloorOverlayObject,
 } from "../config/entryExplorationSceneObjects";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { ENTRY_INTRO_LAYOUTS, type EntryIntroLayout } from "../config/entryIntroLayout";
@@ -38,6 +38,7 @@ import {
 } from "../domain/seoulGridNumberLines";
 import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 import { createEntryExplorationDartHitMarker } from "./entryExplorationDartHitMarker";
+import { createEntryExplorationDartRoulette } from "./entryExplorationDartRoulette";
 import { createEntryExplorationDartSelectableLayer } from "./entryExplorationDartSelectableLayer";
 import {
   createEntryExplorationSceneObject,
@@ -62,13 +63,18 @@ export type EntryExplorationDartViewControls = {
   requestApproach: () => void;
   resetThrow: () => void;
   setHitCell: (cell: SeoulGridCell | null) => void;
+  startRoulette: () => boolean;
   throwAtRandomCell: () => void;
 };
 
+export type EntryExplorationTileMapMode = "arrow" | "roulette";
+
 export type EntryExplorationSeoulTileMapViewInteractionOptions = {
   getCollectedNumbers?: () => readonly number[];
+  mode?: EntryExplorationTileMapMode;
   onEntryBlocked?: () => void;
   onActiveChange?: (isActive: boolean) => void;
+  onCameraSettled?: () => void;
   onControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onTargetHoverChange?: (isOverValidCell: boolean) => void;
@@ -86,20 +92,27 @@ type EntryExplorationTileMapCameraView = {
 };
 
 const SEOUL_TILE_MAP_VIEW_PRIORITY = 30;
-const seoulTileMapObject = getSeoulTileMapObject();
-const mapSize = {
-  depth: seoulTileMapObject.size.depth,
-  width: seoulTileMapObject.size.width,
-};
 
 export function createEntryExplorationSeoulTileMapViewInteractionController({
   getCollectedNumbers = () => [],
+  mode = "arrow",
   onEntryBlocked,
   onActiveChange,
+  onCameraSettled,
   onControlsReady,
   onDartThrowResult,
   onTargetHoverChange,
 }: EntryExplorationSeoulTileMapViewInteractionOptions = {}): EntryExplorationSeoulTileMapViewInteractionController {
+  const isRouletteMode = mode === "roulette";
+  const seoulTileMapObject = getSeoulTileMapObject(
+    isRouletteMode
+      ? ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID
+      : ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
+  );
+  const mapSize = {
+    depth: seoulTileMapObject.size.depth,
+    width: seoulTileMapObject.size.width,
+  };
   const mapMesh = createEntryExplorationSceneObject(seoulTileMapObject);
   const hitMarker = createEntryExplorationDartHitMarker();
   const selectableLayer = createEntryExplorationDartSelectableLayer({
@@ -121,9 +134,24 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let mapPosition: EntryExplorationScenePoint;
   let triggerPosition: EntryExplorationScenePoint;
 
+  const getTriggerPosition = (layout: EntryIntroLayout): EntryExplorationScenePoint => {
+    const archeryRange = layout.objects["archery-range"];
+
+    if (!isRouletteMode) {
+      return archeryRange;
+    }
+
+    const arrowMap = layout.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+
+    return {
+      x: mapPosition.x + archeryRange.x - arrowMap.x,
+      z: mapPosition.z + archeryRange.z - arrowMap.z,
+    };
+  };
+
   const setLayout = (layout: EntryIntroLayout): void => {
-    mapPosition = layout.objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
-    triggerPosition = layout.objects["archery-range"];
+    mapPosition = layout.objects[seoulTileMapObject.id];
+    triggerPosition = getTriggerPosition(layout);
     mapMesh.position.setX(mapPosition.x).setZ(mapPosition.z);
   };
 
@@ -188,6 +216,16 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     onDartThrowResult?.(toThrowResult(cell, camera));
   };
 
+  const roulette = createEntryExplorationDartRoulette({
+    getCells: () => selectableCells,
+    onHighlight: (cell) => selectableLayer.setFlashCell(cell),
+    onPicked: (cell) => {
+      if (isEngaged && !hasThrown && activeCamera) {
+        throwAtCell(cell, activeCamera);
+      }
+    },
+  });
+
   const throwAtRandomCell = (): void => {
     if (!isEngaged || hasThrown || cameraTransitionStartedAt !== null || !activeCamera) {
       return;
@@ -213,19 +251,42 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const resetThrow = (): void => {
+    selectableLayer.setFlashCell(null);
     hasThrown = false;
     setHitCell(null);
   };
 
   const requestApproach = (): void => {
-    if (isEngaged || getCollectedNumbers().length === 0) {
+    if (isEngaged) {
+      return;
+    }
+
+    if (getCollectedNumbers().length === 0) {
+      onEntryBlocked?.();
+
       return;
     }
 
     requestedCharacterDestination = triggerPosition;
   };
 
-  onControlsReady?.({ requestApproach, resetThrow, setHitCell, throwAtRandomCell });
+  const startRoulette = (): boolean => {
+    if (!isRouletteMode || !isEngaged || hasThrown || cameraTransitionStartedAt !== null) {
+      return false;
+    }
+
+    roulette.start();
+
+    return true;
+  };
+
+  onControlsReady?.({
+    requestApproach,
+    resetThrow,
+    setHitCell,
+    startRoulette,
+    throwAtRandomCell,
+  });
 
   const activate = (time: number): void => {
     if (isEngaged || getCollectedNumbers().length === 0) {
@@ -246,6 +307,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const deactivate = (): void => {
+    roulette.cancel();
     isEngaged = false;
     selectableLayer.object.visible = false;
     waitsForTriggerExit = true;
@@ -255,6 +317,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransitionStartedAt = null;
     setTargetHover(false);
     selectableLayer.setHoveredCell(null);
+    selectableLayer.setFlashCell(null);
     onActiveChange?.(false);
   };
 
@@ -351,6 +414,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     cameraTransition = null;
     cameraTransitionStartedAt = null;
+    onCameraSettled?.();
   };
 
   const faceCharacterTowardMap = (): void => {
@@ -399,6 +463,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       getCollectedNumbers().length > 0,
     deactivate,
     dispose: () => {
+      roulette.cancel();
       selectableLayer.dispose();
       disposeEntryExplorationObject3D(mapMesh);
     },
@@ -414,7 +479,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      if (cameraTransitionStartedAt !== null || hasThrown) {
+      if (isRouletteMode || cameraTransitionStartedAt !== null || hasThrown) {
         return true;
       }
 
@@ -433,7 +498,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         return false;
       }
 
-      if (cameraTransitionStartedAt !== null) {
+      if (isRouletteMode || cameraTransitionStartedAt !== null) {
         setTargetHover(false);
         selectableLayer.setHoveredCell(null);
 
@@ -469,14 +534,17 @@ function getMapTexture(object: THREE.Object3D): THREE.Texture | null {
   return object.material.map;
 }
 
-function getSeoulTileMapObject(): EntryExplorationFloorOverlayObject & {
-  interaction: NonNullable<EntryExplorationFloorOverlayObject["interaction"]>;
-} {
-  const object = ENTRY_EXPLORATION_SCENE_OBJECTS.find(
-    (sceneObject) => sceneObject.id === ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID
-  );
+type EntryExplorationTileMapObject = Extract<
+  (typeof ENTRY_EXPLORATION_SCENE_OBJECTS)[number],
+  { interaction: unknown }
+>;
 
-  if (!object || object.type !== "floorOverlay" || !object.interaction) {
+function getSeoulTileMapObject(
+  id: EntryExplorationTileMapObject["id"]
+): EntryExplorationTileMapObject {
+  const object = ENTRY_EXPLORATION_SCENE_OBJECTS.find((sceneObject) => sceneObject.id === id);
+
+  if (!object || !("interaction" in object)) {
     throw new Error("Seoul tile map scene object is required.");
   }
 

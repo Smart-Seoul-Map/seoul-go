@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => {
   const domElement = document.createElement("canvas");
   const movement = {
     getCurrentPosition: vi.fn(() => ({ x: 4, z: 5 })),
+    getIsMoving: vi.fn(() => false),
     headingRadians: 0,
     modelKey: "idlePrimary",
     moveTo: vi.fn(),
@@ -21,6 +22,7 @@ const mocks = vi.hoisted(() => {
   };
   const registry = {
     activateReadySceneInteraction: vi.fn(() => false),
+    clearSceneInteractionApproach: vi.fn(),
     addSceneInteractionObjects: vi.fn(),
     clearSceneInteractionControllers: vi.fn(),
     deactivateActiveSceneInteraction: vi.fn(() => true),

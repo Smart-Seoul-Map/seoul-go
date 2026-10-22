@@ -1,0 +1,23 @@
+.entry-exploration-scene-button {
+  --entry-exploration-scene-button-gutter: var(--sg-spacing-4);
+  position: absolute;
+  z-index: 10;
+}
+
+.entry-exploration-scene-button[data-placement="corner"] {
+  right: calc(var(--entry-exploration-scene-button-gutter) + env(safe-area-inset-right, 0px));
+  bottom: calc(var(--entry-exploration-scene-button-gutter) + var(--sg-safe-area-bottom));
+}
+
+.entry-exploration-scene-button[data-placement="bottom"] {
+  left: 50%;
+  bottom: calc(var(--sg-spacing-6) + var(--sg-safe-area-bottom));
+  transform: translateX(-50%);
+}
+
+@media (max-width: 860px) {
+  .entry-exploration-scene-button[data-placement="corner"] {
+    top: calc(var(--entry-exploration-scene-button-gutter) + var(--sg-safe-area-top));
+    bottom: auto;
+  }
+}

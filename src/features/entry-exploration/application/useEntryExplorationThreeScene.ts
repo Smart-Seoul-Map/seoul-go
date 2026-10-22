@@ -125,6 +125,7 @@ export function useEntryExplorationThreeScene({
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
   const {
     activateReadySceneInteraction,
+    clearSceneInteractionApproach,
     addSceneInteractionObjects,
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
@@ -639,6 +640,7 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        if (!movementRef.current.getIsMoving()) clearSceneInteractionApproach();
         const requestedDestination = takeSceneInteractionCharacterDestination();
         if (requestedDestination) movementRef.current.moveTo(requestedDestination);
         for (const [placeId, landmark] of visitLandmarks) {
