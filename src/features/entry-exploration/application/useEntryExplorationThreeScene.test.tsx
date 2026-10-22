@@ -673,13 +673,14 @@ describe("useEntryExplorationThreeScene", () => {
       .spyOn(THREE.Raycaster.prototype, "intersectObject")
       .mockReturnValue([{ point: floorHitPoint } as THREE.Intersection]);
 
-    renderHook(() =>
+    const { unmount } = renderHook(() =>
       useEntryExplorationThreeScene({
         places: ENTRY_TEST_PLACES,
         containerRef,
         createSceneInteractionControllers: () => [],
       })
     );
+    onTestFinished(unmount);
 
     await act(async () => {
       await Promise.resolve();
