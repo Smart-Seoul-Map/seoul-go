@@ -1,7 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { ENTRY_EDITION_ARRIVAL_RADIUS } from "../config/entryEditionModels";
-import { ENTRY_HANOK_ARRIVAL_RADIUS, ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
+import {
+  ENTRY_ASSET_PLACE_ARRIVAL_RADIUS,
+  ENTRY_ASSET_PLACE_IDS,
+} from "../config/entryAssetPlaces";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import {
   createEntryExplorationPlaceVisit,
@@ -45,7 +48,12 @@ export function useEntryExplorationPlacePanel(
       ...Object.fromEntries(
         places.map((place) => [place.id, createVisit(place.id, ENTRY_EDITION_ARRIVAL_RADIUS)])
       ),
-      [ENTRY_HANOK_PLACE_ID]: createVisit(ENTRY_HANOK_PLACE_ID, ENTRY_HANOK_ARRIVAL_RADIUS),
+      ...Object.fromEntries(
+        ENTRY_ASSET_PLACE_IDS.map((placeId) => [
+          placeId,
+          createVisit(placeId, ENTRY_ASSET_PLACE_ARRIVAL_RADIUS),
+        ])
+      ),
     };
   }, [places]);
   const dismissOpenPanel = useCallback((): boolean => {
