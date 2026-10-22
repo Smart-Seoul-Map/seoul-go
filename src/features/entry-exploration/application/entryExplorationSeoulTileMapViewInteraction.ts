@@ -456,6 +456,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
       getCollectedNumbers().length > 0,
     deactivate,
     dispose: () => {
+      roulette.cancel();
       selectableLayer.dispose();
       disposeEntryExplorationObject3D(mapMesh);
     },
