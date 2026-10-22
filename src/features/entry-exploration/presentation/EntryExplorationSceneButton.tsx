@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode, SyntheticEvent } from "react";
 
+import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 
 import "./EntryExplorationSceneButton.css";
@@ -28,7 +29,7 @@ export function EntryExplorationSceneButton({
   }
 
   return (
-    <div
+    <AppBox
       className="entry-exploration-scene-button"
       data-placement={placement}
       onClick={stopSceneInput}
@@ -43,7 +44,7 @@ export function EntryExplorationSceneButton({
       >
         {children}
       </AppButton>
-    </div>
+    </AppBox>
   );
 }
 
