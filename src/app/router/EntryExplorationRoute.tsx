@@ -2,8 +2,7 @@ import { useEffect, useState, type ReactElement } from "react";
 
 import {
   EntryExplorationPage,
-  ENTRY_HANOK_PLACE,
-  ENTRY_HANOK_PLACE_ID,
+  getEntryAssetPlace,
   useEntryEditionSelection,
 } from "@features/entry-exploration";
 import {
@@ -93,8 +92,9 @@ export function EntryExplorationRoute(): ReactElement {
       places={places}
       onIntroBlocked={handleIntroBlocked}
       renderPlacePanel={({ placeId, ...props }) => {
-        if (placeId === ENTRY_HANOK_PLACE_ID) {
-          return <EntryPlacePanel key={placeId} place={ENTRY_HANOK_PLACE} {...props} />;
+        const assetPlace = getEntryAssetPlace(placeId);
+        if (assetPlace) {
+          return <EntryPlacePanel key={placeId} place={assetPlace} {...props} />;
         }
         const place = places?.find((candidate) => candidate.id === placeId);
         return place ? (
