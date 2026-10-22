@@ -7,8 +7,8 @@ export type EntryEditionModel = {
 
 // API place IDs are independent of the designer's temporary file sequence.
 export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> = {
-  "smart-seoul:1786321258890:25_edition25_24": {
-    url: "/models/places/namsan_baekbeom_square.glb",
+  "smart-seoul:1786321258890:26_edition25_1": {
+    url: "/models/places/bongeunsa.glb",
     size: 5,
     rotationY: Math.PI / 4,
     editionIndex: 0,
@@ -36,6 +36,12 @@ export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> =
     size: 7,
     rotationY: -Math.PI / 4,
     editionIndex: 4,
+  },
+  "smart-seoul:1786321258890:25_edition25_24": {
+    url: "/models/places/namsan_baekbeom_square.glb",
+    size: 5,
+    rotationY: Math.PI / 4,
+    editionIndex: 5,
   },
 };
 
