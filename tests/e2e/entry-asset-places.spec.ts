@@ -6,6 +6,11 @@ const DESKTOP = { width: 1366, height: 900 };
 const MAX_WALK_STEPS = 12;
 // Canvas area kept clear of the number panel (bottom left) and toasts (bottom) when clicking.
 const CLICK_AREA = { left: 0.05, right: 0.95, top: 0.05, bottom: 0.85 };
+// The camera shows cameraViewSize (19) world units across the canvas height, so one screen pixel
+// covers at least 19 / height units on the ground.
+const CAMERA_VIEW_SIZE = 19;
+// Floor steps stop this far from the asset, beyond its 4-unit arrival radius.
+const FLOOR_STEP_CLEARANCE = 6;
 
 type AssetPlace = {
   placeId: "hanok" | "waterfront" | "store";
@@ -72,7 +77,8 @@ async function readCollectedNumberCount(page: Page): Promise<string> {
   return label?.match(/\d+개 획득/)?.[0] ?? "";
 }
 
-// Returns the asset's marker when it is clickable, otherwise the floor point in its direction.
+// Returns the asset's marker when it is clickable, otherwise a floor point toward it that stops
+// short of its arrival radius.
 async function nextClickToward(page: Page, placeId: AssetPlace["placeId"]) {
   const box = await scene(page).boundingBox();
   if (!box) throw new Error("The entry scene has no visible bounds");
@@ -90,10 +96,15 @@ async function nextClickToward(page: Page, placeId: AssetPlace["placeId"]) {
     offset.x > 0 ? limit.right / offset.x : offset.x < 0 ? limit.left / -offset.x : 1,
     offset.y > 0 ? limit.down / offset.y : offset.y < 0 ? limit.up / -offset.y : 1
   );
+  if (scale === 1) return { point: marker, onAsset: true };
+
+  // Passing within the arrival radius would open the panel before the asset itself is clicked.
+  const clearance = (FLOOR_STEP_CLEARANCE * box.height) / CAMERA_VIEW_SIZE;
+  const reach = Math.min(scale, 1 - clearance / Math.hypot(offset.x, offset.y));
 
   return {
-    point: { x: center.x + offset.x * scale, y: center.y + offset.y * scale },
-    onAsset: scale === 1,
+    point: { x: center.x + offset.x * reach, y: center.y + offset.y * reach },
+    onAsset: false,
   };
 }
 
