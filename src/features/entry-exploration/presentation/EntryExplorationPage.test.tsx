@@ -161,7 +161,7 @@ describe("EntryExplorationPage", () => {
     const toastMessage = screen.getByText(TOAST_MESSAGE);
     expect(toastMessage.closest(".AppToast")?.getAttribute("data-status")).toBe("success");
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
     expect(getSpeechText()).toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.intro);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
@@ -235,7 +235,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
-    expect(screen.getByRole("button", { name: /2개 획득/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
   });
 
   test("collapses the automatically opened number panel when the character starts moving", () => {
@@ -245,7 +245,7 @@ describe("EntryExplorationPage", () => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
     });
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
 
     act(() => characterMovingChange?.(true));
     expect(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" })).toBeTruthy();
@@ -253,7 +253,7 @@ describe("EntryExplorationPage", () => {
     act(() => characterMovingChange?.(false));
     fireEvent.click(screen.getByRole("button", { name: "내 번호 열기, 2개 획득" }));
     act(() => characterMovingChange?.(true));
-    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
   });
 
   test("visiting hanok opens its panel but grants no reward and shows no toast", () => {
@@ -303,11 +303,10 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       "해방촌신흥시장|54해방촌신흥시장|49"
     );
-    expect(screen.getByLabelText(/2개 획득/)).toBeTruthy();
     expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     expect(screen.getByText(TOAST_MESSAGE)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "내 번호 접기, 4개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "획득한 숫자" }).textContent).toBe(
       "해방촌신흥시장|54해방촌신흥시장|49리움미술관|55리움미술관|48"
     );
@@ -326,7 +325,7 @@ describe("EntryExplorationPage", () => {
     });
     expect(screen.queryByRole("dialog", { name: "해방촌신흥시장" })).toBeNull();
     expect(screen.getByText(TOAST_MESSAGE)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
     act(() => {
       placeVisits?.[FIRST_PLACE_ID].update({ x: 30, z: 0 }, { x: 0, z: 0 });
       placeVisits?.[FIRST_PLACE_ID].update({ x: 0, z: 0 }, { x: 0, z: 0 });
@@ -335,7 +334,7 @@ describe("EntryExplorationPage", () => {
       expect(dismissPlaceFromBackground?.()).toBe(true);
     });
     expect(entryNumberRewardStore.getState().rewards).toEqual([FIRST_REWARD]);
-    expect(screen.getByRole("button", { name: /2개 획득/ })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "번호" })).toBeTruthy();
   });
 
   beforeEach(() => {

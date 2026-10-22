@@ -50,16 +50,11 @@
   height: var(--entry-numbers-header-height);
 }
 
-.entry-collected-numbers-trigger {
-  --sg-button-radius: var(--sg-radius-4_5);
-  --sg-button-padding-x: var(--sg-spacing-4);
-  width: max-content;
-  height: var(--entry-numbers-header-height);
-}
-
-.entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger {
+.entry-collected-numbers .AppButton.entry-collected-numbers-trigger {
   --sg-button-radius: var(--sg-radius-4);
   --sg-button-padding-x: var(--sg-spacing-3);
+  width: max-content;
+  height: var(--entry-numbers-header-height);
   background: var(--sg-color-bg-brand);
   color: var(--sg-color-text-inverted);
   box-shadow: var(--sg-shadow-2);
@@ -73,15 +68,47 @@
   box-shadow: inset 0 0 0 var(--sg-focus-ring-width) var(--sg-state-focus-ring);
 }
 
-.entry-collected-numbers-trigger-label {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sg-spacing-2);
-}
-
-.entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger-label .AppText {
+.entry-collected-numbers .entry-collected-numbers-trigger .AppText {
   color: inherit;
   font-weight: var(--sg-font-weight-bold);
+}
+
+.entry-collected-numbers-trigger .entry-collected-numbers-icon {
+  background: currentColor;
+}
+
+.entry-collected-numbers-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  flex: none;
+  width: max-content;
+  height: var(--entry-numbers-header-height);
+  white-space: nowrap;
+  padding-inline: var(--sg-spacing-4);
+}
+
+.entry-collected-numbers-notice {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--sg-spacing-5);
+  height: var(--sg-spacing-5);
+  padding: 0;
+  border: 1px solid var(--sg-color-stroke-brand);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-v3-yellow-500);
+  color: var(--sg-color-text-muted);
+  font: inherit;
+  font-size: var(--sg-font-size-2);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.entry-collected-numbers-notice:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
 }
 
 .entry-collected-numbers-close {

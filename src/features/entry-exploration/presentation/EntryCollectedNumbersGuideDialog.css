@@ -1,0 +1,109 @@
+.AppDialog:has(.entry-numbers-guide) {
+  --sg-dialog-surface-bg: var(--sg-color-bg-surface-paper);
+  position: relative;
+}
+
+.AppDialog:has(.entry-numbers-guide) .AppDialogHeader {
+  position: absolute;
+  top: var(--sg-spacing-4);
+  right: var(--sg-spacing-4);
+  z-index: 1;
+  padding: 0;
+}
+
+.entry-numbers-guide-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.entry-numbers-guide-hero {
+  position: relative;
+}
+
+.entry-numbers-guide-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.entry-numbers-guide-caption {
+  position: absolute;
+  right: 7%;
+  bottom: 1.5%;
+  left: 4.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6.5%;
+}
+
+.entry-numbers-guide-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sg-spacing-3);
+  padding: var(--sg-spacing-3) var(--sg-spacing-4);
+  border: 1px solid var(--sg-color-stroke-brand-weak);
+  border-radius: var(--sg-radius-4);
+  background: var(--sg-color-bg-brand-weak);
+}
+
+.entry-numbers-guide-badge {
+  flex: none;
+  width: var(--sg-spacing-10);
+  height: var(--sg-spacing-10);
+  border-radius: var(--sg-radius-full);
+  background-color: var(--sg-color-bg-brand);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.entry-numbers-guide-document {
+  flex: none;
+  width: var(--sg-spacing-8);
+  height: var(--sg-spacing-8);
+  background: var(--sg-v3-blue-600);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.entry-numbers-guide-line {
+  font-size: var(--sg-font-size-6);
+  display: block;
+}
+
+.entry-numbers-guide-accent {
+  color: var(--sg-color-text-brand);
+}
+
+.entry-numbers-guide-national {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-numbers-guide-link {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--sg-spacing-10);
+  height: var(--sg-spacing-10);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-v3-blue-600);
+  box-shadow: var(--sg-shadow-2);
+}
+
+.entry-numbers-guide-link:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}
+
+@media (max-width: 520px) {
+  .AppDialogBackdrop:has(.entry-numbers-guide) {
+    align-items: center;
+  }
+}
