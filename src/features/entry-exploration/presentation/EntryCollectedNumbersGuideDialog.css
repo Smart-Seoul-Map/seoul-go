@@ -20,12 +20,6 @@
   white-space: nowrap;
 }
 
-.entry-numbers-guide {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sg-spacing-3);
-}
-
 .entry-numbers-guide-hero {
   position: relative;
 }
@@ -87,15 +81,8 @@
 }
 
 .entry-numbers-guide-national {
-  display: flex;
   flex: 1;
-  flex-direction: column;
   min-width: 0;
-}
-
-.entry-numbers-guide-link-title {
-  color: var(--sg-v3-blue-600);
-  font-weight: var(--sg-font-weight-bold);
 }
 
 .entry-numbers-guide-link {

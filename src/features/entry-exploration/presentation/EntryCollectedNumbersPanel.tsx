@@ -4,7 +4,7 @@ import type { KeyboardEvent, ReactElement, SyntheticEvent } from "react";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
-import { AppText } from "@shared/ui/typography";
+import { AppHeading, AppText } from "@shared/ui/typography";
 
 import type { EntryNumberRewardRow } from "../domain/entryNumberReward";
 import closeIcon from "../../../assets/icons/close.svg";
@@ -118,9 +118,9 @@ export function EntryCollectedNumbersPanel({
           {isOpen ? (
             <AppBox className="entry-collected-numbers-title">
               <NumbersIcon />
-              <AppText as="span" role="supporting" id={`${id}-title`}>
+              <AppHeading as="h2" size="sm" id={`${id}-title`}>
                 번호
-              </AppText>
+              </AppHeading>
               <button
                 type="button"
                 className="entry-collected-numbers-notice"

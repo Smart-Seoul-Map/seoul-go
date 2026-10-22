@@ -74,7 +74,7 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(screen.queryByRole("list")).toBeNull();
   });
 
-  test("uses supporting text for the visible number title in both collapsed and expanded states", () => {
+  test("renders the collapsed title as supporting text and the expanded title as a heading", () => {
     render(<EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} />);
     const collapsedTitle = within(getTrigger(2)).getByText("번호");
     expect(collapsedTitle.classList.contains("AppText")).toBe(true);
@@ -83,8 +83,8 @@ describe("EntryCollectedNumbersPanel", () => {
     fireEvent.click(getTrigger(2));
     const panel = screen.getByRole("region", { name: "번호" });
     const expandedTitle = within(panel).getByText("번호");
-    expect(expandedTitle.classList.contains("AppText")).toBe(true);
-    expect(expandedTitle.getAttribute("data-role")).toBe("supporting");
+    expect(expandedTitle.classList.contains("AppHeading")).toBe(true);
+    expect(expandedTitle.getAttribute("data-size")).toBe("sm");
     expect(panel.getAttribute("aria-labelledby")).toBe(expandedTitle.id);
   });
 
