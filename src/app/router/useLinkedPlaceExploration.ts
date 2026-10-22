@@ -10,7 +10,7 @@ import {
 } from "@features/places";
 import { resolveLinkedPlaceReference, useUnlockedLinkedPlaceStore } from "@features/exploration";
 import { createLinkedPlaceReferences } from "./linkedPlaceReferences";
-import type { ExplorationPlaceMarkerSelection } from "@features/exploration";
+import type { ExplorationPlaceMarkerSelection, LinkedPlaceReference } from "@features/exploration";
 
 const EMPTY_PLACES: SmartSeoulThemePlace[] = [];
 
@@ -18,11 +18,27 @@ export function useLinkedPlaceExploration(sourcePlaces: readonly SmartSeoulTheme
   const savedPlaces = useStampCourseStore((state) => state.places);
   const unlockedReferences = useUnlockedLinkedPlaceStore((state) => state.references);
   const unlockReferences = useUnlockedLinkedPlaceStore((state) => state.unlockReferences);
-  const references = useMemo(
+  const [visitedReferences, setVisitedReferences] = useState<LinkedPlaceReference[]>([]);
+  const savedReferences = useMemo(
     () => createLinkedPlaceReferences(savedPlaces, sourcePlaces),
     [savedPlaces, sourcePlaces]
   );
-  const [selectedId, setSelectedId] = useState<string | null>(() => references.at(-1)?.id ?? null);
+  useEffect(() => {
+    const savedIds = new Set(savedReferences.map(({ id }) => id));
+    setVisitedReferences((previous) => {
+      const remaining = previous.filter(({ id }) => !savedIds.has(id));
+
+      return remaining.length === previous.length ? previous : remaining;
+    });
+  }, [savedReferences]);
+  const references = useMemo(() => {
+    const savedIds = new Set(savedReferences.map(({ id }) => id));
+
+    return [...savedReferences, ...visitedReferences.filter(({ id }) => !savedIds.has(id))];
+  }, [savedReferences, visitedReferences]);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => savedReferences.at(-1)?.id ?? null
+  );
   useEffect(() => {
     // Saved courses also restore unlocks created before unlock history was introduced.
     unlockReferences(references);
@@ -45,6 +61,17 @@ export function useLinkedPlaceExploration(sourcePlaces: readonly SmartSeoulTheme
   const markers = useMemo(() => createPlacesFeatureCollection(mapPlaces), [mapPlaces]);
   const activate = useCallback((place: ExplorationPlaceMarkerSelection) => {
     if (place.themeId !== SEOUL_EDITION25_THEME_ID) return false;
+    setVisitedReferences((previous) => [
+      ...previous.filter(({ id }) => id !== place.id),
+      {
+        id: place.id,
+        name: place.name,
+        imageUrl: place.imageUrl,
+        position: place.position,
+        addedAt: new Date().toISOString(),
+        selectionYear: place.selectionYear,
+      },
+    ]);
     setSelectedId(place.id);
     return true;
   }, []);

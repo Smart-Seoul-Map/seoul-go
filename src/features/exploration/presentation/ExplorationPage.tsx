@@ -109,12 +109,14 @@ export function ExplorationPage({
   const visitPlace = useVisitedPlaceStore((state) => state.visitPlace);
   const revealedPlaceIds = useMemo(() => new Set(visitedPlaceIds), [visitedPlaceIds]);
 
+  const firstVisitPlaceIdRef = useRef<string | null>(null);
   const selectPlace = useCallback(
     (place: ExplorationPlaceMarkerSelection) => {
+      firstVisitPlaceIdRef.current = visitedPlaceIds.includes(place.id) ? null : place.id;
       visitPlace(place.id);
       openPanel({ type: "place", place });
     },
-    [visitPlace, openPanel]
+    [visitedPlaceIds, visitPlace, openPanel]
   );
 
   const openCoursePanel = () => {
@@ -130,10 +132,18 @@ export function ExplorationPage({
     }
     return stage?.querySelector<HTMLElement>(".maplibregl-canvas") ?? stage;
   };
+  const handleExitComplete = () => {
+    const isClosingPlacePanel = panel.status === "closing" && panel.next === null && selectedPlace;
+    finishExit();
+    if (!isClosingPlacePanel || !renderLinkedPlacesPanel) return;
+    if (firstVisitPlaceIdRef.current !== selectedPlace.id) return;
+    firstVisitPlaceIdRef.current = null;
+    if (onActivateLinkedPlaces?.(selectedPlace)) openPanel({ type: "linked" });
+  };
   const lifecycle = {
     open: isPanelOpen,
     onClose: closePanel,
-    onExitComplete: finishExit,
+    onExitComplete: handleExitComplete,
     returnFocus,
   };
 

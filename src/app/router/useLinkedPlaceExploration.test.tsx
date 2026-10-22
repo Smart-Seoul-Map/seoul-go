@@ -87,6 +87,19 @@ afterEach(() => {
   getSmartSeoulThemeApiKey.mockReturnValue("TEST");
 });
 
+test("activates an Edition place that is not in the course and unlocks its markers", async () => {
+  const client = new QueryClient();
+  const wrapper = ({ children }: PropsWithChildren) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  const { result } = renderHook(() => useLinkedPlaceExploration([]), { wrapper });
+  act(() => {
+    expect(result.current.activate(a)).toBe(true);
+  });
+  await waitFor(() => expect(result.current.selected?.id).toBe(a.id));
+  expect(unlockedLinkedPlaceStore.getState().references.map(({ id }) => id)).toEqual([a.id]);
+});
+
 test("only activates after adding an Edition, preserves selection, and reconciles removal", async () => {
   const client = new QueryClient();
   const wrapper = ({ children }: PropsWithChildren) => (
