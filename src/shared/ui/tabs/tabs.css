@@ -1,7 +1,7 @@
 .AppTabs {
   min-width: 0;
   max-width: 100%;
-  font-family: var(--sg-font-namsan);
+  font-family: var(--sg-font-family-base);
   color: var(--sg-color-text-default);
   letter-spacing: 0;
 }
