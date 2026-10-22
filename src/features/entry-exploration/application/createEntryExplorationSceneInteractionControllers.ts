@@ -13,6 +13,7 @@ export type CreateEntryExplorationSceneInteractionControllersOptions = {
   onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
   onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartViewActiveChange?: (isActive: boolean) => void;
+  onRouletteCameraSettled?: () => void;
   onRouletteThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onRouletteViewActiveChange?: (isActive: boolean) => void;
   onRouletteViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
@@ -25,6 +26,7 @@ export function createEntryExplorationSceneInteractionControllers({
   onDartTargetHoverChange,
   onDartViewActiveChange,
   onDartViewControlsReady,
+  onRouletteCameraSettled,
   onRouletteThrowResult,
   onRouletteViewActiveChange,
   onRouletteViewControlsReady,
@@ -43,6 +45,7 @@ export function createEntryExplorationSceneInteractionControllers({
       mode: "roulette",
       onEntryBlocked: onDartEntryBlocked,
       onActiveChange: onRouletteViewActiveChange,
+      onCameraSettled: onRouletteCameraSettled,
       onControlsReady: onRouletteViewControlsReady,
       onDartThrowResult: onRouletteThrowResult,
     }),

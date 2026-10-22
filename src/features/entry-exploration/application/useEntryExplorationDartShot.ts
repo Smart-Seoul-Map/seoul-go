@@ -9,6 +9,7 @@ export type EntryExplorationDartViewKind = "arrow" | "roulette";
 
 export type EntryExplorationDartShotViewModel = {
   isGuideVisible: boolean;
+  isRouletteReady: boolean;
   isRouletteStarted: boolean;
   isTargetHovered: boolean;
   landedResult: EntryExplorationDartThrowResult | null;
@@ -26,6 +27,7 @@ type EntryExplorationDartShotHookResult = {
   onFlightEnd: () => void;
   onRequestRouletteView: () => void;
   onRetryThrow: () => void;
+  onRouletteCameraSettled: () => void;
   onRouletteStart: () => void;
   onRouletteThrowResult: (result: EntryExplorationDartThrowResult) => void;
   onRouletteViewActiveChange: (isActive: boolean) => void;
@@ -35,6 +37,7 @@ type EntryExplorationDartShotHookResult = {
 
 export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResult {
   const [isGuideVisible, setIsGuideVisible] = useState(false);
+  const [isRouletteReady, setIsRouletteReady] = useState(false);
   const [isRouletteStarted, setIsRouletteStarted] = useState(false);
   const [isTargetHovered, setIsTargetHovered] = useState(false);
   const [shotResult, setShotResult] = useState<EntryExplorationDartThrowResult | null>(null);
@@ -69,6 +72,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
       }
 
       setIsTargetHovered(false);
+      setIsRouletteReady(false);
       setIsRouletteStarted(false);
       setShotResult(null);
       setLandedResult(null);
@@ -105,9 +109,14 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     viewControlsRef.current.arrow?.throwAtRandomCell();
   }, []);
 
+  const onRouletteCameraSettled = useCallback(() => {
+    setIsRouletteReady(true);
+  }, []);
+
   const onRouletteStart = useCallback(() => {
-    setIsRouletteStarted(true);
-    viewControlsRef.current.roulette?.startRoulette();
+    const hasStarted = viewControlsRef.current.roulette?.startRoulette() ?? false;
+
+    setIsRouletteStarted(hasStarted);
   }, []);
 
   const onRequestRouletteView = useCallback(() => {
@@ -136,6 +145,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   return {
     dartShot: {
       isGuideVisible,
+      isRouletteReady,
       isRouletteStarted,
       isTargetHovered,
       landedResult,
@@ -150,6 +160,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     onFlightEnd,
     onRequestRouletteView,
     onRetryThrow,
+    onRouletteCameraSettled,
     onRouletteStart,
     onRouletteThrowResult,
     onRouletteViewActiveChange,

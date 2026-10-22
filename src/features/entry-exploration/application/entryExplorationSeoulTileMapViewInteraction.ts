@@ -63,7 +63,7 @@ export type EntryExplorationDartViewControls = {
   requestApproach: () => void;
   resetThrow: () => void;
   setHitCell: (cell: SeoulGridCell | null) => void;
-  startRoulette: () => void;
+  startRoulette: () => boolean;
   throwAtRandomCell: () => void;
 };
 
@@ -74,6 +74,7 @@ export type EntryExplorationSeoulTileMapViewInteractionOptions = {
   mode?: EntryExplorationTileMapMode;
   onEntryBlocked?: () => void;
   onActiveChange?: (isActive: boolean) => void;
+  onCameraSettled?: () => void;
   onControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
   onTargetHoverChange?: (isOverValidCell: boolean) => void;
@@ -97,6 +98,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   mode = "arrow",
   onEntryBlocked,
   onActiveChange,
+  onCameraSettled,
   onControlsReady,
   onDartThrowResult,
   onTargetHoverChange,
@@ -268,10 +270,14 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     requestedCharacterDestination = triggerPosition;
   };
 
-  const startRoulette = (): void => {
-    if (isRouletteMode && isEngaged && !hasThrown && cameraTransitionStartedAt === null) {
-      roulette.start();
+  const startRoulette = (): boolean => {
+    if (!isRouletteMode || !isEngaged || hasThrown || cameraTransitionStartedAt !== null) {
+      return false;
     }
+
+    roulette.start();
+
+    return true;
   };
 
   onControlsReady?.({
@@ -408,6 +414,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     cameraTransition = null;
     cameraTransitionStartedAt = null;
+    onCameraSettled?.();
   };
 
   const faceCharacterTowardMap = (): void => {

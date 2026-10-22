@@ -408,6 +408,35 @@ describe("entry exploration seoul tile map view interaction", () => {
 
     controller.dispose();
   });
+
+  test("roulette mode refuses to start until the camera settles and then announces it", () => {
+    let viewControls: EntryExplorationDartViewControls | null = null;
+    const onCameraSettled = vi.fn();
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [CENTER_NUMBER],
+      mode: "roulette",
+      onCameraSettled,
+      onControlsReady: (controls) => {
+        viewControls = controls;
+      },
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
+    const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+
+    controller.updateTriggerState(TRIGGER_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, cameraTransitionDurationMs / 2, TRIGGER_POSITION);
+
+    expect(viewControls!.startRoulette()).toBe(false);
+    expect(onCameraSettled).not.toHaveBeenCalled();
+
+    controller.updateCamera(camera, cameraTransitionDurationMs, TRIGGER_POSITION);
+
+    expect(onCameraSettled).toHaveBeenCalledTimes(1);
+    expect(viewControls!.startRoulette()).toBe(true);
+
+    controller.dispose();
+  });
 });
 
 function findOffLineValidCell(): SeoulGridCell {

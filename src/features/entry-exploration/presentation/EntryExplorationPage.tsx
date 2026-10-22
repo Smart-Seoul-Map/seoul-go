@@ -74,6 +74,7 @@ export function EntryExplorationPage({
     onFlightEnd,
     onRequestRouletteView,
     onRetryThrow,
+    onRouletteCameraSettled,
     onRouletteStart,
     onRouletteThrowResult,
     onRouletteViewActiveChange,
@@ -123,6 +124,7 @@ export function EntryExplorationPage({
     onDartThrowResult,
     onDartViewActiveChange,
     onDartViewControlsReady,
+    onRouletteCameraSettled,
     onRouletteThrowResult,
     onRouletteViewActiveChange,
     onRouletteViewControlsReady,
@@ -186,7 +188,7 @@ export function EntryExplorationPage({
       />
       <EntryExplorationSceneButton
         isDisabled={dartShot.isRouletteStarted}
-        isVisible={isRouletteView && dartShot.shotResult === null}
+        isVisible={isRouletteView && dartShot.isRouletteReady && dartShot.shotResult === null}
         onClick={onRouletteStart}
         placement="bottom"
       >
