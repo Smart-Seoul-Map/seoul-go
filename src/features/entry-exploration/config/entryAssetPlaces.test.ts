@@ -25,19 +25,19 @@ test("keeps the hanok panel unchanged and gives waterfront and store their own m
     },
   });
   expect(getEntryAssetPlace("waterfront")).toMatchObject({
-    title: "물빛나루",
+    title: "서울물빛나루",
     subtitle: "탐방중 이런 정보를 만나요!",
     externalLink: {
-      label: "물빛나루 지도 보기",
-      href: "https://map.seoul.go.kr/smgis2/seoulMap",
+      label: "서울물빛나루 지도 보기",
+      href: "https://map.seoul.go.kr/smgis2/short/6PJUP",
     },
   });
   expect(getEntryAssetPlace("store")).toMatchObject({
-    title: "마음편의점",
+    title: "서울마음편의점",
     subtitle: "탐방중 이런 정보를 만나요!",
     externalLink: {
-      label: "마음편의점 지도 보기",
-      href: "https://map.seoul.go.kr/smgis2",
+      label: "서울마음편의점 지도 보기",
+      href: "https://map.seoul.go.kr/smgis2/short/6PiAJ",
     },
   });
   for (const placeId of ENTRY_ASSET_PLACE_IDS) {

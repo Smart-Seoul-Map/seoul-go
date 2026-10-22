@@ -24,15 +24,15 @@ const ASSET_PLACES: readonly AssetPlace[] = [
   },
   {
     placeId: "store",
-    title: "마음편의점",
-    linkLabel: "마음편의점 지도 보기",
-    href: "https://map.seoul.go.kr/smgis2",
+    title: "서울마음편의점",
+    linkLabel: "서울마음편의점 지도 보기",
+    href: "https://map.seoul.go.kr/smgis2/short/6PiAJ",
   },
   {
     placeId: "waterfront",
-    title: "물빛나루",
-    linkLabel: "물빛나루 지도 보기",
-    href: "https://map.seoul.go.kr/smgis2/seoulMap",
+    title: "서울물빛나루",
+    linkLabel: "서울물빛나루 지도 보기",
+    href: "https://map.seoul.go.kr/smgis2/short/6PJUP",
   },
 ];
 

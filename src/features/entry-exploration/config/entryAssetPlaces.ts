@@ -14,25 +14,24 @@ export const ENTRY_ASSET_PLACES = {
       href: "https://map.seoul.go.kr/smgis2/short/6P5oo",
     },
   },
-  // Temporary waterfront/store links until the theme URLs are confirmed.
   waterfront: {
-    title: "물빛나루",
+    title: "서울물빛나루",
     subtitle: ENTRY_ASSET_PLACE_SUBTITLE,
     description:
-      "한강과 물길을 따라 즐길 수 있는 물빛나루 정보를 만나보세요. 스마트서울맵에서 물빛나루 위치를 확인할 수 있어요.",
+      "물길 곁에서 쉬고 즐길 수 있는 수변활력거점, 서울물빛나루 정보를 만나보세요. 스마트서울맵에서 서울물빛나루 위치를 확인할 수 있어요.",
     externalLink: {
-      label: "물빛나루 지도 보기",
-      href: "https://map.seoul.go.kr/smgis2/seoulMap",
+      label: "서울물빛나루 지도 보기",
+      href: "https://map.seoul.go.kr/smgis2/short/6PJUP",
     },
   },
   store: {
-    title: "마음편의점",
+    title: "서울마음편의점",
     subtitle: ENTRY_ASSET_PLACE_SUBTITLE,
     description:
-      "누구나 편하게 들러 쉬어 갈 수 있는 서울마음편의점 정보를 만나보세요. 스마트서울맵에서 마음편의점 위치를 확인할 수 있어요.",
+      "외로울 때 편의점처럼 편하게 들러 마음을 털어놓을 수 있는 서울마음편의점 정보를 만나보세요. 스마트서울맵에서 서울마음편의점 위치를 확인할 수 있어요.",
     externalLink: {
-      label: "마음편의점 지도 보기",
-      href: "https://map.seoul.go.kr/smgis2",
+      label: "서울마음편의점 지도 보기",
+      href: "https://map.seoul.go.kr/smgis2/short/6PiAJ",
     },
   },
 } as const;
