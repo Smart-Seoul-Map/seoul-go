@@ -9,8 +9,9 @@ const CLICK_AREA = { left: 0.05, right: 0.95, top: 0.05, bottom: 0.85 };
 // The camera shows cameraViewSize (19) world units across the canvas height, so one screen pixel
 // covers at least 19 / height units on the ground.
 const CAMERA_VIEW_SIZE = 19;
-// Floor steps stop this far from the asset, beyond its 4-unit arrival radius.
-const FLOOR_STEP_CLEARANCE = 6;
+// Floor steps stop this far from the asset on the screen: past half of the widest asset image
+// (waterfront, 13 units) and beyond the 4-unit arrival radius.
+const FLOOR_STEP_CLEARANCE = 7;
 
 type AssetPlace = {
   placeId: "hanok" | "waterfront" | "store";
@@ -78,7 +79,7 @@ async function readCollectedNumberCount(page: Page): Promise<string> {
 }
 
 // Returns the asset's marker when it is clickable, otherwise a floor point toward it that stops
-// short of its arrival radius.
+// short of its image and arrival radius.
 async function nextClickToward(page: Page, placeId: AssetPlace["placeId"]) {
   const box = await scene(page).boundingBox();
   if (!box) throw new Error("The entry scene has no visible bounds");
@@ -98,9 +99,10 @@ async function nextClickToward(page: Page, placeId: AssetPlace["placeId"]) {
   );
   if (scale === 1) return { point: marker, onAsset: true };
 
-  // Passing within the arrival radius would open the panel before the asset itself is clicked.
+  // A click anywhere on the asset image walks to the asset, and passing within the arrival radius
+  // opens its panel, so the step stops outside both along the screen axis it mostly travels on.
   const clearance = (FLOOR_STEP_CLEARANCE * box.height) / CAMERA_VIEW_SIZE;
-  const reach = Math.min(scale, 1 - clearance / Math.hypot(offset.x, offset.y));
+  const reach = Math.min(scale, 1 - clearance / Math.max(Math.abs(offset.x), Math.abs(offset.y)));
 
   return {
     point: { x: center.x + offset.x * reach, y: center.y + offset.y * reach },
