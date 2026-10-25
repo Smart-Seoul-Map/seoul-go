@@ -1,11 +1,7 @@
 :root {
   /* Typography - Font Families*/
-  --sg-font-namsan:
-    "SeoulNamsan", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-  --sg-font-alrim:
-    "SeoulAlrim", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-  --sg-font-hangang:
-    "SeoulHangang", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  --sg-font-family-base:
+    "Nanum Gothic", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
 
   /* Primitive Colors  */
   --sg-v3-pink-500: #ff2e94;
@@ -195,52 +191,52 @@
   --sg-font-weight-bold: 700;
 
   /* Typography - semantic roles */
-  --sg-typography-body-font-family: var(--sg-font-namsan);
+  --sg-typography-body-font-family: var(--sg-font-family-base);
   --sg-typography-body-font-size: var(--sg-font-size-5);
   --sg-typography-body-line-height: var(--sg-line-height-5);
   --sg-typography-body-font-weight: var(--sg-font-weight-regular);
 
-  --sg-typography-supporting-font-family: var(--sg-font-namsan);
+  --sg-typography-supporting-font-family: var(--sg-font-family-base);
   --sg-typography-supporting-font-size: var(--sg-font-size-4);
   --sg-typography-supporting-line-height: var(--sg-line-height-4);
   --sg-typography-supporting-font-weight: var(--sg-font-weight-regular);
 
-  --sg-typography-caption-font-family: var(--sg-font-hangang);
+  --sg-typography-caption-font-family: var(--sg-font-family-base);
   --sg-typography-caption-font-size: var(--sg-font-size-3);
   --sg-typography-caption-line-height: var(--sg-line-height-3);
   --sg-typography-caption-font-weight: var(--sg-font-weight-regular);
 
-  --sg-typography-button-label-font-family: var(--sg-font-namsan);
+  --sg-typography-button-label-font-family: var(--sg-font-family-base);
   --sg-typography-button-label-font-size: var(--sg-font-size-4);
   --sg-typography-button-label-line-height: var(--sg-line-height-4);
   --sg-typography-button-label-font-weight: var(--sg-font-weight-bold);
 
-  --sg-typography-dialog-title-font-family: var(--sg-font-alrim);
+  --sg-typography-dialog-title-font-family: var(--sg-font-family-base);
   --sg-typography-dialog-title-font-size: var(--sg-font-size-7);
   --sg-typography-dialog-title-line-height: var(--sg-line-height-7);
   --sg-typography-dialog-title-font-weight: var(--sg-font-weight-bold);
 
-  --sg-typography-dialog-body-font-family: var(--sg-font-namsan);
+  --sg-typography-dialog-body-font-family: var(--sg-font-family-base);
   --sg-typography-dialog-body-font-size: var(--sg-font-size-5);
   --sg-typography-dialog-body-line-height: var(--sg-line-height-5);
   --sg-typography-dialog-body-font-weight: var(--sg-font-weight-regular);
 
-  --sg-typography-result-title-font-family: var(--sg-font-alrim);
+  --sg-typography-result-title-font-family: var(--sg-font-family-base);
   --sg-typography-result-title-font-size: var(--sg-font-size-8);
   --sg-typography-result-title-line-height: var(--sg-line-height-8);
   --sg-typography-result-title-font-weight: var(--sg-font-weight-bold);
 
-  --sg-typography-detail-title-font-family: var(--sg-font-alrim);
+  --sg-typography-detail-title-font-family: var(--sg-font-family-base);
   --sg-typography-detail-title-font-size: var(--sg-detail-title-size);
   --sg-typography-detail-title-line-height: normal;
   --sg-typography-detail-title-font-weight: var(--sg-font-weight-bold);
 
-  --sg-typography-detail-body-font-family: var(--sg-font-namsan);
+  --sg-typography-detail-body-font-family: var(--sg-font-family-base);
   --sg-typography-detail-body-font-size: var(--sg-font-size-8);
   --sg-typography-detail-body-line-height: normal;
   --sg-typography-detail-body-font-weight: var(--sg-font-weight-medium);
 
-  --sg-typography-detail-supporting-font-family: var(--sg-font-hangang);
+  --sg-typography-detail-supporting-font-family: var(--sg-font-family-base);
   --sg-typography-detail-supporting-font-size: var(--sg-detail-supporting-size);
   --sg-typography-detail-supporting-line-height: normal;
   --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-medium);
@@ -451,7 +447,7 @@
   /* Main map place detail */
   --sg-edition-marker-width: 144px;
   --sg-edition-marker-image-ratio: 4 / 3;
-  --sg-edition-marker-font-family: var(--sg-font-namsan);
+  --sg-edition-marker-font-family: var(--sg-font-family-base);
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
   --sg-map-detail-header-action-size: var(--sg-spacing-10);
