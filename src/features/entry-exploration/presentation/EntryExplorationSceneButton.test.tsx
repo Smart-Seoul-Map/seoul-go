@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
@@ -32,8 +33,6 @@ describe("EntryExplorationSceneButton", () => {
         START
       </EntryExplorationSceneButton>
     );
-    expect((screen.getByRole("button", { name: "START" }) as HTMLButtonElement).disabled).toBe(
-      true
-    );
+    expect(screen.getByRole("button", { name: "START" })).toBeDisabled();
   });
 });
