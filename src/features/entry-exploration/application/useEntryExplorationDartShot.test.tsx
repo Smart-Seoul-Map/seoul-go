@@ -54,17 +54,12 @@ describe("useEntryExplorationDartShot", () => {
       activeCell: NEXT_CELL,
       layout: LAYOUT,
       step: 1,
-      trailCell: FIRST_CELL,
       win: null,
     });
 
     act(() => result.current.onRouletteWin(win));
 
-    expect(result.current.dartShot.rouletteBoard).toMatchObject({
-      activeCell: null,
-      trailCell: null,
-      win,
-    });
+    expect(result.current.dartShot.rouletteBoard).toMatchObject({ activeCell: null, win });
 
     act(() => result.current.onRouletteThrowResult(ROULETTE_RESULT));
 
@@ -77,7 +72,7 @@ describe("useEntryExplorationDartShot", () => {
     expect(result.current.dartShot).toMatchObject({
       isRouletteReady: true,
       isRouletteStarted: false,
-      rouletteBoard: { activeCell: null, layout: LAYOUT, step: 0, trailCell: null, win: null },
+      rouletteBoard: { activeCell: null, layout: LAYOUT, step: 0, win: null },
       shotResult: null,
       viewKind: "roulette",
     });
@@ -97,7 +92,6 @@ describe("useEntryExplorationDartShot", () => {
       activeCell: null,
       layout: null,
       step: 0,
-      trailCell: null,
       win: null,
     });
   });

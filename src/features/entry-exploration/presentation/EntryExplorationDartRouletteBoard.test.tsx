@@ -19,7 +19,6 @@ const READY_BOARD: EntryExplorationDartRouletteBoardState = {
     selectableCells: SELECTABLE_CELLS,
   },
   step: 0,
-  trailCell: null,
   win: null,
 };
 const WON_BOARD: EntryExplorationDartRouletteBoardState = {
@@ -81,15 +80,16 @@ describe("EntryExplorationDartRouletteBoard", () => {
     expect(tileBoard).toHaveAttribute("data-intro", "false");
   });
 
-  test("lifts the current cell and builds tension in the slow steps", () => {
-    const [, secondCell] = SELECTABLE_CELLS;
+  test("lights the current cell in place and deepens the glow in the slow steps", () => {
     const { container, rerender } = renderBoard({
-      board: { ...READY_BOARD, activeCell: secondCell, trailCell: FIRST_CELL },
+      board: { ...READY_BOARD, activeCell: FIRST_CELL },
       isStarted: true,
     });
+    const litPaths = container.querySelectorAll('[data-lit="true"]');
 
-    expect(container.querySelectorAll('[data-state="active"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-state="trail"]')).toHaveLength(1);
+    expect(litPaths).toHaveLength(1);
+    expect(litPaths[0]).toHaveClass("entry-exploration-dart-roulette__path");
+    expect(container.querySelector(".entry-exploration-dart-roulette__tile")).toBeNull();
     expect(getRoot(container)).toHaveAttribute("data-phase", "fast");
     expect(screen.getByRole("button", { name: "START" })).toBeDisabled();
 

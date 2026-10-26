@@ -11,7 +11,7 @@ import "./EntryExplorationDartRouletteBoard.css";
 
 type EntryExplorationDartRoulettePhase = "done" | "fast" | "idle" | "slow" | "win";
 
-type EntryExplorationDartRouletteTileState = "active" | "owned" | "trail" | "win";
+type EntryExplorationDartRouletteTileState = "owned" | "win";
 
 export type EntryExplorationDartRouletteBoardProps = {
   board: EntryExplorationDartRouletteBoardState;
@@ -33,7 +33,7 @@ export function EntryExplorationDartRouletteBoard({
   isStarted,
   onStart,
 }: EntryExplorationDartRouletteBoardProps): ReactElement {
-  const { activeCell, layout, trailCell, win } = board;
+  const { activeCell, layout, win } = board;
   const hasLayout = layout !== null;
   const [isIntroPlaying, setIsIntroPlaying] = useState(true);
   const phase = getRoulettePhase(board, isStarted, hasResult);
@@ -67,6 +67,7 @@ export function EntryExplorationDartRouletteBoard({
           </div>
           <div className="entry-exploration-dart-roulette__paths">
             {layout.selectableCells.map((cell) => {
+              const isLit = activeCell !== null && isSameCell(cell, activeCell);
               const winDistance = win ? getCellDistance(cell, win.cell) : null;
               const isRippling =
                 isWinHolding &&
@@ -79,10 +80,13 @@ export function EntryExplorationDartRouletteBoard({
                   key={toCellKey(cell)}
                   aria-hidden="true"
                   className="entry-exploration-dart-roulette__path"
+                  data-lit={isLit}
                   data-ripple={isRippling}
                   style={{
                     ...toCellStyle(cell),
-                    animationDelay: getPathAnimationDelay(cell, isIntroPlaying, winDistance),
+                    animationDelay: isLit
+                      ? undefined
+                      : getPathAnimationDelay(cell, isIntroPlaying, winDistance),
                   }}
                 />
               );
@@ -94,16 +98,6 @@ export function EntryExplorationDartRouletteBoard({
               />
             )}
           </div>
-          {trailCell && (
-            <RouletteTile key={`trail:${toCellKey(trailCell)}`} cell={trailCell} state="trail" />
-          )}
-          {activeCell && (
-            <RouletteTile
-              key={`active:${toCellKey(activeCell)}`}
-              cell={activeCell}
-              state="active"
-            />
-          )}
           {win && <RouletteTile cell={win.cell} state={isWinHolding ? "win" : "owned"} />}
           {isWinHolding && win && (
             <>
@@ -141,8 +135,6 @@ type RouletteTileProps = {
 };
 
 function RouletteTile({ cell, state }: RouletteTileProps): ReactElement {
-  const hasStamp = state === "owned" || state === "win";
-
   return (
     <span
       aria-hidden="true"
@@ -150,7 +142,7 @@ function RouletteTile({ cell, state }: RouletteTileProps): ReactElement {
       data-state={state}
       style={toCellStyle(cell)}
     >
-      {hasStamp && <span className="entry-exploration-dart-roulette__stamp">⚑</span>}
+      <span className="entry-exploration-dart-roulette__stamp">⚑</span>
     </span>
   );
 }
@@ -223,6 +215,10 @@ function toPercent(ratio: number): string {
 
 function toCellKey({ column, row }: SeoulGridCell): string {
   return `${column}:${row}`;
+}
+
+function isSameCell(left: SeoulGridCell, right: SeoulGridCell): boolean {
+  return left.column === right.column && left.row === right.row;
 }
 
 function getCellDistance(from: SeoulGridCell, to: SeoulGridCell): number {

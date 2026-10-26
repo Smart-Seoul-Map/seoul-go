@@ -15,7 +15,6 @@ export type EntryExplorationDartRouletteBoardState = {
   activeCell: SeoulGridCell | null;
   layout: EntryExplorationDartRouletteLayout | null;
   step: number;
-  trailCell: SeoulGridCell | null;
   win: EntryExplorationDartRouletteWin | null;
 };
 
@@ -55,7 +54,6 @@ const EMPTY_ROULETTE_BOARD: EntryExplorationDartRouletteBoardState = {
   activeCell: null,
   layout: null,
   step: 0,
-  trailCell: null,
   win: null,
 };
 
@@ -146,13 +144,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
 
   const onRouletteHighlight = useCallback(
     ({ cell, step }: EntryExplorationDartRouletteHighlight) => {
-      setRouletteBoard((board) => ({
-        ...board,
-        activeCell: cell,
-        step,
-        trailCell: board.activeCell,
-        win: null,
-      }));
+      setRouletteBoard((board) => ({ ...board, activeCell: cell, step, win: null }));
 
       if (step >= steps.fastCount) {
         navigator.vibrate?.(vibration.tickMs);
@@ -162,7 +154,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   );
 
   const onRouletteWin = useCallback((win: EntryExplorationDartRouletteWin) => {
-    setRouletteBoard((board) => ({ ...board, activeCell: null, trailCell: null, win }));
+    setRouletteBoard((board) => ({ ...board, activeCell: null, win }));
     navigator.vibrate?.([...vibration.winPattern]);
   }, []);
 
