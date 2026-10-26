@@ -10,10 +10,13 @@ import { useEntryExplorationDartShot } from "./useEntryExplorationDartShot";
 
 const FIRST_CELL = { column: 3, row: 4 };
 const NEXT_CELL = { column: 5, row: 4 };
+const REST_MAP_RECT = { height: 0.6, width: 0.8, x: 0.5, y: 0.5 };
 const LAYOUT: EntryExplorationDartRouletteLayout = {
-  mapRect: { height: 0.6, width: 0.8, x: 0.5, y: 0.5 },
+  mapRect: REST_MAP_RECT,
+  restMapRect: REST_MAP_RECT,
   selectableCells: [FIRST_CELL, NEXT_CELL],
 };
+const BOARD_LAYOUT = { restMapRect: REST_MAP_RECT, selectableCells: LAYOUT.selectableCells };
 const ROULETTE_RESULT: EntryExplorationDartThrowResult = {
   cell: NEXT_CELL,
   districtId: null,
@@ -52,7 +55,7 @@ describe("useEntryExplorationDartShot", () => {
     expect(result.current.dartShot.isRouletteStarted).toBe(true);
     expect(result.current.dartShot.rouletteBoard).toEqual({
       activeCell: NEXT_CELL,
-      layout: LAYOUT,
+      layout: BOARD_LAYOUT,
       step: 1,
       win: null,
     });
@@ -72,10 +75,32 @@ describe("useEntryExplorationDartShot", () => {
     expect(result.current.dartShot).toMatchObject({
       isRouletteReady: true,
       isRouletteStarted: false,
-      rouletteBoard: { activeCell: null, layout: LAYOUT, step: 0, win: null },
+      rouletteBoard: { activeCell: null, layout: BOARD_LAYOUT, step: 0, win: null },
       shotResult: null,
       viewKind: "roulette",
     });
+  });
+
+  test("streams the moving map rect without re-rendering the board", () => {
+    const listener = vi.fn();
+    const movingMapRect = { ...REST_MAP_RECT, height: 0.3, width: 0.4 };
+    const { result } = renderHook(() => useEntryExplorationDartShot());
+
+    act(() => {
+      result.current.onRouletteViewActiveChange(true);
+      result.current.onRouletteLayoutChange(LAYOUT);
+    });
+
+    const unsubscribe = result.current.rouletteMapRectStore.subscribe(listener);
+    const boardBeforeMove = result.current.dartShot.rouletteBoard;
+
+    act(() => result.current.onRouletteLayoutChange({ ...LAYOUT, mapRect: movingMapRect }));
+
+    expect(listener).toHaveBeenCalledWith(movingMapRect);
+    expect(result.current.rouletteMapRectStore.getSnapshot()).toBe(movingMapRect);
+    expect(result.current.dartShot.rouletteBoard).toBe(boardBeforeMove);
+
+    unsubscribe();
   });
 
   test("clears the roulette board when the view closes", () => {

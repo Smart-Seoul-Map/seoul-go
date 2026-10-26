@@ -1,7 +1,5 @@
 export const ENTRY_EXPLORATION_DART_ROULETTE_CONFIG = {
   board: {
-    introDelayPerCellMs: 12,
-    introDurationMs: 900,
     rippleDelayPerCellMs: 22,
     rippleRadiusCells: 9,
     tileGapRatio: 0.06,

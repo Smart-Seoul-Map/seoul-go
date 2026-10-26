@@ -84,6 +84,7 @@ export function EntryExplorationPage({
     onRouletteViewControlsReady,
     onRouletteWin,
     requestDartView,
+    rouletteMapRectStore,
   } = useEntryExplorationDartShot();
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
     places ?? EMPTY_ENTRY_PLACES,
@@ -187,6 +188,7 @@ export function EntryExplorationPage({
           hasResult={dartShot.shotResult !== null}
           isReady={dartShot.isRouletteReady}
           isStarted={dartShot.isRouletteStarted}
+          mapRectStore={rouletteMapRectStore}
           onStart={onRouletteStart}
         />
       )}

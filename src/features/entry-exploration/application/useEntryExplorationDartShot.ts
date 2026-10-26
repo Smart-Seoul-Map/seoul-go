@@ -9,13 +9,25 @@ import type {
   EntryExplorationDartThrowResult,
   EntryExplorationDartViewControls,
   EntryExplorationDartViewKind,
+  EntryExplorationDartViewportRect,
 } from "./entryExplorationSeoulTileMapViewInteraction";
+
+export type EntryExplorationDartRouletteBoardLayout = Omit<
+  EntryExplorationDartRouletteLayout,
+  "mapRect"
+>;
 
 export type EntryExplorationDartRouletteBoardState = {
   activeCell: SeoulGridCell | null;
-  layout: EntryExplorationDartRouletteLayout | null;
+  layout: EntryExplorationDartRouletteBoardLayout | null;
   step: number;
   win: EntryExplorationDartRouletteWin | null;
+};
+
+// 카메라 이동 중 매 프레임 바뀌는 지도 위치는 React 상태를 거치지 않고 구독으로 전달한다.
+export type EntryExplorationDartRouletteMapRectStore = {
+  getSnapshot: () => EntryExplorationDartViewportRect | null;
+  subscribe: (listener: (mapRect: EntryExplorationDartViewportRect) => void) => () => void;
 };
 
 export type EntryExplorationDartShotViewModel = {
@@ -42,6 +54,7 @@ type EntryExplorationDartShotHookResult = {
   onRouletteCameraSettled: () => void;
   onRouletteHighlight: (highlight: EntryExplorationDartRouletteHighlight) => void;
   onRouletteLayoutChange: (layout: EntryExplorationDartRouletteLayout) => void;
+  rouletteMapRectStore: EntryExplorationDartRouletteMapRectStore;
   onRouletteStart: () => void;
   onRouletteThrowResult: (result: EntryExplorationDartThrowResult) => void;
   onRouletteViewActiveChange: (isActive: boolean) => void;
@@ -67,6 +80,8 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   const [shotResult, setShotResult] = useState<EntryExplorationDartThrowResult | null>(null);
   const [landedResult, setLandedResult] = useState<EntryExplorationDartThrowResult | null>(null);
   const [rouletteBoard, setRouletteBoard] = useState(EMPTY_ROULETTE_BOARD);
+  const [rouletteMapRectStore] = useState(createRouletteMapRectStore);
+  const rouletteBoardLayoutRef = useRef<EntryExplorationDartRouletteBoardLayout | null>(null);
   const [viewKind, setViewKind] = useState<EntryExplorationDartViewKind>("arrow");
   const shotResultRef = useRef<EntryExplorationDartThrowResult | null>(null);
   const viewKindRef = useRef<EntryExplorationDartViewKind>("arrow");
@@ -100,6 +115,7 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
       setIsRouletteReady(false);
       setIsRouletteStarted(false);
       setRouletteBoard(EMPTY_ROULETTE_BOARD);
+      rouletteBoardLayoutRef.current = null;
       setShotResult(null);
       setLandedResult(null);
       viewControlsRef.current[kind]?.setHitCell(null);
@@ -138,9 +154,23 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     setIsRouletteReady(true);
   }, []);
 
-  const onRouletteLayoutChange = useCallback((layout: EntryExplorationDartRouletteLayout) => {
-    setRouletteBoard((board) => ({ ...board, layout }));
-  }, []);
+  const onRouletteLayoutChange = useCallback(
+    ({ mapRect, restMapRect, selectableCells }: EntryExplorationDartRouletteLayout) => {
+      rouletteMapRectStore.publish(mapRect);
+
+      const previous = rouletteBoardLayoutRef.current;
+
+      if (previous?.restMapRect === restMapRect && previous.selectableCells === selectableCells) {
+        return;
+      }
+
+      const layout = { restMapRect, selectableCells };
+
+      rouletteBoardLayoutRef.current = layout;
+      setRouletteBoard((board) => ({ ...board, layout }));
+    },
+    [rouletteMapRectStore]
+  );
 
   const onRouletteHighlight = useCallback(
     ({ cell, step }: EntryExplorationDartRouletteHighlight) => {
@@ -216,5 +246,28 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
     onRouletteViewControlsReady,
     onRouletteWin,
     requestDartView,
+    rouletteMapRectStore,
+  };
+}
+
+function createRouletteMapRectStore(): EntryExplorationDartRouletteMapRectStore & {
+  publish: (mapRect: EntryExplorationDartViewportRect) => void;
+} {
+  const listeners = new Set<(mapRect: EntryExplorationDartViewportRect) => void>();
+  let snapshot: EntryExplorationDartViewportRect | null = null;
+
+  return {
+    getSnapshot: () => snapshot,
+    publish: (mapRect) => {
+      snapshot = mapRect;
+      listeners.forEach((listener) => listener(mapRect));
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
   };
 }

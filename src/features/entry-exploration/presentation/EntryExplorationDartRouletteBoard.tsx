@@ -1,6 +1,9 @@
-import { useEffect, useState, type CSSProperties, type ReactElement } from "react";
+import { useLayoutEffect, useRef, type CSSProperties, type ReactElement } from "react";
 
-import type { EntryExplorationDartRouletteBoardState } from "../application/useEntryExplorationDartShot";
+import type {
+  EntryExplorationDartRouletteBoardState,
+  EntryExplorationDartRouletteMapRectStore,
+} from "../application/useEntryExplorationDartShot";
 import type { EntryExplorationDartViewportRect } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
@@ -18,6 +21,7 @@ export type EntryExplorationDartRouletteBoardProps = {
   hasResult: boolean;
   isReady: boolean;
   isStarted: boolean;
+  mapRectStore: EntryExplorationDartRouletteMapRectStore;
   onStart: () => void;
 };
 
@@ -31,31 +35,40 @@ export function EntryExplorationDartRouletteBoard({
   hasResult,
   isReady,
   isStarted,
+  mapRectStore,
   onStart,
 }: EntryExplorationDartRouletteBoardProps): ReactElement {
   const { activeCell, layout, win } = board;
-  const hasLayout = layout !== null;
-  const [isIntroPlaying, setIsIntroPlaying] = useState(true);
+  const restMapRect = layout?.restMapRect ?? null;
+  const boardRef = useRef<HTMLDivElement>(null);
   const phase = getRoulettePhase(board, isStarted, hasResult);
   const isWinHolding = phase === "win";
 
-  useEffect(() => {
-    if (!hasLayout) {
+  // 판은 도착 위치 크기로 한 번 그리고, 카메라 이동 중에는 transform만 바꿔서 다시 그리지 않는다.
+  useLayoutEffect(() => {
+    if (!restMapRect) {
       return;
     }
 
-    const timer = setTimeout(() => setIsIntroPlaying(false), boardConfig.introDurationMs);
+    const followMap = (mapRect: EntryExplorationDartViewportRect): void => {
+      boardRef.current?.style.setProperty("transform", toFollowTransform(mapRect, restMapRect));
+    };
+    const mapRect = mapRectStore.getSnapshot();
 
-    return () => clearTimeout(timer);
-  }, [hasLayout]);
+    if (mapRect) {
+      followMap(mapRect);
+    }
+
+    return mapRectStore.subscribe(followMap);
+  }, [mapRectStore, restMapRect]);
 
   return (
     <div className="entry-exploration-dart-roulette" data-phase={phase}>
       {layout && (
         <div
+          ref={boardRef}
           className="entry-exploration-dart-roulette__board"
-          data-intro={isIntroPlaying}
-          style={toBoardStyle(layout.mapRect)}
+          style={toBoardStyle(layout.restMapRect)}
         >
           <div className="entry-exploration-dart-roulette__slab-depth">
             <div className="entry-exploration-dart-roulette__slab">
@@ -84,9 +97,7 @@ export function EntryExplorationDartRouletteBoard({
                   data-ripple={isRippling}
                   style={{
                     ...toCellStyle(cell),
-                    animationDelay: isLit
-                      ? undefined
-                      : getPathAnimationDelay(cell, isIntroPlaying, winDistance),
+                    animationDelay: getRippleDelay(winDistance),
                   }}
                 />
               );
@@ -163,17 +174,7 @@ function getRoulettePhase(
   return board.step >= steps.fastCount ? "slow" : "fast";
 }
 
-function getPathAnimationDelay(
-  cell: SeoulGridCell,
-  isIntroPlaying: boolean,
-  winDistance: number | null
-): string | undefined {
-  if (isIntroPlaying) {
-    const centerDistance = Math.hypot(cell.column + 0.5 - columns / 2, cell.row + 0.5 - rows / 2);
-
-    return `${Math.round(centerDistance * boardConfig.introDelayPerCellMs)}ms`;
-  }
-
+function getRippleDelay(winDistance: number | null): string | undefined {
   if (winDistance === null) {
     return undefined;
   }
@@ -189,6 +190,27 @@ function toBoardStyle({ height, width, x, y }: EntryExplorationDartViewportRect)
     top: toPercent(y - height / 2),
     width: toPercent(width),
   };
+}
+
+function toFollowTransform(
+  mapRect: EntryExplorationDartViewportRect,
+  restMapRect: EntryExplorationDartViewportRect
+): string {
+  const translateX = (getRectLeft(mapRect) - getRectLeft(restMapRect)) / restMapRect.width;
+  const translateY = (getRectTop(mapRect) - getRectTop(restMapRect)) / restMapRect.height;
+  const scaleX = mapRect.width / restMapRect.width;
+  const scaleY = mapRect.height / restMapRect.height;
+  const translate = `translate(${toPercent(translateX)}, ${toPercent(translateY)})`;
+
+  return `${translate} scale(${scaleX}, ${scaleY})`;
+}
+
+function getRectLeft({ width, x }: EntryExplorationDartViewportRect): number {
+  return x - width / 2;
+}
+
+function getRectTop({ height, y }: EntryExplorationDartViewportRect): number {
+  return y - height / 2;
 }
 
 function toCellStyle({ column, row }: SeoulGridCell): CSSProperties {

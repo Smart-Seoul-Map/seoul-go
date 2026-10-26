@@ -65,7 +65,10 @@ export type EntryExplorationDartRouletteHighlight = {
 };
 
 export type EntryExplorationDartRouletteLayout = {
+  // 지금 화면에서 지도의 위치. 카메라가 이동하는 동안 매 프레임 바뀐다.
   mapRect: EntryExplorationDartViewportRect;
+  // 카메라 이동이 끝났을 때 지도의 위치.
+  restMapRect: EntryExplorationDartViewportRect;
   selectableCells: readonly SeoulGridCell[];
 };
 
@@ -160,7 +163,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
   let requestedCharacterDestination: EntryExplorationScenePoint | null = null;
-  let announcedRouletteMapRect: EntryExplorationDartViewportRect | null = null;
+  let announcedRouletteLayout: EntryExplorationDartRouletteLayout | null = null;
   let mapPosition: EntryExplorationScenePoint;
   let triggerPosition: EntryExplorationScenePoint;
 
@@ -227,22 +230,46 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     };
   };
 
-  const announceRouletteLayout = (camera: THREE.OrthographicCamera): void => {
+  const restCamera = new THREE.OrthographicCamera();
+
+  const announceRouletteLayout = (
+    camera: THREE.OrthographicCamera,
+    { focus, zoom }: EntryExplorationTileMapCameraView
+  ): void => {
     if (!isRouletteMode) {
       return;
     }
 
+    restCamera.copy(camera);
+    updateEntryExplorationCameraView(
+      restCamera,
+      focus,
+      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG.cameraOffset,
+      zoom
+    );
     mapMesh.updateMatrixWorld();
     camera.updateMatrixWorld();
+    restCamera.updateMatrixWorld();
 
     const mapRect = toMapViewportRect(camera);
+    const nextRestMapRect = toMapViewportRect(restCamera);
+    const previous = announcedRouletteLayout;
+    // 도착 위치가 그대로면 같은 객체를 넘겨서, 받는 쪽이 값 비교 없이 판 구조 변화만 알아채게 한다.
+    const restMapRect =
+      previous && isSameViewportRect(previous.restMapRect, nextRestMapRect)
+        ? previous.restMapRect
+        : nextRestMapRect;
 
-    if (announcedRouletteMapRect && isSameViewportRect(announcedRouletteMapRect, mapRect)) {
+    if (
+      previous &&
+      previous.restMapRect === restMapRect &&
+      isSameViewportRect(previous.mapRect, mapRect)
+    ) {
       return;
     }
 
-    announcedRouletteMapRect = mapRect;
-    onRouletteLayoutChange?.({ mapRect, selectableCells });
+    announcedRouletteLayout = { mapRect, restMapRect, selectableCells };
+    onRouletteLayoutChange?.(announcedRouletteLayout);
   };
 
   const resolvePointedCell = (raycaster: THREE.Raycaster): SeoulGridCell | null => {
@@ -364,7 +391,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     selectableCells = getSeoulGridSelectableCells(activeNumbers);
     selectableLayer.setNumbers(activeNumbers);
     selectableLayer.object.visible = !isRouletteMode;
-    announcedRouletteMapRect = null;
+    announcedRouletteLayout = null;
     waitsForTriggerExit = false;
     hasThrown = false;
     setHitCell(null);
@@ -376,7 +403,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   const deactivate = (): void => {
     roulette.cancel();
     isEngaged = false;
-    announcedRouletteMapRect = null;
+    announcedRouletteLayout = null;
     selectableLayer.object.visible = false;
     waitsForTriggerExit = true;
     hasThrown = false;
@@ -511,14 +538,15 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     const { cameraOffset, cameraTransitionDurationMs } =
       ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
-    const { focus, zoom } = getCameraView(camera);
+    const cameraView = getCameraView(camera);
+    const { focus, zoom } = cameraView;
 
     if (cameraTransitionStartedAt === null) {
       if (camera.zoom !== zoom || camera.position.x !== focus.x + cameraOffset.x) {
         updateEntryExplorationCameraView(camera, focus, cameraOffset, zoom);
       }
 
-      announceRouletteLayout(camera);
+      announceRouletteLayout(camera, cameraView);
 
       return;
     }
@@ -538,6 +566,9 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
     const { done } = updateSceneCameraTransition(cameraTransition, time);
 
+    // 진입하는 첫 프레임부터 판이 지도를 따라가도록 카메라 이동 중에도 위치를 알린다.
+    announceRouletteLayout(camera, cameraView);
+
     if (!done) {
       return;
     }
@@ -545,7 +576,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransition = null;
     cameraTransitionStartedAt = null;
     onCameraSettled?.();
-    announceRouletteLayout(camera);
   };
 
   const faceCharacterTowardMap = (): void => {

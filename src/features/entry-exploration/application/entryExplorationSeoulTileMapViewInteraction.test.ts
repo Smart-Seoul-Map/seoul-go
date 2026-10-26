@@ -471,20 +471,35 @@ describe("entry exploration seoul tile map view interaction", () => {
     controller.dispose();
   });
 
-  test("roulette mode announces its board layout once the camera settles", () => {
+  test("roulette mode follows the camera move with its board layout from the first frame", () => {
     const onRouletteLayoutChange = vi.fn();
-    const { camera, controller } = createReadyRouletteController({ onRouletteLayoutChange });
+    const controller = createEntryExplorationSeoulTileMapViewInteractionController({
+      getCollectedNumbers: () => [CENTER_NUMBER],
+      mode: "roulette",
+      onRouletteLayoutChange,
+    });
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1_000);
     const { cameraTransitionDurationMs } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
     const selectableLayer = controller.object.getObjectByName("entry-dart-selectable-layer")!;
 
-    controller.updateCamera(camera, cameraTransitionDurationMs + 16, TRIGGER_POSITION);
+    controller.activate(0);
+    controller.updateCamera(camera, 0, TRIGGER_POSITION);
 
     expect(onRouletteLayoutChange).toHaveBeenCalledTimes(1);
 
-    const [{ mapRect, selectableCells }] = onRouletteLayoutChange.mock.calls[0];
+    controller.updateCamera(camera, cameraTransitionDurationMs / 2, TRIGGER_POSITION);
+    controller.updateCamera(camera, cameraTransitionDurationMs, TRIGGER_POSITION);
+    controller.updateCamera(camera, cameraTransitionDurationMs + 16, TRIGGER_POSITION);
 
-    expect(mapRect.width).toBeGreaterThan(0);
-    expect(mapRect.height / mapRect.width).toBeCloseTo(MAP_SIZE.depth / MAP_SIZE.width, 1);
+    expect(onRouletteLayoutChange).toHaveBeenCalledTimes(3);
+
+    const [firstLayout] = onRouletteLayoutChange.mock.calls[0];
+    const [{ mapRect, restMapRect, selectableCells }] = onRouletteLayoutChange.mock.calls[2];
+
+    expect(firstLayout.restMapRect).toBe(restMapRect);
+    expect(mapRect.x).toBeCloseTo(restMapRect.x);
+    expect(mapRect.width).toBeCloseTo(restMapRect.width);
+    expect(restMapRect.height / restMapRect.width).toBeCloseTo(MAP_SIZE.depth / MAP_SIZE.width, 1);
     expect(selectableCells.length).toBeGreaterThan(0);
     expect(
       selectableCells.every((cell: SeoulGridCell) =>
@@ -492,6 +507,8 @@ describe("entry exploration seoul tile map view interaction", () => {
       )
     ).toBe(true);
     expect(selectableLayer.visible).toBe(false);
+
+    controller.dispose();
   });
 
   test("roulette mode reports each highlight with its step", () => {

@@ -49,11 +49,14 @@
   pointer-events: none;
 }
 
+/* 카메라 이동 중에는 transform만 바뀌므로 판을 별도 레이어로 올려 다시 그리지 않고 합성만 한다. */
 .entry-exploration-dart-roulette__board {
   --slab-depth: 0.28em;
   --cell-rise: 0.1em;
   --cell-rest: translateY(calc((var(--slab-depth) + var(--cell-rise)) * -1));
   position: absolute;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 .entry-exploration-dart-roulette__slab-depth {
@@ -62,11 +65,6 @@
   transform: translateY(calc(var(--slab-depth) * -1));
   filter: drop-shadow(0 var(--slab-depth) 0 var(--entry-exploration-dart-roulette-slab-side))
     drop-shadow(0 0.12em 0.36em var(--entry-exploration-dart-roulette-slab-shadow));
-}
-
-.entry-exploration-dart-roulette__board[data-intro="true"]
-  .entry-exploration-dart-roulette__slab-depth {
-  animation: entry-exploration-dart-roulette-slab-rise 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
 .entry-exploration-dart-roulette__slab {
@@ -90,10 +88,6 @@
   inset: 0;
   transform: translateY(calc(var(--slab-depth) * -1));
   mask: url("../../../assets/entry-exploration/seoul-grid-map.svg") center / 100% 100% no-repeat;
-}
-
-.entry-exploration-dart-roulette__board[data-intro="true"] .entry-exploration-dart-roulette__paths {
-  animation: entry-exploration-dart-roulette-layer-rise 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
 /* 칸은 제자리에 둔 채 빛만 바뀐다. 꺼질 때 천천히 식어서 지나간 칸에 잔광이 남는다. */
@@ -140,16 +134,6 @@
     0 0 0.7em 0.18em var(--entry-exploration-dart-roulette-light-glow),
     0 0 1.6em 0.45em var(--entry-exploration-dart-roulette-light-halo);
   transition-duration: 0.2s;
-}
-
-.entry-exploration-dart-roulette__board[data-intro="true"] .entry-exploration-dart-roulette__path {
-  animation: entry-exploration-dart-roulette-path-intro 0.42s cubic-bezier(0.2, 1.6, 0.4, 1) both;
-}
-
-.entry-exploration-dart-roulette[data-phase="idle"]
-  .entry-exploration-dart-roulette__board[data-intro="false"]
-  .entry-exploration-dart-roulette__path {
-  animation: entry-exploration-dart-roulette-breathe 2.4s ease-in-out infinite;
 }
 
 .entry-exploration-dart-roulette__path[data-ripple="true"] {
@@ -370,33 +354,6 @@
 
 .entry-exploration-dart-roulette[data-phase="idle"] .AppButton {
   animation: entry-exploration-dart-roulette-start-pulse 1.6s ease-out infinite;
-}
-
-@keyframes entry-exploration-dart-roulette-slab-rise {
-  from {
-    transform: translateY(0);
-    filter: drop-shadow(0 0 0 var(--entry-exploration-dart-roulette-slab-side))
-      drop-shadow(0 0 0 transparent);
-  }
-}
-
-@keyframes entry-exploration-dart-roulette-layer-rise {
-  from {
-    transform: translateY(0);
-  }
-}
-
-@keyframes entry-exploration-dart-roulette-path-intro {
-  from {
-    opacity: 0;
-    transform: translateY(-1em) scale(0.3);
-  }
-}
-
-@keyframes entry-exploration-dart-roulette-breathe {
-  50% {
-    filter: brightness(1.12);
-  }
 }
 
 @keyframes entry-exploration-dart-roulette-ripple {

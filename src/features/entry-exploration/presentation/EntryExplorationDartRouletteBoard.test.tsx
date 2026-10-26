@@ -2,7 +2,11 @@ import "@testing-library/jest-dom/vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import type { EntryExplorationDartRouletteBoardState } from "../application/useEntryExplorationDartShot";
+import type {
+  EntryExplorationDartRouletteBoardState,
+  EntryExplorationDartRouletteMapRectStore,
+} from "../application/useEntryExplorationDartShot";
+import type { EntryExplorationDartViewportRect } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import { getSeoulGridSelectableCells } from "../domain/seoulGridNumberLines";
 import {
@@ -12,12 +16,10 @@ import {
 
 const SELECTABLE_CELLS = getSeoulGridSelectableCells([52]);
 const [FIRST_CELL] = SELECTABLE_CELLS;
+const REST_MAP_RECT = { height: 0.5, width: 0.75, x: 0.5, y: 0.5 };
 const READY_BOARD: EntryExplorationDartRouletteBoardState = {
   activeCell: null,
-  layout: {
-    mapRect: { height: 0.62, width: 0.76, x: 0.5, y: 0.5 },
-    selectableCells: SELECTABLE_CELLS,
-  },
+  layout: { restMapRect: REST_MAP_RECT, selectableCells: SELECTABLE_CELLS },
   step: 0,
   win: null,
 };
@@ -27,10 +29,32 @@ const WON_BOARD: EntryExplorationDartRouletteBoardState = {
   win: { cell: FIRST_CELL, gridNumber: "다사 5249" },
 };
 
-afterEach(() => {
-  cleanup();
-  vi.useRealTimers();
-});
+afterEach(cleanup);
+
+function createMapRectStore() {
+  const listeners = new Set<(mapRect: EntryExplorationDartViewportRect) => void>();
+  let snapshot: EntryExplorationDartViewportRect = REST_MAP_RECT;
+  const store: EntryExplorationDartRouletteMapRectStore = {
+    getSnapshot: () => snapshot,
+    subscribe: (listener) => {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+
+  return {
+    moveMap: (mapRect: EntryExplorationDartViewportRect) => {
+      snapshot = mapRect;
+      listeners.forEach((listener) => listener(mapRect));
+    },
+    store,
+  };
+}
+
+const STILL_MAP_RECT_STORE = createMapRectStore().store;
 
 function renderBoard(props: Partial<EntryExplorationDartRouletteBoardProps> = {}) {
   return render(
@@ -39,6 +63,7 @@ function renderBoard(props: Partial<EntryExplorationDartRouletteBoardProps> = {}
       hasResult={false}
       isReady
       isStarted={false}
+      mapRectStore={STILL_MAP_RECT_STORE}
       onStart={vi.fn()}
       {...props}
     />
@@ -65,19 +90,20 @@ describe("EntryExplorationDartRouletteBoard", () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
-  test("finishes the intro wave after it plays", () => {
-    vi.useFakeTimers();
+  test("follows the moving map with a transform without resizing the slab", () => {
+    const { moveMap, store } = createMapRectStore();
+    const { container } = renderBoard({ mapRectStore: store });
+    const tileBoard = container.querySelector<HTMLElement>(
+      ".entry-exploration-dart-roulette__board"
+    )!;
 
-    const { container } = renderBoard();
-    const tileBoard = container.querySelector(".entry-exploration-dart-roulette__board");
+    expect(tileBoard).toHaveStyle({ height: "50%", left: "12.5%", top: "25%", width: "75%" });
+    expect(tileBoard.style.transform).toBe("translate(0%, 0%) scale(1, 1)");
 
-    expect(tileBoard).toHaveAttribute("data-intro", "true");
+    act(() => moveMap({ height: 0.25, width: 0.375, x: 0.5, y: 0.5 }));
 
-    act(() => {
-      vi.advanceTimersByTime(ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.board.introDurationMs);
-    });
-
-    expect(tileBoard).toHaveAttribute("data-intro", "false");
+    expect(tileBoard.style.transform).toBe("translate(25%, 25%) scale(0.5, 0.5)");
+    expect(tileBoard).toHaveStyle({ width: "75%" });
   });
 
   test("lights the current cell in place and deepens the glow in the slow steps", () => {
@@ -103,6 +129,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
         hasResult={false}
         isReady
         isStarted
+        mapRectStore={STILL_MAP_RECT_STORE}
         onStart={vi.fn()}
       />
     );
@@ -129,6 +156,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
         hasResult
         isReady
         isStarted={false}
+        mapRectStore={STILL_MAP_RECT_STORE}
         onStart={vi.fn()}
       />
     );
