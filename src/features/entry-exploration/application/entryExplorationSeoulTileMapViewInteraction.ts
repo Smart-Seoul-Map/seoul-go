@@ -8,6 +8,7 @@ import {
 } from "@shared/lib/three/sceneCameraTransition";
 import { isInsideSceneTriggerRadius } from "@shared/lib/three/sceneTrigger";
 
+import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import {
   ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID,
   ENTRY_EXPLORATION_SCENE_OBJECTS,
@@ -23,6 +24,7 @@ import {
 } from "../domain/entryExplorationSceneMath";
 import {
   getEntryExplorationRectanglePoints,
+  getEntryExplorationTileMapCameraFillZoom,
   getEntryExplorationTileMapCameraFocus,
   getEntryExplorationTileMapCameraZoom,
 } from "../domain/entryExplorationTileMapCameraFit";
@@ -52,6 +54,26 @@ export type EntryExplorationDartViewportPoint = {
   y: number;
 };
 
+export type EntryExplorationDartViewportRect = EntryExplorationDartViewportPoint & {
+  height: number;
+  width: number;
+};
+
+export type EntryExplorationDartRouletteHighlight = {
+  cell: SeoulGridCell;
+  step: number;
+};
+
+export type EntryExplorationDartRouletteLayout = {
+  mapRect: EntryExplorationDartViewportRect;
+  selectableCells: readonly SeoulGridCell[];
+};
+
+export type EntryExplorationDartRouletteWin = {
+  cell: SeoulGridCell;
+  gridNumber: string;
+};
+
 export type EntryExplorationDartThrowResult = {
   cell: SeoulGridCell;
   districtId: number | null;
@@ -67,16 +89,19 @@ export type EntryExplorationDartViewControls = {
   throwAtRandomCell: () => void;
 };
 
-export type EntryExplorationTileMapMode = "arrow" | "roulette";
+export type EntryExplorationDartViewKind = "arrow" | "roulette";
 
 export type EntryExplorationSeoulTileMapViewInteractionOptions = {
   getCollectedNumbers?: () => readonly number[];
-  mode?: EntryExplorationTileMapMode;
+  mode?: EntryExplorationDartViewKind;
   onEntryBlocked?: () => void;
   onActiveChange?: (isActive: boolean) => void;
   onCameraSettled?: () => void;
   onControlsReady?: (controls: EntryExplorationDartViewControls) => void;
   onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
+  onRouletteHighlight?: (highlight: EntryExplorationDartRouletteHighlight) => void;
+  onRouletteLayoutChange?: (layout: EntryExplorationDartRouletteLayout) => void;
+  onRouletteWin?: (win: EntryExplorationDartRouletteWin) => void;
   onTargetHoverChange?: (isOverValidCell: boolean) => void;
 };
 
@@ -92,6 +117,7 @@ type EntryExplorationTileMapCameraView = {
 };
 
 const SEOUL_TILE_MAP_VIEW_PRIORITY = 30;
+const VIEWPORT_RECT_EPSILON = 0.0001;
 
 export function createEntryExplorationSeoulTileMapViewInteractionController({
   getCollectedNumbers = () => [],
@@ -101,6 +127,9 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   onCameraSettled,
   onControlsReady,
   onDartThrowResult,
+  onRouletteHighlight,
+  onRouletteLayoutChange,
+  onRouletteWin,
   onTargetHoverChange,
 }: EntryExplorationSeoulTileMapViewInteractionOptions = {}): EntryExplorationSeoulTileMapViewInteractionController {
   const isRouletteMode = mode === "roulette";
@@ -131,6 +160,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   let isOverValidCell = false;
   let waitsForTriggerExit = false;
   let requestedCharacterDestination: EntryExplorationScenePoint | null = null;
+  let announcedRouletteMapRect: EntryExplorationDartViewportRect | null = null;
   let mapPosition: EntryExplorationScenePoint;
   let triggerPosition: EntryExplorationScenePoint;
 
@@ -171,12 +201,48 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const toViewportPoint = (
-    cell: SeoulGridCell,
+    local: THREE.Vector3,
     camera: THREE.Camera
   ): EntryExplorationDartViewportPoint => {
-    const projected = mapMesh.localToWorld(toCellLocalPosition(cell, 0)).project(camera);
+    const projected = mapMesh.localToWorld(local.clone()).project(camera);
 
     return { x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 };
+  };
+
+  const toMapViewportRect = (camera: THREE.Camera): EntryExplorationDartViewportRect => {
+    const topLeft = toViewportPoint(
+      new THREE.Vector3(-mapSize.width / 2, mapSize.depth / 2, 0),
+      camera
+    );
+    const bottomRight = toViewportPoint(
+      new THREE.Vector3(mapSize.width / 2, -mapSize.depth / 2, 0),
+      camera
+    );
+
+    return {
+      height: Math.abs(bottomRight.y - topLeft.y),
+      width: Math.abs(bottomRight.x - topLeft.x),
+      x: (topLeft.x + bottomRight.x) / 2,
+      y: (topLeft.y + bottomRight.y) / 2,
+    };
+  };
+
+  const announceRouletteLayout = (camera: THREE.OrthographicCamera): void => {
+    if (!isRouletteMode) {
+      return;
+    }
+
+    mapMesh.updateMatrixWorld();
+    camera.updateMatrixWorld();
+
+    const mapRect = toMapViewportRect(camera);
+
+    if (announcedRouletteMapRect && isSameViewportRect(announcedRouletteMapRect, mapRect)) {
+      return;
+    }
+
+    announcedRouletteMapRect = mapRect;
+    onRouletteLayoutChange?.({ mapRect, selectableCells });
   };
 
   const resolvePointedCell = (raycaster: THREE.Raycaster): SeoulGridCell | null => {
@@ -208,7 +274,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cell,
     districtId: getSeoulGridCellDistrictId(cell),
     gridNumber: toSeoulGridNumber(cell),
-    viewportPoint: toViewportPoint(cell, camera),
+    viewportPoint: toViewportPoint(toCellLocalPosition(cell, 0), camera),
   });
 
   const throwAtCell = (cell: SeoulGridCell, camera: THREE.Camera): void => {
@@ -218,12 +284,13 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
 
   const roulette = createEntryExplorationDartRoulette({
     getCells: () => selectableCells,
-    onHighlight: (cell) => selectableLayer.setFlashCell(cell),
+    onHighlight: (cell, step) => onRouletteHighlight?.({ cell, step }),
     onPicked: (cell) => {
       if (isEngaged && !hasThrown && activeCamera) {
         throwAtCell(cell, activeCamera);
       }
     },
+    onWin: (cell) => onRouletteWin?.({ cell, gridNumber: toSeoulGridNumber(cell) }),
   });
 
   const throwAtRandomCell = (): void => {
@@ -251,7 +318,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   };
 
   const resetThrow = (): void => {
-    selectableLayer.setFlashCell(null);
     hasThrown = false;
     setHitCell(null);
   };
@@ -297,7 +363,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     activeNumbers = [...getCollectedNumbers()];
     selectableCells = getSeoulGridSelectableCells(activeNumbers);
     selectableLayer.setNumbers(activeNumbers);
-    selectableLayer.object.visible = true;
+    selectableLayer.object.visible = !isRouletteMode;
+    announcedRouletteMapRect = null;
     waitsForTriggerExit = false;
     hasThrown = false;
     setHitCell(null);
@@ -309,6 +376,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
   const deactivate = (): void => {
     roulette.cancel();
     isEngaged = false;
+    announcedRouletteMapRect = null;
     selectableLayer.object.visible = false;
     waitsForTriggerExit = true;
     hasThrown = false;
@@ -317,7 +385,6 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransitionStartedAt = null;
     setTargetHover(false);
     selectableLayer.setHoveredCell(null);
-    selectableLayer.setFlashCell(null);
     onActiveChange?.(false);
   };
 
@@ -339,7 +406,68 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     };
   };
 
+  const getMapCornerPoints = (): readonly EntryExplorationScenePoint[] => {
+    const halfWidth = mapSize.width / 2;
+    const halfDepth = mapSize.depth / 2;
+
+    mapMesh.updateMatrixWorld();
+
+    return [-1, 1].flatMap((xSign) =>
+      [-1, 1].map((ySign) => {
+        const corner = mapMesh.localToWorld(
+          new THREE.Vector3(halfWidth * xSign, halfDepth * ySign, 0)
+        );
+
+        return { x: corner.x, z: corner.z };
+      })
+    );
+  };
+
+  // 룰렛은 캐릭터 대신 지도만 화면에 꽉 차게 맞춰 칸을 최대한 크게 보여 준다.
+  const getRouletteCameraView = (
+    camera: THREE.OrthographicCamera
+  ): EntryExplorationTileMapCameraView => {
+    const { cameraNarrowViewportContentCenterRatio, cameraOffset } =
+      ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
+    const { contentCenterScreenRatio, heightUsageRatio, maxZoom, widthUsageRatio } =
+      ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.camera;
+    const points = getMapCornerPoints();
+    const viewHalfHeight = (camera.top - camera.bottom) / 2;
+    const viewHalfWidth = (camera.right - camera.left) / 2;
+    const isPortraitViewport = viewHalfWidth < viewHalfHeight;
+    // 세로 화면은 결과 안내가 아래를 덮으므로 지도를 화살 화면처럼 위쪽에 둔다.
+    const centerScreenRatio = isPortraitViewport
+      ? cameraNarrowViewportContentCenterRatio
+      : contentCenterScreenRatio;
+    const zoom = getEntryExplorationTileMapCameraFillZoom({
+      cameraOffset,
+      focusPoint: mapPosition,
+      heightUsageRatio,
+      maxZoom,
+      points,
+      viewHalfHeight,
+      viewHalfWidth,
+      widthUsageRatio,
+    });
+
+    return {
+      focus: getEntryExplorationTileMapCameraFocus({
+        cameraOffset,
+        contentCenterScreenRatio: centerScreenRatio,
+        focusPoint: mapPosition,
+        points,
+        viewHalfHeight,
+        zoom,
+      }),
+      zoom,
+    };
+  };
+
   const getCameraView = (camera: THREE.OrthographicCamera): EntryExplorationTileMapCameraView => {
+    if (isRouletteMode) {
+      return getRouletteCameraView(camera);
+    }
+
     const {
       cameraNarrowViewportContentCenterRatio,
       cameraOffset,
@@ -390,6 +518,8 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
         updateEntryExplorationCameraView(camera, focus, cameraOffset, zoom);
       }
 
+      announceRouletteLayout(camera);
+
       return;
     }
 
@@ -415,6 +545,7 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     cameraTransition = null;
     cameraTransitionStartedAt = null;
     onCameraSettled?.();
+    announceRouletteLayout(camera);
   };
 
   const faceCharacterTowardMap = (): void => {
@@ -524,6 +655,18 @@ export function createEntryExplorationSeoulTileMapViewInteractionController({
     updateCamera,
     updateTriggerState,
   };
+}
+
+function isSameViewportRect(
+  previous: EntryExplorationDartViewportRect,
+  next: EntryExplorationDartViewportRect
+): boolean {
+  return (
+    Math.abs(previous.x - next.x) < VIEWPORT_RECT_EPSILON &&
+    Math.abs(previous.y - next.y) < VIEWPORT_RECT_EPSILON &&
+    Math.abs(previous.width - next.width) < VIEWPORT_RECT_EPSILON &&
+    Math.abs(previous.height - next.height) < VIEWPORT_RECT_EPSILON
+  );
 }
 
 function getMapTexture(object: THREE.Object3D): THREE.Texture | null {

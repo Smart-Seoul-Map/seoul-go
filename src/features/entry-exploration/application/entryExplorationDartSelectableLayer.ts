@@ -14,7 +14,6 @@ export type EntryExplorationDartSelectableLayerOptions = {
 export type EntryExplorationDartSelectableLayer = {
   dispose: () => void;
   object: THREE.Object3D;
-  setFlashCell: (cell: SeoulGridCell | null) => void;
   setHoveredCell: (cell: SeoulGridCell | null) => void;
   setNumbers: (numbers: readonly number[]) => void;
 };
@@ -25,7 +24,6 @@ const BYTE_MAX = 255;
 const SELECTABLE_CELL_OPACITY = 0.5;
 const MAP_ALPHA_THRESHOLD = 0.02;
 const CELL_GAP_RATIO = 0.06;
-const FLASH_BORDER_RATIO = 0.12;
 
 const VERTEX_SHADER = `
 varying vec2 vUv;
@@ -40,8 +38,6 @@ const FRAGMENT_SHADER = `
 uniform sampler2D uCells;
 uniform sampler2D uMap;
 uniform vec2 uGrid;
-uniform vec2 uFlashCell;
-uniform vec3 uFlashColor;
 uniform vec2 uHoveredCell;
 uniform vec3 uHoverColor;
 
@@ -49,17 +45,14 @@ varying vec2 vUv;
 
 void main() {
   vec4 cell = texture2D(uCells, vUv);
-  bool isFlash = floor(vUv * uGrid) == uFlashCell;
   bool isHovered = floor(vUv * uGrid) == uHoveredCell;
   vec3 color = isHovered ? uHoverColor : cell.rgb;
-  float cellAlpha = isHovered || isFlash ? cell.a : cell.a * ${SELECTABLE_CELL_OPACITY.toFixed(2)};
+  float cellAlpha = isHovered ? cell.a : cell.a * ${SELECTABLE_CELL_OPACITY.toFixed(2)};
   float mapAlpha = texture2D(uMap, vUv).a;
   vec2 cellUv = fract(vUv * uGrid);
   vec2 edgeDistance = min(cellUv, 1.0 - cellUv);
-  float edge = min(edgeDistance.x, edgeDistance.y);
-  float insideCell = step(isFlash ? 0.0 : ${CELL_GAP_RATIO.toFixed(2)}, edge);
+  float insideCell = step(${CELL_GAP_RATIO.toFixed(2)}, min(edgeDistance.x, edgeDistance.y));
 
-  color = isFlash ? mix(uFlashColor, vec3(1.0), step(edge, ${FLASH_BORDER_RATIO.toFixed(2)})) : color;
   gl_FragColor = vec4(color, cellAlpha * insideCell * step(${MAP_ALPHA_THRESHOLD.toFixed(2)}, mapAlpha));
 }
 `;
@@ -80,8 +73,6 @@ export function createEntryExplorationDartSelectableLayer({
 
   const uniforms = {
     uCells: { value: cellTexture },
-    uFlashCell: { value: new THREE.Vector2(-1, -1) },
-    uFlashColor: { value: new THREE.Vector3() },
     uGrid: { value: new THREE.Vector2(columns, rows) },
     uHoveredCell: { value: new THREE.Vector2(-1, -1) },
     uHoverColor: { value: new THREE.Vector3() },
@@ -102,12 +93,11 @@ export function createEntryExplorationDartSelectableLayer({
   object.position.z = selectableLayer.yOffset;
   object.visible = false;
 
-  const { hitAccentColor, hoverColor, selectableColor } = getEntryExplorationIntroTheme().dart;
+  const { hoverColor, selectableColor } = getEntryExplorationIntroTheme().dart;
   const [selectableRed, selectableGreen, selectableBlue] = toColorBytes(selectableColor);
   const cells = getSeoulGridCells();
 
   uniforms.uHoverColor.value.set(...toColorBytes(hoverColor)).divideScalar(BYTE_MAX);
-  uniforms.uFlashColor.value.set(...toColorBytes(hitAccentColor)).divideScalar(BYTE_MAX);
 
   const setNumbers = (numbers: readonly number[]): void => {
     cells.forEach((cell) => {
@@ -129,11 +119,7 @@ export function createEntryExplorationDartSelectableLayer({
     uniforms.uHoveredCell.value.set(cell?.column ?? -1, cell ? rows - 1 - cell.row : -1);
   };
 
-  const setFlashCell = (cell: SeoulGridCell | null): void => {
-    uniforms.uFlashCell.value.set(cell?.column ?? -1, cell ? rows - 1 - cell.row : -1);
-  };
-
-  return { dispose: () => cellTexture.dispose(), object, setFlashCell, setHoveredCell, setNumbers };
+  return { dispose: () => cellTexture.dispose(), object, setHoveredCell, setNumbers };
 }
 
 function toColorBytes(color: string): [number, number, number] {

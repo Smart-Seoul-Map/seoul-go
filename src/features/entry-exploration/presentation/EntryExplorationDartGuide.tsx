@@ -9,8 +9,10 @@ import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport"
 import { AppHeading, AppText } from "@shared/ui/typography";
 
 import closeIcon from "../../../assets/icons/close.svg";
-import type { EntryExplorationDartViewKind } from "../application/useEntryExplorationDartShot";
-import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
+import type {
+  EntryExplorationDartThrowResult,
+  EntryExplorationDartViewKind,
+} from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartGuide.css";
 
@@ -41,6 +43,7 @@ export function EntryExplorationDartGuide({
 }: EntryExplorationDartGuideProps): ReactElement | null {
   const isMobileViewport = useIsMobileViewport();
   const isArrowView = viewKind === "arrow";
+  const isThrowGuideVisible = isArrowView && !shotResult;
 
   if (!isVisible) {
     return null;
@@ -91,7 +94,7 @@ export function EntryExplorationDartGuide({
         />
       ) : null}
 
-      {shotResult || !isArrowView ? null : (
+      {isThrowGuideVisible && (
         <>
           <AppBox
             {...PANEL_SURFACE}

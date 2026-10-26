@@ -1,10 +1,12 @@
+import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import type { SeoulGridCell } from "../domain/seoulGridNumber";
 import { pickRandomSeoulGridCell } from "../domain/seoulGridRandomCell";
 
 type EntryExplorationDartRouletteOptions = {
   getCells: () => readonly SeoulGridCell[];
-  onHighlight: (cell: SeoulGridCell) => void;
+  onHighlight: (cell: SeoulGridCell, step: number) => void;
   onPicked: (cell: SeoulGridCell) => void;
+  onWin: (cell: SeoulGridCell) => void;
 };
 
 export type EntryExplorationDartRoulette = {
@@ -13,17 +15,13 @@ export type EntryExplorationDartRoulette = {
   start: () => void;
 };
 
-const STEP_COUNT = 19;
-const FAST_STEP_COUNT = 10;
-const FAST_DELAY_MS = 75;
-const SLOWDOWN_BASE_MS = 24;
-const SLOWDOWN_EXPONENT = 1.65;
-const SETTLE_DELAY_MS = 200;
+const { steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
 
 export function createEntryExplorationDartRoulette({
   getCells,
   onHighlight,
   onPicked,
+  onWin,
 }: EntryExplorationDartRouletteOptions): EntryExplorationDartRoulette {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -34,16 +32,19 @@ export function createEntryExplorationDartRoulette({
   };
 
   const play = (winner: SeoulGridCell, previous: SeoulGridCell | null, shown: number): void => {
-    if (shown === STEP_COUNT) {
-      timer = null;
-      onPicked(winner);
+    if (shown === steps.count) {
+      onWin(winner);
+      timer = setTimeout(() => {
+        timer = null;
+        onPicked(winner);
+      }, steps.winHoldMs);
 
       return;
     }
 
-    const cell = shown === STEP_COUNT - 1 ? winner : pickNextCell(winner, previous);
+    const cell = shown === steps.count - 1 ? winner : pickNextCell(winner, previous);
 
-    onHighlight(cell);
+    onHighlight(cell, shown);
     timer = setTimeout(() => play(winner, cell, shown + 1), getStepDelayMs(shown + 1));
   };
 
@@ -67,13 +68,15 @@ export function createEntryExplorationDartRoulette({
 }
 
 function getStepDelayMs(shown: number): number {
-  if (shown >= STEP_COUNT) {
-    return SETTLE_DELAY_MS;
+  if (shown >= steps.count) {
+    return steps.settleDelayMs;
   }
 
-  if (shown <= FAST_STEP_COUNT) {
-    return FAST_DELAY_MS;
+  if (shown <= steps.fastCount) {
+    return steps.fastDelayMs;
   }
 
-  return FAST_DELAY_MS + (shown - FAST_STEP_COUNT) ** SLOWDOWN_EXPONENT * SLOWDOWN_BASE_MS;
+  const slowdownMs = (shown - steps.fastCount) ** steps.slowdownExponent * steps.slowdownBaseMs;
+
+  return steps.fastDelayMs + slowdownMs;
 }
