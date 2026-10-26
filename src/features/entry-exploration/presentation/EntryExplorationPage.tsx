@@ -21,6 +21,7 @@ import { toSeoulGridCellCenter } from "../domain/seoulGridCoordinates";
 import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
+import { EntryExplorationDartRouletteBoard } from "./EntryExplorationDartRouletteBoard";
 import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
@@ -75,10 +76,13 @@ export function EntryExplorationPage({
     onRequestRouletteView,
     onRetryThrow,
     onRouletteCameraSettled,
+    onRouletteHighlight,
+    onRouletteLayoutChange,
     onRouletteStart,
     onRouletteThrowResult,
     onRouletteViewActiveChange,
     onRouletteViewControlsReady,
+    onRouletteWin,
     requestDartView,
   } = useEntryExplorationDartShot();
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
@@ -125,9 +129,16 @@ export function EntryExplorationPage({
     onDartViewActiveChange,
     onDartViewControlsReady,
     onRouletteCameraSettled,
+    onRouletteEntryBlocked: () => {
+      track({ name: "entry_roulette_blocked" });
+      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+    },
+    onRouletteHighlight,
+    onRouletteLayoutChange,
     onRouletteThrowResult,
     onRouletteViewActiveChange,
     onRouletteViewControlsReady,
+    onRouletteWin,
   });
   const characterSpeech = useEntryCharacterSpeech({
     hasStarted,
@@ -170,6 +181,15 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
+      {isRouletteView && (
+        <EntryExplorationDartRouletteBoard
+          board={dartShot.rouletteBoard}
+          hasResult={dartShot.shotResult !== null}
+          isReady={dartShot.isRouletteReady}
+          isStarted={dartShot.isRouletteStarted}
+          onStart={onRouletteStart}
+        />
+      )}
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
@@ -186,15 +206,7 @@ export function EntryExplorationPage({
         onThrow={onArrowThrow}
         shot={dartShot.shotResult}
       />
-      <EntryExplorationSceneButton
-        isDisabled={dartShot.isRouletteStarted}
-        isVisible={isRouletteView && dartShot.isRouletteReady && dartShot.shotResult === null}
-        onClick={onRouletteStart}
-        placement="bottom"
-      >
-        START
-      </EntryExplorationSceneButton>
-      <EntryExplorationDartHitBadge result={dartShot.landedResult} />
+      <EntryExplorationDartHitBadge result={isRouletteView ? null : dartShot.landedResult} />
       {hasStarted && (
         <EntryCollectedNumbersPanel
           rows={getEntryNumberRewardRows(visibleRewards)}
