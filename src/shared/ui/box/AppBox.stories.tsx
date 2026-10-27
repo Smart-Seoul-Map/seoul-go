@@ -15,7 +15,7 @@ const meta = {
     p: "spacing.6",
     width: "var(--sg-panel-width-small)",
     maxWidth: "full",
-    style: { fontFamily: "var(--sg-font-namsan)" },
+    style: { fontFamily: "var(--sg-font-family-base)" },
   },
 } satisfies Meta<typeof AppBox>;
 export default meta;

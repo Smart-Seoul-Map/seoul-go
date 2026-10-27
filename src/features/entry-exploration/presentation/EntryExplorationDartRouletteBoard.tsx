@@ -43,12 +43,27 @@ export type EntryExplorationDartRouletteBoardProps = {
   visitedPlaces?: readonly EntryNumberRewardCell[];
 };
 
-const CONFETTI_PIECES = Array.from({ length: 14 }, (_, index) => index);
+type ConfettiPiece = (typeof ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.confetti)[number];
+
+type ConfettiPieceStyle = CSSProperties & {
+  "--confetti-rotate": string;
+  "--confetti-x": string;
+  "--confetti-y": string;
+};
+
+type RouletteRootStyle = CSSProperties & {
+  "--entry-exploration-dart-roulette-win-hold": string;
+};
+
 const EMPTY_VISITED_PLACES: readonly EntryNumberRewardCell[] = [];
-const { board: boardConfig, infoBox, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
+const { board: boardConfig, confetti, infoBox, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
 const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
 const CELL_BEVEL_STYLE: CSSProperties = { backgroundSize: `${100 / columns}% ${100 / rows}%` };
+// 당첨 연출(물결·폭죽)이 당첨 유지 시간 안에 끝나도록 CSS에 같은 값을 넘긴다.
+const ROULETTE_ROOT_STYLE: RouletteRootStyle = {
+  "--entry-exploration-dart-roulette-win-hold": `${steps.winHoldMs}ms`,
+};
 
 export function EntryExplorationDartRouletteBoard({
   board,
@@ -143,7 +158,7 @@ export function EntryExplorationDartRouletteBoard({
   };
 
   return (
-    <div className="entry-exploration-dart-roulette" data-phase={phase}>
+    <div className="entry-exploration-dart-roulette" data-phase={phase} style={ROULETTE_ROOT_STYLE}>
       {layout && (
         <div
           ref={boardRef}
@@ -218,8 +233,8 @@ export function EntryExplorationDartRouletteBoard({
                 className="entry-exploration-dart-roulette__confetti"
                 style={toCellCenterStyle(win.cell)}
               >
-                {CONFETTI_PIECES.map((piece) => (
-                  <i key={piece} />
+                {confetti.map((piece, index) => (
+                  <i key={index} data-tone={piece.tone} style={toConfettiStyle(piece)} />
                 ))}
               </span>
             </>
@@ -423,6 +438,14 @@ function toRingStyle(
   const size = `${radiusCells * 2 + widthCells}em`;
 
   return { ...toCellCenterStyle(cell), borderWidth: `${widthCells}em`, height: size, width: size };
+}
+
+function toConfettiStyle({ rotateDeg, xPx, yPx }: ConfettiPiece): ConfettiPieceStyle {
+  return {
+    "--confetti-rotate": `${rotateDeg}deg`,
+    "--confetti-x": `${xPx}px`,
+    "--confetti-y": `${yPx}px`,
+  };
 }
 
 function toPercent(ratio: number): string {

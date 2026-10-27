@@ -13,6 +13,6 @@ test("gives every modeled place its own edition slot within the layout", () => {
   }
 });
 
-test("keeps Namsan Park Baekbeom Square in the first edition slot", () => {
-  expect(ENTRY_EDITION_MODELS["smart-seoul:1786321258890:25_edition25_24"].editionIndex).toBe(0);
+test("keeps Bongeunsa in the first edition slot", () => {
+  expect(ENTRY_EDITION_MODELS["smart-seoul:1786321258890:26_edition25_1"].editionIndex).toBe(0);
 });
