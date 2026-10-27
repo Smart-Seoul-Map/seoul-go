@@ -29,12 +29,7 @@ const E2E_SPECS_BY_PATH = [
   },
   {
     path: /^(src\/features\/exploration|public\/models\/markers)\//,
-    specs: [
-      "intro-seoul-edition",
-      "linked-place-exploration",
-      "place-query-cache",
-      "stamp-course-image",
-    ],
+    specs: ["intro-seoul-edition", "linked-place-exploration", "stamp-course-image"],
   },
   {
     path: /^src\/features\/course\//,

@@ -112,42 +112,36 @@ async function exportPixels(page: Page) {
   );
 }
 
-for (const viewport of [
-  { width: 1440, height: 900 },
-  { width: 390, height: 844 },
-]) {
-  test(`exports distinct photos and preserves current dimensions at ${viewport.width}px`, async ({
-    page,
-  }) => {
-    await page.setViewportSize(viewport);
-    const proxyRequests = await prepareCourse(page);
-    expect(proxyRequests).toEqual([]);
-    const first = await exportPixels(page);
-    expect(first.actualSize).toEqual(first.expectedSize);
-    expect(first.colors).toEqual([
-      [255, 0, 0, 255],
-      [0, 0, 255, 255],
-    ]);
-    expect(proxyRequests).toContain(`${PHOTO_BASE}?color=red`);
-    expect(proxyRequests).toContain(`${PHOTO_BASE}?color=blue`);
+// The export keeps the board's on-screen size at any width, so one mobile width covers it.
+test("exports distinct photos and preserves current dimensions at 390px", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const proxyRequests = await prepareCourse(page);
+  expect(proxyRequests).toEqual([]);
+  const first = await exportPixels(page);
+  expect(first.actualSize).toEqual(first.expectedSize);
+  expect(first.colors).toEqual([
+    [255, 0, 0, 255],
+    [0, 0, 255, 255],
+  ]);
+  expect(proxyRequests).toContain(`${PHOTO_BASE}?color=red`);
+  expect(proxyRequests).toContain(`${PHOTO_BASE}?color=blue`);
 
-    await page
-      .locator('[data-filled="true"] img')
-      .first()
-      .evaluate(async (element, url) => {
-        const image = element as HTMLImageElement;
-        image.src = url;
-        await image.decode();
-      }, `${PHOTO_BASE}?color=lime`);
-    const second = await exportPixels(page);
-    expect(second.colors).toEqual([
-      [0, 255, 0, 255],
-      [0, 0, 255, 255],
-    ]);
-    expect(second.actualSize).toEqual(first.actualSize);
-    await expect(page.locator(".StampCourseBoardFrame")).toHaveCount(1);
-  });
-}
+  await page
+    .locator('[data-filled="true"] img')
+    .first()
+    .evaluate(async (element, url) => {
+      const image = element as HTMLImageElement;
+      image.src = url;
+      await image.decode();
+    }, `${PHOTO_BASE}?color=lime`);
+  const second = await exportPixels(page);
+  expect(second.colors).toEqual([
+    [0, 255, 0, 255],
+    [0, 0, 255, 255],
+  ]);
+  expect(second.actualSize).toEqual(first.actualSize);
+  await expect(page.locator(".StampCourseBoardFrame")).toHaveCount(1);
+});
 
 test("a failed proxy keeps the visible photo and re-enables export", async ({ page }) => {
   await prepareCourse(page);

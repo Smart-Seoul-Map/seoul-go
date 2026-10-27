@@ -13,7 +13,6 @@ const SPECS = [
   "tests/e2e/entry-slot.spec.ts",
   "tests/e2e/intro-seoul-edition.spec.ts",
   "tests/e2e/linked-place-exploration.spec.ts",
-  "tests/e2e/place-query-cache.spec.ts",
   "tests/e2e/stamp-course-image.spec.ts",
 ];
 const INTRO_SPECS = [
@@ -45,7 +44,6 @@ test("runs the exploration specs for exploration code and linked place markers",
     UNMAPPED_SPEC,
     "tests/e2e/intro-seoul-edition.spec.ts",
     "tests/e2e/linked-place-exploration.spec.ts",
-    "tests/e2e/place-query-cache.spec.ts",
     "tests/e2e/stamp-course-image.spec.ts",
   ]);
 });
