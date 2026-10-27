@@ -20,27 +20,15 @@ type AssetPlace = {
   href: string;
 };
 
-// Hanok first; walking straight from waterfront back to hanok would cross store and the edition place.
-const ASSET_PLACES: readonly AssetPlace[] = [
-  {
-    placeId: "hanok",
-    title: "한옥체험",
-    linkLabel: "한옥체험 지도 보기",
-    href: "https://map.seoul.go.kr/smgis2/short/6P5oo",
-  },
-  {
-    placeId: "store",
-    title: "서울마음편의점",
-    linkLabel: "서울마음편의점 지도 보기",
-    href: "https://map.seoul.go.kr/smgis2/short/6PiAJ",
-  },
-  {
-    placeId: "waterfront",
-    title: "서울물빛나루",
-    linkLabel: "서울물빛나루 지도 보기",
-    href: "https://map.seoul.go.kr/smgis2/short/6PJUP",
-  },
-];
+// The intro shows hanok, store and waterfront landmarks. Their panels share one visit flow, so this
+// walks to hanok only; unit tests cover each asset's panel text, link and click routing.
+const ASSET_LANDMARK_COUNT = 3;
+const HANOK: AssetPlace = {
+  placeId: "hanok",
+  title: "한옥체험",
+  linkLabel: "한옥체험 지도 보기",
+  href: "https://map.seoul.go.kr/smgis2/short/6P5oo",
+};
 
 test.use({ actionTimeout: 10_000, launchOptions: { args: ["--enable-unsafe-swiftshader"] } });
 
@@ -184,7 +172,7 @@ async function expectNothingToAppear(page: Page, selector: string): Promise<void
   expect(appeared, `Unexpected ${selector} after closing the asset panel`).toBe(false);
 }
 
-test("desktop: clicking hanok, store and waterfront walks there and opens each map link panel without rewards", async ({
+test("desktop: clicking hanok walks there and opens its map link panel without rewards", async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -194,32 +182,28 @@ test("desktop: clicking hanok, store and waterfront walks there and opens each m
   await expect(scene(page)).toBeVisible({ timeout: 20_000 });
   await expect(scene(page)).not.toHaveAttribute("aria-busy", "true", { timeout: 45_000 });
   await expect(page.locator(".EntryEditionLabels")).toBeVisible();
-  await expect(page.locator(".EntryAssetLandmark")).toHaveCount(ASSET_PLACES.length);
+  await expect(page.locator(".EntryAssetLandmark")).toHaveCount(ASSET_LANDMARK_COUNT);
 
-  for (const asset of ASSET_PLACES) {
-    await test.step(`${asset.title}: click, arrive, check the panel and close it`, async () => {
-      const panel = assetPanel(page, asset.title);
-      const arrivedBy = await walkToAsset(page, asset);
-      expect(arrivedBy, `${asset.title} should be reached by clicking the asset`).toBe("asset");
-      await expect(panel).toHaveAttribute("data-state", "open");
-      await expect(openPlacePanel(page)).toHaveCount(1);
-      const link = panel.getByRole("link", {
-        name: `${asset.linkLabel} (새 탭에서 열기)`,
-        exact: true,
-      });
-      await expect(link).toHaveAttribute("href", asset.href);
-      await expect(link).toHaveAttribute("target", "_blank");
-      await expect(link).toHaveAttribute("rel", /(^|\s)noopener(\s|$)/);
-      await expect(page.locator(".AppToast")).toHaveCount(0);
-      await expect(page.locator(".AppSpeechBubble")).toHaveCount(0);
-      const collectedNumbers = await readCollectedNumberCount(page);
+  const panel = assetPanel(page, HANOK.title);
+  const arrivedBy = await walkToAsset(page, HANOK);
+  expect(arrivedBy, `${HANOK.title} should be reached by clicking the asset`).toBe("asset");
+  await expect(panel).toHaveAttribute("data-state", "open");
+  await expect(openPlacePanel(page)).toHaveCount(1);
+  const link = panel.getByRole("link", {
+    name: `${HANOK.linkLabel} (새 탭에서 열기)`,
+    exact: true,
+  });
+  await expect(link).toHaveAttribute("href", HANOK.href);
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", /(^|\s)noopener(\s|$)/);
+  await expect(page.locator(".AppToast")).toHaveCount(0);
+  await expect(page.locator(".AppSpeechBubble")).toHaveCount(0);
+  const collectedNumbers = await readCollectedNumberCount(page);
 
-      await panel.getByRole("button", { name: "장소 정보 닫기", exact: true }).click();
-      await expectNothingToAppear(
-        page,
-        '.AppToast, .AppSpeechBubble, .PlaceDetailPanel[data-state="open"]'
-      );
-      expect(await readCollectedNumberCount(page)).toBe(collectedNumbers);
-    });
-  }
+  await panel.getByRole("button", { name: "장소 정보 닫기", exact: true }).click();
+  await expectNothingToAppear(
+    page,
+    '.AppToast, .AppSpeechBubble, .PlaceDetailPanel[data-state="open"]'
+  );
+  expect(await readCollectedNumberCount(page)).toBe(collectedNumbers);
 });
