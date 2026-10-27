@@ -1,4 +1,19 @@
-import { useLayoutEffect, useRef, type CSSProperties, type ReactElement } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactElement,
+  type RefObject,
+  type SyntheticEvent,
+} from "react";
+
+import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
+import { AppBadge } from "@shared/ui/badge";
+import { AppBox } from "@shared/ui/box";
+import { AppHStack } from "@shared/ui/layout";
+import { AppText } from "@shared/ui/typography";
 
 import type {
   EntryExplorationDartRouletteBoardState,
@@ -8,12 +23,15 @@ import type { EntryExplorationDartViewportRect } from "../application/entryExplo
 import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
+import type { EntryNumberRewardCell } from "../domain/entryNumberReward";
 import { isSeoulGridCellValid, type SeoulGridCell } from "../domain/seoulGridNumber";
 import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 
 import "./EntryExplorationDartRouletteBoard.css";
 
 type EntryExplorationDartRoulettePhase = "done" | "fast" | "idle" | "slow" | "win";
+
+type RouletteInfoBoxAlign = "center" | "end" | "start";
 
 export type EntryExplorationDartRouletteBoardProps = {
   board: EntryExplorationDartRouletteBoardState;
@@ -22,10 +40,12 @@ export type EntryExplorationDartRouletteBoardProps = {
   isStarted: boolean;
   mapRectStore: EntryExplorationDartRouletteMapRectStore;
   onStart: () => void;
+  visitedPlaces?: readonly EntryNumberRewardCell[];
 };
 
 const CONFETTI_PIECES = Array.from({ length: 14 }, (_, index) => index);
-const { board: boardConfig, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
+const EMPTY_VISITED_PLACES: readonly EntryNumberRewardCell[] = [];
+const { board: boardConfig, infoBox, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
 const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
 const CELL_BEVEL_STYLE: CSSProperties = { backgroundSize: `${100 / columns}% ${100 / rows}%` };
@@ -37,12 +57,21 @@ export function EntryExplorationDartRouletteBoard({
   isStarted,
   mapRectStore,
   onStart,
+  visitedPlaces = EMPTY_VISITED_PLACES,
 }: EntryExplorationDartRouletteBoardProps): ReactElement {
   const { activeCell, layout, win } = board;
   const restMapRect = layout?.restMapRect ?? null;
   const boardRef = useRef<HTMLDivElement>(null);
+  const infoBoxRef = useRef<HTMLDivElement>(null);
+  const cellPointerTypeRef = useRef<string | null>(null);
+  const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
+  const [tappedPlaceId, setTappedPlaceId] = useState<string | null>(null);
   const phase = getRoulettePhase(board, isStarted, hasResult);
   const isWinHolding = phase === "win";
+  // 점멸 중(START 후 결과 전)에는 방문 장소 정보를 열지 않는다.
+  const isInfoAvailable = phase === "idle" || phase === "done";
+  const infoPlaceId = isInfoAvailable ? (tappedPlaceId ?? hoveredPlaceId) : null;
+  const infoPlace = visitedPlaces.find((place) => place.placeId === infoPlaceId) ?? null;
 
   // 판은 도착 위치 크기로 한 번 그리고, 카메라 이동 중에는 transform만 바꿔서 다시 그리지 않는다.
   useLayoutEffect(() => {
@@ -61,6 +90,57 @@ export function EntryExplorationDartRouletteBoard({
 
     return mapRectStore.subscribe(followMap);
   }, [mapRectStore, restMapRect]);
+
+  // 탭으로 연 정보 박스는 박스 밖이나 다른 칸을 누르면 닫는다.
+  useEffect(() => {
+    if (!tappedPlaceId) {
+      return;
+    }
+
+    const handleDocumentPointerDown = (event: PointerEvent): void => {
+      if (event.target instanceof Node && infoBoxRef.current?.contains(event.target)) {
+        return;
+      }
+
+      setTappedPlaceId(null);
+    };
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown, true);
+
+    return () => document.removeEventListener("pointerdown", handleDocumentPointerDown, true);
+  }, [tappedPlaceId]);
+
+  const handleVisitedCellPointerDown = (event: SyntheticEvent, pointerType: string): void => {
+    stopSceneInput(event);
+    cellPointerTypeRef.current = pointerType;
+  };
+
+  // PC 마우스 클릭은 박스를 열지 않는다(호버로만 보인다). 탭이나 키보드로 누르면 연다.
+  const handleVisitedCellClick = (event: SyntheticEvent, placeId: string): void => {
+    stopSceneInput(event);
+    const isMouseClick = cellPointerTypeRef.current === "mouse";
+    cellPointerTypeRef.current = null;
+
+    if (!isMouseClick) {
+      setTappedPlaceId(placeId);
+    }
+  };
+
+  const handleVisitedCellPointerEnter = (pointerType: string, placeId: string): void => {
+    if (pointerType === "mouse") {
+      setHoveredPlaceId(placeId);
+    }
+  };
+
+  const handleInfoClose = (): void => {
+    setHoveredPlaceId(null);
+    setTappedPlaceId(null);
+  };
+
+  const handleStartClick = (): void => {
+    handleInfoClose();
+    onStart();
+  };
 
   return (
     <div className="entry-exploration-dart-roulette" data-phase={phase}>
@@ -87,18 +167,36 @@ export function EntryExplorationDartRouletteBoard({
                 winDistance !== null &&
                 winDistance > 0 &&
                 winDistance <= boardConfig.rippleRadiusCells;
+              const visitedPlace = visitedPlaces.find((place) => isSameCell(place.cell, cell));
+              const pathProps = {
+                className: "entry-exploration-dart-roulette__path",
+                "data-lit": isLit,
+                "data-ripple": isRippling,
+                style: {
+                  ...toCellStyle(cell, boardConfig.tileGapRatio),
+                  animationDelay: getRippleDelay(winDistance),
+                },
+              };
+
+              if (!visitedPlace) {
+                return <span key={toCellKey(cell)} aria-hidden="true" {...pathProps} />;
+              }
 
               return (
-                <span
+                <button
                   key={toCellKey(cell)}
-                  aria-hidden="true"
-                  className="entry-exploration-dart-roulette__path"
-                  data-lit={isLit}
-                  data-ripple={isRippling}
-                  style={{
-                    ...toCellStyle(cell, boardConfig.tileGapRatio),
-                    animationDelay: getRippleDelay(winDistance),
-                  }}
+                  type="button"
+                  aria-label={`${visitedPlace.placeName} 정보 보기`}
+                  data-visited="true"
+                  disabled={!isInfoAvailable}
+                  onClick={(event) => handleVisitedCellClick(event, visitedPlace.placeId)}
+                  onPointerDown={(event) => handleVisitedCellPointerDown(event, event.pointerType)}
+                  onPointerEnter={(event) =>
+                    handleVisitedCellPointerEnter(event.pointerType, visitedPlace.placeId)
+                  }
+                  onPointerLeave={() => setHoveredPlaceId(null)}
+                  onWheel={stopSceneInput}
+                  {...pathProps}
                 />
               );
             })}
@@ -126,12 +224,13 @@ export function EntryExplorationDartRouletteBoard({
               </span>
             </>
           )}
+          {infoPlace && <RouletteVisitedPlaceInfo boxRef={infoBoxRef} place={infoPlace} />}
         </div>
       )}
       <EntryExplorationSceneButton
         isDisabled={isStarted}
         isVisible={isReady && !hasResult}
-        onClick={onStart}
+        onClick={handleStartClick}
         placement="bottom"
       >
         START
@@ -180,6 +279,51 @@ function RouletteResultMarker({ cell }: RouletteResultMarkerProps): ReactElement
   );
 }
 
+type RouletteVisitedPlaceInfoProps = {
+  boxRef: RefObject<HTMLDivElement | null>;
+  place: EntryNumberRewardCell;
+};
+
+// 방문 장소 칸 위에 장소명과 연도 배지를 띄운다. 연도 배지는 장소 정보 패널과 같은 색을 장소명 높이에 맞춰 작게 쓴다.
+function RouletteVisitedPlaceInfo({ boxRef, place }: RouletteVisitedPlaceInfoProps): ReactElement {
+  return (
+    <div
+      className="entry-exploration-dart-roulette__info"
+      style={toCellStyle(place.cell, boardConfig.tileGapRatio)}
+    >
+      <AppBox
+        ref={boxRef}
+        bg="bg.surfacePaper"
+        borderColor="stroke.brand"
+        borderRadius="radius.3"
+        borderWidth="strokeWidth.surface"
+        boxShadow="shadow.raised"
+        className="entry-exploration-dart-roulette__info-box"
+        data-align={getInfoBoxAlign(place.cell)}
+        px="spacing.3"
+        py="spacing.2"
+        onClick={stopSceneInput}
+        onPointerDown={stopSceneInput}
+        onWheel={stopSceneInput}
+      >
+        <AppHStack align="center" gap="sm">
+          <AppText role="supporting">{place.placeName}</AppText>
+          {place.selectionYear !== undefined && (
+            <AppBadge
+              size="xs"
+              tone={getSelectionYearBadgeTone(place.selectionYear)}
+              variant="solid"
+              textPolicy="singleLine"
+            >
+              {place.selectionYear}
+            </AppBadge>
+          )}
+        </AppHStack>
+      </AppBox>
+    </div>
+  );
+}
+
 function getRoulettePhase(
   board: EntryExplorationDartRouletteBoardState,
   isStarted: boolean,
@@ -194,6 +338,21 @@ function getRoulettePhase(
   }
 
   return board.step >= steps.fastCount ? "slow" : "fast";
+}
+
+// 판 가장자리 칸의 정보 박스는 화면 밖으로 잘리지 않게 칸의 같은 쪽 끝에 맞춘다.
+function getInfoBoxAlign({ column }: SeoulGridCell): RouletteInfoBoxAlign {
+  const columnRatio = (column + 0.5) / columns;
+
+  if (columnRatio < infoBox.edgeColumnRatio) {
+    return "start";
+  }
+
+  if (columnRatio > 1 - infoBox.edgeColumnRatio) {
+    return "end";
+  }
+
+  return "center";
 }
 
 function getRippleDelay(winDistance: number | null): string | undefined {
@@ -280,4 +439,9 @@ function isSameCell(left: SeoulGridCell, right: SeoulGridCell): boolean {
 
 function getCellDistance(from: SeoulGridCell, to: SeoulGridCell): number {
   return Math.hypot(from.column - to.column, from.row - to.row);
+}
+
+// 판 위 버튼·정보 박스 입력이 뒤의 3D 씬으로 넘어가지 않게 막는다.
+function stopSceneInput(event: SyntheticEvent): void {
+  event.stopPropagation();
 }
