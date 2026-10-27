@@ -4,17 +4,19 @@ import { startIntro } from "./helpers/introEdition";
 
 const THEME = "1786321258890";
 const MODELED_PLACE_IDS = [
-  "25_edition25_24",
+  "26_edition25_1",
   "25_edition25_12",
   "25_edition25_20",
   "25_edition25_2",
   "25_edition25_6",
+  "25_edition25_24",
 ]
   .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
   .sort();
 const MODEL_PATHS = [
   "/models/places/achasan_eoullim_garden.glb",
   "/models/places/amsa_dong_site.glb",
+  "/models/places/bongeunsa.glb",
   "/models/places/gangbyeon_seojae.glb",
   "/models/places/namsan_baekbeom_square.glb",
   "/models/places/yongyangbongjeojeong_park.glb",
