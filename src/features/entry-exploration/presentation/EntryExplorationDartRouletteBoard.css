@@ -30,18 +30,15 @@
     var(--sg-color-bg-brand) 32%,
     transparent
   );
-  --entry-exploration-dart-roulette-owned-top: #184b42;
-  --entry-exploration-dart-roulette-owned-top-light: #2c7d6c;
-  --entry-exploration-dart-roulette-owned-side: #0a2420;
   --entry-exploration-dart-roulette-owned-edge: #4dd4a8;
-  --entry-exploration-dart-roulette-owned-ink: #c9ffed;
   --entry-exploration-dart-roulette-win-glow: #ffd26a;
   --entry-exploration-dart-roulette-win-pop-bg: #fff4b9;
   --entry-exploration-dart-roulette-ring: #ffdd79;
   --entry-exploration-dart-roulette-flash-core: #fff6c78a;
   --entry-exploration-dart-roulette-flash-mid: #f4c45225;
-  --entry-exploration-dart-roulette-button-bg: #e5b95b;
-  --entry-exploration-dart-roulette-button-ink: #241a0c;
+  --entry-exploration-dart-roulette-marker-cell: var(--sg-v3-blue-500);
+  --entry-exploration-dart-roulette-marker-accent: var(--sg-v3-blue-600);
+  --entry-exploration-dart-roulette-marker-border: var(--sg-color-bg-floating);
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -152,45 +149,39 @@
   animation: entry-exploration-dart-roulette-wave 0.9s ease-out;
 }
 
-.entry-exploration-dart-roulette__tile {
-  --tile-glow: 0 0 0 transparent;
+/* 결과 마커는 번호 줄 칸 윗면 높이에 얹는다. 칸·링 크기는 em(=칸 너비)으로 inline 지정한다. */
+.entry-exploration-dart-roulette__marker {
   position: absolute;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  box-sizing: border-box;
-  border: 0.04em solid var(--entry-exploration-dart-roulette-owned-edge);
-  border-radius: 0.14em;
-  background: linear-gradient(
-    160deg,
-    var(--entry-exploration-dart-roulette-owned-top-light),
-    var(--entry-exploration-dart-roulette-owned-top) 72%
-  );
-  box-shadow:
-    inset 0 0.06em 0 rgb(255 255 255 / 45%),
-    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-owned-side),
-    0 calc(var(--cell-rise) + 0.08em) 0.24em rgb(0 0 0 / 28%),
-    var(--tile-glow);
-  color: var(--entry-exploration-dart-roulette-owned-ink);
+  inset: 0;
+  z-index: 4;
   transform: var(--cell-rest) translateY(0) scale(1);
 }
 
-.entry-exploration-dart-roulette__tile[data-state="win"] {
-  --tile-top: var(--entry-exploration-dart-roulette-owned-top);
-  --tile-top-light: var(--entry-exploration-dart-roulette-owned-top-light);
-  --tile-side: var(--entry-exploration-dart-roulette-owned-side);
-  --tile-edge: var(--entry-exploration-dart-roulette-owned-edge);
-  --tile-glow: 0 0 0 transparent;
-  z-index: 3;
-}
-
-.entry-exploration-dart-roulette__tile[data-state="win"] {
-  --tile-glow: 0 0 24px 8px var(--entry-exploration-dart-roulette-win-glow);
-  z-index: 4;
+/* 당첨 순간 마커가 당첨 칸을 중심으로 튀어 올랐다가 제자리에 앉는다. */
+.entry-exploration-dart-roulette[data-phase="win"] .entry-exploration-dart-roulette__marker {
   animation: entry-exploration-dart-roulette-pop 0.48s ease-out;
 }
 
-.entry-exploration-dart-roulette__tile[data-state="win"]::before {
+.entry-exploration-dart-roulette__marker-cell {
+  position: absolute;
+  background: var(--entry-exploration-dart-roulette-marker-cell);
+}
+
+.entry-exploration-dart-roulette__marker-center {
+  position: absolute;
+  box-sizing: border-box;
+  border: 0 solid var(--entry-exploration-dart-roulette-marker-border);
+  background: var(--entry-exploration-dart-roulette-marker-accent);
+  transition: box-shadow 0.45s ease-out;
+}
+
+.entry-exploration-dart-roulette[data-phase="win"] .entry-exploration-dart-roulette__marker-center {
+  box-shadow: 0 0 24px 8px var(--entry-exploration-dart-roulette-win-glow);
+  animation: entry-exploration-dart-roulette-center-pop 0.48s ease-out;
+}
+
+.entry-exploration-dart-roulette[data-phase="win"]
+  .entry-exploration-dart-roulette__marker-center::before {
   content: "";
   position: absolute;
   inset: -8px;
@@ -200,10 +191,12 @@
   pointer-events: none;
 }
 
-.entry-exploration-dart-roulette__stamp {
-  font-size: 0.72em;
-  line-height: 1;
-  animation: entry-exploration-dart-roulette-stamp 0.32s cubic-bezier(0.1, 1.8, 0.4, 1);
+.entry-exploration-dart-roulette__marker-ring {
+  position: absolute;
+  box-sizing: border-box;
+  border: 0 solid var(--entry-exploration-dart-roulette-marker-accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .entry-exploration-dart-roulette__flash {
@@ -337,25 +330,6 @@
   pointer-events: auto;
 }
 
-.entry-exploration-dart-roulette .AppButton {
-  --sg-button-primary-bg: var(--entry-exploration-dart-roulette-button-bg);
-  --sg-button-primary-bg-pressed: var(--entry-exploration-dart-roulette-button-bg);
-  --sg-button-primary-fg: var(--entry-exploration-dart-roulette-button-ink);
-  --sg-button-disabled-bg: var(--entry-exploration-dart-roulette-button-bg);
-  --sg-button-disabled-fg: var(--entry-exploration-dart-roulette-button-ink);
-  --sg-button-radius: 10px;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.entry-exploration-dart-roulette .AppButton:disabled {
-  opacity: 0.55;
-}
-
-.entry-exploration-dart-roulette[data-phase="idle"] .AppButton {
-  animation: entry-exploration-dart-roulette-start-pulse 1.6s ease-out infinite;
-}
-
 @keyframes entry-exploration-dart-roulette-ripple {
   40% {
     transform: translateY(-0.5em) scale(1.08);
@@ -382,11 +356,16 @@
 
   30% {
     transform: var(--cell-rest) translateY(-0.5em) scale(1.5);
-    background: var(--entry-exploration-dart-roulette-win-pop-bg);
   }
 
   100% {
     transform: var(--cell-rest) translateY(0) scale(1);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-center-pop {
+  30% {
+    background: var(--entry-exploration-dart-roulette-win-pop-bg);
   }
 }
 
@@ -399,22 +378,6 @@
   100% {
     opacity: 0;
     transform: scale(2.6);
-  }
-}
-
-@keyframes entry-exploration-dart-roulette-stamp {
-  0% {
-    opacity: 0;
-    transform: scale(2.5) rotate(-20deg);
-  }
-
-  70% {
-    opacity: 1;
-    transform: scale(0.85);
-  }
-
-  100% {
-    transform: scale(1);
   }
 }
 
@@ -444,16 +407,6 @@
     opacity: 0;
     transform: translate(var(--confetti-x), calc(var(--confetti-y) + 70px))
       rotate(var(--confetti-rotate));
-  }
-}
-
-@keyframes entry-exploration-dart-roulette-start-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgb(229 185 91 / 60%);
-  }
-
-  100% {
-    box-shadow: 0 0 0 14px rgb(229 185 91 / 0%);
   }
 }
 

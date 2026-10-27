@@ -6,15 +6,14 @@ import type {
 } from "../application/useEntryExplorationDartShot";
 import type { EntryExplorationDartViewportRect } from "../application/entryExplorationSeoulTileMapViewInteraction";
 import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
+import { ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG } from "../config/entryExplorationSeoulTileMapViewConfig";
 import { SEOUL_GRID_MAP_CONFIG } from "../config/seoulGridNumberConfig";
-import type { SeoulGridCell } from "../domain/seoulGridNumber";
+import { isSeoulGridCellValid, type SeoulGridCell } from "../domain/seoulGridNumber";
 import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 
 import "./EntryExplorationDartRouletteBoard.css";
 
 type EntryExplorationDartRoulettePhase = "done" | "fast" | "idle" | "slow" | "win";
-
-type EntryExplorationDartRouletteTileState = "owned" | "win";
 
 export type EntryExplorationDartRouletteBoardProps = {
   board: EntryExplorationDartRouletteBoardState;
@@ -27,6 +26,7 @@ export type EntryExplorationDartRouletteBoardProps = {
 
 const CONFETTI_PIECES = Array.from({ length: 14 }, (_, index) => index);
 const { board: boardConfig, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
+const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
 const CELL_BEVEL_STYLE: CSSProperties = { backgroundSize: `${100 / columns}% ${100 / rows}%` };
 
@@ -96,7 +96,7 @@ export function EntryExplorationDartRouletteBoard({
                   data-lit={isLit}
                   data-ripple={isRippling}
                   style={{
-                    ...toCellStyle(cell),
+                    ...toCellStyle(cell, boardConfig.tileGapRatio),
                     animationDelay: getRippleDelay(winDistance),
                   }}
                 />
@@ -109,7 +109,7 @@ export function EntryExplorationDartRouletteBoard({
               />
             )}
           </div>
-          {win && <RouletteTile cell={win.cell} state={isWinHolding ? "win" : "owned"} />}
+          {win && <RouletteResultMarker cell={win.cell} />}
           {isWinHolding && win && (
             <>
               <span
@@ -140,20 +140,42 @@ export function EntryExplorationDartRouletteBoard({
   );
 }
 
-type RouletteTileProps = {
+type RouletteResultMarkerProps = {
   cell: SeoulGridCell;
-  state: EntryExplorationDartRouletteTileState;
 };
 
-function RouletteTile({ cell, state }: RouletteTileProps): ReactElement {
+// 화살 화면의 3D 결과 마커(십자 5칸 + 링 2개)를 판 위에 같은 모양으로 그린다.
+// 당첨 순간에 튀어 오르며 나타나고, 결과가 나온 뒤에도 그대로 남는다.
+function RouletteResultMarker({ cell }: RouletteResultMarkerProps): ReactElement {
+  const crossCells = hitMarker.cellOffsets
+    .map((offset) => ({ column: cell.column + offset.column, row: cell.row + offset.row }))
+    .filter(isSeoulGridCellValid);
+
   return (
     <span
       aria-hidden="true"
-      className="entry-exploration-dart-roulette__tile"
-      data-state={state}
-      style={toCellStyle(cell)}
+      className="entry-exploration-dart-roulette__marker"
+      style={toCellOriginStyle(cell)}
     >
-      <span className="entry-exploration-dart-roulette__stamp">⚑</span>
+      {crossCells.map((crossCell) => (
+        <span
+          key={toCellKey(crossCell)}
+          className="entry-exploration-dart-roulette__marker-cell"
+          style={{ ...toCellStyle(crossCell, 0), opacity: hitMarker.cellOpacity }}
+        />
+      ))}
+      <span
+        className="entry-exploration-dart-roulette__marker-center"
+        style={{ ...toCellStyle(cell, 0), borderWidth: `${(1 - hitMarker.centerScale) / 2}em` }}
+      />
+      <span
+        className="entry-exploration-dart-roulette__marker-ring"
+        style={toRingStyle(cell, hitMarker.ring.outer)}
+      />
+      <span
+        className="entry-exploration-dart-roulette__marker-ring"
+        style={toRingStyle(cell, hitMarker.ring.inner)}
+      />
     </span>
   );
 }
@@ -213,9 +235,7 @@ function getRectTop({ height, y }: EntryExplorationDartViewportRect): number {
   return y - height / 2;
 }
 
-function toCellStyle({ column, row }: SeoulGridCell): CSSProperties {
-  const gap = boardConfig.tileGapRatio;
-
+function toCellStyle({ column, row }: SeoulGridCell, gap: number): CSSProperties {
   return {
     height: toPercent((1 - gap) / rows),
     left: toPercent((column + gap / 2) / columns),
@@ -229,6 +249,21 @@ function toCellCenterStyle({ column, row }: SeoulGridCell): CSSProperties {
     left: toPercent((column + 0.5) / columns),
     top: toPercent((row + 0.5) / rows),
   };
+}
+
+function toCellOriginStyle({ column, row }: SeoulGridCell): CSSProperties {
+  return {
+    transformOrigin: `${toPercent((column + 0.5) / columns)} ${toPercent((row + 0.5) / rows)}`,
+  };
+}
+
+function toRingStyle(
+  cell: SeoulGridCell,
+  { radiusCells, widthCells }: { radiusCells: number; widthCells: number }
+): CSSProperties {
+  const size = `${radiusCells * 2 + widthCells}em`;
+
+  return { ...toCellCenterStyle(cell), borderWidth: `${widthCells}em`, height: size, width: size };
 }
 
 function toPercent(ratio: number): string {

@@ -115,7 +115,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
 
     expect(litPaths).toHaveLength(1);
     expect(litPaths[0]).toHaveClass("entry-exploration-dart-roulette__path");
-    expect(container.querySelector(".entry-exploration-dart-roulette__tile")).toBeNull();
+    expect(container.querySelector(".entry-exploration-dart-roulette__marker")).toBeNull();
     expect(getRoot(container)).toHaveAttribute("data-phase", "fast");
     expect(screen.getByRole("button", { name: "START" })).toBeDisabled();
 
@@ -137,12 +137,13 @@ describe("EntryExplorationDartRouletteBoard", () => {
     expect(getRoot(container)).toHaveAttribute("data-phase", "slow");
   });
 
-  test("celebrates the winner and stamps it after the result arrives", () => {
+  test("pops the result marker on the winner and keeps it after the result arrives", () => {
     const { container, rerender } = renderBoard({ board: WON_BOARD, isStarted: true });
+    const marker = container.querySelector(".entry-exploration-dart-roulette__marker");
 
     expect(getRoot(container)).toHaveAttribute("data-phase", "win");
     expect(screen.queryByText(/구역 점령 성공/)).toBeNull();
-    expect(container.querySelector('[data-state="win"]')).toHaveTextContent("⚑");
+    expect(marker).not.toBeNull();
     expect(container.querySelectorAll('[data-ripple="true"]').length).toBeGreaterThan(0);
     expect(container.querySelector(".entry-exploration-dart-roulette__wave")).not.toBeNull();
     expect(container.querySelector(".entry-exploration-dart-roulette__flash")).not.toBeNull();
@@ -161,8 +162,18 @@ describe("EntryExplorationDartRouletteBoard", () => {
       />
     );
 
+    const markerCells = container.querySelectorAll(".entry-exploration-dart-roulette__marker-cell");
+
     expect(getRoot(container)).toHaveAttribute("data-phase", "done");
-    expect(container.querySelector('[data-state="owned"]')).toHaveTextContent("⚑");
+    expect(container.querySelector(".entry-exploration-dart-roulette__marker")).toBe(marker);
+    expect(markerCells.length).toBeGreaterThan(0);
+    expect(markerCells.length).toBeLessThanOrEqual(5);
+    expect(
+      container.querySelector(".entry-exploration-dart-roulette__marker-center")
+    ).not.toBeNull();
+    expect(
+      container.querySelectorAll(".entry-exploration-dart-roulette__marker-ring")
+    ).toHaveLength(2);
     expect(container.querySelector('[data-ripple="true"]')).toBeNull();
     expect(container.querySelector(".entry-exploration-dart-roulette__flash")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();

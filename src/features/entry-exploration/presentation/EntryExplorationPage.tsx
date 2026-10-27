@@ -208,7 +208,7 @@ export function EntryExplorationPage({
         onThrow={onArrowThrow}
         shot={dartShot.shotResult}
       />
-      <EntryExplorationDartHitBadge result={isRouletteView ? null : dartShot.landedResult} />
+      <EntryExplorationDartHitBadge result={dartShot.landedResult} />
       {hasStarted && (
         <EntryCollectedNumbersPanel
           rows={getEntryNumberRewardRows(visibleRewards)}

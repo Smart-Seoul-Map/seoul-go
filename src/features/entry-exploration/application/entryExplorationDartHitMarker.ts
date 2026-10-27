@@ -17,13 +17,6 @@ export type EntryExplorationDartHitMarker = {
 
 const MARKER_RENDER_ORDER = 999;
 const RING_SEGMENTS = 64;
-const CELL_OFFSETS = [
-  { column: 0, row: 0 },
-  { column: 0, row: -1 },
-  { column: 0, row: 1 },
-  { column: -1, row: 0 },
-  { column: 1, row: 0 },
-] as const;
 
 const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 
@@ -35,7 +28,9 @@ export function createEntryExplorationDartHitMarker(): EntryExplorationDartHitMa
   const { dart } = getEntryExplorationIntroTheme();
   const cellMaterial = createMarkerMaterial(dart.hitCellColor, hitMarker.cellOpacity);
   const ringMaterial = createMarkerMaterial(dart.hitAccentColor, 1);
-  const cellMeshes = CELL_OFFSETS.map(() => createMarkerMesh(createCellGeometry(), cellMaterial));
+  const cellMeshes = hitMarker.cellOffsets.map(() =>
+    createMarkerMesh(createCellGeometry(), cellMaterial)
+  );
   const borderMesh = createMarkerMesh(
     createCellGeometry(),
     createMarkerMaterial(dart.hitBorderColor, 1)
@@ -61,7 +56,7 @@ export function createEntryExplorationDartHitMarker(): EntryExplorationDartHitMa
 
     object.position.copy(getCellLocalPosition(cell, hitMarker.yOffset));
     cellMeshes.forEach((mesh, index) => {
-      const offset = CELL_OFFSETS[index];
+      const offset = hitMarker.cellOffsets[index];
 
       mesh.visible = isSeoulGridCellValid({
         column: cell.column + offset.column,
