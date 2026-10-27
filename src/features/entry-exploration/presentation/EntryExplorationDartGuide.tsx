@@ -9,7 +9,10 @@ import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport"
 import { AppHeading, AppText } from "@shared/ui/typography";
 
 import closeIcon from "../../../assets/icons/close.svg";
-import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
+import type {
+  EntryExplorationDartThrowResult,
+  EntryExplorationDartViewKind,
+} from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartGuide.css";
 
@@ -26,6 +29,7 @@ export type EntryExplorationDartGuideProps = {
   onRetryThrow: () => void;
   onStartExploration: (result: EntryExplorationDartThrowResult) => void;
   shotResult: EntryExplorationDartThrowResult | null;
+  viewKind?: EntryExplorationDartViewKind;
 };
 
 export function EntryExplorationDartGuide({
@@ -35,8 +39,11 @@ export function EntryExplorationDartGuide({
   onRetryThrow,
   onStartExploration,
   shotResult,
+  viewKind = "arrow",
 }: EntryExplorationDartGuideProps): ReactElement | null {
   const isMobileViewport = useIsMobileViewport();
+  const isArrowView = viewKind === "arrow";
+  const isThrowGuideVisible = isArrowView && !shotResult;
 
   if (!isVisible) {
     return null;
@@ -55,7 +62,7 @@ export function EntryExplorationDartGuide({
         </AppIconButton>
       </AppBox>
 
-      {!isMobileViewport && (
+      {isArrowView && !isMobileViewport && (
         <AppBox
           {...PANEL_SURFACE}
           as="section"
@@ -87,7 +94,7 @@ export function EntryExplorationDartGuide({
         />
       ) : null}
 
-      {shotResult ? null : (
+      {isThrowGuideVisible && (
         <>
           <AppBox
             {...PANEL_SURFACE}

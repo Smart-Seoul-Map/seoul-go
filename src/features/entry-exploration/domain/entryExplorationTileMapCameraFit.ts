@@ -11,6 +11,12 @@ export type EntryExplorationTileMapCameraZoomOptions = {
   widthUsageRatio: number;
 };
 
+export type EntryExplorationTileMapCameraFillZoomOptions =
+  EntryExplorationTileMapCameraZoomOptions & {
+    heightUsageRatio: number;
+    viewHalfHeight: number;
+  };
+
 export type EntryExplorationTileMapCameraFocusOptions = {
   cameraOffset: EntryExplorationCameraOffset;
   contentCenterScreenRatio: number;
@@ -82,6 +88,23 @@ export function getEntryExplorationTileMapCameraZoom({
   }
 
   return Math.min(maxZoom, (viewHalfWidth * widthUsageRatio) / requiredHalfWidth);
+}
+
+export function getEntryExplorationTileMapCameraFillZoom({
+  heightUsageRatio,
+  viewHalfHeight,
+  ...widthOptions
+}: EntryExplorationTileMapCameraFillZoomOptions): number {
+  const { cameraOffset, focusPoint, points } = widthOptions;
+  const widthZoom = getEntryExplorationTileMapCameraZoom(widthOptions);
+  const span = getScreenSpan(points, focusPoint, getCameraUpAxis(cameraOffset));
+  const requiredHalfHeight = span === null ? 0 : Math.max(Math.abs(span.max), Math.abs(span.min));
+
+  if (requiredHalfHeight === 0 || viewHalfHeight <= 0) {
+    return widthZoom;
+  }
+
+  return Math.min(widthZoom, (viewHalfHeight * heightUsageRatio) / requiredHalfHeight);
 }
 
 export function getEntryExplorationTileMapCameraFocus({

@@ -47,6 +47,35 @@ describe("useEntryExplorationSceneInteractionRegistry", () => {
     expect(result.current.getSceneInteractionPointerDestination(new THREE.Raycaster())).toBeNull();
   });
 
+  test("lets only the controller that requested the walk activate until the walk ends", () => {
+    const passedThrough = createSceneInteractionController({ canActivate: () => true });
+    const requested = createSceneInteractionController({
+      canActivate: () => true,
+      takeRequestedCharacterDestination: () => ({ x: 1, z: 2 }),
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([passedThrough, requested]);
+
+    expect(result.current.takeSceneInteractionCharacterDestination()).toEqual({ x: 1, z: 2 });
+    result.current.activateReadySceneInteraction(0);
+    expect(requested.activate).toHaveBeenCalledOnce();
+    expect(passedThrough.activate).not.toHaveBeenCalled();
+  });
+
+  test("lets any ready controller activate after the requested walk is cleared", () => {
+    const passedThrough = createSceneInteractionController({ canActivate: () => true });
+    const requested = createSceneInteractionController({
+      takeRequestedCharacterDestination: () => ({ x: 1, z: 2 }),
+    });
+    const { result } = renderHook(() => useEntryExplorationSceneInteractionRegistry());
+    result.current.registerSceneInteractionControllers([passedThrough, requested]);
+
+    result.current.takeSceneInteractionCharacterDestination();
+    result.current.clearSceneInteractionApproach();
+    result.current.activateReadySceneInteraction(0);
+    expect(passedThrough.activate).toHaveBeenCalledOnce();
+  });
+
   test("passes the intro layout to every controller that accepts one", () => {
     const firstSetLayout = vi.fn();
     const secondSetLayout = vi.fn();

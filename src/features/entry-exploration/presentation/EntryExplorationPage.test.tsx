@@ -74,6 +74,13 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
   });
 
+  test("explains how to unlock the grid when the roulette entry is rejected", () => {
+    renderEntryExplorationPage();
+    startExploration();
+    act(() => gridOptions.onRouletteEntryBlocked?.());
+    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+  });
+
   test("passes restored numbers to the dart and adds new numbers only after the place panel closes", () => {
     entryNumberRewardStore.setState({ rewards: [FIRST_REWARD] });
     renderEntryExplorationPage();
@@ -478,6 +485,7 @@ function getSpeechText(): string {
 function registerDartViewControls() {
   const controls = {
     requestApproach: vi.fn(),
+    startRoulette: vi.fn(),
     resetThrow: vi.fn(),
     setHitCell: vi.fn(),
     throwAtRandomCell: vi.fn(),

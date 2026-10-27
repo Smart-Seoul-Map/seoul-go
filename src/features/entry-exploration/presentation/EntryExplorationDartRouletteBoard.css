@@ -1,0 +1,471 @@
+.entry-exploration-dart-roulette {
+  --entry-exploration-dart-roulette-slab-side: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-yellow-500) 60%, var(--sg-v3-ink-900)) 55%,
+    var(--sg-v3-paper-100)
+  );
+  --entry-exploration-dart-roulette-slab-shadow: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-yellow-500) 23%, black) 32%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-slab-shade: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-yellow-500) 34%, var(--sg-v3-ink-900)) 16%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-path-top: color-mix(
+    in srgb,
+    var(--sg-v3-blue-600) 27%,
+    var(--sg-v3-paper-50)
+  );
+  --entry-exploration-dart-roulette-path-side: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-blue-600) 65%, var(--sg-v3-ink-900)) 50%,
+    var(--sg-v3-paper-50)
+  );
+  --entry-exploration-dart-roulette-path-edge: color-mix(
+    in srgb,
+    var(--sg-v3-blue-600) 33%,
+    var(--sg-v3-paper-100)
+  );
+  --entry-exploration-dart-roulette-light-top: color-mix(
+    in srgb,
+    var(--sg-color-bg-brand) 70%,
+    white
+  );
+  --entry-exploration-dart-roulette-light-core: color-mix(
+    in srgb,
+    var(--sg-color-bg-brand) 18%,
+    white
+  );
+  --entry-exploration-dart-roulette-light-side: var(--sg-color-stroke-brand);
+  --entry-exploration-dart-roulette-light-edge: color-mix(
+    in srgb,
+    var(--sg-color-bg-brand) 35%,
+    white
+  );
+  --entry-exploration-dart-roulette-light-glow: color-mix(
+    in srgb,
+    var(--sg-color-bg-brand) 70%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-light-halo: color-mix(
+    in srgb,
+    var(--sg-color-bg-brand) 32%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-visited-top: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 40%,
+    white
+  );
+  --entry-exploration-dart-roulette-visited-side: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 80%,
+    var(--sg-v3-ink-500)
+  );
+  --entry-exploration-dart-roulette-visited-edge: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 65%,
+    white
+  );
+  --entry-exploration-dart-roulette-confetti-mint: color-mix(
+    in srgb,
+    var(--sg-v3-green-500) 61%,
+    white
+  );
+  --entry-exploration-dart-roulette-confetti-pink: color-mix(
+    in srgb,
+    var(--sg-v3-pink-500) 68%,
+    var(--sg-v3-paper-50)
+  );
+  --entry-exploration-dart-roulette-confetti-blue: color-mix(
+    in srgb,
+    var(--sg-v3-blue-500) 63%,
+    white
+  );
+  --entry-exploration-dart-roulette-win-glow: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 61%,
+    var(--sg-v3-paper-100)
+  );
+  --entry-exploration-dart-roulette-win-pop-bg: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 28%,
+    var(--sg-v3-paper-50)
+  );
+  --entry-exploration-dart-roulette-ring: color-mix(in srgb, var(--sg-v3-yellow-500) 59%, white);
+  --entry-exploration-dart-roulette-flash-core: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-yellow-500) 20%, var(--sg-v3-paper-50)) 54%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-flash-mid: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sg-v3-yellow-500) 68%, var(--sg-v3-paper-100)) 15%,
+    transparent
+  );
+  --entry-exploration-dart-roulette-marker-cell: var(--sg-v3-blue-500);
+  --entry-exploration-dart-roulette-marker-accent: var(--sg-v3-blue-600);
+  --entry-exploration-dart-roulette-marker-border: var(--sg-color-bg-floating);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  container-type: size;
+  pointer-events: none;
+}
+
+/* 카메라 이동 중에는 transform만 바뀌므로 판을 별도 레이어로 올려 다시 그리지 않고 합성만 한다. */
+.entry-exploration-dart-roulette__board {
+  --slab-depth: 0.28em;
+  --cell-rise: 0.1em;
+  --cell-rest: translateY(calc((var(--slab-depth) + var(--cell-rise)) * -1));
+  position: absolute;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.entry-exploration-dart-roulette__slab-depth {
+  position: absolute;
+  inset: 0;
+  transform: translateY(calc(var(--slab-depth) * -1));
+  filter: drop-shadow(0 var(--slab-depth) 0 var(--entry-exploration-dart-roulette-slab-side))
+    drop-shadow(0 0.12em 0.36em var(--entry-exploration-dart-roulette-slab-shadow));
+}
+
+.entry-exploration-dart-roulette__slab {
+  position: absolute;
+  inset: 0;
+  background: url("../../../assets/entry-exploration/seoul-grid-map.svg") center / 100% 100%
+    no-repeat;
+  mask: url("../../../assets/entry-exploration/seoul-grid-map.svg") center / 100% 100% no-repeat;
+}
+
+.entry-exploration-dart-roulette__slab-bevel {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 55%) 0%, transparent 34%),
+    linear-gradient(315deg, var(--entry-exploration-dart-roulette-slab-shade) 0%, transparent 34%);
+}
+
+.entry-exploration-dart-roulette__paths {
+  position: absolute;
+  inset: 0;
+  transform: translateY(calc(var(--slab-depth) * -1));
+  mask: url("../../../assets/entry-exploration/seoul-grid-map.svg") center / 100% 100% no-repeat;
+}
+
+/* 칸은 제자리에 둔 채 빛만 바뀐다. 꺼질 때 천천히 식어서 지나간 칸에 잔광이 남는다. */
+.entry-exploration-dart-roulette__path {
+  position: absolute;
+  box-sizing: border-box;
+  border: 0.04em solid var(--entry-exploration-dart-roulette-path-edge);
+  border-radius: 0.14em;
+  background-color: var(--entry-exploration-dart-roulette-path-top);
+  background-image: linear-gradient(150deg, rgb(255 255 255 / 60%), transparent 70%);
+  box-shadow:
+    inset 0 0.07em 0 rgb(255 255 255 / 70%),
+    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-path-side),
+    0 0 0 0 transparent,
+    0 0 0 0 transparent;
+  transform: translateY(calc(var(--cell-rise) * -1));
+  transition:
+    background-color 0.45s ease-out,
+    border-color 0.45s ease-out,
+    box-shadow 0.45s ease-out;
+}
+
+/* 방문해 번호를 얻은 장소 칸. 점등 규칙이 뒤에 있어 점멸 빛은 그대로 보인다. */
+.entry-exploration-dart-roulette__path[data-visited="true"] {
+  margin: 0;
+  padding: 0;
+  border-color: var(--entry-exploration-dart-roulette-visited-edge);
+  background-color: var(--entry-exploration-dart-roulette-visited-top);
+  box-shadow:
+    inset 0 0.07em 0 rgb(255 255 255 / 70%),
+    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-visited-side),
+    0 0 0 0 transparent,
+    0 0 0 0 transparent;
+  font: inherit;
+  appearance: none;
+}
+
+/* 판은 입력을 통과시키고, 정보를 열 수 있을 때(추첨 전·결과 후)만 방문 칸이 입력을 받는다. */
+.entry-exploration-dart-roulette__path[data-visited="true"]:enabled {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.entry-exploration-dart-roulette__path[data-lit="true"] {
+  z-index: 1;
+  border-color: var(--entry-exploration-dart-roulette-light-edge);
+  background-color: var(--entry-exploration-dart-roulette-light-top);
+  box-shadow:
+    inset 0 0 0.3em var(--entry-exploration-dart-roulette-light-core),
+    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-light-side),
+    0 0 0.5em 0.1em var(--entry-exploration-dart-roulette-light-glow),
+    0 0 1.2em 0.3em var(--entry-exploration-dart-roulette-light-halo);
+  transition-duration: 0.12s;
+}
+
+.entry-exploration-dart-roulette[data-phase="slow"] .entry-exploration-dart-roulette__path {
+  transition-duration: 0.7s;
+}
+
+.entry-exploration-dart-roulette[data-phase="slow"]
+  .entry-exploration-dart-roulette__path[data-lit="true"] {
+  box-shadow:
+    inset 0 0 0.35em var(--entry-exploration-dart-roulette-light-core),
+    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-light-side),
+    0 0 0.7em 0.18em var(--entry-exploration-dart-roulette-light-glow),
+    0 0 1.6em 0.45em var(--entry-exploration-dart-roulette-light-halo);
+  transition-duration: 0.2s;
+}
+
+.entry-exploration-dart-roulette__path[data-ripple="true"] {
+  animation: entry-exploration-dart-roulette-ripple 0.45s ease-out both;
+}
+
+.entry-exploration-dart-roulette__wave {
+  position: absolute;
+  width: 2em;
+  height: 2em;
+  box-sizing: border-box;
+  border: 0.32em solid var(--entry-exploration-dart-roulette-ring);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: entry-exploration-dart-roulette-wave var(--entry-exploration-dart-roulette-win-hold)
+    ease-out;
+}
+
+/* 결과 마커는 번호 줄 칸 윗면 높이에 얹는다. 칸·링 크기는 em(=칸 너비)으로 inline 지정한다. */
+.entry-exploration-dart-roulette__marker {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  transform: var(--cell-rest) translateY(0) scale(1);
+}
+
+/* 당첨 순간 마커가 당첨 칸을 중심으로 튀어 올랐다가 제자리에 앉는다. */
+.entry-exploration-dart-roulette[data-phase="win"] .entry-exploration-dart-roulette__marker {
+  animation: entry-exploration-dart-roulette-pop 0.48s ease-out;
+}
+
+.entry-exploration-dart-roulette__marker-cell {
+  position: absolute;
+  background: var(--entry-exploration-dart-roulette-marker-cell);
+}
+
+.entry-exploration-dart-roulette__marker-center {
+  position: absolute;
+  box-sizing: border-box;
+  border: 0 solid var(--entry-exploration-dart-roulette-marker-border);
+  background: var(--entry-exploration-dart-roulette-marker-accent);
+  transition: box-shadow 0.45s ease-out;
+}
+
+.entry-exploration-dart-roulette[data-phase="win"] .entry-exploration-dart-roulette__marker-center {
+  box-shadow: 0 0 24px 8px var(--entry-exploration-dart-roulette-win-glow);
+  animation: entry-exploration-dart-roulette-center-pop 0.48s ease-out;
+}
+
+.entry-exploration-dart-roulette[data-phase="win"]
+  .entry-exploration-dart-roulette__marker-center::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 3px solid var(--entry-exploration-dart-roulette-ring);
+  border-radius: 10px;
+  animation: entry-exploration-dart-roulette-ring 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.entry-exploration-dart-roulette__marker-ring {
+  position: absolute;
+  box-sizing: border-box;
+  border: 0 solid var(--entry-exploration-dart-roulette-marker-accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.entry-exploration-dart-roulette__flash {
+  position: absolute;
+  z-index: 5;
+  width: 800px;
+  height: 800px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle closest-side,
+    var(--entry-exploration-dart-roulette-flash-core) 0%,
+    var(--entry-exploration-dart-roulette-flash-mid) 30%,
+    transparent 65%
+  );
+  animation: entry-exploration-dart-roulette-fade 0.55s ease-out forwards;
+  pointer-events: none;
+}
+
+.entry-exploration-dart-roulette__confetti {
+  position: absolute;
+  z-index: 6;
+  width: 0;
+  height: 0;
+}
+
+.entry-exploration-dart-roulette__confetti i {
+  --confetti-color: var(--entry-exploration-dart-roulette-win-glow);
+  position: absolute;
+  top: -5px;
+  left: -3px;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--confetti-color);
+  opacity: 0;
+  animation: entry-exploration-dart-roulette-confetti
+    var(--entry-exploration-dart-roulette-win-hold) cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+
+.entry-exploration-dart-roulette__confetti i[data-tone="mint"] {
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-mint);
+}
+
+.entry-exploration-dart-roulette__confetti i[data-tone="pink"] {
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-pink);
+}
+
+.entry-exploration-dart-roulette__confetti i[data-tone="blue"] {
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-blue);
+}
+
+.entry-exploration-dart-roulette__confetti i[data-tone="pop"] {
+  --confetti-color: var(--entry-exploration-dart-roulette-win-pop-bg);
+}
+
+/* 정보 박스 기준은 칸 윗면 높이에 얹는다. 박스 안은 판 글자 크기(=칸 너비) 대신 기본 크기를 쓴다. */
+.entry-exploration-dart-roulette__info {
+  position: absolute;
+  z-index: 7;
+  transform: var(--cell-rest);
+}
+
+.entry-exploration-dart-roulette__info-box {
+  position: absolute;
+  bottom: calc(100% + var(--sg-spacing-2));
+  left: 50%;
+  width: max-content;
+  max-width: 60cqw;
+  font-size: var(--sg-font-size-5);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.entry-exploration-dart-roulette__info-box[data-align="start"] {
+  left: 0;
+  transform: none;
+}
+
+.entry-exploration-dart-roulette__info-box[data-align="end"] {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+.entry-exploration-dart-roulette .entry-exploration-scene-button {
+  pointer-events: auto;
+}
+
+@keyframes entry-exploration-dart-roulette-ripple {
+  40% {
+    transform: translateY(-0.5em) scale(1.08);
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-wave {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(14);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-pop {
+  0% {
+    transform: var(--cell-rest) translateY(0) scale(1);
+  }
+
+  30% {
+    transform: var(--cell-rest) translateY(-0.5em) scale(1.5);
+  }
+
+  100% {
+    transform: var(--cell-rest) translateY(0) scale(1);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-center-pop {
+  30% {
+    background: var(--entry-exploration-dart-roulette-win-pop-bg);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-ring {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes entry-exploration-dart-roulette-confetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translate(calc(var(--confetti-x) * 0.85), var(--confetti-y))
+      rotate(calc(var(--confetti-rotate) * 0.6));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-x), calc(var(--confetti-y) + 70px))
+      rotate(var(--confetti-rotate));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-exploration-dart-roulette *,
+  .entry-exploration-dart-roulette *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .entry-exploration-dart-roulette__confetti,
+  .entry-exploration-dart-roulette__wave {
+    display: none;
+  }
+}
