@@ -55,7 +55,7 @@
     var(--sg-color-bg-brand) 32%,
     transparent
   );
-  --entry-exploration-dart-roulette-owned-edge: color-mix(
+  --entry-exploration-dart-roulette-confetti-mint: color-mix(
     in srgb,
     var(--sg-v3-green-500) 61%,
     white
@@ -299,7 +299,7 @@
 }
 
 .entry-exploration-dart-roulette__confetti i:nth-child(2) {
-  --confetti-color: var(--entry-exploration-dart-roulette-owned-edge);
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-mint);
   --confetti-x: 52px;
   --confetti-y: -96px;
   --confetti-rotate: -200deg;
@@ -325,7 +325,7 @@
 }
 
 .entry-exploration-dart-roulette__confetti i:nth-child(6) {
-  --confetti-color: var(--entry-exploration-dart-roulette-owned-edge);
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-mint);
   --confetti-x: 54px;
   --confetti-y: 72px;
   --confetti-rotate: -220deg;
@@ -350,7 +350,7 @@
 }
 
 .entry-exploration-dart-roulette__confetti i:nth-child(10) {
-  --confetti-color: var(--entry-exploration-dart-roulette-owned-edge);
+  --confetti-color: var(--entry-exploration-dart-roulette-confetti-mint);
   --confetti-x: -112px;
   --confetti-y: -4px;
   --confetti-rotate: -240deg;
