@@ -55,6 +55,21 @@
     var(--sg-color-bg-brand) 32%,
     transparent
   );
+  --entry-exploration-dart-roulette-visited-top: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 40%,
+    white
+  );
+  --entry-exploration-dart-roulette-visited-side: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 80%,
+    var(--sg-v3-ink-500)
+  );
+  --entry-exploration-dart-roulette-visited-edge: color-mix(
+    in srgb,
+    var(--sg-v3-yellow-500) 65%,
+    white
+  );
   --entry-exploration-dart-roulette-confetti-mint: color-mix(
     in srgb,
     var(--sg-v3-green-500) 61%,
@@ -160,6 +175,27 @@
     background-color 0.45s ease-out,
     border-color 0.45s ease-out,
     box-shadow 0.45s ease-out;
+}
+
+/* 방문해 번호를 얻은 장소 칸. 점등 규칙이 뒤에 있어 점멸 빛은 그대로 보인다. */
+.entry-exploration-dart-roulette__path[data-visited="true"] {
+  margin: 0;
+  padding: 0;
+  border-color: var(--entry-exploration-dart-roulette-visited-edge);
+  background-color: var(--entry-exploration-dart-roulette-visited-top);
+  box-shadow:
+    inset 0 0.07em 0 rgb(255 255 255 / 70%),
+    0 var(--cell-rise) 0 var(--entry-exploration-dart-roulette-visited-side),
+    0 0 0 0 transparent,
+    0 0 0 0 transparent;
+  font: inherit;
+  appearance: none;
+}
+
+/* 판은 입력을 통과시키고, 정보를 열 수 있을 때(추첨 전·결과 후)만 방문 칸이 입력을 받는다. */
+.entry-exploration-dart-roulette__path[data-visited="true"]:enabled {
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .entry-exploration-dart-roulette__path[data-lit="true"] {
@@ -306,6 +342,35 @@
 
 .entry-exploration-dart-roulette__confetti i[data-tone="pop"] {
   --confetti-color: var(--entry-exploration-dart-roulette-win-pop-bg);
+}
+
+/* 정보 박스 기준은 칸 윗면 높이에 얹는다. 박스 안은 판 글자 크기(=칸 너비) 대신 기본 크기를 쓴다. */
+.entry-exploration-dart-roulette__info {
+  position: absolute;
+  z-index: 7;
+  transform: var(--cell-rest);
+}
+
+.entry-exploration-dart-roulette__info-box {
+  position: absolute;
+  bottom: calc(100% + var(--sg-spacing-2));
+  left: 50%;
+  width: max-content;
+  max-width: 60cqw;
+  font-size: var(--sg-font-size-5);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.entry-exploration-dart-roulette__info-box[data-align="start"] {
+  left: 0;
+  transform: none;
+}
+
+.entry-exploration-dart-roulette__info-box[data-align="end"] {
+  right: 0;
+  left: auto;
+  transform: none;
 }
 
 .entry-exploration-dart-roulette .entry-exploration-scene-button {

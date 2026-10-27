@@ -25,7 +25,11 @@ import { EntryExplorationDartRouletteBoard } from "./EntryExplorationDartRoulett
 import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
-import { getEntryDartNumbers, getEntryNumberRewardRows } from "../domain/entryNumberReward";
+import {
+  getEntryDartNumbers,
+  getEntryNumberRewardCells,
+  getEntryNumberRewardRows,
+} from "../domain/entryNumberReward";
 import {
   ENTRY_GRID_NUMBER_REQUIRED_MESSAGE,
   ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
@@ -174,6 +178,11 @@ export function EntryExplorationPage({
   };
 
   const isRouletteView = dartShot.isGuideVisible && dartShot.viewKind === "roulette";
+  const rouletteVisitedPlaces = getEntryNumberRewardCells(
+    visibleRewards,
+    dartShot.rouletteBoard.layout?.selectableCells ?? [],
+    places ?? EMPTY_ENTRY_PLACES
+  );
 
   return (
     <main className="entry-exploration-page" data-dart-target={dartShot.isTargetHovered}>
@@ -190,6 +199,7 @@ export function EntryExplorationPage({
           isStarted={dartShot.isRouletteStarted}
           mapRectStore={rouletteMapRectStore}
           onStart={onRouletteStart}
+          visitedPlaces={rouletteVisitedPlaces}
         />
       )}
       <EntryExplorationDartGuide
