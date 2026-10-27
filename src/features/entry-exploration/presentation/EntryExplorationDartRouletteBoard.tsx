@@ -24,8 +24,15 @@ export type EntryExplorationDartRouletteBoardProps = {
   onStart: () => void;
 };
 
-const CONFETTI_PIECES = Array.from({ length: 14 }, (_, index) => index);
-const { board: boardConfig, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
+type ConfettiPiece = (typeof ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.confetti)[number];
+
+type ConfettiPieceStyle = CSSProperties & {
+  "--confetti-rotate": string;
+  "--confetti-x": string;
+  "--confetti-y": string;
+};
+
+const { board: boardConfig, confetti, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
 const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
 const CELL_BEVEL_STYLE: CSSProperties = { backgroundSize: `${100 / columns}% ${100 / rows}%` };
@@ -120,8 +127,8 @@ export function EntryExplorationDartRouletteBoard({
                 className="entry-exploration-dart-roulette__confetti"
                 style={toCellCenterStyle(win.cell)}
               >
-                {CONFETTI_PIECES.map((piece) => (
-                  <i key={piece} />
+                {confetti.map((piece, index) => (
+                  <i key={index} data-tone={piece.tone} style={toConfettiStyle(piece)} />
                 ))}
               </span>
             </>
@@ -264,6 +271,14 @@ function toRingStyle(
   const size = `${radiusCells * 2 + widthCells}em`;
 
   return { ...toCellCenterStyle(cell), borderWidth: `${widthCells}em`, height: size, width: size };
+}
+
+function toConfettiStyle({ rotateDeg, xPx, yPx }: ConfettiPiece): ConfettiPieceStyle {
+  return {
+    "--confetti-rotate": `${rotateDeg}deg`,
+    "--confetti-x": `${xPx}px`,
+    "--confetti-y": `${yPx}px`,
+  };
 }
 
 function toPercent(ratio: number): string {

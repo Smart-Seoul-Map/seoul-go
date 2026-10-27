@@ -148,7 +148,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
     expect(container.querySelector(".entry-exploration-dart-roulette__wave")).not.toBeNull();
     expect(container.querySelector(".entry-exploration-dart-roulette__flash")).not.toBeNull();
     expect(container.querySelectorAll(".entry-exploration-dart-roulette__confetti i")).toHaveLength(
-      14
+      ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.confetti.length
     );
 
     rerender(
