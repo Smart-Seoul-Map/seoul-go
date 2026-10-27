@@ -201,7 +201,8 @@
   border-radius: 50%;
   opacity: 0;
   transform: translate(-50%, -50%);
-  animation: entry-exploration-dart-roulette-wave 0.9s ease-out;
+  animation: entry-exploration-dart-roulette-wave var(--entry-exploration-dart-roulette-win-hold)
+    ease-out;
 }
 
 /* 결과 마커는 번호 줄 칸 윗면 높이에 얹는다. 칸·링 크기는 em(=칸 너비)으로 inline 지정한다. */
@@ -287,7 +288,8 @@
   border-radius: 2px;
   background: var(--confetti-color);
   opacity: 0;
-  animation: entry-exploration-dart-roulette-confetti 0.9s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+  animation: entry-exploration-dart-roulette-confetti
+    var(--entry-exploration-dart-roulette-win-hold) cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
 }
 
 .entry-exploration-dart-roulette__confetti i[data-tone="mint"] {

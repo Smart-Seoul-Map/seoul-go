@@ -32,10 +32,18 @@ type ConfettiPieceStyle = CSSProperties & {
   "--confetti-y": string;
 };
 
+type RouletteRootStyle = CSSProperties & {
+  "--entry-exploration-dart-roulette-win-hold": string;
+};
+
 const { board: boardConfig, confetti, steps } = ENTRY_EXPLORATION_DART_ROULETTE_CONFIG;
 const { hitMarker } = ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG;
 const { columns, rows } = SEOUL_GRID_MAP_CONFIG;
 const CELL_BEVEL_STYLE: CSSProperties = { backgroundSize: `${100 / columns}% ${100 / rows}%` };
+// 당첨 연출(물결·폭죽)이 당첨 유지 시간 안에 끝나도록 CSS에 같은 값을 넘긴다.
+const ROULETTE_ROOT_STYLE: RouletteRootStyle = {
+  "--entry-exploration-dart-roulette-win-hold": `${steps.winHoldMs}ms`,
+};
 
 export function EntryExplorationDartRouletteBoard({
   board,
@@ -70,7 +78,7 @@ export function EntryExplorationDartRouletteBoard({
   }, [mapRectStore, restMapRect]);
 
   return (
-    <div className="entry-exploration-dart-roulette" data-phase={phase}>
+    <div className="entry-exploration-dart-roulette" data-phase={phase} style={ROULETTE_ROOT_STYLE}>
       {layout && (
         <div
           ref={boardRef}
