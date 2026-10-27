@@ -10,6 +10,10 @@ export const ENTRY_EXPLORATION_DART_ROULETTE_CONFIG = {
     maxZoom: 2.5,
     widthUsageRatio: 0.94,
   },
+  // 칸 열 위치(판 너비 비율)가 이 값보다 왼쪽·오른쪽 끝에 가까우면 정보 박스를 그쪽으로 붙인다.
+  infoBox: {
+    edgeColumnRatio: 0.3,
+  },
   steps: {
     count: 19,
     fastCount: 10,
