@@ -32,17 +32,17 @@
   );
   --entry-exploration-dart-roulette-visited-top: color-mix(
     in srgb,
-    var(--sg-color-bg-brand) 35%,
+    var(--sg-v3-yellow-500) 40%,
     white
   );
   --entry-exploration-dart-roulette-visited-side: color-mix(
     in srgb,
-    var(--sg-color-stroke-brand) 55%,
-    white
+    var(--sg-v3-yellow-500) 80%,
+    var(--sg-v3-ink-500)
   );
   --entry-exploration-dart-roulette-visited-edge: color-mix(
     in srgb,
-    var(--sg-color-bg-brand) 50%,
+    var(--sg-v3-yellow-500) 65%,
     white
   );
   --entry-exploration-dart-roulette-owned-edge: #4dd4a8;
