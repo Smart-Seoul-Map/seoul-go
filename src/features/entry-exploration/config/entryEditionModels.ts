@@ -46,6 +46,24 @@ export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> =
     rotationY: FRONT_FACING_RADIANS + 22 * DEGREES_TO_RADIANS,
     editionIndex: 5,
   },
+  "smart-seoul:1786321258890:25_edition25_14": {
+    url: "/models/places/hongjecheon_artificial_waterfall.glb",
+    size: 6,
+    rotationY: FRONT_FACING_RADIANS,
+    editionIndex: 6,
+  },
+  "smart-seoul:1786321258890:26_edition25_14": {
+    url: "/models/places/seodaemun_hyeongmuso.glb",
+    size: 6,
+    rotationY: FRONT_FACING_RADIANS,
+    editionIndex: 8,
+  },
+  "smart-seoul:1786321258890:26_edition25_9": {
+    url: "/models/places/hwarangdae.glb",
+    size: 6,
+    rotationY: FRONT_FACING_RADIANS,
+    editionIndex: 9,
+  },
 };
 
 export const ENTRY_EDITION_ARRIVAL_RADIUS = 3.2;
