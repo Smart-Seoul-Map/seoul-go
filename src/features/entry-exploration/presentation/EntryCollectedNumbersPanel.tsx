@@ -4,7 +4,7 @@ import type { KeyboardEvent, ReactElement, SyntheticEvent } from "react";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
-import { AppHeading, AppText } from "@shared/ui/typography";
+import { AppText } from "@shared/ui/typography";
 
 import type { EntryNumberRewardRow } from "../domain/entryNumberReward";
 import closeIcon from "../../../assets/icons/close.svg";
@@ -115,36 +115,34 @@ export function EntryCollectedNumbersPanel({
         onKeyDown={handleKeyDown}
       >
         <AppBox as="header" className="entry-collected-numbers-header">
-          {isOpen ? (
-            <AppBox className="entry-collected-numbers-title">
-              <NumbersIcon />
-              <AppHeading as="h2" size="sm" id={`${id}-title`}>
-                번호
-              </AppHeading>
-              <button
-                type="button"
-                className="entry-collected-numbers-notice"
-                aria-label="번호 안내"
-                aria-haspopup="dialog"
-                onClick={() => setIsNoticeOpen(true)}
-              >
-                !
-              </button>
-            </AppBox>
-          ) : (
-            <AppButton
-              ref={triggerRef}
-              size="md"
-              variant="ghost"
-              aria-label={`내 번호 열기, ${countLabel}`}
-              className="entry-collected-numbers-trigger"
-              onClick={() => setIsOpen(true)}
-            >
-              <NumbersIcon />
-              <AppText as="span" role="supporting">
+          <AppButton
+            ref={triggerRef}
+            size="md"
+            variant="ghost"
+            aria-label={`내 번호 ${isOpen ? "접기" : "열기"}, ${countLabel}`}
+            aria-expanded={isOpen}
+            aria-controls={`${id}-content`}
+            title="내 번호"
+            className="entry-collected-numbers-trigger"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <NumbersIcon />
+            <span className="entry-collected-numbers-trigger-label">
+              <AppText as="span" role="supporting" id={`${id}-title`}>
                 번호
               </AppText>
-            </AppButton>
+            </span>
+          </AppButton>
+          {isOpen && (
+            <button
+              type="button"
+              className="entry-collected-numbers-notice"
+              aria-label="번호 안내"
+              aria-haspopup="dialog"
+              onClick={() => setIsNoticeOpen(true)}
+            >
+              !
+            </button>
           )}
           <div className="entry-collected-numbers-close" aria-hidden={!isOpen} inert={!isOpen}>
             <AppIconButton ariaLabel="내 번호 접기" size="nav" onClick={() => setIsOpen(false)}>
