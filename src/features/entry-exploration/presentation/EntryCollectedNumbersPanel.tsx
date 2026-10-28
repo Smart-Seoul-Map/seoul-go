@@ -28,7 +28,7 @@ export function EntryCollectedNumbersPanel({
   isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
-  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [seenCount, setSeenCount] = useState(rows.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
   const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
@@ -85,7 +85,7 @@ export function EntryCollectedNumbersPanel({
   }, [openState]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
-    if (isNoticeOpen) return;
+    if (isGuideOpen) return;
 
     event.stopPropagation();
     if (event.key === "Escape" && isOpen) {
@@ -136,10 +136,10 @@ export function EntryCollectedNumbersPanel({
           {isOpen && (
             <button
               type="button"
-              className="entry-collected-numbers-notice"
+              className="entry-collected-numbers-guide-button"
               aria-label="번호 안내"
               aria-haspopup="dialog"
-              onClick={() => setIsNoticeOpen(true)}
+              onClick={() => setIsGuideOpen(true)}
             >
               !
             </button>
@@ -195,7 +195,7 @@ export function EntryCollectedNumbersPanel({
           </div>
         </div>
       </AppBox>
-      <EntryCollectedNumbersGuideDialog open={isNoticeOpen} onOpenChange={setIsNoticeOpen} />
+      <EntryCollectedNumbersGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} />
     </>
   );
 }

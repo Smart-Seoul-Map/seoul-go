@@ -28,7 +28,7 @@ export function EntryCollectedNumbersGuideDialog({
       open={open}
       title={
         <AppBox as="span" className="entry-numbers-guide-title">
-          내 번호
+          번호 안내
         </AppBox>
       }
       closeOnInteractOutside

@@ -89,7 +89,7 @@
   padding-inline-end: var(--sg-spacing-2);
 }
 
-.entry-collected-numbers-notice {
+.entry-collected-numbers-guide-button {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -107,7 +107,7 @@
   cursor: pointer;
 }
 
-.entry-collected-numbers-notice:focus-visible {
+.entry-collected-numbers-guide-button:focus-visible {
   outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
   outline-offset: var(--sg-focus-ring-offset);
 }
