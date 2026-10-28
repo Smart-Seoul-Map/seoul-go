@@ -20,8 +20,19 @@
   white-space: nowrap;
 }
 
+/* PC에서 창이 낮으면 아래 카드까지 스크롤 없이 보이도록 그림을 비율(676:664) 그대로 줄인다.
+   75%보다 작아지면 그림 문구가 빈 칸을 넘치므로 그보다 낮은 창은 스크롤로 둔다. */
 .entry-numbers-guide-hero {
+  /* 그림 밖 본문 높이(본문 위아래 여백, 카드 2개, 간격)를 PC 팝업 폭 기준으로 어림한 값 */
+  --entry-numbers-guide-cards-height: 280px;
   position: relative;
+  width: clamp(
+    75%,
+    (100dvh - var(--sg-dialog-surface-margin-y) * 2 - var(--entry-numbers-guide-cards-height)) *
+      676 / 664,
+    100%
+  );
+  margin-inline: auto;
 }
 
 .entry-numbers-guide-hero img {
@@ -107,5 +118,11 @@
 @media (max-width: 520px) {
   .AppDialogBackdrop:has(.entry-numbers-guide) {
     align-items: center;
+  }
+
+  /* 휴대폰은 팝업 폭이 이미 좁아 그림을 더 줄이면 그림 문구가 빈 칸을 넘치므로 폭을 채우고 스크롤로 둔다. */
+  .entry-numbers-guide-hero {
+    width: auto;
+    margin-inline: 0;
   }
 }
