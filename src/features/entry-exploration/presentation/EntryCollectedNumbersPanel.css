@@ -84,7 +84,7 @@
   font-weight: var(--sg-font-weight-bold);
 }
 
-/* 열린 패널에서 안내 버튼이 "번호" 바로 옆에 붙도록 버튼 오른쪽 여백을 줄인다 */
+/* 열린 패널에서 안내 버튼이 "번호" 바로 옆에 붙도록 버튼 오른쪽 여백을 줄인다. */
 .entry-collected-numbers[data-open="true"] .entry-collected-numbers-trigger {
   padding-inline-end: var(--sg-spacing-2);
 }

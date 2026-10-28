@@ -85,6 +85,7 @@ export function EntryCollectedNumbersPanel({
   }, [openState]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+    // 안내 팝업은 포커스를 팝업 안으로 옮기지 않아 Escape가 이 패널로도 온다. 팝업만 닫히게 넘긴다.
     if (isGuideOpen) return;
 
     event.stopPropagation();

@@ -30,6 +30,7 @@
   height: auto;
 }
 
+/* 위치 %는 numbers-guide-hero.webp 아래쪽 빈 칸에 맞춘 값이라 그림을 바꾸면 같이 바꾼다. */
 .entry-numbers-guide-caption {
   position: absolute;
   right: 7%;
