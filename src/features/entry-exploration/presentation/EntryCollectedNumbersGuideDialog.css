@@ -11,6 +11,11 @@
   padding: 0;
 }
 
+/* 좁은 화면에서 카드 문구가 낱말 중간에서 줄바꿈되지 않게 한다. */
+.entry-numbers-guide {
+  word-break: keep-all;
+}
+
 .entry-numbers-guide-title {
   position: absolute;
   width: 1px;
