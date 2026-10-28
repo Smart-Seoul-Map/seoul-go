@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: center;
   height: 6.5%;
+  white-space: nowrap;
 }
 
 .entry-numbers-guide-card {
