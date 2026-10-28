@@ -45,6 +45,8 @@ export function EntryCollectedNumbersGuideDialog({
             <img
               src={heroImage}
               alt="서울을 1km의 작은 격자로 나누고, 가로 세로를 지정하기 위해 사용하는 번호예요."
+              width="676"
+              height="664"
             />
             <AppBox className="entry-numbers-guide-caption">
               <AppText as="span" role="supporting" align="center">
