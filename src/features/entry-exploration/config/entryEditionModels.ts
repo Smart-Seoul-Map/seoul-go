@@ -52,6 +52,12 @@ export const ENTRY_EDITION_MODELS: Readonly<Record<string, EntryEditionModel>> =
     rotationY: FRONT_FACING_RADIANS,
     editionIndex: 6,
   },
+  "smart-seoul:1786321258890:25_edition25_4": {
+    url: "/models/places/yangcheon_hyanggyo.glb",
+    size: 6,
+    rotationY: FRONT_FACING_RADIANS,
+    editionIndex: 7,
+  },
   "smart-seoul:1786321258890:26_edition25_14": {
     url: "/models/places/seodaemun_hyeongmuso.glb",
     size: 6,
