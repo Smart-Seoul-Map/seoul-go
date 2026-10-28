@@ -13,6 +13,7 @@ const MODELED_PLACE_IDS = [
   "25_edition25_14",
   "26_edition25_14",
   "26_edition25_9",
+  "25_edition25_4",
 ]
   .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
   .sort();
@@ -25,6 +26,7 @@ const MODEL_PATHS = [
   "/models/places/hwarangdae.glb",
   "/models/places/namsan_baekbeom_square.glb",
   "/models/places/seodaemun_hyeongmuso.glb",
+  "/models/places/yangcheon_hyanggyo.glb",
   "/models/places/yongyangbongjeojeong_park.glb",
 ];
 
