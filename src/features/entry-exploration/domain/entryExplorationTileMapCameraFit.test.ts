@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   getEntryExplorationRectanglePoints,
+  getEntryExplorationTileMapCameraFillZoom,
   getEntryExplorationTileMapCameraFocus,
   getEntryExplorationTileMapCameraZoom,
 } from "./entryExplorationTileMapCameraFit";
@@ -11,6 +12,44 @@ const focusPoint = { x: 0, z: 0 };
 const points = getEntryExplorationRectanglePoints({ x: 0, z: 0 }, { depth: 9.79, width: 12 });
 
 describe("entry exploration tile map camera fit", () => {
+  test("stops zooming in when the map reaches the usable viewport height", () => {
+    const widthOptions = {
+      cameraOffset,
+      focusPoint,
+      maxZoom: 4,
+      points,
+      viewHalfWidth: 16.9,
+      widthUsageRatio: 0.94,
+    };
+    const fillZoom = getEntryExplorationTileMapCameraFillZoom({
+      ...widthOptions,
+      heightUsageRatio: 0.8,
+      viewHalfHeight: 9.5,
+    });
+
+    expect(fillZoom).toBeGreaterThan(0);
+    expect(fillZoom).toBeLessThan(getEntryExplorationTileMapCameraZoom(widthOptions));
+  });
+
+  test("keeps the width zoom when a narrow viewport has height to spare", () => {
+    const widthOptions = {
+      cameraOffset,
+      focusPoint,
+      maxZoom: 4,
+      points,
+      viewHalfWidth: 4.39,
+      widthUsageRatio: 0.94,
+    };
+
+    expect(
+      getEntryExplorationTileMapCameraFillZoom({
+        ...widthOptions,
+        heightUsageRatio: 0.8,
+        viewHalfHeight: 9.5,
+      })
+    ).toBe(getEntryExplorationTileMapCameraZoom(widthOptions));
+  });
+
   test("keeps the max zoom when the map already fits the viewport width", () => {
     const zoom = getEntryExplorationTileMapCameraZoom({
       cameraOffset,

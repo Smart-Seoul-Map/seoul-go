@@ -9,7 +9,7 @@
   );
   overflow: auto;
   overscroll-behavior: contain;
-  font-family: var(--sg-font-namsan);
+  font-family: var(--sg-font-family-base);
   letter-spacing: 0;
   box-shadow: var(--sg-detail-card-shadow);
   container-type: inline-size;
@@ -86,7 +86,7 @@
   border-radius: var(--sg-button-radius);
   background: var(--sg-button-primary-bg);
   color: var(--sg-button-primary-fg);
-  font-family: var(--sg-font-namsan);
+  font-family: var(--sg-font-family-base);
   font-size: var(--sg-typography-button-label-font-size);
   font-weight: var(--sg-typography-button-label-font-weight);
   line-height: var(--sg-typography-button-label-line-height);

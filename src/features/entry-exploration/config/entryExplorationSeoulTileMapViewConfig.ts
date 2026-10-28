@@ -20,6 +20,13 @@ export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_VIEW_CONFIG = {
   },
   characterFacingDistance: 0.7,
   hitMarker: {
+    cellOffsets: [
+      { column: 0, row: 0 },
+      { column: 0, row: -1 },
+      { column: 0, row: 1 },
+      { column: -1, row: 0 },
+      { column: 1, row: 0 },
+    ],
     cellOpacity: 0.55,
     centerScale: 0.78,
     layerGap: 0.002,

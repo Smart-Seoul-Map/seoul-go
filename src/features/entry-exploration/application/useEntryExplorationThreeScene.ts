@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import * as THREE from "three";
-import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
 import { track } from "@shared/lib/analytics/analytics";
 import {
@@ -17,15 +17,18 @@ import {
   type SceneCameraTransition,
 } from "@shared/lib/three/sceneCameraTransition";
 
+import { ENTRY_ASSET_PLACE_IDS, type EntryAssetPlaceId } from "../config/entryAssetPlaces";
 import {
   ENTRY_EXPLORATION_CHARACTER_ANIMATION_TIME_SCALE,
   ENTRY_EXPLORATION_CHARACTER_MODEL_MANIFEST,
   ENTRY_EXPLORATION_SCENE_CONFIG,
 } from "../config/entryExplorationSceneConfig";
 import { ENTRY_EXPLORATION_SCENE_OBJECTS } from "../config/entryExplorationSceneObjects";
-import { ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
-import type { EntryExplorationPlaceVisit } from "../domain/entryExplorationPlaceVisit";
+import {
+  updateClosestEntryExplorationPlaceVisit,
+  type EntryExplorationPlaceVisit,
+} from "../domain/entryExplorationPlaceVisit";
 import type { EntryEditionPlace, EntryExplorationPlaceId } from "../domain/entryEditionPlace";
 import {
   getEntryExplorationSceneDistance,
@@ -87,6 +90,21 @@ export type EntryExplorationThreeSceneControls = {
   deactivateActiveInteraction: () => void;
 };
 
+// An empty, non-interactive marker that exposes the asset's screen position (used by e2e).
+function addEntryAssetLandmarkMarker(placeId: EntryAssetPlaceId, landmark: THREE.Object3D): void {
+  const element = document.createElement("span");
+  element.className = "EntryAssetLandmark";
+  element.dataset.placeId = placeId;
+  element.setAttribute("aria-hidden", "true");
+  const marker = new CSS2DObject(element);
+
+  if (landmark instanceof THREE.Mesh) {
+    landmark.geometry.computeBoundingBox();
+    landmark.geometry.boundingBox?.getCenter(marker.position);
+  }
+  landmark.add(marker);
+}
+
 export function useEntryExplorationThreeScene({
   places = null,
   containerRef,
@@ -125,6 +143,7 @@ export function useEntryExplorationThreeScene({
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
   const {
     activateReadySceneInteraction,
+    clearSceneInteractionApproach,
     addSceneInteractionObjects,
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
@@ -304,9 +323,19 @@ export function useEntryExplorationThreeScene({
     const introFloor = createEntryExplorationIntroFloor();
     const scenery = createEntryExplorationScenery();
     let editionScenery: ReturnType<typeof createEntryEditionScenery> | null = null;
-    const hanok = scenery.object.getObjectByName(`entry-scenery-${ENTRY_HANOK_PLACE_ID}`);
     const visitLandmarks = new Map<string, THREE.Object3D>();
-    if (hanok) visitLandmarks.set(ENTRY_HANOK_PLACE_ID, hanok);
+    const assetLandmarks = new Map<EntryAssetPlaceId, THREE.Object3D>();
+    ENTRY_ASSET_PLACE_IDS.forEach((placeId) => {
+      const landmark = scenery.object.getObjectByName(`entry-scenery-${placeId}`);
+      if (!landmark) return;
+      addEntryAssetLandmarkMarker(placeId, landmark);
+      assetLandmarks.set(placeId, landmark);
+    });
+    const getAssetPlaceVisitTargets = () =>
+      [...assetLandmarks].flatMap(([placeId, landmark]) => {
+        const visit = placeVisitsRef.current?.[placeId];
+        return visit ? [{ visit, destination: landmark.position }] : [];
+      });
     const labels = new CSS2DRenderer();
     labels.setSize(width, height);
     labels.domElement.className = "EntryEditionLabels";
@@ -539,8 +568,12 @@ export function useEntryExplorationThreeScene({
         return;
       }
 
-      if (hanok && raycaster.intersectObject(hanok, true).length > 0) {
-        movementRef.current.moveTo({ x: hanok.position.x, z: hanok.position.z });
+      const assetHit = raycaster.intersectObjects([...assetLandmarks.values()], false)[0];
+      if (assetHit) {
+        movementRef.current.moveTo({
+          x: assetHit.object.position.x,
+          z: assetHit.object.position.z,
+        });
         return;
       }
 
@@ -639,12 +672,17 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
+        if (!movementRef.current.getIsMoving()) clearSceneInteractionApproach();
         const requestedDestination = takeSceneInteractionCharacterDestination();
         if (requestedDestination) movementRef.current.moveTo(requestedDestination);
         for (const [placeId, landmark] of visitLandmarks) {
           if (placeVisitsRef.current?.[placeId]?.update(characterPosition, landmark.position)) {
             movementRef.current.stop();
           }
+        }
+        const assetVisitTargets = getAssetPlaceVisitTargets();
+        if (updateClosestEntryExplorationPlaceVisit(characterPosition, assetVisitTargets)) {
+          movementRef.current.stop();
         }
         updateSceneInteractionTriggers(characterPosition);
         activateReadySceneInteraction(time, (controller) => {

@@ -39,6 +39,48 @@ test("opens hanok within its original four-unit radius and dismisses it without 
   expect(store.getState().rewards).toEqual([]);
 });
 
+test.each(["waterfront", "store"])(
+  "opens %s within four units like hanok, stays closed until re-entry, and grants no reward",
+  (placeId) => {
+    const store = createEntryNumberRewardStore({ storage: null });
+    const visitPlace = createVisitHandler(store);
+    const visited: string[] = [];
+    const dismissed: string[] = [];
+    const { result } = renderHook(() =>
+      useEntryExplorationPlacePanel(ENTRY_TEST_PLACES, {
+        onVisit: (id) => {
+          visited.push(id);
+          visitPlace(id);
+        },
+        onDismiss: (id) => dismissed.push(id),
+      })
+    );
+    const asset = { x: 0, z: 0 };
+    act(() => {
+      result.current.placeVisits[placeId].update({ x: 4.1, z: 0 }, asset);
+    });
+    expect(result.current.panelProps.open).toBe(false);
+    act(() => {
+      result.current.placeVisits[placeId].update({ x: 3.9, z: 0 }, asset);
+    });
+    expect(result.current.panelProps).toMatchObject({ placeId, open: true });
+    expect(visited).toEqual([placeId]);
+    act(() => result.current.panelProps.onClose());
+    expect(dismissed).toEqual([placeId]);
+    act(() => {
+      result.current.placeVisits[placeId].update({ x: 1, z: 0 }, asset);
+    });
+    expect(result.current.panelProps.open).toBe(false);
+    act(() => {
+      result.current.placeVisits[placeId].update({ x: 10, z: 0 }, asset);
+      result.current.placeVisits[placeId].update({ x: 0, z: 0 }, asset);
+    });
+    expect(result.current.panelProps).toMatchObject({ placeId, open: true });
+    expect(visited).toEqual([placeId, placeId]);
+    expect(store.getState().rewards).toEqual([]);
+  }
+);
+
 test("awards on arrival but starts presentation only on explicit card dismissal", () => {
   const store = createEntryNumberRewardStore({ storage: null });
   const dismissed: string[] = [];

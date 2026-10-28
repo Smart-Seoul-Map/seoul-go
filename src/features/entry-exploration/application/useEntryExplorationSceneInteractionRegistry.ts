@@ -39,6 +39,7 @@ function getSceneInteractionPriority(
 export function useEntryExplorationSceneInteractionRegistry() {
   const activeSceneInteractionRef = useRef<EntryExplorationSceneInteractionController | null>(null);
   const sceneInteractionControllersRef = useRef<EntryExplorationSceneInteractionController[]>([]);
+  const approachControllerRef = useRef<EntryExplorationSceneInteractionController | null>(null);
 
   const registerSceneInteractionControllers = useCallback(
     (controllers: EntryExplorationSceneInteractionController[]) => {
@@ -49,6 +50,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
 
   const clearSceneInteractionControllers = useCallback(() => {
     activeSceneInteractionRef.current = null;
+    approachControllerRef.current = null;
     sceneInteractionControllersRef.current = [];
   }, []);
 
@@ -94,10 +96,18 @@ export function useEntryExplorationSceneInteractionRegistry() {
   const takeSceneInteractionCharacterDestination = useCallback(() => {
     for (const controller of sceneInteractionControllersRef.current) {
       const destination = controller.takeRequestedCharacterDestination?.();
-      if (destination) return destination;
+      if (destination) {
+        approachControllerRef.current = controller;
+
+        return destination;
+      }
     }
 
     return null;
+  }, []);
+
+  const clearSceneInteractionApproach = useCallback(() => {
+    approachControllerRef.current = null;
   }, []);
 
   const setSceneInteractionCharacter = useCallback((character: THREE.Object3D | null) => {
@@ -155,7 +165,11 @@ export function useEntryExplorationSceneInteractionRegistry() {
       }
 
       const nextActiveController = sceneInteractionControllersRef.current
-        .filter((controller) => controller.canActivate())
+        .filter(
+          (controller) =>
+            controller.canActivate() &&
+            (approachControllerRef.current === null || approachControllerRef.current === controller)
+        )
         .sort(
           (leftController, rightController) =>
             getSceneInteractionPriority(rightController) -
@@ -166,6 +180,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
         return false;
       }
 
+      approachControllerRef.current = null;
       onActivate?.(nextActiveController);
       nextActiveController.activate(time);
       activeSceneInteractionRef.current = nextActiveController;
@@ -213,6 +228,7 @@ export function useEntryExplorationSceneInteractionRegistry() {
   return {
     activateReadySceneInteraction,
     addSceneInteractionObjects,
+    clearSceneInteractionApproach,
     clearSceneInteractionControllers,
     deactivateActiveSceneInteraction,
     disposeSceneInteractionControllers,

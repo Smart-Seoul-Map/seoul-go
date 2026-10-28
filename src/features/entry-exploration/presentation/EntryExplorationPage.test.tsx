@@ -10,7 +10,7 @@ import { AppToastProvider } from "@shared/ui/toast";
 import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
-import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryHanokPlace";
+import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryAssetPlaces";
 import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
@@ -28,6 +28,13 @@ let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
 let dismissPlaceFromBackground: UseEntryExplorationThreeSceneOptions["onPlacePanelDismiss"];
 let characterMovingChange: UseEntryExplorationThreeSceneOptions["onCharacterMovingChange"];
 let speechAnchor: UseEntryExplorationThreeSceneOptions["characterSpeechAnchor"];
+
+const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
+
+vi.mock("@shared/lib/analytics/analytics", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@shared/lib/analytics/analytics")>()),
+  track: trackMock,
+}));
 
 vi.mock("../application/createEntryExplorationSceneInteractionControllers", () => ({
   createEntryExplorationSceneInteractionControllers: vi.fn((options) => {
@@ -64,6 +71,13 @@ describe("EntryExplorationPage", () => {
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
     act(() => gridOptions.onDartEntryBlocked?.());
+    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+  });
+
+  test("explains how to unlock the grid when the roulette entry is rejected", () => {
+    renderEntryExplorationPage();
+    startExploration();
+    act(() => gridOptions.onRouletteEntryBlocked?.());
     expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
   });
 
@@ -277,6 +291,31 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
   });
 
+  test.each(["waterfront", "store"])(
+    "visiting %s sends an unrewarded visit event and closes without a number or toast",
+    (placeId) => {
+      renderEntryExplorationPage();
+      startExploration();
+      trackMock.mockClear();
+      act(() => {
+        placeVisits?.[placeId].update({ x: 0, z: 0 }, { x: 0, z: 0 });
+      });
+      expect(trackMock).toHaveBeenCalledExactlyOnceWith({
+        name: "entry_place_visit",
+        placeId,
+        rewarded: false,
+      });
+      expect(screen.getByRole("dialog")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(screen.queryByText(TOAST_MESSAGE)).toBeNull();
+      expect(screen.queryByRole("button", { name: DART_TOAST_ACTION })).toBeNull();
+      expect(entryNumberRewardStore.getState().rewards).toEqual([]);
+      expect(loadEntryNumberRewards()).toEqual([]);
+      expect(screen.getByRole("button", { name: "내 번호 열기, 0개 획득" })).toBeTruthy();
+    }
+  );
+
   test("revisiting a place restored from storage only opens its information card", () => {
     entryNumberRewardStore.setState({ rewards: [FIRST_REWARD] });
     renderEntryExplorationPage();
@@ -445,6 +484,7 @@ function getSpeechText(): string {
 function registerDartViewControls() {
   const controls = {
     requestApproach: vi.fn(),
+    startRoulette: vi.fn(),
     resetThrow: vi.fn(),
     setHitCell: vi.fn(),
     throwAtRandomCell: vi.fn(),

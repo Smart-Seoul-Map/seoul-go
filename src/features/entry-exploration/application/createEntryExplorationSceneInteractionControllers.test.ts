@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
 import { useEntryExplorationSceneInteractionControllers } from "./useEntryExplorationSceneInteractionControllers";
+import {
+  ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID,
+  ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID,
+} from "../config/entryExplorationSceneObjects";
 import { ENTRY_INTRO_LAYOUTS } from "../config/entryIntroLayout";
 
 vi.mock("./entryExplorationGltfLoader", () => ({
@@ -28,14 +32,39 @@ describe("createEntryExplorationSceneInteractionControllers", () => {
   test("creates the registered entry exploration interaction controllers", () => {
     const controllers = createEntryExplorationSceneInteractionControllers();
 
-    expect(controllers).toHaveLength(2);
+    expect(controllers).toHaveLength(3);
     expect(controllers[0].priority ?? 0).toBeGreaterThan(0);
-    expect(controllers[1].object.name).toBe("entry-slot-machine");
+    expect(controllers[1].priority ?? 0).toBeGreaterThan(0);
+    expect(controllers[2].object.name).toBe("entry-slot-machine");
     expect(controllers.every((controller) => controller.object !== undefined)).toBe(true);
 
     controllers.forEach((controller) => {
       controller.dispose();
     });
+  });
+
+  test("reports a blocked roulette entry separately from the dart", () => {
+    const onDartEntryBlocked = vi.fn();
+    const onRouletteEntryBlocked = vi.fn();
+    const controllers = createEntryExplorationSceneInteractionControllers({
+      getCollectedNumbers: () => [],
+      onDartEntryBlocked,
+      onRouletteEntryBlocked,
+    });
+    const { objects } = ENTRY_INTRO_LAYOUTS.pc;
+    const archeryRange = objects["archery-range"];
+    const arrowMap = objects[ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID];
+    const rouletteMap = objects[ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID];
+
+    controllers[1].updateTriggerState({
+      x: rouletteMap.x + archeryRange.x - arrowMap.x,
+      z: rouletteMap.z + archeryRange.z - arrowMap.z,
+    });
+
+    expect(onRouletteEntryBlocked).toHaveBeenCalledTimes(1);
+    expect(onDartEntryBlocked).not.toHaveBeenCalled();
+
+    controllers.forEach((controller) => controller.dispose());
   });
 
   test("the existing grid controller unlocks after the parent receives a number", () => {
