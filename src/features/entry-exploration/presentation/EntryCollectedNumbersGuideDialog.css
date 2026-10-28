@@ -120,6 +120,11 @@
     align-items: center;
   }
 
+  /* 휴대폰 주소창이 보일 때도 팝업이 화면 안에 들어오도록 실제 보이는 높이(dvh)로 맞춘다. */
+  .AppDialogBackdrop:has(.entry-numbers-guide) .AppDialog {
+    max-height: calc(100dvh - var(--sg-spacing-8));
+  }
+
   /* 휴대폰은 팝업 폭이 이미 좁아 그림을 더 줄이면 그림 문구가 빈 칸을 넘치므로 폭을 채우고 스크롤로 둔다. */
   .entry-numbers-guide-hero {
     width: auto;
