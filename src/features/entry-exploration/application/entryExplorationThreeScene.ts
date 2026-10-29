@@ -15,10 +15,11 @@ const ENTRY_EXPLORATION_SCENE_CLEAR_COLOR = 0xf7f4ed;
 const ENTRY_EXPLORATION_AMBIENT_SKY_COLOR = 0xffffff;
 const ENTRY_EXPLORATION_AMBIENT_GROUND_COLOR = 0xa7b39f;
 const ENTRY_EXPLORATION_KEY_LIGHT_COLOR = 0xffffff;
+// 카메라가 +x·+z 쪽에서 보므로 +x는 화면 오른쪽 아래다. 해가 그쪽에서 비춰 정면이 밝고 그림자는 왼쪽 위로 진다.
 const ENTRY_EXPLORATION_KEY_LIGHT_POSITION = {
-  x: -6,
+  x: 10,
   y: 16,
-  z: 8,
+  z: 0,
 } as const;
 const ENTRY_EXPLORATION_CAMERA_DEFAULT_ZOOM = 1;
 const textureLoader = new THREE.TextureLoader();

@@ -10,6 +10,10 @@ const MODELED_PLACE_IDS = [
   "25_edition25_2",
   "25_edition25_6",
   "25_edition25_24",
+  "25_edition25_14",
+  "26_edition25_14",
+  "26_edition25_9",
+  "25_edition25_4",
 ]
   .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
   .sort();
@@ -18,7 +22,11 @@ const MODEL_PATHS = [
   "/models/places/amsa_dong_site.glb",
   "/models/places/bongeunsa.glb",
   "/models/places/gangbyeon_seojae.glb",
+  "/models/places/hongjecheon_artificial_waterfall.glb",
+  "/models/places/hwarangdae.glb",
   "/models/places/namsan_baekbeom_square.glb",
+  "/models/places/seodaemun_hyeongmuso.glb",
+  "/models/places/yangcheon_hyanggyo.glb",
   "/models/places/yongyangbongjeojeong_park.glb",
 ];
 
