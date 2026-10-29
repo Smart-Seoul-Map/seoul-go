@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
@@ -127,6 +127,41 @@ describe("ExplorationPage", () => {
       }
     }
   );
+  test("opens linked recommendations only after the place panel closes on the first visit", () => {
+    const activate = vi.fn<(place: ExplorationPlaceMarkerSelection) => boolean>(() => true);
+    function Page(): ReactElement {
+      const [hasReference, setHasReference] = useState(false);
+
+      return (
+        <ExplorationPage
+          themeProgressItems={themeProgressItems}
+          hasLinkedPlaceReference={hasReference}
+          onActivateLinkedPlaces={(place) => {
+            setHasReference(true);
+            return activate(place);
+          }}
+          renderLinkedPlacesPanel={({ open, onExitComplete }) => (
+            <AppResponsivePanel.Root open={open} skipAnimation>
+              <AppResponsivePanel.Content title="근처 추천 장소" onExitComplete={onExitComplete} />
+            </AppResponsivePanel.Root>
+          )}
+          renderPlacePanel={({ open, onExitComplete }) => (
+            <AppResponsivePanel.Root open={open} skipAnimation>
+              <AppResponsivePanel.Content title="장소 상세" onExitComplete={onExitComplete} />
+            </AppResponsivePanel.Root>
+          )}
+        />
+      );
+    }
+    renderExplorationPage(<Page />);
+    act(() => explorationMapMock.latestProps?.onPlaceMarkerSelect?.(createPlaceMarkerSelection()));
+    expect(activate).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "장소 상세" })).toBeInTheDocument();
+    act(() => explorationMapMock.latestProps?.onMapMoveRequest?.());
+    expect(activate).toHaveBeenCalledOnce();
+    expect(screen.getByRole("dialog", { name: "근처 추천 장소" })).toBeInTheDocument();
+  });
+
   test("서울에디션25 방문만으로 진행률을 올리고 다시 표시해도 유지한다", () => {
     const markers = createPlaceMarkers();
     markers.features[0].properties.themeId = "1786321258890";
