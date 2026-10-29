@@ -33,7 +33,7 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   const title = within(dialog).getByRole("heading", { name: place.title });
   expect(title.closest(".AppResponsivePanelHeader")).not.toBeNull();
   expect(within(dialog).getAllByRole("heading", { name: place.title })).toHaveLength(1);
-  const search = within(dialog).getByRole("link", { name: `${place.title} 네이버 검색` });
+  const search = within(dialog).getByRole("button", { name: `${place.title} 검색` });
   expect(within(title.closest(".AppResponsivePanelHeader")!).getByText("2025")).toHaveClass(
     "AppBadge-content"
   );
@@ -41,11 +41,6 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(yearBadge).toHaveAttribute("data-size", width === 390 ? "number-sm" : "number-md");
   expect(yearBadge).toHaveAttribute("data-tone", "info");
   expect(yearBadge).toHaveAttribute("data-variant", "solid");
-  const url = new URL(search.getAttribute("href")!);
-  expect(url.hostname).toBe("search.naver.com");
-  expect(url.searchParams.get("query")).toBe(place.title);
-  expect(search).toHaveAttribute("target", "_blank");
-  expect(search).toHaveAttribute("rel", "noopener noreferrer");
   expect(search.closest(".AppResponsivePanelBody")).toBeNull();
   const add = within(dialog).getByRole("button", { name: "스탬프/코스 추가" });
   expect(add.closest(".AppResponsivePanelFooter")).not.toBeNull();
@@ -54,6 +49,25 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(onAddToCourse).toHaveBeenCalledOnce();
   fireEvent.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(onClose).toHaveBeenCalledOnce();
+});
+
+test("검색 버튼을 누르면 네이버·구글 이미지 검색 목록이 열리고 선택하면 새 탭으로 연다", () => {
+  resize(1366);
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  render(<MapPlaceDetailPanel place={place} onClose={vi.fn()} />);
+  const search = screen.getByRole("button", { name: `${place.title} 검색` });
+  expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  fireEvent.click(search);
+  expect(search).toHaveAttribute("aria-expanded", "true");
+  const items = within(screen.getByRole("menu")).getAllByRole("menuitem");
+  expect(items.map((item) => item.textContent)).toEqual(["네이버 검색", "구글 이미지 검색"]);
+  fireEvent.click(items[1]);
+  const url = new URL(open.mock.calls[0][0] as string);
+  expect(url.hostname).toBe("www.google.com");
+  expect(url.searchParams.get("udm")).toBe("2");
+  expect(url.searchParams.get("q")).toBe(place.title);
+  expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  open.mockRestore();
 });
 
 test.each([390, 1366])("%ipx에서 시트 위 콘텐츠는 모바일에만 표시한다", (width) => {

@@ -1,6 +1,8 @@
-import type { ReactElement, ReactNode } from "react";
+import { useState } from "react";
+import type { FocusEvent, KeyboardEvent, ReactElement, ReactNode } from "react";
 
-import { buildExternalSearchUrl } from "@shared/lib/externalSearch/externalSearchUrl";
+import type { ExternalSearchProviderId } from "@shared/constants/externalSearch";
+import { openExternalSearch } from "@shared/lib/externalSearch/externalSearchUrl";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
@@ -29,6 +31,11 @@ export type MapPlaceDetailPanelProps = Pick<
   onAddToCourse?: () => void;
 };
 
+const SEARCH_MENU_ITEMS: { providerId: ExternalSearchProviderId; label: string }[] = [
+  { providerId: "NAVER", label: "네이버 검색" },
+  { providerId: "GOOGLE_IMAGE", label: "구글 이미지 검색" },
+];
+
 function PlaceDetailHeaderMeta({
   place,
 }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement | null {
@@ -49,19 +56,84 @@ function PlaceDetailHeaderMeta({
   );
 }
 
+function PlaceSearchMenu({ title }: { title: string }): ReactElement {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleBlur = (event: FocusEvent<HTMLElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Escape" || !isOpen) return;
+    event.stopPropagation();
+    setIsOpen(false);
+  };
+
+  const handleSelect = (providerId: ExternalSearchProviderId) => {
+    openExternalSearch(providerId, title);
+    setIsOpen(false);
+  };
+
+  return (
+    <AppBox
+      className="MapPlaceDetailSearchMenu"
+      position="relative"
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+    >
+      <button
+        type="button"
+        className="MapPlaceDetailSearch"
+        aria-label={`${title} 검색`}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        title="검색"
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span aria-hidden="true" className="MapPlaceDetailSearchIcon" />
+      </button>
+      <AppBox
+        className="MapPlaceDetailSearchList"
+        data-open={isOpen}
+        aria-hidden={!isOpen}
+        inert={!isOpen}
+        position="absolute"
+        top="100%"
+        right={0}
+        zIndex={1}
+        display="grid"
+        minWidth="max-content"
+        mt="spacing.1"
+        p="spacing.1"
+        bg="bg.surfacePaper"
+        borderColor="stroke.weak"
+        borderWidth="strokeWidth.surface"
+        borderRadius="radius.4_5"
+        boxShadow="shadow.raised"
+      >
+        <AppBox role="menu" display="flex" flexDirection="column" minHeight="0" overflowY="hidden">
+          {SEARCH_MENU_ITEMS.map(({ providerId, label }) => (
+            <AppButton
+              key={providerId}
+              role="menuitem"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSelect(providerId)}
+            >
+              {label}
+            </AppButton>
+          ))}
+        </AppBox>
+      </AppBox>
+    </AppBox>
+  );
+}
+
 function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
   return (
     <div className="MapPlaceDetailToolbar">
-      <a
-        className="MapPlaceDetailSearch"
-        href={buildExternalSearchUrl("NAVER", place.title)}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${place.title} 네이버 검색`}
-        title="네이버 검색"
-      >
-        <span aria-hidden="true" className="MapPlaceDetailSearchIcon" />
-      </a>
+      <PlaceSearchMenu title={place.title} />
       <AppResponsivePanel.CloseButton iconOnly />
     </div>
   );
