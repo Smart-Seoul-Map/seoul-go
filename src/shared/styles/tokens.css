@@ -187,7 +187,6 @@
 
   /* Typography - font weight */
   --sg-font-weight-regular: 400;
-  --sg-font-weight-medium: 500;
   --sg-font-weight-bold: 700;
 
   /* Typography - semantic roles */
@@ -234,12 +233,12 @@
   --sg-typography-detail-body-font-family: var(--sg-font-family-base);
   --sg-typography-detail-body-font-size: var(--sg-font-size-8);
   --sg-typography-detail-body-line-height: normal;
-  --sg-typography-detail-body-font-weight: var(--sg-font-weight-medium);
+  --sg-typography-detail-body-font-weight: var(--sg-font-weight-regular);
 
   --sg-typography-detail-supporting-font-family: var(--sg-font-family-base);
   --sg-typography-detail-supporting-font-size: var(--sg-detail-supporting-size);
   --sg-typography-detail-supporting-line-height: normal;
-  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-medium);
+  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-regular);
 
   /* Button component tokens */
   --sg-button-primary-bg: var(--sg-color-bg-brand);
@@ -361,7 +360,7 @@
   --sg-toast-success-accent: var(--sg-color-text-positive);
   --sg-toast-error-accent: var(--sg-color-text-danger);
   --sg-toast-message-font-size: var(--sg-typography-supporting-font-size);
-  --sg-toast-message-font-weight: var(--sg-font-weight-medium);
+  --sg-toast-message-font-weight: var(--sg-font-weight-regular);
   --sg-toast-message-line-height: var(--sg-typography-supporting-line-height);
   --sg-toast-enter-duration: var(--sg-motion-duration-4);
   --sg-toast-enter-easing: var(--sg-motion-easing-enter);
