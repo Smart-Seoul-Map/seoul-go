@@ -59,16 +59,6 @@
   white-space: nowrap;
 }
 
-.entry-numbers-guide-card {
-  display: flex;
-  align-items: center;
-  gap: var(--sg-spacing-3);
-  padding: var(--sg-spacing-3) var(--sg-spacing-4);
-  border: 1px solid var(--sg-color-stroke-brand-weak);
-  border-radius: var(--sg-radius-4);
-  background: var(--sg-color-bg-brand-weak);
-}
-
 .entry-numbers-guide-badge {
   flex: none;
   width: var(--sg-spacing-10);

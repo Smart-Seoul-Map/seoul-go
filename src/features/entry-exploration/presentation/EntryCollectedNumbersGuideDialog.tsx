@@ -14,6 +14,18 @@ import { ENTRY_NATIONAL_POINT_LINK } from "../config/entryNationalPointLink";
 
 import "./EntryCollectedNumbersGuideDialog.css";
 
+const GUIDE_CARD = {
+  display: "flex",
+  alignItems: "center",
+  gap: "spacing.3",
+  px: "spacing.4",
+  py: "spacing.3",
+  bg: "bg.brandWeak",
+  borderColor: "stroke.brandWeak",
+  borderWidth: 1,
+  borderRadius: "radius.4",
+} as const;
+
 type EntryCollectedNumbersGuideDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,7 +66,7 @@ export function EntryCollectedNumbersGuideDialog({
               </AppText>
             </AppBox>
           </AppBox>
-          <AppBox as="section" className="entry-numbers-guide-card">
+          <AppBox {...GUIDE_CARD} as="section">
             <AppBox
               as="span"
               aria-hidden="true"
@@ -69,7 +81,7 @@ export function EntryCollectedNumbersGuideDialog({
               </span>
             </AppText>
           </AppBox>
-          <AppBox as="section" className="entry-numbers-guide-card">
+          <AppBox {...GUIDE_CARD} as="section">
             <AppBox
               as="span"
               aria-hidden="true"
