@@ -133,7 +133,7 @@ test("failed linked queries can retry to an empty result without showing partial
   await page.getByRole("button", { name: "기준 장소 B 2026년 선정 장소로 이동" }).click();
   await page
     .getByRole("dialog", { name: "기준 장소 B", exact: true })
-    .getByRole("button", { name: "스탬프/코스 추가", exact: true })
+    .getByRole("button", { name: "스탬프 코스 추가", exact: true })
     .click();
   const panel = page.getByRole("dialog", { name: "근처 추천 장소", exact: true });
   await expect(panel.getByRole("alert")).toHaveText("근처 장소를 불러오지 못했어요.");
@@ -175,7 +175,7 @@ for (const viewport of [
     await markerB.click();
     const detail = page.getByRole("dialog", { name: "기준 장소 B", exact: true });
     await expect(detail).toBeVisible({ timeout: 10000 });
-    await detail.getByRole("button", { name: "스탬프/코스 추가", exact: true }).click();
+    await detail.getByRole("button", { name: "스탬프 코스 추가", exact: true }).click();
     const panel = page.getByRole("dialog", { name: "근처 추천 장소", exact: true });
     await expect(panel).toBeVisible();
     await expect(panel.getByRole("listitem")).toHaveCount(3);
@@ -311,7 +311,7 @@ test("loads each linked marker GLB once across tabs and panel reopen, even an em
   await markerB.click();
   await page
     .getByRole("dialog", { name: "기준 장소 B", exact: true })
-    .getByRole("button", { name: "스탬프/코스 추가", exact: true })
+    .getByRole("button", { name: "스탬프 코스 추가", exact: true })
     .click();
   const panel = page.getByRole("dialog", { name: "근처 추천 장소", exact: true });
   await expect(panel.getByRole("listitem")).toHaveCount(3);

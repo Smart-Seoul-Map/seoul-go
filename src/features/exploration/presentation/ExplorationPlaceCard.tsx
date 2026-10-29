@@ -95,7 +95,7 @@ export function ExplorationPlaceCard({
           size="xs"
           variant="ghost"
         >
-          스탬프 코스 +
+          스탬프 코스 추가
         </AppButton>
       </div>
     </article>

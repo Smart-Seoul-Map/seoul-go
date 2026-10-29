@@ -77,7 +77,7 @@ export function EntryCollectedNumbersGuideDialog({
               <span className="entry-numbers-guide-line">슬롯에서 나온 번호는</span>
               <span className="entry-numbers-guide-line">
                 서울탐방GO에서{" "}
-                <span className="entry-numbers-guide-accent">탐험할 위치를 찾는 단서</span>예요!
+                <span className="entry-numbers-guide-accent">탐방할 위치를 찾는 단서</span>예요!
               </span>
             </AppText>
           </AppBox>

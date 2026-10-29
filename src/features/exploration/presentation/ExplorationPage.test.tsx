@@ -244,7 +244,7 @@ describe("ExplorationPage", () => {
               showCloseButton={false}
               onExitComplete={onExitComplete}
             >
-              <button onClick={() => onAddToCourse?.(place)}>스탬프/코스 추가</button>
+              <button onClick={() => onAddToCourse?.(place)}>스탬프 코스 추가</button>
               <button onClick={onClose}>닫기</button>
             </AppResponsivePanel.Content>
           </AppResponsivePanel.Root>
@@ -256,7 +256,7 @@ describe("ExplorationPage", () => {
     act(() => explorationMapMock.latestProps?.onPlaceMarkerSelect?.(place));
 
     const panel = screen.getByRole("dialog", { name: place.name });
-    fireEvent.click(within(panel).getByRole("button", { name: "스탬프/코스 추가" }));
+    fireEvent.click(within(panel).getByRole("button", { name: "스탬프 코스 추가" }));
     expect(onAddPlaceToCourse).toHaveBeenCalledWith(place);
     fireEvent.click(within(panel).getByRole("button", { name: "닫기" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

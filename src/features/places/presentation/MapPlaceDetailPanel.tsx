@@ -107,7 +107,7 @@ export function MapPlaceDetailPanel({
           disabled={!onAddToCourse}
           onClick={onAddToCourse}
         >
-          {isStampAcquired ? "스탬프/코스 완료" : "스탬프/코스 추가"}
+          {isStampAcquired ? "스탬프 코스 완료" : "스탬프 코스 추가"}
         </AppButton>
       }
     >
