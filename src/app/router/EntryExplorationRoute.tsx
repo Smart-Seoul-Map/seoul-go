@@ -43,8 +43,8 @@ function EntryPlacePanelActions({
           {place.subtitle}
         </AppText>
       )}
-      <AppIconButton ariaLabel="장소 정보 닫기" size="sm" onClick={onClose}>
-        <img src={closeIcon} alt="" width="20" height="20" />
+      <AppIconButton ariaLabel="장소 정보 닫기" size="md" onClick={onClose}>
+        <img className="EntryPlacePanelCloseIcon" src={closeIcon} alt="" />
       </AppIconButton>
     </AppHStack>
   );

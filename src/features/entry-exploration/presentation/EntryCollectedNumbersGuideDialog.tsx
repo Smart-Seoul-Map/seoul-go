@@ -48,7 +48,7 @@ export function EntryCollectedNumbersGuideDialog({
       closeAction={{
         ariaLabel: "닫기",
         onClick: () => onOpenChange(false),
-        children: <img src={closeIcon} alt="" width="20" height="20" />,
+        children: <img src={closeIcon} alt="" width="28" height="28" />,
       }}
     >
       <AppBox className="entry-numbers-guide">

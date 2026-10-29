@@ -147,7 +147,7 @@ export function EntryCollectedNumbersPanel({
           )}
           <div className="entry-collected-numbers-close" aria-hidden={!isOpen} inert={!isOpen}>
             <AppIconButton ariaLabel="내 번호 접기" size="nav" onClick={() => setIsOpen(false)}>
-              <img src={closeIcon} alt="" width="20" height="20" />
+              <img src={closeIcon} alt="" width="28" height="28" />
             </AppIconButton>
           </div>
         </AppBox>

@@ -170,7 +170,7 @@ function CloseButton({
         if (!event.defaultPrevented) panel.changeOpen(false, "closeButton");
       }}
     >
-      {iconOnly ? <span className="AppResponsivePanelCloseIcon" aria-hidden="true" /> : children}
+      {iconOnly ? <img className="AppResponsivePanelCloseIcon" src={closeIcon} alt="" /> : children}
     </button>
   );
 }
@@ -329,7 +329,7 @@ function MountedContent({
         </header>
         {showCloseButton && (
           <CloseButton aria-label="닫기" title="닫기" className="AppResponsivePanelClose">
-            <img src={closeIcon} alt="" width="20" height="20" />
+            <img className="AppResponsivePanelCloseIcon" src={closeIcon} alt="" />
           </CloseButton>
         )}
         {children}

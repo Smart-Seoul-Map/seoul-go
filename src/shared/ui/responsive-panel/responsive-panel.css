@@ -129,7 +129,6 @@
   padding: 0;
   border: 0;
   border-radius: var(--sg-radius-full);
-  color: var(--sg-color-text-muted);
   background: var(--sg-color-bg-transparent);
   cursor: pointer;
 }
@@ -144,8 +143,6 @@
 .AppResponsivePanelCloseIcon {
   width: var(--sg-spacing-7);
   height: var(--sg-spacing-7);
-  background: currentColor;
-  mask: url("../../../assets/icons/close.svg") center / contain no-repeat;
 }
 .AppResponsivePanelContent[data-has-close] .AppResponsivePanelHeader {
   padding-right: calc(var(--sg-panel-padding-x) + var(--sg-panel-close-size));
