@@ -84,6 +84,34 @@
   font-weight: var(--sg-font-weight-bold);
 }
 
+/* 열린 패널에서 안내 버튼이 "번호" 바로 옆에 붙도록 버튼 오른쪽 여백을 줄인다. */
+.entry-collected-numbers[data-open="true"] .entry-collected-numbers-trigger {
+  padding-inline-end: var(--sg-spacing-2);
+}
+
+.entry-collected-numbers-guide-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--sg-spacing-5);
+  height: var(--sg-spacing-5);
+  padding: 0;
+  border: 1px solid var(--sg-color-stroke-brand);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-v3-yellow-500);
+  color: var(--sg-color-text-muted);
+  font: inherit;
+  font-size: var(--sg-font-size-2);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.entry-collected-numbers-guide-button:focus-visible {
+  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
+  outline-offset: var(--sg-focus-ring-offset);
+}
+
 .entry-collected-numbers-close {
   position: absolute;
   top: 50%;

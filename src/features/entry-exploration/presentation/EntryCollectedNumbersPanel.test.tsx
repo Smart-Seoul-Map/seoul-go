@@ -46,6 +46,25 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
+  test("opens the guide dialog from the ! button beside the trigger without closing the panel", () => {
+    render(<EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} />);
+    expect(screen.queryByRole("button", { name: "번호 안내" })).toBeNull();
+
+    const trigger = getTrigger(2);
+    fireEvent.click(trigger);
+    const guideButton = screen.getByRole("button", { name: "번호 안내" });
+    expect(trigger.contains(guideButton)).toBe(false);
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(guideButton);
+    expect(screen.getByRole("dialog", { name: "번호 안내" })).toBeTruthy();
+
+    guideButton.focus();
+    fireEvent.keyDown(guideButton, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  });
+
   test("retains the animating content but excludes it from interaction while collapsed", () => {
     const { container } = render(<EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} />);
     const body = container.querySelector(".entry-collected-numbers-body");

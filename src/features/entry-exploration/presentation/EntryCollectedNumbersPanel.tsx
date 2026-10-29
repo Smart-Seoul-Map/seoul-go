@@ -10,6 +10,8 @@ import type { EntryNumberRewardRow } from "../domain/entryNumberReward";
 import closeIcon from "../../../assets/icons/close.svg";
 import dicesIcon from "../../../assets/icons/dices.svg";
 
+import { EntryCollectedNumbersGuideDialog } from "./EntryCollectedNumbersGuideDialog";
+
 import "./EntryCollectedNumbersPanel.css";
 
 type EntryCollectedNumbersPanelProps = {
@@ -26,6 +28,7 @@ export function EntryCollectedNumbersPanel({
   isDartViewActive = false,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [seenCount, setSeenCount] = useState(rows.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
   const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
@@ -82,6 +85,9 @@ export function EntryCollectedNumbersPanel({
   }, [openState]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+    // 안내 팝업은 포커스를 팝업 안으로 옮기지 않아 Escape가 이 패널로도 온다. 팝업만 닫히게 넘긴다.
+    if (isGuideOpen) return;
+
     event.stopPropagation();
     if (event.key === "Escape" && isOpen) {
       event.preventDefault();
@@ -90,94 +96,108 @@ export function EntryCollectedNumbersPanel({
   };
 
   return (
-    <AppBox
-      as="section"
-      ref={(element) => {
-        panelRef.current = element;
-      }}
-      id={`${id}-panel`}
-      aria-labelledby={isOpen ? `${id}-title` : undefined}
-      tabIndex={isOpen ? -1 : undefined}
-      bg="bg.floating"
-      borderRadius="radius.4_5"
-      boxShadow="shadow.raised"
-      className="entry-collected-numbers"
-      data-open={isOpen}
-      onClick={stopSceneInput}
-      onPointerDown={stopSceneInput}
-      onWheel={stopSceneInput}
-      onKeyDown={handleKeyDown}
-    >
-      <AppBox as="header" className="entry-collected-numbers-header">
-        <AppButton
-          ref={triggerRef}
-          size="md"
-          variant="ghost"
-          aria-label={`내 번호 ${isOpen ? "접기" : "열기"}, ${countLabel}`}
-          aria-expanded={isOpen}
-          aria-controls={`${id}-content`}
-          title="내 번호"
-          className="entry-collected-numbers-trigger"
-          onClick={() => setIsOpen(!isOpen)}
+    <>
+      <AppBox
+        as="section"
+        ref={(element) => {
+          panelRef.current = element;
+        }}
+        id={`${id}-panel`}
+        aria-labelledby={isOpen ? `${id}-title` : undefined}
+        tabIndex={isOpen ? -1 : undefined}
+        bg="bg.floating"
+        borderRadius="radius.4_5"
+        boxShadow="shadow.raised"
+        className="entry-collected-numbers"
+        data-open={isOpen}
+        onClick={stopSceneInput}
+        onPointerDown={stopSceneInput}
+        onWheel={stopSceneInput}
+        onKeyDown={handleKeyDown}
+      >
+        <AppBox as="header" className="entry-collected-numbers-header">
+          <AppButton
+            ref={triggerRef}
+            size="md"
+            variant="ghost"
+            aria-label={`내 번호 ${isOpen ? "접기" : "열기"}, ${countLabel}`}
+            aria-expanded={isOpen}
+            aria-controls={`${id}-content`}
+            title="내 번호"
+            className="entry-collected-numbers-trigger"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <NumbersIcon />
+            <span className="entry-collected-numbers-trigger-label">
+              <AppText as="span" role="supporting" id={`${id}-title`}>
+                번호
+              </AppText>
+            </span>
+          </AppButton>
+          {isOpen && (
+            <button
+              type="button"
+              className="entry-collected-numbers-guide-button"
+              aria-label="번호 안내"
+              aria-haspopup="dialog"
+              onClick={() => setIsGuideOpen(true)}
+            >
+              !
+            </button>
+          )}
+          <div className="entry-collected-numbers-close" aria-hidden={!isOpen} inert={!isOpen}>
+            <AppIconButton ariaLabel="내 번호 접기" size="nav" onClick={() => setIsOpen(false)}>
+              <img src={closeIcon} alt="" width="20" height="20" />
+            </AppIconButton>
+          </div>
+        </AppBox>
+        <div
+          id={`${id}-content`}
+          className="entry-collected-numbers-body"
+          aria-hidden={!isOpen}
+          inert={!isOpen}
         >
-          <NumbersIcon />
-          <span className="entry-collected-numbers-trigger-label">
-            <AppText as="span" role="supporting" id={`${id}-title`}>
-              번호
-            </AppText>
-          </span>
-        </AppButton>
-        <div className="entry-collected-numbers-close" aria-hidden={!isOpen} inert={!isOpen}>
-          <AppIconButton ariaLabel="내 번호 접기" size="nav" onClick={() => setIsOpen(false)}>
-            <img src={closeIcon} alt="" width="20" height="20" />
-          </AppIconButton>
+          <div className="entry-collected-numbers-content">
+            {rows.length === 0 ? (
+              <AppBox px="spacing.4" py="spacing.5" className="entry-collected-numbers-empty">
+                <AppText role="supporting" tone="muted">
+                  아직 획득한 번호가 없어요.
+                </AppText>
+              </AppBox>
+            ) : (
+              <AppBox
+                as="ul"
+                ref={(element) => {
+                  listRef.current = element;
+                }}
+                aria-label="획득한 숫자"
+                tabIndex={0}
+                className="entry-collected-numbers-list"
+                px="spacing.4"
+                py="spacing.1"
+              >
+                {rows.map((row) => (
+                  <AppBox as="li" key={row.key} className="entry-collected-numbers-row">
+                    <span className="entry-collected-numbers-place">
+                      <AppText as="span" role="supporting">
+                        {row.placeName}
+                      </AppText>
+                    </span>
+                    <span aria-hidden="true" className="entry-collected-numbers-separator">
+                      |
+                    </span>
+                    <AppBadge size="number-sm" tone="brand" variant="solid" textPolicy="singleLine">
+                      {row.number}
+                    </AppBadge>
+                  </AppBox>
+                ))}
+              </AppBox>
+            )}
+          </div>
         </div>
       </AppBox>
-      <div
-        id={`${id}-content`}
-        className="entry-collected-numbers-body"
-        aria-hidden={!isOpen}
-        inert={!isOpen}
-      >
-        <div className="entry-collected-numbers-content">
-          {rows.length === 0 ? (
-            <AppBox px="spacing.4" py="spacing.5" className="entry-collected-numbers-empty">
-              <AppText role="supporting" tone="muted">
-                아직 획득한 번호가 없어요.
-              </AppText>
-            </AppBox>
-          ) : (
-            <AppBox
-              as="ul"
-              ref={(element) => {
-                listRef.current = element;
-              }}
-              aria-label="획득한 숫자"
-              tabIndex={0}
-              className="entry-collected-numbers-list"
-              px="spacing.4"
-              py="spacing.1"
-            >
-              {rows.map((row) => (
-                <AppBox as="li" key={row.key} className="entry-collected-numbers-row">
-                  <span className="entry-collected-numbers-place">
-                    <AppText as="span" role="supporting">
-                      {row.placeName}
-                    </AppText>
-                  </span>
-                  <span aria-hidden="true" className="entry-collected-numbers-separator">
-                    |
-                  </span>
-                  <AppBadge size="number-sm" tone="brand" variant="solid" textPolicy="singleLine">
-                    {row.number}
-                  </AppBadge>
-                </AppBox>
-              ))}
-            </AppBox>
-          )}
-        </div>
-      </div>
-    </AppBox>
+      <EntryCollectedNumbersGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} />
+    </>
   );
 }
 
