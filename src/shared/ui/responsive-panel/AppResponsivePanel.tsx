@@ -321,7 +321,7 @@ function MountedContent({
           <AppHeading
             as="h2"
             id={`${panel.id}-title`}
-            size="lg"
+            size={presentation === "bottom-sheet" ? "md" : "lg"}
             align={
               presentation === "bottom-sheet" && panel.sheet.headerAlign === "center"
                 ? "center"
