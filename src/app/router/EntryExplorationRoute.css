@@ -1,21 +1,5 @@
-.EntryPlacePanel .AppResponsivePanelHeader {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sg-spacing-3);
-}
-
-.EntryPlacePanel .AppResponsivePanelTitle {
-  min-width: 0;
-}
-
 /* 지도 장소 상세와 같은 닫기 크기를 쓴다(PC 40px, 모바일 20px). */
 .EntryPlacePanelCloseIcon {
-  width: var(--sg-map-detail-header-icon-size);
-  height: var(--sg-map-detail-header-icon-size);
-}
-
-.EntryPlacePanel[data-presentation="bottom-sheet"] .EntryPlacePanelCloseIcon {
-  width: var(--sg-map-detail-header-icon-mobile-size);
-  height: var(--sg-map-detail-header-icon-mobile-size);
+  width: var(--place-detail-icon-size);
+  height: var(--place-detail-icon-size);
 }

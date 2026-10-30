@@ -46,7 +46,7 @@ test.each([390, 1366])("restores the hanok information and external link at %ipx
   const link = screen.getByRole("link", { name: /한옥체험 지도 보기/ });
   expect(link.getAttribute("href")).toBe("https://map.seoul.go.kr/smgis2/short/6P5oo");
   expect(link.getAttribute("target")).toBe("_blank");
-  expect(screen.queryByText("탐방중 이런 정보를 만나요!") !== null).toBe(width >= 768);
+  expect(screen.queryByText("탐방중 이런 정보를 만나요!")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "장소 정보 닫기" }));
   expect(onClose).toHaveBeenCalledOnce();
 });
@@ -61,5 +61,5 @@ test.each([390, 1366])("provides a pointer-accessible card close action at %ipx"
   expect(close.classList.contains("AppIconButton")).toBe(true);
   fireEvent.click(close);
   expect(onClose).toHaveBeenCalledOnce();
-  expect(screen.queryByText(/20(25|26) · 서울에디션/) !== null).toBe(width >= 768);
+  expect(screen.getByText(/^20(25|26)$/)).toHaveClass("AppBadge-content");
 });

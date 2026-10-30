@@ -1,50 +1,4 @@
-.MapPlaceDetailPanel {
-  --sg-typography-detail-title-line-height: var(--sg-map-detail-header-line-height);
-  --place-detail-gutter: var(--sg-spacing-7);
-  --place-detail-gap: var(--sg-spacing-4);
-  --place-detail-action-size: var(--sg-map-detail-header-action-size);
-  --place-detail-icon-size: var(--sg-map-detail-header-icon-size);
-}
-
-.MapPlaceDetailPanel .AppResponsivePanelHeader {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: var(--place-detail-gap);
-  padding: var(--sg-spacing-7) var(--place-detail-gutter) var(--place-detail-gap);
-}
-
-.MapPlaceDetailPanel .AppResponsivePanelTitle {
-  display: -webkit-box;
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  font-size: var(--sg-font-size-11);
-  line-height: var(--sg-typography-detail-title-line-height);
-  white-space: normal;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.MapPlaceDetailMeta {
-  min-height: var(--sg-map-detail-header-line-height);
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--sg-spacing-2);
-  min-width: 0;
-}
-
-.MapPlaceDetailToolbar {
-  min-height: var(--sg-map-detail-header-line-height);
-  display: flex;
-  align-items: center;
-  gap: var(--sg-spacing-2);
-  flex: none;
-  min-width: 0;
-  margin-left: auto;
-}
-
+/* 머리글·본문 크기는 인트로와 같이 쓰는 place-detail-card.css를 따른다. 여기는 지도 전용 요소만 둔다. */
 .MapPlaceDetailSearch {
   display: grid;
   place-items: center;
@@ -88,34 +42,12 @@
   height: var(--place-detail-icon-size);
 }
 
-.MapPlaceDetailPanel[data-presentation] .PlaceDetailPanelBody {
-  padding: 0;
-}
-
-.MapPlaceDetailPanel .PlaceDetailCard {
-  padding: 0 var(--place-detail-gutter);
-}
-
-.MapPlaceDetailPanel .PlaceDetailCardImage {
-  margin: 0 0 var(--place-detail-gap);
-}
-
-.MapPlaceDetailPanel .PlaceDetailCardDescription {
-  min-height: 0;
-  margin: 0 0 var(--place-detail-gap);
-  padding: var(--sg-spacing-4);
-}
-
 .MapPlaceDetailStamp {
   display: flex;
   flex-direction: column;
   gap: var(--sg-spacing-1);
   margin-inline: var(--place-detail-gutter);
   overflow-wrap: anywhere;
-}
-
-.MapPlaceDetailPanel .PlaceDetailPanelFooter {
-  padding: var(--place-detail-gap) var(--place-detail-gutter) var(--sg-spacing-7);
 }
 
 .MapPlaceDetailAddButton {
@@ -131,14 +63,7 @@
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] {
-  --sg-typography-detail-title-line-height: var(--sg-map-detail-header-title-mobile-line-height);
-  --place-detail-icon-size: var(--sg-map-detail-header-icon-mobile-size);
   overflow: visible;
-  --place-detail-gutter: var(--sg-spacing-4);
-  --place-detail-gap: var(--sg-spacing-3);
-  --sg-typography-detail-body-font-size: var(--sg-font-size-4);
-  --sg-typography-detail-body-line-height: var(--sg-map-detail-mobile-body-line-height);
-  --sg-typography-detail-title-font-size: var(--sg-font-size-7);
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"]:has(.PlaceDetailPanelAbove) {
@@ -157,46 +82,18 @@
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
   border-radius: var(--sg-panel-sheet-radius) var(--sg-panel-sheet-radius) 0 0;
-  gap: var(--place-detail-gap);
-  padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelTitle {
-  margin-top: calc(
-    (
-        var(--sg-map-detail-header-line-height) -
-          var(--sg-map-detail-header-title-mobile-line-height)
-      ) /
-      2
-  );
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailSearch {
   display: none;
 }
 
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
-  padding-top: 0;
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardImage {
-  aspect-ratio: var(--sg-map-detail-mobile-image-ratio);
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardDescription,
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailStamp {
   padding: 0;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailStamp {
   flex-direction: row;
   flex-wrap: wrap;
   gap: var(--sg-spacing-2);
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailPanelFooter {
-  padding-bottom: var(--sg-spacing-6);
 }

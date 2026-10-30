@@ -6,18 +6,13 @@ import {
   useEntryEditionSelection,
 } from "@features/entry-exploration";
 import {
+  PlaceDetailHeaderMeta,
   PlaceDetailPanel,
   useSeoulEditionPlacesQuery,
   type PlaceDetailCardProps,
 } from "@features/places";
-import {
-  FLOATING_PANEL_SHEET_OPTIONS,
-  useResponsivePanelPresentation,
-  type PanelSnapPoint,
-} from "@shared/ui/responsive-panel";
+import { FLOATING_PANEL_SHEET_OPTIONS, type PanelSnapPoint } from "@shared/ui/responsive-panel";
 import { AppIconButton } from "@shared/ui/button";
-import { AppHStack } from "@shared/ui/layout";
-import { AppText } from "@shared/ui/typography";
 
 import closeIcon from "../../assets/icons/close.svg";
 
@@ -26,27 +21,25 @@ import "./EntryExplorationRoute.css";
 const ENTRY_PLACE_INITIAL_SNAP_POINT = FLOATING_PANEL_SHEET_OPTIONS.snapPoints[0];
 
 type EntryPlacePanelProps = {
-  place: PlaceDetailCardProps;
+  place: PlaceDetailCardProps & { selectionYear?: number };
   open: boolean;
   onClose: () => void;
 };
 
+// 지도 장소 상세와 같은 머리글: 제목 옆 연도 배지, 오른쪽 끝 닫기.
 function EntryPlacePanelActions({
   place,
   onClose,
 }: Pick<EntryPlacePanelProps, "place" | "onClose">): ReactElement {
-  const presentation = useResponsivePanelPresentation();
   return (
-    <AppHStack align="center" gap="sm">
-      {presentation !== "bottom-sheet" && (
-        <AppText role="detailSupporting" tone="muted" align="end">
-          {place.subtitle}
-        </AppText>
-      )}
-      <AppIconButton ariaLabel="장소 정보 닫기" size="md" onClick={onClose}>
-        <img className="EntryPlacePanelCloseIcon" src={closeIcon} alt="" />
-      </AppIconButton>
-    </AppHStack>
+    <>
+      <PlaceDetailHeaderMeta selectionYear={place.selectionYear} />
+      <div className="PlaceDetailToolbar">
+        <AppIconButton ariaLabel="장소 정보 닫기" size="md" onClick={onClose}>
+          <img className="EntryPlacePanelCloseIcon" src={closeIcon} alt="" />
+        </AppIconButton>
+      </div>
+    </>
   );
 }
 
@@ -66,7 +59,6 @@ function EntryPlacePanel({ place, open, onClose }: EntryPlacePanelProps): ReactE
       place={place}
       open={open}
       modal={false}
-      className="EntryPlacePanel"
       headerTrailing={<EntryPlacePanelActions place={place} onClose={onClose} />}
       mobileActiveSnapPoint={entryPlaceSnapPoint}
       onMobileSnapPointChange={setEntryPlaceSnapPoint}
@@ -104,7 +96,7 @@ export function EntryExplorationRoute(): ReactElement {
               title: place.name,
               description: place.description,
               address: place.address,
-              subtitle: place.selectionYear ? `${place.selectionYear} · 서울에디션` : "서울에디션",
+              selectionYear: place.selectionYear,
               image: { src: place.imageUrl, alt: place.name },
             }}
             {...props}
