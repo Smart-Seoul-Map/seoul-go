@@ -87,6 +87,10 @@ export function EntryExplorationPage({
     requestDartView,
     rouletteMapRectStore,
   } = useEntryExplorationDartShot();
+  const characterSpeech = useEntryCharacterSpeech({
+    hasStarted,
+    isDartActive: dartShot.isGuideVisible,
+  });
   const openNumberGuide = (source: "first_entry" | "number_button"): void => {
     track({ name: "entry_guide_open", source });
     setIsNumberGuideOpen(true);
@@ -115,6 +119,11 @@ export function EntryExplorationPage({
           return next;
         });
         showNumberRewardToast();
+        const reward = rewards.find((candidate) => candidate.placeId === placeId);
+        // 처음 번호를 얻은 순간에만 해치가 번호와 다트의 관계를 한 번 알려 준다.
+        if (reward && visibleRewards.length === 0) {
+          characterSpeech.say({ key: "firstNumber", numbers: getEntryDartNumbers([reward]) });
+        }
       },
     }
   );
@@ -153,11 +162,6 @@ export function EntryExplorationPage({
     onRouletteViewControlsReady,
     onRouletteWin,
   });
-  const characterSpeech = useEntryCharacterSpeech({
-    hasStarted,
-    isDartActive: dartShot.isGuideVisible,
-  });
-
   useEntryExplorationThreeScene({
     places,
     containerRef,
@@ -246,12 +250,9 @@ export function EntryExplorationPage({
         시작 지점 뽑기
       </EntryExplorationSceneButton>
       {hasStarted && renderPlacePanel?.(panelProps)}
-      {characterSpeech.speechKey &&
+      {characterSpeech.message &&
         createPortal(
-          <AppSpeechBubble
-            speaker={HAECHI_CHARACTER_NAME}
-            message={ENTRY_GUIDE_MESSAGES.speech[characterSpeech.speechKey]}
-          />,
+          <AppSpeechBubble speaker={HAECHI_CHARACTER_NAME} message={characterSpeech.message} />,
           characterSpeech.anchor.element
         )}
     </main>

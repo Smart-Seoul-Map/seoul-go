@@ -178,7 +178,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
-    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.intro);
+    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.firstNumber([54, 49]));
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(router.state.location.pathname).toBe("/");
   });
@@ -416,6 +416,26 @@ describe("EntryExplorationPage", () => {
     renderEntryExplorationPage();
     startExploration();
     expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+  });
+
+  test("Haechi explains the first numbers once and not again for later rewards", () => {
+    renderEntryExplorationPage();
+    startExploration();
+    act(() => characterMovingChange?.(false));
+    act(() => {
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.firstNumber([54, 49]));
+
+    act(() => characterMovingChange?.(true));
+    expect(getSpeechText()).toBe("");
+    act(() => characterMovingChange?.(false));
+    act(() => {
+      placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(getSpeechText()).toBe("");
   });
 
   test("shows the exploration UI only after the scene reports the intro start", () => {

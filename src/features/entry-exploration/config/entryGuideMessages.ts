@@ -2,6 +2,8 @@
 export const ENTRY_GUIDE_MESSAGES = {
   speech: {
     intro: "서울에디션25의 특별한 장소를 찾아 탐방을 시작해 볼까?",
+    firstNumber: (numbers: readonly number[]): string =>
+      `${numbers.map((number) => `${number}번`).join(", ")}을 얻었어! 이제 지도에서 이 번호 줄에 다트를 던질 수 있어.`,
   },
   toast: {
     numberRequired: "장소를 방문해 번호를 먼저 획득해 주세요",
