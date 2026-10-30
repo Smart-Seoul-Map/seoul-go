@@ -65,10 +65,6 @@
   background: var(--sg-color-bg-surface-paper);
   overflow-wrap: anywhere;
 }
-.LinkedPlacesReferenceLabel {
-  color: var(--sg-color-text-muted);
-  font-size: var(--sg-font-size-3);
-}
 .LinkedPlacesCardMeta {
   display: flex;
   flex-wrap: wrap;

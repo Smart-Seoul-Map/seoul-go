@@ -11,7 +11,7 @@ import {
   FLOATING_PANEL_SHEET_OPTIONS,
   type PanelSnapPoint,
 } from "@shared/ui/responsive-panel";
-import { AppHeading } from "@shared/ui/typography";
+import { AppCaption, AppHeading, AppText } from "@shared/ui/typography";
 import type { LinkedPlaceReference } from "../domain/linkedPlaceReference";
 import type { ExplorationPanelLifecycleProps } from "./ExplorationPage";
 import "./linked-places.css";
@@ -56,13 +56,19 @@ function NearbyPlaceList({
   if (isLoading)
     return (
       <p className="LinkedPlacesState" role="status">
-        근처 장소를 찾고 있어요.
+        <AppText as="span" tone="muted">
+          근처 장소를 찾고 있어요.
+        </AppText>
       </p>
     );
   if (isError)
     return (
       <div className="LinkedPlacesState">
-        <p role="alert">근처 장소를 불러오지 못했어요.</p>
+        <p role="alert">
+          <AppText as="span" tone="muted">
+            근처 장소를 불러오지 못했어요.
+          </AppText>
+        </p>
         <AppButton variant="outline" onClick={onRetry}>
           다시 시도
         </AppButton>
@@ -71,7 +77,9 @@ function NearbyPlaceList({
   if (places.length === 0)
     return (
       <p className="LinkedPlacesState" role="status">
-        반경 1km 안에 연계 장소가 없어요.
+        <AppText as="span" tone="muted">
+          반경 1km 안에 연계 장소가 없어요.
+        </AppText>
       </p>
     );
   return (
@@ -82,7 +90,7 @@ function NearbyPlaceList({
           key={place.id}
           onClick={() => track({ name: "linked_place_card_press", placeId: place.id })}
         >
-          <span className="LinkedPlacesReferenceLabel">{selected?.name} 기준</span>
+          <AppCaption as="span">{selected?.name} 기준</AppCaption>
           <AppHeading as="h3" size="sm">
             {place.name}
           </AppHeading>
@@ -105,7 +113,9 @@ export function LinkedPlacesContent(props: LinkedPlacesContentProps): ReactEleme
   if (!selected)
     return (
       <p className="LinkedPlacesState" role="status">
-        코스에 담긴 서울에디션 장소가 없어요.
+        <AppText as="span" tone="muted">
+          코스에 담긴 서울에디션 장소가 없어요.
+        </AppText>
       </p>
     );
   return (
