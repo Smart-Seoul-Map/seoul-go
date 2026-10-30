@@ -11,6 +11,7 @@ import type {
 } from "../config/entryExplorationSceneObjects";
 import type { EntryExplorationScenePoint } from "../domain/entryExplorationSceneMath";
 
+// style.css 인트로 바닥(--sg-color-bg-intro)과 같은 색이어야 경계가 안 보인다.
 const ENTRY_EXPLORATION_SCENE_CLEAR_COLOR = 0xf7f4ed;
 const ENTRY_EXPLORATION_AMBIENT_SKY_COLOR = 0xffffff;
 const ENTRY_EXPLORATION_AMBIENT_GROUND_COLOR = 0xa7b39f;

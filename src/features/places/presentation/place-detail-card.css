@@ -28,7 +28,6 @@
 .PlaceDetailCardHeader .AppHeading {
   flex: 0 1 auto;
   min-width: 0;
-  color: var(--sg-detail-title-color);
 }
 .PlaceDetailCardHeader .AppText {
   flex: 1 1 auto;
@@ -105,14 +104,52 @@
 .PlaceDetailCard > .PlaceDetailExternalLink {
   margin-top: var(--sg-spacing-4);
 }
-.PlaceDetailPanel .PlaceDetailPanelFooter {
-  flex-direction: column;
-}
+/* 인트로와 지도 장소 상세가 같이 쓰는 머리글·본문 규칙. 지도 전용(검색·스탬프·코스 버튼)은 map-place-detail-panel.css에 둔다. */
 .PlaceDetailPanel {
   --sg-panel-bg: var(--sg-color-bg-surface-paper);
   --panel-custom-sheet-max-height: var(--place-detail-mobile-max-height, 100dvh);
+  --sg-typography-detail-title-line-height: var(--sg-map-detail-header-line-height);
+  --place-detail-gutter: var(--sg-spacing-7);
+  --place-detail-gap: var(--sg-spacing-4);
+  --place-detail-action-size: var(--sg-map-detail-header-action-size);
+  --place-detail-icon-size: var(--sg-map-detail-header-icon-size);
 }
-.PlaceDetailPanel .PlaceDetailPanelBody {
+.PlaceDetailPanel .AppResponsivePanelHeader {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--place-detail-gap);
+  padding: var(--sg-spacing-7) var(--place-detail-gutter) var(--place-detail-gap);
+}
+.PlaceDetailPanel .AppResponsivePanelHeader .AppHeading {
+  display: -webkit-box;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--sg-font-size-11);
+  line-height: var(--sg-typography-detail-title-line-height);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.PlaceDetailMeta {
+  min-height: var(--sg-map-detail-header-line-height);
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  min-width: 0;
+}
+.PlaceDetailToolbar {
+  min-height: var(--sg-map-detail-header-line-height);
+  display: flex;
+  align-items: center;
+  gap: var(--sg-spacing-2);
+  flex: none;
+  min-width: 0;
+  margin-left: auto;
+}
+.PlaceDetailPanel[data-presentation] .PlaceDetailPanelBody {
   padding: 0;
   border: 0;
   scrollbar-width: none;
@@ -120,16 +157,12 @@
 .PlaceDetailPanel .PlaceDetailPanelBody::-webkit-scrollbar {
   display: none;
 }
-.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
-  padding: var(--sg-spacing-6) var(--sg-spacing-semantic-screen-gutter-x) var(--sg-spacing-2);
-  background: var(--sg-panel-bg);
-}
-.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelTitle {
-  color: var(--sg-detail-title-color);
-  font-size: var(--sg-typography-detail-title-font-size);
-  line-height: var(--sg-typography-detail-title-line-height);
+/* 아래 버튼 줄이 없을 때도 본문 끝이 패널 가장자리에 붙지 않게 한다. */
+.PlaceDetailPanel[data-presentation] .PlaceDetailPanelBody:last-child {
+  padding-bottom: var(--sg-spacing-7);
 }
 .PlaceDetailPanel .PlaceDetailCard {
+  padding: 0 var(--place-detail-gutter);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -138,6 +171,18 @@
   overflow: hidden;
   /* Let wheel and touch scrolling reach the panel body instead of this clipped card. */
   overscroll-behavior: auto;
+}
+.PlaceDetailPanel .PlaceDetailCardImage {
+  margin: 0 0 var(--place-detail-gap);
+}
+.PlaceDetailPanel .PlaceDetailCardDescription {
+  min-height: 0;
+  margin: 0 0 var(--place-detail-gap);
+  padding: var(--sg-spacing-4);
+}
+.PlaceDetailPanel .PlaceDetailPanelFooter {
+  flex-direction: column;
+  padding: var(--place-detail-gap) var(--place-detail-gutter) var(--sg-spacing-7);
 }
 .PlaceDetailPanel[data-hide-title] .AppResponsivePanelClose {
   position: relative;
@@ -150,7 +195,54 @@
 .PlaceDetailPanel .PlaceDetailCardHeader {
   margin-top: 0;
 }
+.PlaceDetailPanel[data-presentation="bottom-sheet"] {
+  --sg-typography-detail-title-font-size: var(--sg-font-size-7);
+  --sg-typography-detail-title-line-height: var(--sg-map-detail-header-title-mobile-line-height);
+  --sg-typography-detail-body-font-size: var(--sg-font-size-4);
+  --sg-typography-detail-body-line-height: var(--sg-map-detail-mobile-body-line-height);
+  --place-detail-icon-size: var(--sg-map-detail-header-icon-mobile-size);
+  --place-detail-gutter: var(--sg-spacing-4);
+  --place-detail-gap: var(--sg-spacing-3);
+  /* 주소 위치 아이콘을 14px 주소 글자 한 줄 높이에 맞춘다. */
+  --sg-detail-location-icon-size: var(--sg-spacing-5);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader {
+  gap: var(--place-detail-gap);
+  padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
+  background: var(--sg-panel-bg);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader .AppHeading {
+  margin-top: calc(
+    (
+        var(--sg-map-detail-header-line-height) -
+          var(--sg-map-detail-header-title-mobile-line-height)
+      ) /
+      2
+  );
+  font-size: var(--sg-typography-detail-title-font-size);
+  line-height: var(--sg-typography-detail-title-line-height);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailPanelBody:last-child {
+  padding-bottom: var(--sg-spacing-6);
+}
 .PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
   width: 100%;
-  padding-top: var(--sg-spacing-1);
+  padding-top: 0;
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardImage {
+  aspect-ratio: var(--sg-map-detail-mobile-image-ratio);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardDescription {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+/* 모바일 주소는 박스는 그대로 두고 글자만 본문(14px)에 맞춘다. */
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCardAddress {
+  --sg-typography-detail-supporting-font-size: var(--sg-font-size-4);
+  --sg-typography-detail-supporting-line-height: var(--sg-map-detail-mobile-body-line-height);
+}
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailPanelFooter {
+  padding-bottom: var(--sg-spacing-6);
 }

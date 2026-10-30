@@ -1,18 +1,16 @@
 import type { ReactElement, ReactNode } from "react";
 
 import { buildExternalSearchUrl } from "@shared/lib/externalSearch/externalSearchUrl";
-import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 import {
   AppResponsivePanel,
-  useResponsivePanelPresentation,
   type AppResponsivePanelContentProps,
 } from "@shared/ui/responsive-panel";
 import { AppText } from "@shared/ui/typography";
 import type { PlaceDetailCardProps } from "./PlaceDetailCard";
+import { PlaceDetailHeaderMeta } from "./PlaceDetailHeaderMeta";
 import { PlaceDetailPanel } from "./PlaceDetailPanel";
-import { getSelectionYearBadgeTone } from "@shared/constants/selectionYearBadge";
 import "./map-place-detail-panel.css";
 
 export type MapPlaceDetailPanelProps = Pick<
@@ -29,29 +27,9 @@ export type MapPlaceDetailPanelProps = Pick<
   onAddToCourse?: () => void;
 };
 
-function PlaceDetailHeaderMeta({
-  place,
-}: Pick<MapPlaceDetailPanelProps, "place">): ReactElement | null {
-  const presentation = useResponsivePanelPresentation();
-  if (place.selectionYear === undefined) return null;
-
-  return (
-    <div className="MapPlaceDetailMeta">
-      <AppBadge
-        size={presentation === "bottom-sheet" ? "number-sm" : "number-md"}
-        tone={getSelectionYearBadgeTone(place.selectionYear)}
-        variant="solid"
-        textPolicy="singleLine"
-      >
-        {place.selectionYear}
-      </AppBadge>
-    </div>
-  );
-}
-
 function PlaceDetailActions({ place }: Pick<MapPlaceDetailPanelProps, "place">): ReactElement {
   return (
-    <div className="MapPlaceDetailToolbar">
+    <div className="PlaceDetailToolbar">
       <a
         className="MapPlaceDetailSearch"
         href={buildExternalSearchUrl("NAVER", place.title)}
@@ -94,7 +72,7 @@ export function MapPlaceDetailPanel({
       }}
       headerTrailing={
         <>
-          <PlaceDetailHeaderMeta place={place} />
+          <PlaceDetailHeaderMeta selectionYear={place.selectionYear} />
           <PlaceDetailActions place={place} />
         </>
       }
@@ -107,7 +85,7 @@ export function MapPlaceDetailPanel({
           disabled={!onAddToCourse}
           onClick={onAddToCourse}
         >
-          {isStampAcquired ? "스탬프/코스 완료" : "스탬프/코스 추가"}
+          {isStampAcquired ? "스탬프 코스 완료" : "스탬프 코스 추가"}
         </AppButton>
       }
     >
@@ -116,7 +94,7 @@ export function MapPlaceDetailPanel({
         bg="bg.surfacePaper"
         borderColor="stroke.weak"
         borderWidth="strokeWidth.surface"
-        borderRadius="radius.4_5"
+        borderRadius="radius.4"
         boxShadow="shadow.raised"
         px="spacing.4"
         py="spacing.3"

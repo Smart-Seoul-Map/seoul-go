@@ -4,7 +4,8 @@ import "./typography.css";
 
 export type AppTextElement = "p" | "span" | "div";
 export type AppTextRole = "body" | "supporting" | "dialogBody" | "detailBody" | "detailSupporting";
-export type AppTextTone = "default" | "muted" | "subtle" | "disabled" | "brand" | "danger";
+export type AppTextTone =
+  "default" | "muted" | "subtle" | "disabled" | "brand" | "danger" | "inverted";
 export type AppTextAlign = "start" | "center" | "end";
 export type AppTextMaxLines = 1 | 2 | 3;
 

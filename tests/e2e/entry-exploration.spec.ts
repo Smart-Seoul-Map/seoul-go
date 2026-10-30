@@ -162,7 +162,7 @@ test("desktop: arrival, panel input isolation, dismiss, leave and re-enter", asy
     await startExploration(page);
     await arriveAtPlace(page);
     await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
-    await expect(panel(page).getByText("2026 · 서울에디션", { exact: true })).toBeVisible();
+    await expect(panel(page).getByText("2026", { exact: true })).toBeVisible();
     await expect(panel(page).getByText("서울특별시 용산구 신흥로 95-9")).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("desktop-arrival.png") });
   });
@@ -202,7 +202,7 @@ test.describe("mobile", () => {
     await startExploration(page);
     await arriveAtPlace(page);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
-    await expect(panel(page).getByText("2026 · 서울에디션", { exact: true })).toHaveCount(0);
+    await expect(panel(page).getByText("2026", { exact: true })).toBeVisible();
     await expect
       .poll(async () => (await panel(page).boundingBox())?.height)
       .toBeCloseTo(MOBILE_SHEET_COLLAPSED_HEIGHT, 0);
@@ -268,7 +268,7 @@ test.describe("mobile", () => {
 
     await page.setViewportSize(DESKTOP);
     await expect(panel(page)).toHaveAttribute("data-appearance", "floating");
-    await expect(panel(page).getByText("2026 · 서울에디션", { exact: true })).toBeVisible();
+    await expect(panel(page).getByText("2026", { exact: true })).toBeVisible();
     await page.setViewportSize(MOBILE);
     await expect(panel(page)).toHaveAttribute("data-presentation", "bottom-sheet");
     await expect(

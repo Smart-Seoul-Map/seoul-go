@@ -9,6 +9,7 @@ import type { CharacterDirection } from "@shared/lib/character/characterDirectio
 import { useKeyboardCharacterDirection } from "@shared/lib/character/useKeyboardCharacterDirection";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
+import { AppCaption } from "@shared/ui/typography";
 import { AppVirtualJoystick } from "@shared/ui/virtual-joystick";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
@@ -360,7 +361,9 @@ export function ExplorationMap({
       <div ref={containerRef} aria-label="서울 지도" className="map-view" />
       {markerLoadFailed && (
         <p className="exploration-marker-error" role="alert">
-          장소 마커를 불러오지 못했어요.
+          <AppCaption as="span" tone="danger">
+            장소 마커를 불러오지 못했어요.
+          </AppCaption>
         </p>
       )}
       {markerMap &&

@@ -47,7 +47,7 @@ test.each([390, 1366])("%ipx에서 제목과 검색은 헤더, 주요 액션은 
   expect(search).toHaveAttribute("target", "_blank");
   expect(search).toHaveAttribute("rel", "noopener noreferrer");
   expect(search.closest(".AppResponsivePanelBody")).toBeNull();
-  const add = within(dialog).getByRole("button", { name: "스탬프/코스 추가" });
+  const add = within(dialog).getByRole("button", { name: "스탬프 코스 추가" });
   expect(add.closest(".AppResponsivePanelFooter")).not.toBeNull();
   expect(add.closest(".AppResponsivePanelBody")).toBeNull();
   fireEvent.click(add);
@@ -84,5 +84,5 @@ test("모바일에서 50%, 90%를 순환하고 이미지 오류 시 대체 이�
   expect(dialog.style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
   fireEvent.error(screen.getByRole("img", { name: place.image.alt }));
   expect(screen.getByText("이미지 준비중")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "스탬프/코스 추가" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "스탬프 코스 추가" })).toBeDisabled();
 });

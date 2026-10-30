@@ -20,6 +20,7 @@ export type { SmartSeoulThemePlace } from "./domain/place";
 export type { NearbySmartSeoulPlace } from "./domain/nearbyPlace";
 export { PlaceDetailCard } from "./presentation/PlaceDetailCard";
 export type { PlaceDetailCardProps } from "./presentation/PlaceDetailCard";
+export { PlaceDetailHeaderMeta } from "./presentation/PlaceDetailHeaderMeta";
 export { PlaceDetailPanel } from "./presentation/PlaceDetailPanel";
 export type { PlaceDetailPanelProps } from "./presentation/PlaceDetailPanel";
 export { MapPlaceDetailPanel } from "./presentation/MapPlaceDetailPanel";

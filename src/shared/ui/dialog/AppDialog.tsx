@@ -130,7 +130,7 @@ export function AppDialog({
               <AppIconButton
                 ariaLabel={closeAction.ariaLabel}
                 onClick={closeAction.onClick}
-                size="sm"
+                size="nav"
                 variant="layer"
               >
                 {closeAction.children}

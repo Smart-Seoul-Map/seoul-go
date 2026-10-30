@@ -31,7 +31,7 @@ body {
 }
 
 .entry-exploration-page {
-  background: #f7f4ed;
+  background: var(--sg-color-bg-intro);
   height: 100vh;
   overflow: hidden;
   position: relative;

@@ -129,7 +129,6 @@
   padding: 0;
   border: 0;
   border-radius: var(--sg-radius-full);
-  color: var(--sg-color-text-muted);
   background: var(--sg-color-bg-transparent);
   cursor: pointer;
 }
@@ -144,8 +143,6 @@
 .AppResponsivePanelCloseIcon {
   width: var(--sg-spacing-7);
   height: var(--sg-spacing-7);
-  background: currentColor;
-  mask: url("../../../assets/icons/close.svg") center / contain no-repeat;
 }
 .AppResponsivePanelContent[data-has-close] .AppResponsivePanelHeader {
   padding-right: calc(var(--sg-panel-padding-x) + var(--sg-panel-close-size));
@@ -158,14 +155,6 @@
   .AppResponsivePanelHeader {
   text-align: center;
   padding-inline: calc(var(--sg-spacing-4) + var(--sg-panel-close-size));
-}
-.AppResponsivePanelTitle {
-  margin: 0;
-  font-family: var(--sg-font-family-base);
-  font-size: var(--sg-panel-title-size);
-  font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-panel-title-line-height);
-  overflow-wrap: anywhere;
 }
 .AppResponsivePanelDescription {
   color: var(--sg-color-text-muted);

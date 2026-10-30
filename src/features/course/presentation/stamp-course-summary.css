@@ -12,7 +12,7 @@
   min-width: 0;
   font-family: var(--sg-font-family-base);
   font-size: var(--sg-font-size-7);
-  font-weight: var(--sg-font-weight-medium);
+  font-weight: var(--sg-font-weight-bold);
   line-height: var(--sg-line-height-7);
   overflow-wrap: anywhere;
 }
