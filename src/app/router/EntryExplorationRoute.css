@@ -1,4 +1,4 @@
-/* 지도 장소 상세와 같은 닫기 크기를 쓴다(PC 40px, 모바일 20px). */
+/* 지도 장소 상세와 같은 닫기 크기를 쓴다(40px 버튼 안에 PC 28px, 모바일 20px). */
 .EntryPlacePanelCloseIcon {
   width: var(--place-detail-icon-size);
   height: var(--place-detail-icon-size);
