@@ -133,6 +133,7 @@ export function EntryExplorationPage({
       status: "success",
       actionLabel: ENTRY_GUIDE_MESSAGES.toast.numberRewardAction,
       onAction: () => {
+        track({ name: "entry_number_reward_action" });
         dismissOpenPanel();
         clearToasts();
         requestDartView();
