@@ -72,14 +72,14 @@ describe("EntryExplorationPage", () => {
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
     act(() => gridOptions.onDartEntryBlocked?.());
-    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
   });
 
   test("explains how to unlock the grid when the roulette entry is rejected", () => {
     renderEntryExplorationPage();
     startExploration();
     act(() => gridOptions.onRouletteEntryBlocked?.());
-    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
   });
 
   test("passes restored numbers to the dart and adds new numbers only after the place panel closes", () => {

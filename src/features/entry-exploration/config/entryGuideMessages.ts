@@ -6,7 +6,7 @@ export const ENTRY_GUIDE_MESSAGES = {
       `${numbers.map((number) => `${number}번`).join(", ")}을 얻었어! 이제 지도에서 이 번호 줄에 다트를 던질 수 있어.`,
   },
   toast: {
-    numberRequired: "장소를 방문해 번호를 먼저 획득해 주세요",
+    numberRequired: "장소를 방문해 번호를 모으면, 그 번호 줄에 다트를 던질 수 있어요",
     numberReward: "번호를 추가했어요",
     numberRewardAction: "다트게임하기",
   },
