@@ -41,15 +41,6 @@
 .LinkedPlacesListHeading {
   margin-bottom: var(--sg-spacing-4);
 }
-.LinkedPlacesListHeading h2,
-.LinkedPlacesCard h3 {
-  margin: 0;
-  font-family: var(--sg-font-family-base);
-  font-size: var(--sg-font-size-6);
-  font-weight: var(--sg-font-weight-regular);
-  line-height: var(--sg-line-height-6);
-  overflow-wrap: anywhere;
-}
 .LinkedPlacesListHeading p {
   margin: var(--sg-spacing-1) 0 0;
   font-size: var(--sg-font-size-2);

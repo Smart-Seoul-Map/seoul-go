@@ -11,6 +11,7 @@ import {
   FLOATING_PANEL_SHEET_OPTIONS,
   type PanelSnapPoint,
 } from "@shared/ui/responsive-panel";
+import { AppHeading } from "@shared/ui/typography";
 import type { LinkedPlaceReference } from "../domain/linkedPlaceReference";
 import type { ExplorationPanelLifecycleProps } from "./ExplorationPage";
 import "./linked-places.css";
@@ -82,7 +83,9 @@ function NearbyPlaceList({
           onClick={() => track({ name: "linked_place_card_press", placeId: place.id })}
         >
           <span className="LinkedPlacesReferenceLabel">{selected?.name} 기준</span>
-          <h3>{place.name}</h3>
+          <AppHeading as="h3" size="sm">
+            {place.name}
+          </AppHeading>
           <div className="LinkedPlacesCardMeta">
             <AppBadge size="xs" tone="brand" variant="weak">
               {place.themeName}
@@ -137,7 +140,9 @@ export function LinkedPlacesContent(props: LinkedPlacesContentProps): ReactEleme
           {place.id === selected.id && (
             <>
               <div className="LinkedPlacesListHeading">
-                <h2>근처 추천 장소{!isLoading && !isError ? ` ${places.length}곳` : ""}</h2>
+                <AppHeading as="h2" size="sm">
+                  근처 추천 장소{!isLoading && !isError ? ` ${places.length}곳` : ""}
+                </AppHeading>
                 <p>{selected.name} 기준 · 반경 1km</p>
               </div>
               <NearbyPlaceList {...props} />
