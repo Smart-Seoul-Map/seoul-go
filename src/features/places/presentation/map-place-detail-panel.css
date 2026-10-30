@@ -191,10 +191,6 @@
   );
 }
 
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailSearchMenu {
-  display: none;
-}
-
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {
   padding-top: 0;
 }
