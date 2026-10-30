@@ -17,7 +17,7 @@
   font-family: var(--sg-typography-supporting-font-family);
   font-size: var(--sg-typography-supporting-font-size);
   font-weight: var(--sg-font-weight-regular);
-  line-height: var(--sg-line-height-5);
+  line-height: var(--sg-typography-supporting-line-height);
   letter-spacing: 0;
   text-align: start;
 }

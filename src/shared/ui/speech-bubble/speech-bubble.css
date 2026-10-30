@@ -58,9 +58,9 @@
   margin: 0;
   color: var(--sg-color-text-default);
   font-family: var(--sg-font-family-base);
-  font-size: var(--sg-font-size-2);
+  font-size: var(--sg-typography-caption-font-size);
   font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-2);
+  line-height: var(--sg-typography-caption-line-height);
   letter-spacing: 0;
   overflow-wrap: anywhere;
 }

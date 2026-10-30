@@ -153,7 +153,7 @@ export function LinkedPlacesContent(props: LinkedPlacesContentProps): ReactEleme
                 <AppHeading as="h2" size="sm">
                   근처 추천 장소{!isLoading && !isError ? ` ${places.length}곳` : ""}
                 </AppHeading>
-                <p>{selected.name} 기준 · 반경 1km</p>
+                <AppCaption>{selected.name} 기준 · 반경 1km</AppCaption>
               </div>
               <NearbyPlaceList {...props} />
             </>

@@ -32,9 +32,6 @@
 
 .entry-exploration-dart-guide__hint .AppHeading {
   width: 100%;
-  font-size: var(--sg-font-size-7);
-  font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-8);
 }
 
 .entry-exploration-dart-guide__result {
@@ -87,9 +84,6 @@
     max-width: calc(100% - var(--sg-spacing-10) * 2);
     transform: translateX(-50%);
     white-space: nowrap;
-    --sg-typography-dialog-title-font-size: var(--sg-detail-title-size);
-    --sg-typography-dialog-title-line-height: var(--sg-line-height-12);
-    --sg-typography-supporting-font-size: var(--sg-detail-supporting-size);
   }
 
   .entry-exploration-dart-guide__note {

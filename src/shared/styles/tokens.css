@@ -461,7 +461,7 @@
 
   /* Stamp course panel */
   --sg-course-action-size: var(--sg-spacing-12);
-  --sg-course-count-size: var(--sg-font-size-6);
+  --sg-course-count-size: var(--sg-typography-body-font-size);
   --sg-course-action-label-size: var(--sg-font-size-4);
   --sg-course-action-padding-y: var(--sg-spacing-0_5);
   --sg-course-action-padding-x: var(--sg-spacing-3);

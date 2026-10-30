@@ -73,11 +73,11 @@ export function EntryExplorationDartGuide({
           pb={{ base: "spacing.3", md: "spacing.7" }}
         >
           <AppStack align="start" gap="xs">
-            <AppHeading as="h2" size="md">
+            <AppHeading as="h2" size="detail">
               서울 지도에 <span className="entry-exploration-dart-guide__accent">화살을</span> 쏴
               볼까요?
             </AppHeading>
-            <AppText role="supporting" tone="muted">
+            <AppText role="detailSupporting" tone="muted">
               명중하면 오늘 탐방을 시작할{" "}
               <span className="entry-exploration-dart-guide__accent">서울의 격자번호</span>가
               정해져요.
