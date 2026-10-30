@@ -66,7 +66,7 @@ export function EntryExplorationDartGuide({
         <AppBox
           {...PANEL_SURFACE}
           as="section"
-          borderRadius="radius.4_5"
+          borderRadius="radius.5"
           className="entry-exploration-dart-guide__intro"
           px={{ base: "spacing.4_5", md: "spacing.6" }}
           pt={{ base: "spacing.4", md: "spacing.7" }}
@@ -99,7 +99,7 @@ export function EntryExplorationDartGuide({
           <AppBox
             {...PANEL_SURFACE}
             as="section"
-            borderRadius="radius.4_5"
+            borderRadius="radius.5"
             boxShadow="shadow.raised"
             className="entry-exploration-dart-guide__note"
             px="spacing.4_5"
@@ -118,7 +118,7 @@ export function EntryExplorationDartGuide({
           <AppBox
             {...PANEL_SURFACE}
             as="section"
-            borderRadius="radius.4_5"
+            borderRadius="radius.5"
             boxShadow="shadow.1"
             className="entry-exploration-dart-guide__hint"
             px="spacing.4_5"
@@ -159,7 +159,7 @@ function DartResultPanel({
       <AppBox
         {...PANEL_SURFACE}
         as="section"
-        borderRadius="radius.6"
+        borderRadius="radius.5"
         boxShadow="shadow.raised"
         px="spacing.4_5"
         py="spacing.4"

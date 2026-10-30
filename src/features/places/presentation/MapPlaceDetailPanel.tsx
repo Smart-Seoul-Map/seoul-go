@@ -94,7 +94,7 @@ export function MapPlaceDetailPanel({
         bg="bg.surfacePaper"
         borderColor="stroke.weak"
         borderWidth="strokeWidth.surface"
-        borderRadius="radius.4_5"
+        borderRadius="radius.4"
         boxShadow="shadow.raised"
         px="spacing.4"
         py="spacing.3"

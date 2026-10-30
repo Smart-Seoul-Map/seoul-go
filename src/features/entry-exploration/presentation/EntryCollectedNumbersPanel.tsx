@@ -106,7 +106,7 @@ export function EntryCollectedNumbersPanel({
         aria-labelledby={isOpen ? `${id}-title` : undefined}
         tabIndex={isOpen ? -1 : undefined}
         bg="bg.floating"
-        borderRadius="radius.4_5"
+        borderRadius="radius.5"
         boxShadow="shadow.raised"
         className="entry-collected-numbers"
         data-open={isOpen}

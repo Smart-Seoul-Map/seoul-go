@@ -434,7 +434,7 @@
   --sg-detail-title-color: #222222;
   --sg-detail-image-bg: var(--sg-color-bg-surface-paper);
   --sg-detail-image-ratio: 444 / 247;
-  --sg-detail-image-radius: var(--sg-radius-5_5);
+  --sg-detail-image-radius: var(--sg-radius-4);
   --sg-detail-image-stroke-width: 1.4px;
   --sg-detail-image-stroke: #ffffffb8;
   --sg-detail-image-shadow: 0 8px 24px #0000001a;
