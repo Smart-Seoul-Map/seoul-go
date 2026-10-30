@@ -71,6 +71,26 @@
   outline-offset: var(--sg-focus-ring-offset);
 }
 
+.MapPlaceDetailSearchList {
+  --place-detail-search-motion-duration: var(--sg-motion-duration-4);
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--place-detail-search-motion-duration) var(--sg-motion-easing-standard),
+    opacity var(--place-detail-search-motion-duration) var(--sg-motion-easing-standard);
+}
+
+.MapPlaceDetailSearchList[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .MapPlaceDetailSearchList {
+    --place-detail-search-motion-duration: 0ms;
+  }
+}
+
 .MapPlaceDetailSearchIcon {
   width: var(--place-detail-icon-size);
   height: var(--place-detail-icon-size);
@@ -169,10 +189,6 @@
       ) /
       2
   );
-}
-
-.MapPlaceDetailPanel[data-presentation="bottom-sheet"] .MapPlaceDetailSearch {
-  display: none;
 }
 
 .MapPlaceDetailPanel[data-presentation="bottom-sheet"] .PlaceDetailCard {

@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 
+import { AppBox } from "@shared/ui/box";
+
 import type { OffscreenMarkerIndicator } from "../application/explorationOffscreenMarkers";
 import "./ExplorationOffscreenIndicators.css";
 
@@ -12,24 +14,23 @@ export function ExplorationOffscreenIndicators({
 }: ExplorationOffscreenIndicatorsProps): ReactElement {
   return (
     <div className="ExplorationOffscreenIndicators">
-      {indicators.map(({ angleRadians, id, name, x, y }) => (
-        <div
+      {indicators.map(({ id, name, x, y }) => (
+        <AppBox
           key={id}
           className="ExplorationOffscreenIndicator"
           role="img"
           aria-label={`${name} 방향`}
           style={{ left: x, top: y }}
+          bg="bg.surfacePaper"
+          borderColor="stroke.weak"
+          borderWidth="strokeWidth.surface"
+          borderRadius="radius.4_5"
+          boxShadow="shadow.raised"
         >
-          <svg
-            className="ExplorationOffscreenIndicatorArrow"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-            style={{ transform: `rotate(${angleRadians}rad)` }}
-          >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </div>
+          <span className="ExplorationOffscreenIndicatorBadge" aria-hidden="true">
+            <span className="ExplorationOffscreenIndicatorStar" />
+          </span>
+        </AppBox>
       ))}
     </div>
   );

@@ -236,7 +236,7 @@ for (const viewport of [
     await panel.getByRole("button", { name: "닫기", exact: true }).click();
     await expect(panel).toHaveCount(0);
     await page.getByRole("button", { name: "코스 보기", exact: true }).click();
-    const course = page.getByRole("dialog", { name: "담긴 코스", exact: true });
+    const course = page.getByRole("dialog", { name: "스탬프", exact: true });
     await expect(course).toBeVisible();
     await expect(course.getByRole("button", { name: "편집", exact: true })).toBeVisible();
     await expect(course.getByRole("button", { name: "카카오 도보길찾기" })).toBeVisible();

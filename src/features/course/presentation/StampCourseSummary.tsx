@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 
 import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
+import { MAX_STAMP_COURSE_PLACES } from "../domain/stampCourse";
 import { useStampCourseStore } from "../application/useStampCourseStore";
 import "./stamp-course-summary.css";
 
@@ -21,12 +22,8 @@ export function StampCourseSummary({ onOpen }: StampCourseSummaryProps): ReactEl
       borderRadius="radius.5"
       boxShadow="shadow.raised"
     >
-      <span className="StampCourseSummaryLabel">
-        <span role="status" aria-live="polite">
-          담은 코스 {count}개
-        </span>
-        <span aria-hidden="true"> · </span>
-        <span>코스 보기</span>
+      <span className="StampCourseSummaryLabel" role="status" aria-live="polite">
+        스탬프 {count}/{MAX_STAMP_COURSE_PLACES}
       </span>
       <AppButton
         className="StampCourseSummaryButton"

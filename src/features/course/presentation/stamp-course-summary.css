@@ -4,7 +4,7 @@
   gap: var(--sg-spacing-5);
   width: max-content;
   max-width: 100%;
-  padding: var(--sg-spacing-2) var(--sg-spacing-2) var(--sg-spacing-2) var(--sg-spacing-5_5);
+  padding: var(--sg-spacing-2_5) var(--sg-spacing-2_5) var(--sg-spacing-2_5) var(--sg-spacing-5_5);
   color: var(--sg-color-text-default);
 }
 
@@ -12,16 +12,16 @@
   min-width: 0;
   font-family: var(--sg-font-family-base);
   font-size: var(--sg-font-size-7);
-  font-weight: var(--sg-font-weight-medium);
+  font-weight: var(--sg-font-weight-regular);
   line-height: var(--sg-line-height-7);
   overflow-wrap: anywhere;
 }
 
 .StampCourseSummaryButton {
-  --sg-button-secondary-bg: var(--sg-color-bg-neutral-strong);
-  --sg-button-secondary-bg-pressed: var(--sg-color-bg-neutral-strong);
+  --sg-button-secondary-bg: var(--sg-color-bg-brand);
+  --sg-button-secondary-bg-pressed: var(--sg-color-bg-brand-pressed);
   --sg-button-secondary-fg: var(--sg-color-text-inverted);
-  --sg-button-radius: var(--sg-radius-5);
+  --sg-button-radius: var(--sg-radius-full);
   width: var(--sg-spacing-12);
   height: var(--sg-spacing-12);
   padding: 0;
@@ -33,26 +33,34 @@
 }
 
 .StampCourseSummaryIcon {
-  width: var(--sg-spacing-8);
-  height: var(--sg-spacing-8);
+  width: 100%;
+  height: 100%;
   background: currentColor;
-  mask: url("../../../assets/chevron-right.svg") center / contain no-repeat;
+  mask: url("../../../assets/icons/flag.svg") center / contain no-repeat;
 }
 
 @media (max-width: 860px) {
   .StampCourseSummary {
-    gap: var(--sg-spacing-3);
-    padding-block: var(--sg-spacing-1);
-    padding-left: var(--sg-spacing-4);
+    gap: var(--sg-spacing-1_5);
+    padding-block: var(--sg-spacing-1_5);
+    padding-right: var(--sg-spacing-2);
+    padding-left: var(--sg-spacing-2);
   }
 
   .StampCourseSummaryButton {
-    width: var(--sg-spacing-10);
-    height: var(--sg-spacing-10);
+    --sg-button-height-md: var(--sg-spacing-9);
+    flex-shrink: 0;
+    width: var(--sg-spacing-9);
+    height: var(--sg-spacing-9);
+  }
+
+  .StampCourseSummaryIcon {
+    width: 88%;
+    height: 88%;
   }
 
   .StampCourseSummaryLabel {
     font-size: var(--sg-font-size-5);
-    line-height: var(--sg-line-height-5);
+    line-height: var(--sg-line-height-2);
   }
 }

@@ -8,26 +8,29 @@
 
 .ExplorationOffscreenIndicator {
   align-items: center;
-  background: var(--sg-color-bg-surface);
-  border: var(--sg-spacing-0_5) solid var(--sg-color-text-brand);
-  border-radius: var(--sg-radius-full);
-  box-shadow: var(--sg-shadow-raised);
-  color: var(--sg-color-text-brand);
   display: flex;
-  height: var(--sg-spacing-10);
+  height: var(--sg-spacing-12);
   justify-content: center;
   position: absolute;
   transform: translate(-50%, -50%);
-  width: var(--sg-spacing-10);
+  width: var(--sg-spacing-12);
 }
 
-.ExplorationOffscreenIndicatorArrow {
+.ExplorationOffscreenIndicatorBadge {
+  background: var(--sg-color-bg-brand);
+  border-radius: var(--sg-radius-full);
+  color: var(--sg-color-text-inverted);
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: var(--sg-spacing-9);
+  width: var(--sg-spacing-9);
+}
+
+.ExplorationOffscreenIndicatorStar {
+  background: currentColor;
   display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
-  height: var(--sg-spacing-6);
-  width: var(--sg-spacing-6);
+  height: 90%;
+  mask: url("../../../assets/icons/star.svg") center / contain no-repeat;
+  width: 90%;
 }
