@@ -39,6 +39,7 @@
   --sg-color-bg-surface: var(--sg-v3-paper-50);
   --sg-color-bg-surface-pressed: #f0e6dc;
   --sg-color-bg-floating: #ffffff;
+  --sg-color-bg-intro: #f7f4ed;
   --sg-color-bg-floating-pressed: #f7f8f9;
   --sg-color-bg-brand: var(--sg-v3-pink-500);
   --sg-color-bg-brand-pressed: var(--sg-v3-pink-600);
@@ -187,7 +188,6 @@
 
   /* Typography - font weight */
   --sg-font-weight-regular: 400;
-  --sg-font-weight-medium: 500;
   --sg-font-weight-bold: 700;
 
   /* Typography - semantic roles */
@@ -234,12 +234,12 @@
   --sg-typography-detail-body-font-family: var(--sg-font-family-base);
   --sg-typography-detail-body-font-size: var(--sg-font-size-8);
   --sg-typography-detail-body-line-height: normal;
-  --sg-typography-detail-body-font-weight: var(--sg-font-weight-medium);
+  --sg-typography-detail-body-font-weight: var(--sg-font-weight-regular);
 
   --sg-typography-detail-supporting-font-family: var(--sg-font-family-base);
   --sg-typography-detail-supporting-font-size: var(--sg-detail-supporting-size);
   --sg-typography-detail-supporting-line-height: normal;
-  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-medium);
+  --sg-typography-detail-supporting-font-weight: var(--sg-font-weight-regular);
 
   /* Button component tokens */
   --sg-button-primary-bg: var(--sg-color-bg-brand);
@@ -360,9 +360,6 @@
   --sg-toast-accent-width: var(--sg-spacing-1);
   --sg-toast-success-accent: var(--sg-color-text-positive);
   --sg-toast-error-accent: var(--sg-color-text-danger);
-  --sg-toast-message-font-size: var(--sg-typography-supporting-font-size);
-  --sg-toast-message-font-weight: var(--sg-font-weight-medium);
-  --sg-toast-message-line-height: var(--sg-typography-supporting-line-height);
   --sg-toast-enter-duration: var(--sg-motion-duration-4);
   --sg-toast-enter-easing: var(--sg-motion-easing-enter);
   --sg-toast-enter-offset-y: var(--sg-spacing-3);
@@ -395,8 +392,6 @@
   --sg-panel-body-padding-bottom: var(--sg-spacing-12);
   --sg-panel-footer-padding-top: var(--sg-spacing-4);
   --sg-panel-footer-padding-bottom: var(--sg-spacing-6);
-  --sg-panel-title-size: var(--sg-font-size-8);
-  --sg-panel-title-line-height: var(--sg-line-height-8);
   --sg-panel-description-size: var(--sg-font-size-5);
   --sg-panel-description-line-height: var(--sg-line-height-5);
   --sg-panel-enter-duration: var(--sg-motion-duration-6);
@@ -433,10 +428,9 @@
   --sg-detail-header-min-height: var(--sg-icon-button-size-nav);
   --sg-detail-title-size: 2.125rem;
   --sg-detail-supporting-size: 1.1875rem;
-  --sg-detail-title-color: #222222;
-  --sg-detail-image-bg: var(--sg-color-bg-surface);
+  --sg-detail-image-bg: var(--sg-color-bg-surface-paper);
   --sg-detail-image-ratio: 444 / 247;
-  --sg-detail-image-radius: var(--sg-radius-5_5);
+  --sg-detail-image-radius: var(--sg-radius-4);
   --sg-detail-image-stroke-width: 1.4px;
   --sg-detail-image-stroke: #ffffffb8;
   --sg-detail-image-shadow: 0 8px 24px #0000001a;
@@ -451,7 +445,7 @@
   --sg-map-detail-visit-badge-bg: var(--sg-v3-green-500);
   --sg-map-detail-visit-badge-fg: var(--sg-color-text-inverted);
   --sg-map-detail-header-action-size: var(--sg-spacing-10);
-  --sg-map-detail-header-icon-size: var(--sg-spacing-10);
+  --sg-map-detail-header-icon-size: var(--sg-spacing-7);
   --sg-map-detail-header-icon-mobile-size: var(--sg-spacing-5);
   --sg-map-detail-header-line-height: var(--sg-spacing-10);
   --sg-map-detail-header-title-mobile-line-height: var(--sg-spacing-8);
@@ -463,8 +457,7 @@
 
   /* Stamp course panel */
   --sg-course-action-size: var(--sg-spacing-12);
-  --sg-course-title-size: var(--sg-font-size-9);
-  --sg-course-count-size: var(--sg-font-size-6);
+  --sg-course-count-size: var(--sg-typography-body-font-size);
   --sg-course-action-label-size: var(--sg-font-size-4);
   --sg-course-action-padding-y: var(--sg-spacing-0_5);
   --sg-course-action-padding-x: var(--sg-spacing-3);

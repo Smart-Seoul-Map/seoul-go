@@ -6,14 +6,14 @@
   border-radius: var(--sg-radius-3);
   background: var(--sg-color-bg-neutral-strong);
   box-shadow: var(--sg-shadow-2);
-  color: var(--sg-color-text-inverted);
-  font-family: var(--sg-font-family-base);
-  font-size: var(--sg-font-size-4);
-  font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-4);
   padding: var(--sg-spacing-2) var(--sg-spacing-3);
   pointer-events: none;
   white-space: nowrap;
+}
+
+.entry-exploration-dart-hit-badge .AppText {
+  display: block;
+  font-weight: var(--sg-font-weight-bold);
 }
 
 @keyframes entry-exploration-dart-hit-badge-enter {

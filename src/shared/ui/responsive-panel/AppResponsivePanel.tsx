@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import closeIcon from "../../../assets/icons/close.svg";
+import { AppHeading } from "../typography";
 
 import { PanelContext, usePanelContext } from "./panelContext";
 import type {
@@ -170,7 +171,7 @@ function CloseButton({
         if (!event.defaultPrevented) panel.changeOpen(false, "closeButton");
       }}
     >
-      {iconOnly ? <span className="AppResponsivePanelCloseIcon" aria-hidden="true" /> : children}
+      {iconOnly ? <img className="AppResponsivePanelCloseIcon" src={closeIcon} alt="" /> : children}
     </button>
   );
 }
@@ -317,9 +318,18 @@ function MountedContent({
           data-hidden={hideTitle || undefined}
         >
           {headerLeading}
-          <h2 id={`${panel.id}-title`} className="AppResponsivePanelTitle">
+          <AppHeading
+            as="h2"
+            id={`${panel.id}-title`}
+            size={presentation === "bottom-sheet" ? "md" : "lg"}
+            align={
+              presentation === "bottom-sheet" && panel.sheet.headerAlign === "center"
+                ? "center"
+                : "start"
+            }
+          >
             {title}
-          </h2>
+          </AppHeading>
           {headerTrailing}
           {description && (
             <div id={`${panel.id}-description`} className="AppResponsivePanelDescription">
@@ -329,7 +339,7 @@ function MountedContent({
         </header>
         {showCloseButton && (
           <CloseButton aria-label="닫기" title="닫기" className="AppResponsivePanelClose">
-            <img src={closeIcon} alt="" width="20" height="20" />
+            <img className="AppResponsivePanelCloseIcon" src={closeIcon} alt="" />
           </CloseButton>
         )}
         {children}

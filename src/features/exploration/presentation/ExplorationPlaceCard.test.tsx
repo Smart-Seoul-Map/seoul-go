@@ -68,7 +68,7 @@ describe("ExplorationPlaceCard", () => {
 
     render(<ExplorationPlaceCard onAddToCourse={handleAddToCourse} place={place} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "스탬프 코스 +" }));
+    fireEvent.click(screen.getByRole("button", { name: "스탬프 코스 추가" }));
 
     expect(handleAddToCourse).toHaveBeenCalledWith(place);
   });

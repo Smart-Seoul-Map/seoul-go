@@ -2,7 +2,7 @@
   --speech-bubble-cap-width: var(--sg-spacing-16);
   --speech-bubble-stroke-width: var(--sg-spacing-0_5);
   --speech-bubble-stroke: var(--sg-v3-pink-500);
-  --speech-bubble-bg: var(--sg-color-bg-floating);
+  --speech-bubble-bg: var(--sg-color-bg-surface-paper);
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
@@ -58,9 +58,9 @@
   margin: 0;
   color: var(--sg-color-text-default);
   font-family: var(--sg-font-family-base);
-  font-size: var(--sg-font-size-2);
+  font-size: var(--sg-typography-caption-font-size);
   font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-line-height-2);
+  line-height: var(--sg-typography-caption-line-height);
   letter-spacing: 0;
   overflow-wrap: anywhere;
 }
