@@ -137,7 +137,7 @@ export function LinkedPlacesContent(props: LinkedPlacesContentProps): ReactEleme
           {place.id === selected.id && (
             <>
               <div className="LinkedPlacesListHeading">
-                <h2>근처 추천 장소{!isLoading && !isError ? ` ${places.length}` : ""}</h2>
+                <h2>근처 추천 장소{!isLoading && !isError ? ` ${places.length}곳` : ""}</h2>
                 <p>{selected.name} 기준 · 반경 1km</p>
               </div>
               <NearbyPlaceList {...props} />
@@ -175,7 +175,7 @@ export function LinkedPlacesPanel({
     >
       <AppResponsivePanel.Content
         className="LinkedPlacesPanel"
-        title="근처 추천 장소"
+        title="서울에디션25 장소"
         width="var(--sg-detail-width)"
         onExitComplete={onExitComplete}
         returnFocus={returnFocus}
