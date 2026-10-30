@@ -28,7 +28,6 @@
 .PlaceDetailCardHeader .AppHeading {
   flex: 0 1 auto;
   min-width: 0;
-  color: var(--sg-detail-title-color);
 }
 .PlaceDetailCardHeader .AppText {
   flex: 1 1 auto;
@@ -220,7 +219,6 @@
       ) /
       2
   );
-  color: var(--sg-detail-title-color);
   font-size: var(--sg-typography-detail-title-font-size);
   line-height: var(--sg-typography-detail-title-line-height);
 }
