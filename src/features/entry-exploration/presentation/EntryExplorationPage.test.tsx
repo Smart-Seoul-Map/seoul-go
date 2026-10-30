@@ -11,7 +11,7 @@ import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryAssetPlaces";
-import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
+import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시장", east: 54, north: 49 };
@@ -177,7 +177,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
-    expect(getSpeechText()).toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.intro);
+    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.intro);
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(router.state.location.pathname).toBe("/");
   });

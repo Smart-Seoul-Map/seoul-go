@@ -30,13 +30,8 @@ import {
   getEntryNumberRewardCells,
   getEntryNumberRewardRows,
 } from "../domain/entryNumberReward";
-import {
-  ENTRY_GRID_NUMBER_REQUIRED_MESSAGE,
-  ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
-  ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
-} from "../config/entryNumberRewardConfig";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
-import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
+import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
@@ -112,9 +107,9 @@ export function EntryExplorationPage({
   );
   const showNumberRewardToast = (): void => {
     showToast({
-      message: ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
+      message: ENTRY_GUIDE_MESSAGES.toast.numberReward,
       status: "success",
-      actionLabel: ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
+      actionLabel: ENTRY_GUIDE_MESSAGES.toast.numberRewardAction,
       onAction: () => {
         dismissOpenPanel();
         clearToasts();
@@ -127,7 +122,7 @@ export function EntryExplorationPage({
     collectedNumbers: getEntryDartNumbers(visibleRewards),
     onDartEntryBlocked: () => {
       track({ name: "entry_dart_blocked" });
-      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+      showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
     },
     onDartTargetHoverChange,
     onDartThrowResult,
@@ -136,7 +131,7 @@ export function EntryExplorationPage({
     onRouletteCameraSettled,
     onRouletteEntryBlocked: () => {
       track({ name: "entry_roulette_blocked" });
-      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+      showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
     },
     onRouletteHighlight,
     onRouletteLayoutChange,
@@ -238,7 +233,7 @@ export function EntryExplorationPage({
         createPortal(
           <AppSpeechBubble
             speaker={HAECHI_CHARACTER_NAME}
-            message={ENTRY_CHARACTER_SPEECH_MESSAGES[characterSpeech.speechKey]}
+            message={ENTRY_GUIDE_MESSAGES.speech[characterSpeech.speechKey]}
           />,
           characterSpeech.anchor.element
         )}

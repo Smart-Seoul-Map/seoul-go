@@ -3,7 +3,9 @@ import type { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js"
 
 import { createCharacterSpeechAnchor } from "@shared/lib/character/characterSpeechAnchor";
 
-import type { EntryCharacterSpeechKey } from "../config/entryCharacterSpeechMessages";
+import type { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
+
+type EntryCharacterSpeechKey = keyof typeof ENTRY_GUIDE_MESSAGES.speech;
 
 type UseEntryCharacterSpeechOptions = {
   hasStarted: boolean;
