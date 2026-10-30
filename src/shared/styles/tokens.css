@@ -39,6 +39,7 @@
   --sg-color-bg-surface: var(--sg-v3-paper-50);
   --sg-color-bg-surface-pressed: #f0e6dc;
   --sg-color-bg-floating: #ffffff;
+  --sg-color-bg-intro: #f7f4ed;
   --sg-color-bg-floating-pressed: #f7f8f9;
   --sg-color-bg-brand: var(--sg-v3-pink-500);
   --sg-color-bg-brand-pressed: var(--sg-v3-pink-600);
@@ -431,7 +432,7 @@
   --sg-detail-title-size: 2.125rem;
   --sg-detail-supporting-size: 1.1875rem;
   --sg-detail-title-color: #222222;
-  --sg-detail-image-bg: var(--sg-color-bg-surface);
+  --sg-detail-image-bg: var(--sg-color-bg-surface-paper);
   --sg-detail-image-ratio: 444 / 247;
   --sg-detail-image-radius: var(--sg-radius-5_5);
   --sg-detail-image-stroke-width: 1.4px;

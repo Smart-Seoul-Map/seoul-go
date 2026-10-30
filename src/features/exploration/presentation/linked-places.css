@@ -21,6 +21,7 @@
   width: 240px;
   min-height: 96px;
   max-width: 100%;
+  background: var(--sg-color-bg-surface-paper);
 }
 .LinkedPlacesReferenceImage {
   display: block;
@@ -61,7 +62,7 @@
   padding: var(--sg-spacing-3_5) var(--sg-spacing-4);
   border: 1px solid var(--sg-color-text-default);
   border-radius: var(--sg-radius-4);
-  background: var(--sg-color-bg-floating);
+  background: var(--sg-color-bg-surface-paper);
   overflow-wrap: anywhere;
 }
 .LinkedPlacesReferenceLabel {

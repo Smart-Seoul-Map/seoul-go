@@ -187,7 +187,7 @@ function DartResultPanel({
       </AppBox>
 
       <AppBox
-        bg="bg.surface"
+        bg="bg.surfacePaper"
         borderColor="stroke.brand"
         borderRadius="radius.4"
         borderWidth="strokeWidth.surface"
