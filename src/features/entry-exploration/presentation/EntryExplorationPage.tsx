@@ -32,6 +32,7 @@ import {
 } from "../domain/entryNumberReward";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
 import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
+import { hasSeenEntryGuide, markEntryGuideSeen } from "../data/entryGuideStorage";
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
@@ -58,6 +59,7 @@ export function EntryExplorationPage({
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingPlaceIds, setPendingPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
   const [isCharacterMoving, setIsCharacterMoving] = useState(false);
+  const [isNumberGuideOpen, setIsNumberGuideOpen] = useState(false);
   const {
     hasStarted,
     handleIntroStart,
@@ -85,6 +87,17 @@ export function EntryExplorationPage({
     requestDartView,
     rouletteMapRectStore,
   } = useEntryExplorationDartShot();
+  const openNumberGuide = (source: "first_entry" | "number_button"): void => {
+    track({ name: "entry_guide_open", source });
+    setIsNumberGuideOpen(true);
+  };
+  // 처음 들어온 사람에게만 번호 안내를 자동으로 연다. 다시 보려면 내 번호의 "!"를 누른다.
+  const handleEntryIntroStart = (): void => {
+    handleIntroStart();
+    if (hasSeenEntryGuide()) return;
+    markEntryGuideSeen();
+    openNumberGuide("first_entry");
+  };
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
     places ?? EMPTY_ENTRY_PLACES,
     {
@@ -150,7 +163,7 @@ export function EntryExplorationPage({
     containerRef,
     createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
-    onIntroStart: handleIntroStart,
+    onIntroStart: handleEntryIntroStart,
     onIntroBlocked,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
@@ -219,6 +232,10 @@ export function EntryExplorationPage({
           rows={getEntryNumberRewardRows(visibleRewards)}
           isCharacterMoving={isCharacterMoving}
           isDartViewActive={dartShot.isGuideVisible}
+          isGuideOpen={isNumberGuideOpen}
+          onGuideOpenChange={(open) =>
+            open ? openNumberGuide("number_button") : setIsNumberGuideOpen(false)
+          }
         />
       )}
       <EntryExplorationSceneButton

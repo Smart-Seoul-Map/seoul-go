@@ -12,6 +12,16 @@ export default defineConfig({
   reporter: [[process.env.CI ? "github" : "list"], ["html", { open: "never" }]],
   use: {
     baseURL: previewUrl,
+    // 첫 진입 번호 안내가 장면 클릭을 막지 않도록 이미 본 상태로 시작한다. 안내 자체는 단위 테스트에서 확인한다.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: new URL(previewUrl).origin,
+          localStorage: [{ name: "seoul-go:entry-guide-seen:v1", value: "1" }],
+        },
+      ],
+    },
     channel: "chromium",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",

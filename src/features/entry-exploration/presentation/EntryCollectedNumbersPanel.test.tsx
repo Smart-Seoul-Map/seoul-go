@@ -46,8 +46,11 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
-  test("opens the guide dialog from the ! button beside the trigger without closing the panel", () => {
-    render(<EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} />);
+  test("asks to open the guide dialog from the ! button beside the trigger without closing the panel", () => {
+    const onGuideOpenChange = vi.fn();
+    const { rerender } = render(
+      <EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} onGuideOpenChange={onGuideOpenChange} />
+    );
     expect(screen.queryByRole("button", { name: "번호 안내" })).toBeNull();
 
     const trigger = getTrigger(2);
@@ -57,11 +60,19 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
 
     fireEvent.click(guideButton);
+    expect(onGuideOpenChange).toHaveBeenCalledWith(true);
+    rerender(
+      <EntryCollectedNumbersPanel
+        rows={HAEBANGCHON_ROWS}
+        isGuideOpen
+        onGuideOpenChange={onGuideOpenChange}
+      />
+    );
     expect(screen.getByRole("dialog", { name: "번호 안내" })).toBeTruthy();
 
     guideButton.focus();
     fireEvent.keyDown(guideButton, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(onGuideOpenChange).toHaveBeenLastCalledWith(false);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
   });
 

@@ -12,6 +12,7 @@ import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryAssetPlaces";
 import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
+import { ENTRY_GUIDE_SEEN_STORAGE_KEY } from "../data/entryGuideStorage";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시장", east: 54, north: 49 };
@@ -379,6 +380,8 @@ describe("EntryExplorationPage", () => {
 
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
+    localStorage.setItem(ENTRY_GUIDE_SEEN_STORAGE_KEY, "1");
     entryNumberRewardStore.setState({ rewards: [] });
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       arc: vi.fn(),
@@ -393,6 +396,26 @@ describe("EntryExplorationPage", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+  });
+
+  test("opens the number guide automatically only on the first entry", () => {
+    localStorage.removeItem(ENTRY_GUIDE_SEEN_STORAGE_KEY);
+    renderEntryExplorationPage();
+    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+
+    startExploration();
+
+    expect(screen.getByRole("dialog", { name: "번호 안내" })).toBeTruthy();
+    expect(localStorage.getItem(ENTRY_GUIDE_SEEN_STORAGE_KEY)).toBe("1");
+    expect(trackMock).toHaveBeenCalledWith({ name: "entry_guide_open", source: "first_entry" });
+
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+    cleanup();
+
+    renderEntryExplorationPage();
+    startExploration();
+    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
   });
 
   test("shows the exploration UI only after the scene reports the intro start", () => {

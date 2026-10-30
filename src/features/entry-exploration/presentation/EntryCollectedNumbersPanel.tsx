@@ -18,6 +18,8 @@ type EntryCollectedNumbersPanelProps = {
   rows: readonly EntryNumberRewardRow[];
   isCharacterMoving?: boolean;
   isDartViewActive?: boolean;
+  isGuideOpen?: boolean;
+  onGuideOpenChange?: (open: boolean) => void;
 };
 
 type OpenState = "closed" | "open" | "autoOpen";
@@ -26,9 +28,10 @@ export function EntryCollectedNumbersPanel({
   rows,
   isCharacterMoving = false,
   isDartViewActive = false,
+  isGuideOpen = false,
+  onGuideOpenChange,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [seenCount, setSeenCount] = useState(rows.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
   const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
@@ -140,7 +143,7 @@ export function EntryCollectedNumbersPanel({
               className="entry-collected-numbers-guide-button"
               aria-label="번호 안내"
               aria-haspopup="dialog"
-              onClick={() => setIsGuideOpen(true)}
+              onClick={() => onGuideOpenChange?.(true)}
             >
               !
             </button>
@@ -196,7 +199,10 @@ export function EntryCollectedNumbersPanel({
           </div>
         </div>
       </AppBox>
-      <EntryCollectedNumbersGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} />
+      <EntryCollectedNumbersGuideDialog
+        open={isGuideOpen}
+        onOpenChange={(open) => onGuideOpenChange?.(open)}
+      />
     </>
   );
 }

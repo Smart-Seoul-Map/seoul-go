@@ -16,6 +16,51 @@
   word-break: keep-all;
 }
 
+/* 단계 버튼은 팝업 폭을 반씩 나눠 쓴다. */
+.AppDialog:has(.entry-numbers-guide) .AppDialogActions > .AppButton {
+  flex: 1;
+}
+
+/* 오른쪽 위 닫기 버튼과 겹치지 않게 단계 제목 오른쪽을 비운다. */
+.entry-numbers-guide-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sg-spacing-1);
+  padding-right: calc(var(--sg-icon-button-size-nav) + var(--sg-spacing-2));
+}
+
+.entry-numbers-guide-progress {
+  display: flex;
+  gap: var(--sg-spacing-1_5);
+  margin: 0 0 var(--sg-spacing-1);
+  padding: 0;
+  list-style: none;
+}
+
+.entry-numbers-guide-progress li {
+  display: grid;
+  place-items: center;
+  width: var(--sg-spacing-6);
+  height: var(--sg-spacing-6);
+  border: 1px solid var(--sg-color-stroke-brand-weak);
+  border-radius: var(--sg-radius-full);
+  background: var(--sg-color-bg-floating);
+  color: var(--sg-color-text-muted);
+  font-size: var(--sg-font-size-2);
+  font-weight: var(--sg-font-weight-bold);
+}
+
+.entry-numbers-guide-progress li[data-done] {
+  background: var(--sg-color-bg-brand-weak);
+  color: var(--sg-color-text-brand);
+}
+
+.entry-numbers-guide-progress li[aria-current="step"] {
+  border-color: var(--sg-color-bg-brand);
+  background: var(--sg-color-bg-brand);
+  color: var(--sg-color-text-inverted);
+}
+
 .entry-numbers-guide-title {
   position: absolute;
   width: 1px;
@@ -28,8 +73,8 @@
 /* PC에서 창이 낮으면 아래 카드까지 스크롤 없이 보이도록 그림을 비율(676:664) 그대로 줄인다.
    75%보다 작아지면 그림 문구가 빈 칸을 넘치므로 그보다 낮은 창은 스크롤로 둔다. */
 .entry-numbers-guide-hero {
-  /* 그림 밖 본문 높이(본문 위아래 여백, 카드 2개, 간격)를 PC 팝업 폭 기준으로 어림한 값 */
-  --entry-numbers-guide-cards-height: 280px;
+  /* 그림 밖 높이(단계 제목, 카드 2개, 간격, 아래 버튼 줄)를 PC 팝업 폭 기준으로 어림한 값 */
+  --entry-numbers-guide-cards-height: 440px;
   position: relative;
   width: clamp(
     75%,
