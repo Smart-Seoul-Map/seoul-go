@@ -394,8 +394,6 @@
   --sg-panel-body-padding-bottom: var(--sg-spacing-12);
   --sg-panel-footer-padding-top: var(--sg-spacing-4);
   --sg-panel-footer-padding-bottom: var(--sg-spacing-6);
-  --sg-panel-title-size: var(--sg-font-size-8);
-  --sg-panel-title-line-height: var(--sg-line-height-8);
   --sg-panel-description-size: var(--sg-font-size-5);
   --sg-panel-description-line-height: var(--sg-line-height-5);
   --sg-panel-enter-duration: var(--sg-motion-duration-6);

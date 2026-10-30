@@ -121,7 +121,7 @@
   gap: var(--place-detail-gap);
   padding: var(--sg-spacing-7) var(--place-detail-gutter) var(--place-detail-gap);
 }
-.PlaceDetailPanel .AppResponsivePanelTitle {
+.PlaceDetailPanel .AppResponsivePanelHeader .AppHeading {
   display: -webkit-box;
   flex: 0 1 auto;
   min-width: 0;
@@ -212,7 +212,7 @@
   padding: var(--sg-spacing-6) var(--place-detail-gutter) var(--place-detail-gap);
   background: var(--sg-panel-bg);
 }
-.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelTitle {
+.PlaceDetailPanel[data-presentation="bottom-sheet"] .AppResponsivePanelHeader .AppHeading {
   margin-top: calc(
     (
         var(--sg-map-detail-header-line-height) -

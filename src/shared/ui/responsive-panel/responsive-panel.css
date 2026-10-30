@@ -156,14 +156,6 @@
   text-align: center;
   padding-inline: calc(var(--sg-spacing-4) + var(--sg-panel-close-size));
 }
-.AppResponsivePanelTitle {
-  margin: 0;
-  font-family: var(--sg-font-family-base);
-  font-size: var(--sg-panel-title-size);
-  font-weight: var(--sg-font-weight-bold);
-  line-height: var(--sg-panel-title-line-height);
-  overflow-wrap: anywhere;
-}
 .AppResponsivePanelDescription {
   color: var(--sg-color-text-muted);
   font-size: var(--sg-panel-description-size);

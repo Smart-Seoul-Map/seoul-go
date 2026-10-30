@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
 import closeIcon from "../../../assets/icons/close.svg";
+import { AppHeading } from "../typography";
 
 import { PanelContext, usePanelContext } from "./panelContext";
 import type {
@@ -317,9 +318,18 @@ function MountedContent({
           data-hidden={hideTitle || undefined}
         >
           {headerLeading}
-          <h2 id={`${panel.id}-title`} className="AppResponsivePanelTitle">
+          <AppHeading
+            as="h2"
+            id={`${panel.id}-title`}
+            size="lg"
+            align={
+              presentation === "bottom-sheet" && panel.sheet.headerAlign === "center"
+                ? "center"
+                : "start"
+            }
+          >
             {title}
-          </h2>
+          </AppHeading>
           {headerTrailing}
           {description && (
             <div id={`${panel.id}-description`} className="AppResponsivePanelDescription">
