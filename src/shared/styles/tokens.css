@@ -360,9 +360,6 @@
   --sg-toast-accent-width: var(--sg-spacing-1);
   --sg-toast-success-accent: var(--sg-color-text-positive);
   --sg-toast-error-accent: var(--sg-color-text-danger);
-  --sg-toast-message-font-size: var(--sg-typography-supporting-font-size);
-  --sg-toast-message-font-weight: var(--sg-font-weight-regular);
-  --sg-toast-message-line-height: var(--sg-typography-supporting-line-height);
   --sg-toast-enter-duration: var(--sg-motion-duration-4);
   --sg-toast-enter-easing: var(--sg-motion-easing-enter);
   --sg-toast-enter-offset-y: var(--sg-spacing-3);

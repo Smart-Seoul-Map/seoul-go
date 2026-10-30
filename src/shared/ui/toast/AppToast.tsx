@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
 import { AppTextButton } from "../button";
+import { AppText } from "../typography";
 
 import type { AppToastItem } from "./toastTypes";
 
@@ -35,7 +36,11 @@ export function AppToast({
       onPointerUp={onPointerUp}
       role={role}
     >
-      <div className="AppToastMessage">{toast.message}</div>
+      <div className="AppToastMessage">
+        <AppText as="div" role="supporting" tone="inverted">
+          {toast.message}
+        </AppText>
+      </div>
       {toast.actionLabel && (
         <AppTextButton onClick={onAction} variant="brand">
           {toast.actionLabel}
