@@ -4,7 +4,7 @@
   gap: var(--sg-spacing-5);
   width: max-content;
   max-width: 100%;
-  padding: var(--sg-spacing-2_5) var(--sg-spacing-2_5) var(--sg-spacing-2_5) var(--sg-spacing-5_5);
+  padding: var(--sg-spacing-2) var(--sg-spacing-2) var(--sg-spacing-2) var(--sg-spacing-5_5);
   color: var(--sg-color-text-default);
 }
 
@@ -42,25 +42,17 @@
 @media (max-width: 860px) {
   .StampCourseSummary {
     gap: var(--sg-spacing-3);
-    padding-block: var(--sg-spacing-2);
-    padding-right: var(--sg-spacing-2);
-    padding-left: var(--sg-spacing-5);
+    padding-block: var(--sg-spacing-1);
+    padding-left: var(--sg-spacing-4);
   }
 
   .StampCourseSummaryButton {
-    --sg-button-height-md: var(--sg-spacing-9);
-    flex-shrink: 0;
-    width: var(--sg-spacing-9);
-    height: var(--sg-spacing-9);
-  }
-
-  .StampCourseSummaryIcon {
-    width: 88%;
-    height: 88%;
+    width: var(--sg-spacing-10);
+    height: var(--sg-spacing-10);
   }
 
   .StampCourseSummaryLabel {
     font-size: var(--sg-font-size-5);
-    line-height: var(--sg-line-height-2);
+    line-height: var(--sg-line-height-5);
   }
 }
