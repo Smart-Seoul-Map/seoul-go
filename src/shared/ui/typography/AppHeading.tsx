@@ -4,7 +4,7 @@ import "./typography.css";
 
 export type AppHeadingElement = "h1" | "h2" | "h3" | "h4";
 export type AppHeadingSize = "sm" | "md" | "lg" | "detail";
-export type AppHeadingTone = "default" | "muted" | "brand" | "danger";
+export type AppHeadingTone = "default" | "muted" | "brand" | "danger" | "inverted";
 export type AppHeadingAlign = "start" | "center" | "end";
 export type AppHeadingMaxLines = 1 | 2;
 

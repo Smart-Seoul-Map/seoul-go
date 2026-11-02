@@ -55,6 +55,11 @@
   color: var(--sg-color-text-danger);
 }
 
+.AppText[data-tone="inverted"],
+.AppHeading[data-tone="inverted"] {
+  color: var(--sg-color-text-inverted);
+}
+
 .AppText[data-role="body"] {
   font-family: var(--sg-typography-body-font-family);
   font-size: var(--sg-typography-body-font-size);

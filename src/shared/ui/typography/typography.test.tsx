@@ -31,6 +31,23 @@ describe("Typography wrappers", () => {
     expect(heading.getAttribute("data-tone")).toBe("default");
   });
 
+  test("renders headings and text with the inverted tone for dark backgrounds", () => {
+    render(
+      <>
+        <AppHeading as="h2" tone="inverted">
+          첫 진입 가이드
+        </AppHeading>
+        <AppText tone="inverted">가이드 설명</AppText>
+      </>
+    );
+
+    const heading = screen.getByRole("heading", { level: 2, name: "첫 진입 가이드" });
+    const text = screen.getByText("가이드 설명");
+
+    expect(heading.getAttribute("data-tone")).toBe("inverted");
+    expect(text.getAttribute("data-tone")).toBe("inverted");
+  });
+
   test("renders captions with line clamp metadata", () => {
     render(
       <AppCaption maxLines={2} tone="subtle">
