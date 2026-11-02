@@ -71,17 +71,9 @@
   color: var(--sg-button-primary-fg);
 }
 
-.AppButton[data-variant="primary"]:active {
-  background: var(--sg-button-primary-bg-pressed);
-}
-
 .AppButton[data-variant="secondary"] {
   background: var(--sg-button-secondary-bg);
   color: var(--sg-button-secondary-fg);
-}
-
-.AppButton[data-variant="secondary"]:active {
-  background: var(--sg-button-secondary-bg-pressed);
 }
 
 .AppButton[data-variant="strong"] {
@@ -90,17 +82,9 @@
   color: var(--sg-button-strong-fg);
 }
 
-.AppButton[data-variant="strong"]:active {
-  background: var(--sg-button-strong-bg-pressed);
-}
-
 .AppButton[data-variant="danger"] {
   background: var(--sg-button-danger-bg);
   color: var(--sg-button-danger-fg);
-}
-
-.AppButton[data-variant="danger"]:active {
-  background: var(--sg-button-danger-bg-pressed);
 }
 
 .AppButton[data-variant="outline"] {
@@ -112,10 +96,6 @@
 .AppButton[data-variant="ghost"] {
   background: var(--sg-button-ghost-bg);
   color: var(--sg-button-ghost-fg);
-}
-
-.AppButton[data-variant="ghost"]:active {
-  background: var(--sg-button-ghost-bg-pressed);
 }
 
 .AppButton:disabled {
@@ -152,10 +132,6 @@
 .AppTextButton[data-variant="danger"] {
   background: transparent;
   color: var(--sg-color-text-danger);
-}
-
-.AppTextButton:active {
-  background: var(--sg-text-button-state-pressed);
 }
 
 .AppTextButton:disabled {
@@ -196,4 +172,95 @@
 .AppIconButton:disabled {
   background: transparent;
   color: var(--sg-icon-button-state-disabled);
+}
+
+.AppTabs-trigger,
+.AppResponsivePanelIconClose,
+.MapPlaceDetailSearch,
+.PlaceDetailExternalLink {
+  position: relative;
+}
+
+.AppButton::after,
+.AppIconButton::after,
+.AppTextButton::after,
+.AppTabs-trigger::after,
+.AppResponsivePanelIconClose::after,
+.AppResponsivePanelClose::after,
+.MapPlaceDetailSearch::after,
+.PlaceDetailExternalLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(
+      .AppButton[data-variant="ghost"],
+      .AppButton[data-variant="outline"],
+      .AppIconButton,
+      .AppTextButton,
+      .AppTabs-trigger,
+      .AppResponsivePanelIconClose,
+      .AppResponsivePanelClose,
+      .MapPlaceDetailSearch
+    ):hover:not(:disabled):not([aria-disabled="true"])::after {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+
+:is(
+    .AppButton[data-variant="ghost"],
+    .AppButton[data-variant="outline"],
+    .AppIconButton,
+    .AppTextButton,
+    .AppTabs-trigger,
+    .AppResponsivePanelIconClose,
+    .AppResponsivePanelClose,
+    .MapPlaceDetailSearch
+  ):active:not(:disabled):not([aria-disabled="true"])::after {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(
+      .AppButton[data-variant="primary"],
+      .AppButton[data-variant="secondary"],
+      .AppButton[data-variant="strong"],
+      .AppButton[data-variant="danger"],
+      .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger,
+      .PlaceDetailExternalLink
+    ):hover:not(:disabled):not([aria-disabled="true"])::after {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+:is(
+    .AppButton[data-variant="primary"],
+    .AppButton[data-variant="secondary"],
+    .AppButton[data-variant="strong"],
+    .AppButton[data-variant="danger"],
+    .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger,
+    .PlaceDetailExternalLink
+  ):active:not(:disabled):not([aria-disabled="true"])::after {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(
+    .AppButton,
+    .AppIconButton,
+    .AppTextButton,
+    .AppTabs-trigger,
+    .AppResponsivePanelIconClose,
+    .AppResponsivePanelClose,
+    .MapPlaceDetailSearch,
+    .PlaceDetailExternalLink
+  )::after {
+    transition: none;
+  }
 }

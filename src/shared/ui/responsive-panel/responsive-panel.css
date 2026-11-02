@@ -132,9 +132,6 @@
   background: var(--sg-color-bg-transparent);
   cursor: pointer;
 }
-.AppResponsivePanelIconClose:hover {
-  background: var(--sg-color-bg-transparent-pressed);
-}
 .AppResponsivePanelIconClose:focus-visible,
 .AppResponsivePanelBody:focus-visible {
   outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
@@ -186,9 +183,6 @@
   border-radius: var(--sg-radius-full);
   background: var(--sg-color-bg-transparent);
   cursor: pointer;
-}
-.AppResponsivePanelClose:hover {
-  background: var(--sg-color-bg-transparent-pressed);
 }
 .AppResponsivePanelClose:focus-visible,
 .AppResponsivePanelHandle:focus-visible {
