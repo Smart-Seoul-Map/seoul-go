@@ -4,6 +4,12 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { getEntryNumberRewardRows } from "../domain/entryNumberReward";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 
+const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
+vi.mock("@shared/lib/analytics/analytics", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@shared/lib/analytics/analytics")>()),
+  track: trackMock,
+}));
+
 vi.mock("../../../assets/icons/dices.svg", () => ({
   default: "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg'%3e%3c/svg%3e",
 }));
@@ -25,7 +31,10 @@ const RIUM_ROWS = getEntryNumberRewardRows([
   },
 ]);
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  trackMock.mockClear();
+});
 
 describe("EntryCollectedNumbersPanel", () => {
   test("expands the existing header without replacing its button, icon, or title", () => {
@@ -46,11 +55,8 @@ describe("EntryCollectedNumbersPanel", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
-  test("asks to open the guide dialog from the ! button beside the trigger without closing the panel", () => {
-    const onGuideOpenChange = vi.fn();
-    const { rerender } = render(
-      <EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} onGuideOpenChange={onGuideOpenChange} />
-    );
+  test("opens the guide dialog from the ! button beside the trigger without closing the panel", () => {
+    render(<EntryCollectedNumbersPanel rows={HAEBANGCHON_ROWS} />);
     expect(screen.queryByRole("button", { name: "번호 안내" })).toBeNull();
 
     const trigger = getTrigger(2);
@@ -58,22 +64,19 @@ describe("EntryCollectedNumbersPanel", () => {
     const guideButton = screen.getByRole("button", { name: "번호 안내" });
     expect(trigger.contains(guideButton)).toBe(false);
     expect(screen.queryByRole("dialog")).toBeNull();
+    expect(trackMock).not.toHaveBeenCalled();
 
     fireEvent.click(guideButton);
-    expect(onGuideOpenChange).toHaveBeenCalledWith(true);
-    rerender(
-      <EntryCollectedNumbersPanel
-        rows={HAEBANGCHON_ROWS}
-        isGuideOpen
-        onGuideOpenChange={onGuideOpenChange}
-      />
-    );
     expect(screen.getByRole("dialog", { name: "번호 안내" })).toBeTruthy();
 
     guideButton.focus();
     fireEvent.keyDown(guideButton, { key: "Escape" });
-    expect(onGuideOpenChange).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByRole("dialog")).toBeNull();
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(trackMock).toHaveBeenCalledExactlyOnceWith({
+      name: "entry_guide_open",
+      source: "number_button",
+    });
   });
 
   test("retains the animating content but excludes it from interaction while collapsed", () => {

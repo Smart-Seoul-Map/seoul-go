@@ -398,24 +398,38 @@ describe("EntryExplorationPage", () => {
     vi.restoreAllMocks();
   });
 
-  test("opens the number guide automatically only on the first entry", () => {
+  test("opens the first entry guide only on the first entry and closes it after its three steps", () => {
+    const guideName = /장소를 확인해 보세요/;
+    const numberStepName = /번호를 두 개 받아요/;
+    const dartStepName = /자치구를 추첨해 보세요/;
     localStorage.removeItem(ENTRY_GUIDE_SEEN_STORAGE_KEY);
     renderEntryExplorationPage();
-    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
 
     startExploration();
 
-    expect(screen.getByRole("dialog", { name: "번호 안내" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: guideName })).toBeTruthy();
+    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
     expect(localStorage.getItem(ENTRY_GUIDE_SEEN_STORAGE_KEY)).toBe("1");
     expect(trackMock).toHaveBeenCalledWith({ name: "entry_guide_open", source: "first_entry" });
 
-    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
-    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+    expect(screen.getByRole("dialog", { name: numberStepName })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.queryByRole("dialog", { name: numberStepName })).toBeNull();
+    expect(screen.getByRole("dialog", { name: dartStepName })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "확인" }));
+    expect(screen.queryByRole("dialog", { name: dartStepName })).toBeNull();
+    // 열기 전 포커스가 없었고 내 번호 패널이 접혀 "!"도 없으니 내 번호 버튼으로 돌아간다.
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: /^내 번호 열기/ }));
     cleanup();
 
     renderEntryExplorationPage();
     startExploration();
-    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
   });
 
   test("Haechi explains the first numbers once and not again for later rewards", () => {

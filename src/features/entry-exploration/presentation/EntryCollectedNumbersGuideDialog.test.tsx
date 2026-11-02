@@ -1,76 +1,33 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
 import { ENTRY_NATIONAL_POINT_LINK } from "../config/entryNationalPointLink";
 import { EntryCollectedNumbersGuideDialog } from "./EntryCollectedNumbersGuideDialog";
 
-const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
-vi.mock("@shared/lib/analytics/analytics", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@shared/lib/analytics/analytics")>()),
-  track: trackMock,
-}));
-
-const STEPS = ENTRY_GUIDE_MESSAGES.numberGuide.steps;
-
-afterEach(() => {
-  cleanup();
-  trackMock.mockClear();
-});
-
-function goToStep(count: number): void {
-  for (let index = 0; index < count; index += 1) {
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
-  }
-}
+afterEach(cleanup);
 
 describe("EntryCollectedNumbersGuideDialog", () => {
-  test("walks through visiting, earning numbers and throwing the dart", () => {
-    const onOpenChange = vi.fn();
-    render(<EntryCollectedNumbersGuideDialog open onOpenChange={onOpenChange} />);
+  test("explains the grid numbers with a clue card that starts from the visited place", () => {
+    render(<EntryCollectedNumbersGuideDialog open onOpenChange={vi.fn()} />);
 
-    expect(screen.getByRole("heading", { name: STEPS[0].title })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "이전" })).toBeNull();
-
-    goToStep(1);
-    expect(screen.getByRole("heading", { name: STEPS[1].title })).toBeTruthy();
-    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.numberGuide.clueLead)).toBeTruthy();
-    expect(screen.queryByText(/슬롯/)).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "이전" }));
-    expect(screen.getByRole("heading", { name: STEPS[0].title })).toBeTruthy();
-
-    goToStep(2);
-    expect(screen.getByRole("heading", { name: STEPS[2].title })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "시작하기" }));
-
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-    expect(trackMock).toHaveBeenCalledWith({ name: "entry_guide_close", step: 3, completed: true });
+    const dialog = screen.getByRole("dialog", { name: "번호 안내" });
+    const lines = Array.from(
+      dialog.querySelectorAll(".entry-numbers-guide-line"),
+      (line) => line.textContent
+    );
+    expect(lines).toEqual([
+      "장소를 방문해 얻은 번호는",
+      "서울탐방GO에서 탐방할 위치를 찾는 단서예요!",
+    ]);
   });
 
-  test("starts again from the first step when reopened", () => {
-    const { rerender } = render(<EntryCollectedNumbersGuideDialog open onOpenChange={vi.fn()} />);
-    goToStep(2);
-
-    rerender(<EntryCollectedNumbersGuideDialog open={false} onOpenChange={vi.fn()} />);
-    rerender(<EntryCollectedNumbersGuideDialog open onOpenChange={vi.fn()} />);
-
-    expect(screen.getByRole("heading", { name: STEPS[0].title })).toBeTruthy();
-  });
-
-  test("closes with the close button and records the step it was closed on", () => {
+  test("closes with the close button", () => {
     const onOpenChange = vi.fn();
     render(<EntryCollectedNumbersGuideDialog open onOpenChange={onOpenChange} />);
-    goToStep(1);
 
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
-    expect(trackMock).toHaveBeenCalledWith({
-      name: "entry_guide_close",
-      step: 2,
-      completed: false,
-    });
   });
 
   test("closes when the backdrop is clicked", () => {
@@ -84,7 +41,6 @@ describe("EntryCollectedNumbersGuideDialog", () => {
 
   test("opens the national point number page in a new tab without sharing the opener", () => {
     render(<EntryCollectedNumbersGuideDialog open onOpenChange={vi.fn()} />);
-    goToStep(1);
 
     const link = screen.getByRole("link", { name: ENTRY_NATIONAL_POINT_LINK.label });
     expect(link.getAttribute("href")).toBe(ENTRY_NATIONAL_POINT_LINK.href);

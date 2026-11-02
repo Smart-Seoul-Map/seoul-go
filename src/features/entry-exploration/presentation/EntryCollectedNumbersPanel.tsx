@@ -1,6 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactElement, SyntheticEvent } from "react";
 
+import { track } from "@shared/lib/analytics/analytics";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
@@ -18,8 +19,6 @@ type EntryCollectedNumbersPanelProps = {
   rows: readonly EntryNumberRewardRow[];
   isCharacterMoving?: boolean;
   isDartViewActive?: boolean;
-  isGuideOpen?: boolean;
-  onGuideOpenChange?: (open: boolean) => void;
 };
 
 type OpenState = "closed" | "open" | "autoOpen";
@@ -28,10 +27,9 @@ export function EntryCollectedNumbersPanel({
   rows,
   isCharacterMoving = false,
   isDartViewActive = false,
-  isGuideOpen = false,
-  onGuideOpenChange,
 }: EntryCollectedNumbersPanelProps): ReactElement {
   const [openState, setOpenState] = useState<OpenState>("closed");
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [seenCount, setSeenCount] = useState(rows.length);
   const [wasCharacterMoving, setWasCharacterMoving] = useState(isCharacterMoving);
   const [wasDartViewActive, setWasDartViewActive] = useState(isDartViewActive);
@@ -58,6 +56,10 @@ export function EntryCollectedNumbersPanel({
   }
 
   const setIsOpen = (open: boolean): void => setOpenState(open ? "open" : "closed");
+  const handleGuideButtonClick = (): void => {
+    track({ name: "entry_guide_open", source: "number_button" });
+    setIsGuideOpen(true);
+  };
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -143,7 +145,7 @@ export function EntryCollectedNumbersPanel({
               className="entry-collected-numbers-guide-button"
               aria-label="번호 안내"
               aria-haspopup="dialog"
-              onClick={() => onGuideOpenChange?.(true)}
+              onClick={handleGuideButtonClick}
             >
               !
             </button>
@@ -199,10 +201,7 @@ export function EntryCollectedNumbersPanel({
           </div>
         </div>
       </AppBox>
-      <EntryCollectedNumbersGuideDialog
-        open={isGuideOpen}
-        onOpenChange={(open) => onGuideOpenChange?.(open)}
-      />
+      <EntryCollectedNumbersGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} />
     </>
   );
 }
