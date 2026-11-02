@@ -31,6 +31,7 @@
 }
 
 .map-canvas-stack[data-mobile="true"] .app-virtual-joystick.exploration-map-joystick {
+  bottom: calc(var(--sg-spacing-8) + var(--sg-safe-area-bottom));
   display: flex;
 }
 .exploration-marker-error {

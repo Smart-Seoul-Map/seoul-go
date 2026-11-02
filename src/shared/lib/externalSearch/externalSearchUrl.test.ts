@@ -20,6 +20,9 @@ describe("외부 검색 URL", () => {
     expect(buildExternalSearchUrl("GOOGLE", "서울숲")).toBe(
       "https://www.google.com/search?q=%EC%84%9C%EC%9A%B8%EC%88%B2"
     );
+    expect(buildExternalSearchUrl("GOOGLE_IMAGE", "서울숲")).toBe(
+      "https://www.google.com/search?udm=2&q=%EC%84%9C%EC%9A%B8%EC%88%B2"
+    );
     expect(buildExternalSearchUrl("YOUTUBE", "서울숲")).toBe(
       "https://www.youtube.com/results?search_query=%EC%84%9C%EC%9A%B8%EC%88%B2"
     );

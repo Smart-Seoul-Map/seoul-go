@@ -57,7 +57,7 @@ async function prepareCourse(page: Page): Promise<string[]> {
     return route.fulfill({ body: Buffer.from(photos[color], "base64"), contentType: "image/png" });
   });
   await page.getByRole("button", { name: "코스 보기", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "담긴 코스" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "스탬프" })).toBeVisible();
   await page
     .locator('[data-filled="true"] img')
     .evaluateAll((images) =>

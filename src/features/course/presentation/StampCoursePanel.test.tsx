@@ -52,7 +52,7 @@ test.each([0, 1, 2, 3, 6])("저장된 코스 %i개에 맞는 높이로 열고 �
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe(
     count <= 2 ? "50dvh" : "90dvh"
   );
-  expect(screen.getByLabelText("담긴 코스 개수")).toHaveTextContent(`${count}/6`);
+  expect(screen.getByLabelText("스탬프 개수")).toHaveTextContent(`${count}/6`);
   expect(
     within(screen.getByRole("list", { name: "스탬프 코스" })).getAllByRole("listitem")
   ).toHaveLength(6);
@@ -70,7 +70,7 @@ test("복원한 코스로 시작하고 사용자가 높이를 바꾼 후에도 �
   act(() => {
     stampCourseStore.getState().removePlace("place-0");
   });
-  expect(screen.getByLabelText("담긴 코스 개수")).toHaveTextContent("2/6");
+  expect(screen.getByLabelText("스탬프 개수")).toHaveTextContent("2/6");
   expect(screen.getByRole("dialog").style.getPropertyValue("--panel-snap-height")).toBe("50dvh");
 });
 
@@ -115,7 +115,7 @@ test("편집에서 개별 삭제를 즉시 저장하고 실행 취소로 원래 
   expect(screen.getByRole("button", { name: "전체 삭제" })).toBeEnabled();
   expect(screen.getAllByRole("button", { name: /저장된 장소 \d 삭제/ })).toHaveLength(3);
   fireEvent.click(screen.getByRole("button", { name: "저장된 장소 2 삭제" }));
-  expect(screen.getByLabelText("담긴 코스 개수")).toHaveTextContent("2/6");
+  expect(screen.getByLabelText("스탬프 개수")).toHaveTextContent("2/6");
   expect(screen.getByRole("button", { name: "저장된 장소 3 순서 변경" })).toHaveFocus();
   expect(
     createStampCourseStore()

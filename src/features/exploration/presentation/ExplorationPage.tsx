@@ -14,6 +14,7 @@ import "./ExplorationPage.css";
 import type { MapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { createEmptyMapMarkerFeatureCollection } from "@shared/lib/maplibre/mapMarkerFeature";
 import { useAppToast } from "@shared/ui/toast";
+import { AppBox } from "@shared/ui/box";
 import { AppButton } from "@shared/ui/button";
 import { useIsMobileViewport } from "@shared/lib/responsive/useIsMobileViewport";
 
@@ -189,20 +190,30 @@ export function ExplorationPage({
         />
         <div className="exploration-map-notice-actions">
           {renderMapNotice?.({ isCharacterMoving })}
-          {hasLinkedPlaceReference && renderLinkedPlacesPanel && (
+        </div>
+        {hasLinkedPlaceReference && renderLinkedPlacesPanel && (
+          <AppBox
+            className="exploration-linked-places-launcher"
+            display="flex"
+            hidden={isPanelOpen || isSwitching}
+            bg="bg.surfacePaper"
+            borderColor="stroke.weak"
+            borderWidth="strokeWidth.surface"
+            borderRadius="radius.5"
+            boxShadow="shadow.raised"
+          >
             <AppButton
               ref={linkedPlacesButtonRef}
-              hidden={isPanelOpen || isSwitching}
               className="exploration-linked-places-button"
-              size="sm"
               variant="secondary"
+              aria-label="근처 추천"
               aria-haspopup="dialog"
               onClick={() => openPanel({ type: "linked" })}
             >
-              근처 추천
+              <span className="exploration-linked-places-icon" aria-hidden="true" />
             </AppButton>
-          )}
-        </div>
+          </AppBox>
+        )}
         <ul className="exploration-theme-place-count-list" aria-label="테마별 장소 개수">
           {districtName ? (
             <li className="exploration-theme-place-count-item">

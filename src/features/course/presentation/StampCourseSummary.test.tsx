@@ -21,19 +21,19 @@ afterEach(() => {
 
 test("코스 추가와 삭제를 반영하고 중복 추가는 개수를 늘리지 않는다", () => {
   render(<StampCourseSummary />);
-  expect(screen.getByRole("status")).toHaveTextContent("담은 코스 0개");
+  expect(screen.getByRole("status")).toHaveTextContent("스탬프 0/6");
   act(() => {
     stampCourseStore.getState().addPlace(place);
   });
-  expect(screen.getByRole("status")).toHaveTextContent("담은 코스 1개");
+  expect(screen.getByRole("status")).toHaveTextContent("스탬프 1/6");
   act(() => {
     stampCourseStore.getState().addPlace(place);
   });
-  expect(screen.getByRole("status")).toHaveTextContent("담은 코스 1개");
+  expect(screen.getByRole("status")).toHaveTextContent("스탬프 1/6");
   act(() => {
     stampCourseStore.getState().removePlace(place.id);
   });
-  expect(screen.getByRole("status")).toHaveTextContent("담은 코스 0개");
+  expect(screen.getByRole("status")).toHaveTextContent("스탬프 0/6");
   expect(screen.getByRole("button", { name: "코스 보기" })).toHaveAttribute(
     "aria-disabled",
     "true"
@@ -45,7 +45,7 @@ test("저장소에서 복원한 코스 개수를 표시한다", () => {
   const restoredStore = createStampCourseStore();
   stampCourseStore.setState({ places: restoredStore.getState().places });
   render(<StampCourseSummary />);
-  expect(screen.getByRole("status")).toHaveTextContent("담은 코스 1개");
+  expect(screen.getByRole("status")).toHaveTextContent("스탬프 1/6");
 });
 
 test("연결된 코스 보기 버튼으로 패널을 연다", () => {
