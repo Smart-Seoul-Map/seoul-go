@@ -47,6 +47,7 @@ import { createEntryEditionScenery } from "./entryEditionScenery";
 import { createEntryExplorationGuideArrow } from "./entryExplorationGuideArrow";
 import { getEntryExplorationIntroTheme } from "./entryExplorationIntroTheme";
 import { createEntryExplorationArcheryRange } from "./entryExplorationArcheryRange";
+import { createEntryExplorationDecorations } from "./entryExplorationDecorations";
 import {
   addEntryExplorationLights,
   createEntryExplorationCamera,
@@ -342,6 +343,7 @@ export function useEntryExplorationThreeScene({
     labels.domElement.style.pointerEvents = "none";
     labels.domElement.hidden = true;
     const archeryRange = createEntryExplorationArcheryRange();
+    const decorations = createEntryExplorationDecorations();
     const surroundings = new THREE.Group();
     surroundings.name = "entry-exploration-surroundings";
     const staticSceneObjects = ENTRY_EXPLORATION_SCENE_OBJECTS.filter(
@@ -362,6 +364,7 @@ export function useEntryExplorationThreeScene({
       introFloor.applyLayout(layout, aspect);
       scenery.applyLayout(layout);
       archeryRange.applyLayout(layout);
+      decorations.applyLayout(layout);
       staticSceneObjects.forEach((object, index) => {
         const point = layout.objects[object.id];
         sceneObjectMeshes[index].position.setX(point.x).setZ(point.z);
@@ -380,7 +383,7 @@ export function useEntryExplorationThreeScene({
 
     addEntryExplorationLights(scene);
     scene.add(floor);
-    surroundings.add(introFloor.object, scenery.object, archeryRange.object);
+    surroundings.add(introFloor.object, scenery.object, archeryRange.object, decorations.object);
     sceneObjectMeshes.forEach((mesh) => {
       surroundings.add(mesh);
     });
@@ -388,6 +391,7 @@ export function useEntryExplorationThreeScene({
     const introHiddenObjects = [
       scenery.object,
       archeryRange.object,
+      decorations.object,
       ...sceneObjectMeshes,
       ...sceneInteractionControllers.map((controller) => controller.object),
     ];
@@ -743,6 +747,7 @@ export function useEntryExplorationThreeScene({
       editionScenery?.dispose();
       labels.domElement.remove();
       archeryRange.dispose();
+      decorations.dispose();
       disposeEntryExplorationObject3D(introFloor.object);
       disposeEntryExplorationObject3D(floor);
       sceneObjectMeshes.forEach(disposeEntryExplorationObject3D);

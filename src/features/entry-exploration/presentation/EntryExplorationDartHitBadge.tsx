@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 
+import { AppText } from "@shared/ui/typography";
+
 import type { EntryExplorationDartThrowResult } from "../application/entryExplorationSeoulTileMapViewInteraction";
 
 import "./EntryExplorationDartHitBadge.css";
@@ -23,7 +25,9 @@ export function EntryExplorationDartHitBadge({
         top: `${result.viewportPoint.y * 100}%`,
       }}
     >
-      {result.gridNumber}
+      <AppText as="span" role="supporting" tone="inverted">
+        {result.gridNumber}
+      </AppText>
     </span>
   );
 }

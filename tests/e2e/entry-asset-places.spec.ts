@@ -10,7 +10,7 @@ const CLICK_AREA = { left: 0.05, right: 0.95, top: 0.05, bottom: 0.85 };
 // covers at least 19 / height units on the ground.
 const CAMERA_VIEW_SIZE = 19;
 // Floor steps stop this far from the asset on the screen: past half of the widest asset image
-// (waterfront, 13 units) and beyond the 4-unit arrival radius.
+// (waterfront and store, 8 units) and beyond the 4-unit arrival radius.
 const FLOOR_STEP_CLEARANCE = 7;
 
 type AssetPlace = {

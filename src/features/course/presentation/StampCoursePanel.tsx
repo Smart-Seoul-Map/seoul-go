@@ -137,13 +137,13 @@ export function StampCoursePanel({
       }}
     >
       <AppResponsivePanel.Content
-        title="담긴 코스"
+        title="스탬프"
         onExitComplete={onExitComplete}
         returnFocus={returnFocus}
         headerClassName="StampCourseHeader"
         headerTrailing={
           <>
-            <span className="StampCourseCount" aria-label="담긴 코스 개수" aria-live="polite">
+            <span className="StampCourseCount" aria-label="스탬프 개수" aria-live="polite">
               {places.length}/{MAX_STAMP_COURSE_PLACES}
             </span>
             <div className="StampCourseHeaderActions">

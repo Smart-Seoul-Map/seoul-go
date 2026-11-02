@@ -13,12 +13,7 @@ test("fits an offset model to the entry scene without mutating or disposing cach
   const original = new THREE.Box3().setFromObject(source).clone();
   const disposeGeometry = vi.spyOn(geometry, "dispose");
   const disposeMaterial = vi.spyOn(material, "dispose");
-  const instance = createEntryEditionModel(source, {
-    url: "/model.glb",
-    size: 4,
-    rotationY: Math.PI / 4,
-    editionIndex: 0,
-  });
+  const instance = createEntryEditionModel(source, { size: 4, rotationY: Math.PI / 4 });
   const bounds = new THREE.Box3().setFromObject(instance.object);
   expect(bounds.min.y).toBeCloseTo(0);
   expect(bounds.getCenter(new THREE.Vector3()).x).toBeCloseTo(0);

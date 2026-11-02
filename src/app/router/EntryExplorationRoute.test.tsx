@@ -61,5 +61,5 @@ test.each([390, 1366])("provides a pointer-accessible card close action at %ipx"
   expect(close.classList.contains("AppIconButton")).toBe(true);
   fireEvent.click(close);
   expect(onClose).toHaveBeenCalledOnce();
-  expect(screen.getByText(/^20(25|26)$/)).toHaveClass("AppBadge-content");
+  expect(screen.getByText(/^20(25|26)$/).classList.contains("AppBadge-content")).toBe(true);
 });

@@ -21,6 +21,7 @@
   width: 240px;
   min-height: 96px;
   max-width: 100%;
+  background: var(--sg-color-bg-surface-paper);
 }
 .LinkedPlacesReferenceImage {
   display: block;
@@ -41,20 +42,8 @@
 .LinkedPlacesListHeading {
   margin-bottom: var(--sg-spacing-4);
 }
-.LinkedPlacesListHeading h2,
-.LinkedPlacesCard h3 {
-  margin: 0;
-  font-family: var(--sg-font-family-base);
-  font-size: var(--sg-font-size-6);
-  font-weight: var(--sg-font-weight-regular);
-  line-height: var(--sg-line-height-6);
-  overflow-wrap: anywhere;
-}
-.LinkedPlacesListHeading p {
-  margin: var(--sg-spacing-1) 0 0;
-  font-size: var(--sg-font-size-2);
-  color: var(--sg-color-text-muted);
-  overflow-wrap: anywhere;
+.LinkedPlacesListHeading .AppCaption {
+  margin-top: var(--sg-spacing-1);
 }
 .LinkedPlacesList {
   display: grid;
@@ -68,14 +57,10 @@
   gap: var(--sg-spacing-2_5);
   min-height: 124px;
   padding: var(--sg-spacing-3_5) var(--sg-spacing-4);
-  border: 1px solid var(--sg-color-text-default);
+  border: var(--sg-stroke-width-surface) solid var(--sg-color-stroke-weak);
   border-radius: var(--sg-radius-4);
-  background: var(--sg-color-bg-floating);
+  background: var(--sg-color-bg-surface-paper);
   overflow-wrap: anywhere;
-}
-.LinkedPlacesReferenceLabel {
-  color: var(--sg-color-text-muted);
-  font-size: var(--sg-font-size-3);
 }
 .LinkedPlacesCardMeta {
   display: flex;

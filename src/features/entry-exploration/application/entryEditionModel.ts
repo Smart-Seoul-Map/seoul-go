@@ -3,7 +3,10 @@ import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
 import type { EntryEditionModel } from "../config/entryEditionModels";
 
-export function createEntryEditionModel(source: THREE.Object3D, asset: EntryEditionModel) {
+export function createEntryEditionModel(
+  source: THREE.Object3D,
+  asset: Pick<EntryEditionModel, "size" | "rotationY">
+) {
   const object = new THREE.Group();
   const model = clone(source);
   model.rotation.y += asset.rotationY;

@@ -40,9 +40,6 @@
 
 .AppToastMessage {
   flex: 1;
-  font-size: var(--sg-toast-message-font-size);
-  font-weight: var(--sg-toast-message-font-weight);
-  line-height: var(--sg-toast-message-line-height);
   min-width: 0;
 }
 

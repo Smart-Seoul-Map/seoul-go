@@ -11,7 +11,7 @@ export const ENTRY_EXPLORATION_SCENERY_OBJECTS = [
   { key: "bench", width: 2.6 },
   { key: "streetlamp", width: 1.6 },
   { key: "park", width: 11 },
-  { key: "waterfront", width: 13 },
+  { key: "waterfront", width: 8 },
   { key: "store", width: 8 },
   { key: "subway", width: 7 },
   { key: "busstop", width: 6 },

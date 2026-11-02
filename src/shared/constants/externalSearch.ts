@@ -11,6 +11,12 @@ export const EXTERNAL_SEARCH_PROVIDERS = {
     searchUrl: "https://www.google.com/search",
     queryParam: "q",
   },
+  GOOGLE_IMAGE: {
+    id: "GOOGLE_IMAGE",
+    label: "구글 이미지",
+    searchUrl: "https://www.google.com/search?udm=2",
+    queryParam: "q",
+  },
   YOUTUBE: {
     id: "YOUTUBE",
     label: "유튜브",
@@ -19,7 +25,7 @@ export const EXTERNAL_SEARCH_PROVIDERS = {
   },
 } as const;
 
-export const EXTERNAL_SEARCH_PROVIDER_IDS = ["NAVER", "GOOGLE", "YOUTUBE"] as const;
+export const EXTERNAL_SEARCH_PROVIDER_IDS = ["NAVER", "GOOGLE", "GOOGLE_IMAGE", "YOUTUBE"] as const;
 
 export type ExternalSearchProviderId = (typeof EXTERNAL_SEARCH_PROVIDER_IDS)[number];
 
