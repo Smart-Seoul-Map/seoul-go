@@ -16,10 +16,6 @@
   color: var(--sg-color-text-info);
 }
 
-.MapPlaceDetailSearch:hover {
-  background: var(--sg-color-bg-transparent-pressed);
-}
-
 .MapPlaceDetailSearch:focus-visible {
   outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
   outline-offset: var(--sg-focus-ring-offset);

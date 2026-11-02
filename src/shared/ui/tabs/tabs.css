@@ -96,12 +96,6 @@
   flex-direction: column;
 }
 
-@media (hover: hover) {
-  .AppTabs-trigger:not(:disabled):hover {
-    background: var(--sg-color-bg-floating-pressed);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .AppTabs-trigger {
     transition: none;

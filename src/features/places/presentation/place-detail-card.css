@@ -93,10 +93,6 @@
   text-decoration: none;
   overflow-wrap: anywhere;
 }
-.PlaceDetailExternalLink:hover,
-.PlaceDetailExternalLink:active {
-  background: var(--sg-button-primary-bg-pressed);
-}
 .PlaceDetailExternalLink:focus-visible {
   outline: 3px solid var(--sg-state-focus-ring);
   outline-offset: 2px;

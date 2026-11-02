@@ -472,6 +472,7 @@
   --sg-course-seal-empty-fg: var(--sg-color-text-info);
   --sg-course-seal-stroke: var(--sg-color-text-muted);
   --sg-course-remove-fg: var(--sg-color-text-inverted);
+  --sg-course-remove-icon-size: calc(var(--sg-spacing-6_5) + var(--sg-spacing-2));
   --sg-course-route-color: var(--sg-v3-blue-500);
   --sg-course-board-top: color-mix(in srgb, var(--sg-v3-pink-500) 25%, var(--sg-color-bg-floating));
   --sg-course-board-bottom: color-mix(
