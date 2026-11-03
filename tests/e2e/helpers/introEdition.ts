@@ -61,4 +61,11 @@ export async function startIntro(page: Page): Promise<void> {
   await expect(start).toBeEnabled({ timeout: 45_000 });
   await start.focus();
   await page.keyboard.press("Enter");
+  // 해치가 걸어 나와 처음 멈추면 첫 진입 가이드가 방문마다 열려 장면 클릭을 막으므로 끝까지 넘겨 닫는다.
+  const guide = page.locator(".entry-guide-overlay");
+  await expect(guide).toBeVisible({ timeout: 45_000 });
+  await guide.getByRole("button", { name: "다음", exact: true }).click();
+  await guide.getByRole("button", { name: "다음", exact: true }).click();
+  await guide.getByRole("button", { name: "확인", exact: true }).click();
+  await expect(guide).toHaveCount(0);
 }

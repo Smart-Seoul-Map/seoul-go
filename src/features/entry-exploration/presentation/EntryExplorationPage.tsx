@@ -33,7 +33,7 @@ import {
 } from "../domain/entryNumberReward";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
 import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
-import { hasSeenEntryGuide, markEntryGuideSeen } from "../data/entryGuideStorage";
+import { markEntryGuideSeen } from "../data/entryGuideStorage";
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
@@ -45,6 +45,9 @@ export type EntryExplorationPageProps = {
     placeId: EntryExplorationPlaceId;
   }) => ReactNode;
 };
+
+// 첫 진입 가이드는 방문마다 한 번 열린다(waiting → open → closed).
+type EntryGuideStatus = "waiting" | "open" | "closed";
 
 const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
 
@@ -60,7 +63,7 @@ export function EntryExplorationPage({
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingPlaceIds, setPendingPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
   const [isCharacterMoving, setIsCharacterMoving] = useState(false);
-  const [isEntryGuideOpen, setIsEntryGuideOpen] = useState(false);
+  const [entryGuideStatus, setEntryGuideStatus] = useState<EntryGuideStatus>("waiting");
   const {
     hasStarted,
     handleIntroStart,
@@ -92,13 +95,13 @@ export function EntryExplorationPage({
     hasStarted,
     isDartActive: dartShot.isGuideVisible,
   });
-  // 처음 들어온 사람에게만 첫 진입 가이드를 연다. 번호 안내는 내 번호의 "!"로 따로 연다.
-  const handleEntryIntroStart = (): void => {
-    handleIntroStart();
-    if (hasSeenEntryGuide()) return;
+  // 해치가 걸어 나와 처음 멈추면(원래 인트로 말풍선이 뜨던 때) 방문마다 첫 진입 가이드를 연다.
+  // '봤음' 저장은 남겨 두지만 여는 판단에는 쓰지 않는다. 번호 안내는 내 번호의 "!"로 따로 연다.
+  const openEntryGuideOnFirstStop = (): void => {
+    if (!hasStarted || entryGuideStatus !== "waiting") return;
     markEntryGuideSeen();
     track({ name: "entry_guide_open", source: "first_entry" });
-    setIsEntryGuideOpen(true);
+    setEntryGuideStatus("open");
   };
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
     places ?? EMPTY_ENTRY_PLACES,
@@ -166,15 +169,17 @@ export function EntryExplorationPage({
     containerRef,
     createSceneInteractionControllers,
     onSceneControlsReady: handleSceneControlsReady,
-    onIntroStart: handleEntryIntroStart,
+    onIntroStart: handleIntroStart,
     onIntroBlocked,
     placeVisits,
     onPlacePanelDismiss: dismissOpenPanel,
     onCharacterMovingChange: (isMoving) => {
       setIsCharacterMoving(isMoving);
       characterSpeech.handleCharacterMovingChange(isMoving);
+      if (!isMoving) openEntryGuideOnFirstStop();
     },
     characterSpeechAnchor: characterSpeech.anchor,
+    canDrawGuideArrow: entryGuideStatus === "closed",
   });
 
   const handleStartGridExploration = (result: EntryExplorationDartThrowResult): void => {
@@ -250,7 +255,10 @@ export function EntryExplorationPage({
           <AppSpeechBubble speaker={HAECHI_CHARACTER_NAME} message={characterSpeech.message} />,
           characterSpeech.anchor.element
         )}
-      <EntryGuideOverlay open={isEntryGuideOpen} onOpenChange={setIsEntryGuideOpen} />
+      <EntryGuideOverlay
+        open={entryGuideStatus === "open"}
+        onOpenChange={(open) => setEntryGuideStatus(open ? "open" : "closed")}
+      />
     </main>
   );
 }

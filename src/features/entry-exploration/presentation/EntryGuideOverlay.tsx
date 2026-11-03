@@ -26,7 +26,7 @@ type EntryGuideOverlayProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-// 첫 진입 가이드를 전체 화면 오버레이로 한 단계씩 보여 준다. 인트로를 처음 시작할 때만 열린다.
+// 첫 진입 가이드를 전체 화면 오버레이로 한 단계씩 보여 준다. 방문마다 해치가 처음 멈출 때 열린다.
 export function EntryGuideOverlay({
   open,
   onOpenChange,

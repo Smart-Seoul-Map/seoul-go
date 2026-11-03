@@ -1,7 +1,7 @@
 export const ENTRY_GUIDE_SEEN_STORAGE_KEY = "seoul-go:entry-guide-seen:v1";
 export type EntryGuideStorage = Pick<Storage, "getItem" | "setItem">;
 
-// 첫 진입 번호 안내는 브라우저마다 한 번만 자동으로 연다. 저장소를 못 쓰면 매번 열어도 동작에는 문제없다.
+// 첫 진입 가이드를 봤는지 남긴다. 지금은 여는 판단에 쓰지 않는다(195 리뷰 반영 확정 전까지 남겨 둠).
 export function hasSeenEntryGuide(
   storage: EntryGuideStorage | null = getBrowserStorage()
 ): boolean {

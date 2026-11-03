@@ -52,7 +52,9 @@ export function useEntryCharacterSpeech({
     setStatus("ended");
   }
 
-  const message = status === "visible" ? toSpeechMessage(line) : null;
+  // 인트로 대사 자리는 첫 진입 가이드가 대신하므로 화면에만 숨긴다. 대사 줄·문구·흐름은 그대로 둔다.
+  const isHiddenLine = line.key === "intro";
+  const message = status === "visible" && !isHiddenLine ? toSpeechMessage(line) : null;
 
   return { anchor, message, handleCharacterMovingChange, say };
 }
