@@ -1,5 +1,5 @@
 /* 첫 진입 가이드 오버레이. 정렬·간격은 AppVStack gap 단계를 쓰고(시안 수치와는 조금 다르다),
-   top을 주지 않고 아래에서부터 쌓는다. 휴대폰은 묶음을 화면 아래에, PC는 세로 가운데에 둔다. */
+   휴대폰·PC 모두 묶음을 화면 세로 가운데에 둔다. */
 .entry-guide-overlay {
   --entry-guide-overlay-dim: rgba(0, 0, 0, 0.8);
   /* 브랜드 분홍 그대로는 딤 위에서 14px 글자 대비(4.5:1)에 못 미쳐 흰색을 섞어 밝힌다. */
@@ -13,7 +13,7 @@
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
   background: var(--entry-guide-overlay-dim);
   /* 떠 있는 동안 뒤 지도로 터치·스크롤이 넘어가지 않게 한다. */
   touch-action: none;
@@ -24,7 +24,7 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 430px;
-  padding: 0 24px calc(9px + var(--sg-safe-area-bottom));
+  padding: 0 24px;
 }
 
 /* 단계가 바뀔 때 이미지·제목·팁만 바꿔 끼운다. 버튼은 묶음 밖에 그대로 있어 위치가 흔들리지 않는다.
@@ -66,16 +66,6 @@
 @media (prefers-reduced-motion: reduce) {
   .entry-guide-overlay-content[data-fade] {
     animation: none;
-  }
-}
-
-@media (min-width: 768px) {
-  .entry-guide-overlay {
-    align-items: center;
-  }
-
-  .entry-guide-overlay-stage {
-    padding-bottom: 0;
   }
 }
 
