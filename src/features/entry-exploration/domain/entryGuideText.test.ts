@@ -11,7 +11,7 @@ describe("splitEntryGuideHighlights", () => {
 
   test("highlights only the words inside [[ ]] and drops the markers", () => {
     expect(splitEntryGuideHighlights("Tip! 건물·동상 같은 [[장소]]로 가면\n어떤 곳인지")).toEqual([
-      { text: "Tip! ", isHighlighted: false },
+      { text: "Tip! 건물·동상 같은 ", isHighlighted: false },
       { text: "장소", isHighlighted: true },
       { text: "로 가면\n어떤 곳인지", isHighlighted: false },
     ]);
