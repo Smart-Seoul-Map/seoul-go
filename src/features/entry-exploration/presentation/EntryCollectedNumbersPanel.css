@@ -66,12 +66,14 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger:hover::after {
+  .entry-collected-numbers[data-open="false"]
+    .entry-collected-numbers-trigger:hover:not(:disabled):not([aria-disabled="true"])::after {
     background: var(--sg-state-hover-overlay-solid);
   }
 }
 
-.entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger:active::after {
+.entry-collected-numbers[data-open="false"]
+  .entry-collected-numbers-trigger:active:not(:disabled):not([aria-disabled="true"])::after {
   background: var(--sg-state-pressed-overlay-solid);
 }
 
