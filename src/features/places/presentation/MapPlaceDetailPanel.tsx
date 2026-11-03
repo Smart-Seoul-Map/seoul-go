@@ -4,7 +4,7 @@ import type { FocusEvent, KeyboardEvent, ReactElement, ReactNode } from "react";
 import type { ExternalSearchProviderId } from "@shared/constants/externalSearch";
 import { openExternalSearch } from "@shared/lib/externalSearch/externalSearchUrl";
 import { AppBox } from "@shared/ui/box";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import {
   AppResponsivePanel,
   type AppResponsivePanelContentProps,
@@ -60,17 +60,17 @@ function PlaceSearchMenu({ title }: { title: string }): ReactElement {
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
     >
-      <button
-        type="button"
+      <AppIconButton
         className="MapPlaceDetailSearch"
-        aria-label={`${title} 검색`}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
+        ariaLabel={`${title} 검색`}
+        ariaHasPopup="menu"
+        ariaExpanded={isOpen}
         title="검색"
+        size="sm"
         onClick={() => setIsOpen((current) => !current)}
       >
         <span aria-hidden="true" className="MapPlaceDetailSearchIcon" />
-      </button>
+      </AppIconButton>
       <AppBox
         className="MapPlaceDetailSearchList"
         data-open={isOpen}

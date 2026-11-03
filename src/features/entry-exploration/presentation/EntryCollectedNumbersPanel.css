@@ -65,6 +65,16 @@
   box-shadow: var(--sg-shadow-2);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger:hover::after {
+    background: var(--sg-state-hover-overlay-solid);
+  }
+}
+
+.entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger:active::after {
+  background: var(--sg-state-pressed-overlay-solid);
+}
+
 .entry-collected-numbers-trigger:focus-visible {
   box-shadow: inset 0 0 0 var(--sg-focus-ring-width) var(--sg-state-focus-ring);
 }

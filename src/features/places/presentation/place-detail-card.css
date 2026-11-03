@@ -76,6 +76,7 @@
   min-width: 0;
 }
 .PlaceDetailExternalLink {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,6 +93,28 @@
   text-align: center;
   text-decoration: none;
   overflow-wrap: anywhere;
+}
+.PlaceDetailExternalLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+  transition: background var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard);
+}
+@media (hover: hover) and (pointer: fine) {
+  .PlaceDetailExternalLink:hover::after {
+    background: var(--sg-state-hover-overlay-solid);
+  }
+}
+.PlaceDetailExternalLink:active::after {
+  background: var(--sg-state-pressed-overlay-solid);
+}
+@media (prefers-reduced-motion: reduce) {
+  .PlaceDetailExternalLink::after {
+    transition: none;
+  }
 }
 .PlaceDetailExternalLink:focus-visible {
   outline: 3px solid var(--sg-state-focus-ring);

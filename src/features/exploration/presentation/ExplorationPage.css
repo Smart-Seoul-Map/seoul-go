@@ -29,7 +29,6 @@
 
 .exploration-linked-places-button {
   --sg-button-secondary-bg: var(--sg-color-bg-brand);
-  --sg-button-secondary-bg-pressed: var(--sg-color-bg-brand-pressed);
   --sg-button-secondary-fg: var(--sg-color-text-inverted);
   --sg-button-radius: var(--sg-radius-full);
   width: var(--sg-spacing-12);

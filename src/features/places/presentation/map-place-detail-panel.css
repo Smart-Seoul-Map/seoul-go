@@ -1,24 +1,11 @@
 /* 머리글·본문 크기는 인트로와 같이 쓰는 place-detail-card.css를 따른다. 여기는 지도 전용 요소만 둔다. */
-.MapPlaceDetailSearch {
-  display: grid;
-  place-items: center;
-  flex: none;
+.AppIconButton.MapPlaceDetailSearch[data-size="sm"] {
   width: var(--place-detail-action-size);
   height: var(--place-detail-action-size);
-  padding: 0;
-  border: 0;
-  border-radius: var(--sg-radius-full);
-  background: var(--sg-color-bg-transparent);
-  cursor: pointer;
 }
 
-.MapPlaceDetailSearch {
+.AppIconButton.MapPlaceDetailSearch[data-variant="layer"] {
   color: var(--sg-color-text-info);
-}
-
-.MapPlaceDetailSearch:focus-visible {
-  outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
-  outline-offset: var(--sg-focus-ring-offset);
 }
 
 .MapPlaceDetailSearchList {
@@ -74,7 +61,6 @@
 
 .MapPlaceDetailAddButton[data-acquired="true"] {
   --sg-button-primary-bg: var(--sg-map-detail-acquired-button-bg);
-  --sg-button-primary-bg-pressed: var(--sg-map-detail-acquired-button-bg-pressed);
   --sg-button-primary-fg: var(--sg-map-detail-acquired-button-fg);
 }
 

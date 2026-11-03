@@ -175,9 +175,7 @@
 }
 
 .AppTabs-trigger,
-.AppResponsivePanelIconClose,
-.MapPlaceDetailSearch,
-.PlaceDetailExternalLink {
+.AppResponsivePanelIconClose {
   position: relative;
 }
 
@@ -186,16 +184,14 @@
 .AppTextButton::after,
 .AppTabs-trigger::after,
 .AppResponsivePanelIconClose::after,
-.AppResponsivePanelClose::after,
-.MapPlaceDetailSearch::after,
-.PlaceDetailExternalLink::after {
+.AppResponsivePanelClose::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background: transparent;
   pointer-events: none;
-  transition: background 0.15s ease;
+  transition: background var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -206,10 +202,9 @@
       .AppTextButton,
       .AppTabs-trigger,
       .AppResponsivePanelIconClose,
-      .AppResponsivePanelClose,
-      .MapPlaceDetailSearch
+      .AppResponsivePanelClose
     ):hover:not(:disabled):not([aria-disabled="true"])::after {
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--sg-state-hover-overlay-subtle);
   }
 }
 
@@ -220,10 +215,9 @@
     .AppTextButton,
     .AppTabs-trigger,
     .AppResponsivePanelIconClose,
-    .AppResponsivePanelClose,
-    .MapPlaceDetailSearch
+    .AppResponsivePanelClose
   ):active:not(:disabled):not([aria-disabled="true"])::after {
-  background: rgba(0, 0, 0, 0.16);
+  background: var(--sg-state-pressed-overlay-subtle);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -231,11 +225,9 @@
       .AppButton[data-variant="primary"],
       .AppButton[data-variant="secondary"],
       .AppButton[data-variant="strong"],
-      .AppButton[data-variant="danger"],
-      .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger,
-      .PlaceDetailExternalLink
+      .AppButton[data-variant="danger"]
     ):hover:not(:disabled):not([aria-disabled="true"])::after {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--sg-state-hover-overlay-solid);
   }
 }
 
@@ -243,11 +235,9 @@
     .AppButton[data-variant="primary"],
     .AppButton[data-variant="secondary"],
     .AppButton[data-variant="strong"],
-    .AppButton[data-variant="danger"],
-    .entry-collected-numbers[data-open="false"] .entry-collected-numbers-trigger,
-    .PlaceDetailExternalLink
+    .AppButton[data-variant="danger"]
   ):active:not(:disabled):not([aria-disabled="true"])::after {
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--sg-state-pressed-overlay-solid);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -257,9 +247,7 @@
     .AppTextButton,
     .AppTabs-trigger,
     .AppResponsivePanelIconClose,
-    .AppResponsivePanelClose,
-    .MapPlaceDetailSearch,
-    .PlaceDetailExternalLink
+    .AppResponsivePanelClose
   )::after {
     transition: none;
   }
