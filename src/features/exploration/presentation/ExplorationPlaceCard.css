@@ -450,7 +450,7 @@
   z-index: 1;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 861px) {
   .exploration-place-card {
     --exploration-place-card-width: 294.4px;
     --exploration-place-card-body-height: 483.2px;
