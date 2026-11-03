@@ -68,6 +68,10 @@
 
   /* Color - state */
   --sg-state-focus-ring: var(--sg-color-stroke-focus);
+  --sg-state-hover-overlay-subtle: rgba(0, 0, 0, 0.08);
+  --sg-state-pressed-overlay-subtle: rgba(0, 0, 0, 0.16);
+  --sg-state-hover-overlay-solid: rgba(255, 255, 255, 0.25);
+  --sg-state-pressed-overlay-solid: rgba(0, 0, 0, 0.25);
   --sg-state-disabled-fg: var(--sg-color-text-disabled);
   --sg-state-disabled-bg: var(--sg-color-bg-disabled);
   --sg-state-danger-fg: var(--sg-color-text-danger);
@@ -243,22 +247,17 @@
 
   /* Button component tokens */
   --sg-button-primary-bg: var(--sg-color-bg-brand);
-  --sg-button-primary-bg-pressed: var(--sg-color-bg-brand-pressed);
   --sg-button-primary-fg: var(--sg-color-text-inverted);
   --sg-button-strong-bg: var(--sg-v3-blue-500);
-  --sg-button-strong-bg-pressed: var(--sg-v3-blue-600);
   --sg-button-strong-border: var(--sg-v3-blue-600);
   --sg-button-strong-fg: var(--sg-color-text-inverted);
   --sg-button-secondary-bg: var(--sg-color-bg-neutral-weak);
-  --sg-button-secondary-bg-pressed: var(--sg-color-bg-neutral-weak-pressed);
   --sg-button-secondary-fg: var(--sg-color-text-default);
   --sg-button-danger-bg: var(--sg-color-bg-danger);
-  --sg-button-danger-bg-pressed: var(--sg-color-bg-danger-pressed);
   --sg-button-danger-fg: var(--sg-color-text-inverted);
   --sg-button-outline-stroke: var(--sg-color-stroke-weak);
   --sg-button-outline-fg: var(--sg-color-text-default);
   --sg-button-ghost-bg: var(--sg-color-bg-transparent);
-  --sg-button-ghost-bg-pressed: var(--sg-color-bg-transparent-pressed);
   --sg-button-ghost-fg: var(--sg-color-text-default);
   --sg-button-disabled-bg: var(--sg-color-bg-disabled);
   --sg-button-disabled-fg: var(--sg-color-text-disabled);
@@ -276,7 +275,6 @@
   --sg-text-button-padding-y-default: var(--sg-spacing-2);
   --sg-text-button-radius-default: var(--sg-radius-2);
   --sg-text-button-color-default: var(--sg-color-text-muted);
-  --sg-text-button-state-pressed: var(--sg-color-bg-surface-pressed);
 
   /* Icon button component tokens */
   --sg-icon-button-size-nav: 44px;
@@ -450,7 +448,6 @@
   --sg-map-detail-header-line-height: var(--sg-spacing-10);
   --sg-map-detail-header-title-mobile-line-height: var(--sg-spacing-8);
   --sg-map-detail-acquired-button-bg: var(--sg-v3-green-500);
-  --sg-map-detail-acquired-button-bg-pressed: var(--sg-v3-green-500);
   --sg-map-detail-acquired-button-fg: var(--sg-color-text-inverted);
   --sg-map-detail-mobile-body-line-height: 1.5;
   --sg-map-detail-mobile-image-ratio: 358 / 136;
@@ -472,6 +469,7 @@
   --sg-course-seal-empty-fg: var(--sg-color-text-info);
   --sg-course-seal-stroke: var(--sg-color-text-muted);
   --sg-course-remove-fg: var(--sg-color-text-inverted);
+  --sg-course-remove-icon-size: calc(var(--sg-spacing-6_5) + var(--sg-spacing-2));
   --sg-course-route-color: var(--sg-v3-blue-500);
   --sg-course-board-top: color-mix(in srgb, var(--sg-v3-pink-500) 25%, var(--sg-color-bg-floating));
   --sg-course-board-bottom: color-mix(

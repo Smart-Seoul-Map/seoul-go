@@ -182,6 +182,10 @@
   cursor: grabbing;
 }
 
+.StampCourseDragHandle::after {
+  display: none;
+}
+
 .StampCourseDragHandle:focus-visible,
 .StampCourseSlot[data-drop-target="true"] .StampCourseSeal {
   outline: var(--sg-focus-ring-width) solid var(--sg-state-focus-ring);
@@ -197,8 +201,6 @@
 }
 
 .StampCourseRemoveButton {
-  --sg-button-ghost-bg: transparent;
-  --sg-button-ghost-bg-pressed: transparent;
   --sg-button-ghost-fg: var(--sg-course-remove-fg);
   position: absolute;
   z-index: 2;
@@ -214,9 +216,19 @@
 .StampCourseRemoveIcon {
   z-index: 1;
   /* Figma asset size: includes the drop-shadow margin around the 26px circle. */
-  width: 34px;
-  height: 34px;
+  width: var(--sg-course-remove-icon-size);
+  height: var(--sg-course-remove-icon-size);
   background: url("../../../assets/icons/minus.svg") center / contain no-repeat;
+}
+
+.StampCourseRemoveButton::after {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width: var(--sg-spacing-6_5);
+  height: var(--sg-spacing-6_5);
+  border-radius: var(--sg-radius-full);
+  transform: translate(-50%, calc(-50% - 2px));
 }
 
 .StampCoursePlaceName {

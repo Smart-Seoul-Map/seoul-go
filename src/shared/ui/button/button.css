@@ -71,17 +71,9 @@
   color: var(--sg-button-primary-fg);
 }
 
-.AppButton[data-variant="primary"]:active {
-  background: var(--sg-button-primary-bg-pressed);
-}
-
 .AppButton[data-variant="secondary"] {
   background: var(--sg-button-secondary-bg);
   color: var(--sg-button-secondary-fg);
-}
-
-.AppButton[data-variant="secondary"]:active {
-  background: var(--sg-button-secondary-bg-pressed);
 }
 
 .AppButton[data-variant="strong"] {
@@ -90,17 +82,9 @@
   color: var(--sg-button-strong-fg);
 }
 
-.AppButton[data-variant="strong"]:active {
-  background: var(--sg-button-strong-bg-pressed);
-}
-
 .AppButton[data-variant="danger"] {
   background: var(--sg-button-danger-bg);
   color: var(--sg-button-danger-fg);
-}
-
-.AppButton[data-variant="danger"]:active {
-  background: var(--sg-button-danger-bg-pressed);
 }
 
 .AppButton[data-variant="outline"] {
@@ -112,10 +96,6 @@
 .AppButton[data-variant="ghost"] {
   background: var(--sg-button-ghost-bg);
   color: var(--sg-button-ghost-fg);
-}
-
-.AppButton[data-variant="ghost"]:active {
-  background: var(--sg-button-ghost-bg-pressed);
 }
 
 .AppButton:disabled {
@@ -152,10 +132,6 @@
 .AppTextButton[data-variant="danger"] {
   background: transparent;
   color: var(--sg-color-text-danger);
-}
-
-.AppTextButton:active {
-  background: var(--sg-text-button-state-pressed);
 }
 
 .AppTextButton:disabled {
@@ -196,4 +172,83 @@
 .AppIconButton:disabled {
   background: transparent;
   color: var(--sg-icon-button-state-disabled);
+}
+
+.AppTabs-trigger,
+.AppResponsivePanelIconClose {
+  position: relative;
+}
+
+.AppButton::after,
+.AppIconButton::after,
+.AppTextButton::after,
+.AppTabs-trigger::after,
+.AppResponsivePanelIconClose::after,
+.AppResponsivePanelClose::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+  transition: background var(--sg-motion-duration-color-transition) var(--sg-motion-easing-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(
+      .AppButton[data-variant="ghost"],
+      .AppButton[data-variant="outline"],
+      .AppIconButton,
+      .AppTextButton,
+      .AppTabs-trigger,
+      .AppResponsivePanelIconClose,
+      .AppResponsivePanelClose
+    ):hover:not(:disabled):not([aria-disabled="true"])::after {
+    background: var(--sg-state-hover-overlay-subtle);
+  }
+}
+
+:is(
+    .AppButton[data-variant="ghost"],
+    .AppButton[data-variant="outline"],
+    .AppIconButton,
+    .AppTextButton,
+    .AppTabs-trigger,
+    .AppResponsivePanelIconClose,
+    .AppResponsivePanelClose
+  ):active:not(:disabled):not([aria-disabled="true"])::after {
+  background: var(--sg-state-pressed-overlay-subtle);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(
+      .AppButton[data-variant="primary"],
+      .AppButton[data-variant="secondary"],
+      .AppButton[data-variant="strong"],
+      .AppButton[data-variant="danger"]
+    ):hover:not(:disabled):not([aria-disabled="true"])::after {
+    background: var(--sg-state-hover-overlay-solid);
+  }
+}
+
+:is(
+    .AppButton[data-variant="primary"],
+    .AppButton[data-variant="secondary"],
+    .AppButton[data-variant="strong"],
+    .AppButton[data-variant="danger"]
+  ):active:not(:disabled):not([aria-disabled="true"])::after {
+  background: var(--sg-state-pressed-overlay-solid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(
+    .AppButton,
+    .AppIconButton,
+    .AppTextButton,
+    .AppTabs-trigger,
+    .AppResponsivePanelIconClose,
+    .AppResponsivePanelClose
+  )::after {
+    transition: none;
+  }
 }

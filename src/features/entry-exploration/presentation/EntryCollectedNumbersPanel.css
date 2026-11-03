@@ -65,8 +65,16 @@
   box-shadow: var(--sg-shadow-2);
 }
 
-.entry-collected-numbers-trigger:active {
-  transform: none;
+@media (hover: hover) and (pointer: fine) {
+  .entry-collected-numbers[data-open="false"]
+    .entry-collected-numbers-trigger:hover:not(:disabled):not([aria-disabled="true"])::after {
+    background: var(--sg-state-hover-overlay-solid);
+  }
+}
+
+.entry-collected-numbers[data-open="false"]
+  .entry-collected-numbers-trigger:active:not(:disabled):not([aria-disabled="true"])::after {
+  background: var(--sg-state-pressed-overlay-solid);
 }
 
 .entry-collected-numbers-trigger:focus-visible {
