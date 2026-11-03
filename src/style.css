@@ -28,11 +28,13 @@ body {
 .entry-exploration-page,
 .entry-exploration-scene {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .entry-exploration-page {
   background: var(--sg-color-bg-intro);
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -42,6 +44,7 @@ body {
 .entry-exploration-scene {
   touch-action: none;
   height: 100vh;
+  height: 100dvh;
   min-height: 0;
   position: relative;
 }

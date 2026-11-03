@@ -2,11 +2,13 @@
   background: var(--sg-color-bg-surface);
   color: var(--sg-color-text-default);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 
 .map-stage {
   min-height: 100vh;
+  min-height: 100dvh;
   min-width: 0;
   position: relative;
 }

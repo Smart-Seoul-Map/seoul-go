@@ -1,5 +1,5 @@
 .AppToastViewport {
-  bottom: calc(var(--sg-toast-viewport-bottom) + env(safe-area-inset-bottom));
+  bottom: calc(var(--sg-toast-viewport-bottom) + var(--sg-safe-area-bottom));
   box-sizing: border-box;
   display: flex;
   justify-content: center;

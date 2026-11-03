@@ -1,5 +1,6 @@
 .character-overlay {
   height: min(44vh, 360px);
+  height: min(44dvh, 360px);
   left: 50%;
   pointer-events: none;
   position: absolute;
