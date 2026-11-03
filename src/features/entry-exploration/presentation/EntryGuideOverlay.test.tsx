@@ -67,7 +67,7 @@ describe("EntryGuideOverlay", () => {
   test("colors only the [[ ]] words of the tip without showing the markers", () => {
     render(<EntryGuideOverlay open onOpenChange={vi.fn()} />);
 
-    const highlight = screen.getByText("근처 추천 장소");
+    const highlight = screen.getByText("장소");
     expect(highlight.tagName).toBe("SPAN");
     expect(highlight.classList.contains("entry-guide-overlay-highlight")).toBe(true);
 
@@ -80,7 +80,7 @@ describe("EntryGuideOverlay", () => {
   test("draws the title and tip in the inverted tone over the dim", () => {
     render(<EntryGuideOverlay open onOpenChange={vi.fn()} />);
 
-    const tip = screen.getByText("근처 추천 장소").parentElement;
+    const tip = screen.getByText("장소").parentElement;
     expect(screen.getByRole("heading").getAttribute("data-tone")).toBe("inverted");
     expect(tip?.getAttribute("data-tone")).toBe("inverted");
   });

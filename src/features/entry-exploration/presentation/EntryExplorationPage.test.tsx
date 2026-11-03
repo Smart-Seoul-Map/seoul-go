@@ -402,7 +402,7 @@ describe("EntryExplorationPage", () => {
   });
 
   test("opens the first entry guide when Haechi first stops on every visit and allows the arrow after its three steps", () => {
-    const guideName = /장소를 확인해 보세요/;
+    const guideName = /해치를 움직여 보세요/;
     const numberStepName = /번호를 두 개 받아요/;
     const dartStepName = /자치구를 추첨해 보세요/;
     const guideOpenEvent = { name: "entry_guide_open", source: "first_entry" };

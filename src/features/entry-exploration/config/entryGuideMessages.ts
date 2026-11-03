@@ -16,8 +16,8 @@ export const ENTRY_GUIDE_MESSAGES = {
     confirm: "확인",
     pointerAction: { mouse: "클릭", touch: "터치" },
     stepText: {
-      moveTitle: "지도를 {pointerAction}해 이동하고\n장소를 확인해 보세요!",
-      moveTip: "Tip! [[근처 추천 장소]]에서 1km 안의\n테마 장소를 바로 볼 수 있어요!",
+      moveTitle: "가고 싶은 곳을 {pointerAction}해\n해치를 움직여 보세요!",
+      moveTip: "Tip! 건물·동상 같은 [[장소]]로 가면\n어떤 곳인지 확인할 수 있어요!",
       numberTitle: "장소를 확인하면\n번호를 두 개 받아요!",
       numberTip: "Tip! 번호는 격자지도의 줄 번호예요.\n[[모은 줄]]에만 다트를 던질 수 있어요!",
       dartTitle: "번호 줄에 다트를 던져\n자치구를 추첨해 보세요!",

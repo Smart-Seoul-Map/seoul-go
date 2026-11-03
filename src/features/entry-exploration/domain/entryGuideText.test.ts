@@ -4,16 +4,16 @@ import { splitEntryGuideHighlights } from "./entryGuideText";
 
 describe("splitEntryGuideHighlights", () => {
   test("keeps text without markers as one plain segment including its line break", () => {
-    expect(splitEntryGuideHighlights("지도를 클릭해 이동하고\n장소를 확인해 보세요!")).toEqual([
-      { text: "지도를 클릭해 이동하고\n장소를 확인해 보세요!", isHighlighted: false },
+    expect(splitEntryGuideHighlights("가고 싶은 곳을 클릭해\n해치를 움직여 보세요!")).toEqual([
+      { text: "가고 싶은 곳을 클릭해\n해치를 움직여 보세요!", isHighlighted: false },
     ]);
   });
 
   test("highlights only the words inside [[ ]] and drops the markers", () => {
-    expect(splitEntryGuideHighlights("Tip! [[근처 추천 장소]]에서 1km 안의\n테마 장소")).toEqual([
+    expect(splitEntryGuideHighlights("Tip! 건물·동상 같은 [[장소]]로 가면\n어떤 곳인지")).toEqual([
       { text: "Tip! ", isHighlighted: false },
-      { text: "근처 추천 장소", isHighlighted: true },
-      { text: "에서 1km 안의\n테마 장소", isHighlighted: false },
+      { text: "장소", isHighlighted: true },
+      { text: "로 가면\n어떤 곳인지", isHighlighted: false },
     ]);
   });
 
