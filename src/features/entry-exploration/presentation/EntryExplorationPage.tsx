@@ -24,19 +24,16 @@ import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { EntryExplorationDartRouletteBoard } from "./EntryExplorationDartRouletteBoard";
 import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
+import { EntryGuideOverlay } from "./EntryGuideOverlay";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
 import {
   getEntryDartNumbers,
   getEntryNumberRewardCells,
   getEntryNumberRewardRows,
 } from "../domain/entryNumberReward";
-import {
-  ENTRY_GRID_NUMBER_REQUIRED_MESSAGE,
-  ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
-  ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
-} from "../config/entryNumberRewardConfig";
 import { useEntryCharacterSpeech } from "../application/useEntryCharacterSpeech";
-import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
+import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
+import { markEntryGuideSeen } from "../data/entryGuideStorage";
 import "./entry-edition-places.css";
 
 export type EntryExplorationPageProps = {
@@ -48,6 +45,9 @@ export type EntryExplorationPageProps = {
     placeId: EntryExplorationPlaceId;
   }) => ReactNode;
 };
+
+// 첫 진입 가이드는 방문마다 한 번 열린다(waiting → open → closed).
+type EntryGuideStatus = "waiting" | "open" | "closed";
 
 const EMPTY_ENTRY_PLACES: readonly EntryEditionPlace[] = [];
 
@@ -63,6 +63,7 @@ export function EntryExplorationPage({
   const visitPlace = useEntryNumberRewardStore((state) => state.visitPlace);
   const [pendingPlaceIds, setPendingPlaceIds] = useState<ReadonlySet<string>>(() => new Set());
   const [isCharacterMoving, setIsCharacterMoving] = useState(false);
+  const [entryGuideStatus, setEntryGuideStatus] = useState<EntryGuideStatus>("waiting");
   const {
     hasStarted,
     handleIntroStart,
@@ -90,6 +91,18 @@ export function EntryExplorationPage({
     requestDartView,
     rouletteMapRectStore,
   } = useEntryExplorationDartShot();
+  const characterSpeech = useEntryCharacterSpeech({
+    hasStarted,
+    isDartActive: dartShot.isGuideVisible,
+  });
+  // 해치가 걸어 나와 처음 멈추면(원래 인트로 말풍선이 뜨던 때) 방문마다 첫 진입 가이드를 연다.
+  // '봤음' 저장은 남겨 두지만 여는 판단에는 쓰지 않는다. 번호 안내는 내 번호의 "!"로 따로 연다.
+  const openEntryGuideOnFirstStop = (): void => {
+    if (!hasStarted || entryGuideStatus !== "waiting") return;
+    markEntryGuideSeen();
+    track({ name: "entry_guide_open", source: "first_entry" });
+    setEntryGuideStatus("open");
+  };
   const { placeVisits, panelProps, dismissOpenPanel } = useEntryExplorationPlacePanel(
     places ?? EMPTY_ENTRY_PLACES,
     {
@@ -107,15 +120,21 @@ export function EntryExplorationPage({
           return next;
         });
         showNumberRewardToast();
+        const reward = rewards.find((candidate) => candidate.placeId === placeId);
+        // 처음 번호를 얻은 순간에만 해치가 번호와 다트의 관계를 한 번 알려 준다.
+        if (reward && visibleRewards.length === 0) {
+          characterSpeech.say({ key: "firstNumber", numbers: getEntryDartNumbers([reward]) });
+        }
       },
     }
   );
   const showNumberRewardToast = (): void => {
     showToast({
-      message: ENTRY_NUMBER_REWARD_TOAST_MESSAGE,
+      message: ENTRY_GUIDE_MESSAGES.toast.numberReward,
       status: "success",
-      actionLabel: ENTRY_NUMBER_REWARD_TOAST_ACTION_LABEL,
+      actionLabel: ENTRY_GUIDE_MESSAGES.toast.numberRewardAction,
       onAction: () => {
+        track({ name: "entry_number_reward_action" });
         dismissOpenPanel();
         clearToasts();
         requestDartView();
@@ -127,7 +146,7 @@ export function EntryExplorationPage({
     collectedNumbers: getEntryDartNumbers(visibleRewards),
     onDartEntryBlocked: () => {
       track({ name: "entry_dart_blocked" });
-      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+      showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
     },
     onDartTargetHoverChange,
     onDartThrowResult,
@@ -136,7 +155,7 @@ export function EntryExplorationPage({
     onRouletteCameraSettled,
     onRouletteEntryBlocked: () => {
       track({ name: "entry_roulette_blocked" });
-      showToast({ message: ENTRY_GRID_NUMBER_REQUIRED_MESSAGE });
+      showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
     },
     onRouletteHighlight,
     onRouletteLayoutChange,
@@ -145,11 +164,6 @@ export function EntryExplorationPage({
     onRouletteViewControlsReady,
     onRouletteWin,
   });
-  const characterSpeech = useEntryCharacterSpeech({
-    hasStarted,
-    isDartActive: dartShot.isGuideVisible,
-  });
-
   useEntryExplorationThreeScene({
     places,
     containerRef,
@@ -162,8 +176,10 @@ export function EntryExplorationPage({
     onCharacterMovingChange: (isMoving) => {
       setIsCharacterMoving(isMoving);
       characterSpeech.handleCharacterMovingChange(isMoving);
+      if (!isMoving) openEntryGuideOnFirstStop();
     },
     characterSpeechAnchor: characterSpeech.anchor,
+    canDrawGuideArrow: entryGuideStatus === "closed",
   });
 
   const handleStartGridExploration = (result: EntryExplorationDartThrowResult): void => {
@@ -234,14 +250,15 @@ export function EntryExplorationPage({
         시작 지점 뽑기
       </EntryExplorationSceneButton>
       {hasStarted && renderPlacePanel?.(panelProps)}
-      {characterSpeech.speechKey &&
+      {characterSpeech.message &&
         createPortal(
-          <AppSpeechBubble
-            speaker={HAECHI_CHARACTER_NAME}
-            message={ENTRY_CHARACTER_SPEECH_MESSAGES[characterSpeech.speechKey]}
-          />,
+          <AppSpeechBubble speaker={HAECHI_CHARACTER_NAME} message={characterSpeech.message} />,
           characterSpeech.anchor.element
         )}
+      <EntryGuideOverlay
+        open={entryGuideStatus === "open"}
+        onOpenChange={(open) => setEntryGuideStatus(open ? "open" : "closed")}
+      />
     </main>
   );
 }

@@ -571,6 +571,39 @@ describe("useEntryExplorationThreeScene", () => {
     expect(dispose).toHaveBeenCalledOnce();
   });
 
+  test("waits after intro arrival until the guide arrow is allowed and then draws it", async () => {
+    const containerRef = createContainerRef();
+    const createSceneInteractionControllers = () => [];
+    const { rerender, unmount } = renderHook(
+      ({ canDrawGuideArrow }) =>
+        useEntryExplorationThreeScene({
+          places: ENTRY_TEST_PLACES,
+          containerRef,
+          createSceneInteractionControllers,
+          canDrawGuideArrow,
+        }),
+      { initialProps: { canDrawGuideArrow: false } }
+    );
+    onTestFinished(unmount);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => {
+      startIntro();
+    });
+    const guide = mocks.introFloorObject?.parent?.getObjectByName("entry-guide-arrow");
+    expect(guide).toBeDefined();
+    const arrival = ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition;
+    act(() => {
+      mocks.movementOptions?.onArrive?.({ position: arrival, target: arrival });
+    });
+    expect(mocks.domElement.hasAttribute("aria-busy")).toBe(false);
+    expect(guide?.visible).toBe(false);
+
+    rerender({ canDrawGuideArrow: true });
+    expect(guide?.visible).toBe(true);
+  });
+
   test("opens each landmark independently and rearms after leaving", async () => {
     const onOpenChange = vi.fn();
     const onFirstPlaceOpenChange = vi.fn();

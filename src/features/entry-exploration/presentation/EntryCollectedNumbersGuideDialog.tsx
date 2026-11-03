@@ -10,6 +10,7 @@ import compassIcon from "../../../assets/icons/compass.svg";
 import documentIcon from "../../../assets/icons/document.svg";
 import externalLinkIcon from "../../../assets/icons/external-link.svg";
 import heroImage from "../../../assets/entry-exploration/numbers-guide-hero.webp";
+import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
 import { ENTRY_NATIONAL_POINT_LINK } from "../config/entryNationalPointLink";
 
 import "./EntryCollectedNumbersGuideDialog.css";
@@ -26,6 +27,8 @@ const GUIDE_CARD = {
   borderRadius: "radius.4",
 } as const;
 
+const MESSAGES = ENTRY_GUIDE_MESSAGES.numberGuide;
+
 type EntryCollectedNumbersGuideDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,7 +43,7 @@ export function EntryCollectedNumbersGuideDialog({
       open={open}
       title={
         <AppBox as="span" className="entry-numbers-guide-title">
-          번호 안내
+          {MESSAGES.title}
         </AppBox>
       }
       closeOnInteractOutside
@@ -54,15 +57,10 @@ export function EntryCollectedNumbersGuideDialog({
       <AppBox className="entry-numbers-guide">
         <AppVStack gap="sm">
           <AppBox className="entry-numbers-guide-hero">
-            <img
-              src={heroImage}
-              alt="서울을 1km의 작은 격자로 나누고, 가로 세로를 지정하기 위해 사용하는 번호예요."
-              width="676"
-              height="664"
-            />
+            <img src={heroImage} alt={MESSAGES.heroAlt} width="676" height="664" />
             <AppBox className="entry-numbers-guide-caption">
               <AppText as="span" role="supporting" align="center">
-                격자마다 서로 다른 번호를 부여해요.
+                {MESSAGES.heroCaption}
               </AppText>
             </AppBox>
           </AppBox>
@@ -74,10 +72,11 @@ export function EntryCollectedNumbersGuideDialog({
               style={{ backgroundImage: `url("${compassIcon}")` }}
             />
             <AppText>
-              <span className="entry-numbers-guide-line">슬롯에서 나온 번호는</span>
+              <span className="entry-numbers-guide-line">{MESSAGES.clueLead}</span>
               <span className="entry-numbers-guide-line">
-                서울탐방GO에서{" "}
-                <span className="entry-numbers-guide-accent">탐방할 위치를 찾는 단서</span>예요!
+                {MESSAGES.cluePrefix}
+                <span className="entry-numbers-guide-accent">{MESSAGES.clueAccent}</span>
+                {MESSAGES.clueSuffix}
               </span>
             </AppText>
           </AppBox>
@@ -91,10 +90,10 @@ export function EntryCollectedNumbersGuideDialog({
             <AppBox className="entry-numbers-guide-national">
               <AppVStack>
                 <AppHeading as="h3" size="sm" tone="brand">
-                  실제 국가지점번호도 알아볼까요?
+                  {MESSAGES.nationalPointTitle}
                 </AppHeading>
                 <AppText as="span" role="supporting" tone="muted">
-                  국토를 10m 간격의 격자로 구분해 위치를 표시하는 국가 주소정보체계예요.
+                  {MESSAGES.nationalPointDescription}
                 </AppText>
               </AppVStack>
             </AppBox>

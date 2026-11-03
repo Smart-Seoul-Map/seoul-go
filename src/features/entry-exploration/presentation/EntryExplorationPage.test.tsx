@@ -11,7 +11,8 @@ import { entryNumberRewardStore } from "../application/useEntryNumberRewardStore
 import { loadEntryNumberRewards } from "../data/entryNumberRewardStorage";
 import { ENTRY_TEST_PLACES } from "../testing/entryEditionFixtures";
 import { ENTRY_HANOK_PLACE, ENTRY_HANOK_PLACE_ID } from "../config/entryAssetPlaces";
-import { ENTRY_CHARACTER_SPEECH_MESSAGES } from "../config/entryCharacterSpeechMessages";
+import { ENTRY_GUIDE_MESSAGES } from "../config/entryGuideMessages";
+import { ENTRY_GUIDE_SEEN_STORAGE_KEY } from "../data/entryGuideStorage";
 const FIRST_PLACE_ID = ENTRY_TEST_PLACES[0].id;
 const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시장", east: 54, north: 49 };
@@ -28,6 +29,7 @@ let placeVisits: UseEntryExplorationThreeSceneOptions["placeVisits"];
 let dismissPlaceFromBackground: UseEntryExplorationThreeSceneOptions["onPlacePanelDismiss"];
 let characterMovingChange: UseEntryExplorationThreeSceneOptions["onCharacterMovingChange"];
 let speechAnchor: UseEntryExplorationThreeSceneOptions["characterSpeechAnchor"];
+let canDrawArrow: UseEntryExplorationThreeSceneOptions["canDrawGuideArrow"];
 
 const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
 
@@ -52,12 +54,14 @@ vi.mock("../application/useEntryExplorationThreeScene", () => ({
     onPlacePanelDismiss,
     onCharacterMovingChange,
     characterSpeechAnchor,
+    canDrawGuideArrow,
   }: UseEntryExplorationThreeSceneOptions) => {
     placeVisits = visits;
     introStartHandler = onIntroStart;
     dismissPlaceFromBackground = onPlacePanelDismiss;
     characterMovingChange = onCharacterMovingChange;
     speechAnchor = characterSpeechAnchor;
+    canDrawArrow = canDrawGuideArrow;
     useEffect(() => {
       const controllers = createSceneInteractionControllers();
       return () => controllers.forEach((controller) => controller.dispose());
@@ -71,14 +75,14 @@ describe("EntryExplorationPage", () => {
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
     act(() => gridOptions.onDartEntryBlocked?.());
-    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
   });
 
   test("explains how to unlock the grid when the roulette entry is rejected", () => {
     renderEntryExplorationPage();
     startExploration();
     act(() => gridOptions.onRouletteEntryBlocked?.());
-    expect(screen.getByText("장소를 방문해 번호를 먼저 획득해 주세요")).toBeTruthy();
+    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
   });
 
   test("passes restored numbers to the dart and adds new numbers only after the place panel closes", () => {
@@ -177,7 +181,7 @@ describe("EntryExplorationPage", () => {
     expect(screen.getByRole("button", { name: DART_TOAST_ACTION })).toBeTruthy();
     expect(screen.getByRole("button", { name: "내 번호 접기, 2개 획득" })).toBeTruthy();
     expect(getNumberRowTexts()).toEqual(["해방촌신흥시장|54", "해방촌신흥시장|49"]);
-    expect(getSpeechText()).toContain(ENTRY_CHARACTER_SPEECH_MESSAGES.intro);
+    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.firstNumber([54, 49]));
     expect(loadEntryNumberRewards()).toEqual([FIRST_REWARD]);
     expect(router.state.location.pathname).toBe("/");
   });
@@ -379,6 +383,8 @@ describe("EntryExplorationPage", () => {
 
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
+    localStorage.setItem(ENTRY_GUIDE_SEEN_STORAGE_KEY, "1");
     entryNumberRewardStore.setState({ rewards: [] });
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       arc: vi.fn(),
@@ -393,6 +399,86 @@ describe("EntryExplorationPage", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+  });
+
+  test("opens the first entry guide when Haechi first stops on every visit and allows the arrow after its three steps", () => {
+    const guideName = /해치를 움직여 보세요/;
+    const numberStepName = /번호를 두 개 받아요/;
+    const dartStepName = /자치구를 추첨해 보세요/;
+    const guideOpenEvent = { name: "entry_guide_open", source: "first_entry" };
+    localStorage.removeItem(ENTRY_GUIDE_SEEN_STORAGE_KEY);
+    trackMock.mockClear();
+    renderEntryExplorationPage();
+    // 장면은 마운트하자마자 멈춤을 알리지만 인트로 전이라 열지 않는다.
+    act(() => characterMovingChange?.(false));
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+
+    startExploration();
+    act(() => characterMovingChange?.(true));
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+    expect(trackMock).not.toHaveBeenCalledWith(guideOpenEvent);
+
+    act(() => characterMovingChange?.(false));
+
+    expect(screen.getByRole("dialog", { name: guideName })).toBeTruthy();
+    expect(screen.queryByRole("dialog", { name: "번호 안내" })).toBeNull();
+    // 인트로 대사 자리는 가이드가 대신해 말풍선이 뜨지 않는다.
+    expect(getSpeechText()).toBe("");
+    expect(canDrawArrow).toBe(false);
+    expect(localStorage.getItem(ENTRY_GUIDE_SEEN_STORAGE_KEY)).toBe("1");
+    expect(trackMock).toHaveBeenCalledWith(guideOpenEvent);
+
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+    expect(screen.getByRole("dialog", { name: numberStepName })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.queryByRole("dialog", { name: numberStepName })).toBeNull();
+    expect(screen.getByRole("dialog", { name: dartStepName })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "확인" }));
+    expect(screen.queryByRole("dialog", { name: dartStepName })).toBeNull();
+    // 열기 전 포커스가 없었고 내 번호 패널이 접혀 "!"도 없으니 내 번호 버튼으로 돌아간다.
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: /^내 번호 열기/ }));
+    expect(canDrawArrow).toBe(true);
+
+    // 같은 방문에서는 다시 멈춰도 열지 않는다.
+    trackMock.mockClear();
+    act(() => characterMovingChange?.(true));
+    act(() => characterMovingChange?.(false));
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+    expect(trackMock).not.toHaveBeenCalledWith(guideOpenEvent);
+    expect(canDrawArrow).toBe(true);
+    cleanup();
+
+    // 다시 들어오면 '봤음'이 저장돼 있어도 첫 멈춤에 또 연다.
+    renderEntryExplorationPage();
+    startExploration();
+    expect(screen.queryByRole("dialog", { name: guideName })).toBeNull();
+    expect(canDrawArrow).toBe(false);
+    act(() => characterMovingChange?.(false));
+    expect(screen.getByRole("dialog", { name: guideName })).toBeTruthy();
+    expect(trackMock).toHaveBeenCalledWith(guideOpenEvent);
+  });
+
+  test("Haechi explains the first numbers once and not again for later rewards", () => {
+    renderEntryExplorationPage();
+    startExploration();
+    act(() => characterMovingChange?.(false));
+    act(() => {
+      placeVisits?.[FIRST_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(getSpeechText()).toContain(ENTRY_GUIDE_MESSAGES.speech.firstNumber([54, 49]));
+
+    act(() => characterMovingChange?.(true));
+    expect(getSpeechText()).toBe("");
+    act(() => characterMovingChange?.(false));
+    act(() => {
+      placeVisits?.[SECOND_PLACE_ID].update({ x: 10, z: 20 }, { x: 10, z: 20 });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(getSpeechText()).toBe("");
   });
 
   test("shows the exploration UI only after the scene reports the intro start", () => {

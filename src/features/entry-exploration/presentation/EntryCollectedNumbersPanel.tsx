@@ -1,6 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactElement, SyntheticEvent } from "react";
 
+import { track } from "@shared/lib/analytics/analytics";
 import { AppBadge } from "@shared/ui/badge";
 import { AppBox } from "@shared/ui/box";
 import { AppButton, AppIconButton } from "@shared/ui/button";
@@ -55,6 +56,10 @@ export function EntryCollectedNumbersPanel({
   }
 
   const setIsOpen = (open: boolean): void => setOpenState(open ? "open" : "closed");
+  const handleGuideButtonClick = (): void => {
+    track({ name: "entry_guide_open", source: "number_button" });
+    setIsGuideOpen(true);
+  };
 
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
@@ -140,7 +145,7 @@ export function EntryCollectedNumbersPanel({
               className="entry-collected-numbers-guide-button"
               aria-label="번호 안내"
               aria-haspopup="dialog"
-              onClick={() => setIsGuideOpen(true)}
+              onClick={handleGuideButtonClick}
             >
               !
             </button>

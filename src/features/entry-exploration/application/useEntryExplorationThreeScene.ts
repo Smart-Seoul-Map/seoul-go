@@ -85,6 +85,8 @@ export type UseEntryExplorationThreeSceneOptions = {
   onPlacePanelDismiss?: () => boolean;
   onCharacterMovingChange?: (isMoving: boolean) => void;
   characterSpeechAnchor?: THREE.Object3D;
+  // false인 동안은 인트로 도착 뒤에도 바닥 점선 화살표를 그리지 않고, true가 되면 그리기 시작한다.
+  canDrawGuideArrow?: boolean;
 };
 
 export type EntryExplorationThreeSceneControls = {
@@ -117,6 +119,7 @@ export function useEntryExplorationThreeScene({
   onPlacePanelDismiss,
   onCharacterMovingChange,
   characterSpeechAnchor,
+  canDrawGuideArrow = true,
 }: UseEntryExplorationThreeSceneOptions): void {
   const activeActionsRef = useRef<THREE.AnimationAction[]>([]);
   const onIntroStartRef = useRef(onIntroStart);
@@ -131,6 +134,8 @@ export function useEntryExplorationThreeScene({
   placesRef.current = places;
   const placeVisitsRef = useRef(placeVisits);
   placeVisitsRef.current = placeVisits;
+  const canDrawGuideArrowRef = useRef(canDrawGuideArrow);
+  canDrawGuideArrowRef.current = canDrawGuideArrow;
   const startPendingIntroRef = useRef<(() => void) | null>(null);
   const currentModelKeyRef = useRef<CharacterMovementModelKey>("idlePrimary");
   const headingRadiansRef = useRef(0);
@@ -181,6 +186,19 @@ export function useEntryExplorationThreeScene({
     [hasActiveSceneInteraction]
   );
 
+  // 인트로 도착 뒤이고 그려도 될 때만 바닥 점선 화살표를 그리기 시작한다. 두 번째 호출부터는 무시된다.
+  const startGuideArrow = useCallback(() => {
+    if (introStatusRef.current !== "ready" || !canDrawGuideArrowRef.current) return;
+    guideArrowRef.current?.start(
+      performance.now(),
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    );
+  }, []);
+
+  useEffect(() => {
+    if (canDrawGuideArrow) startGuideArrow();
+  }, [canDrawGuideArrow, startGuideArrow]);
+
   const movement = useCharacterMovementController<EntryExplorationScenePoint>({
     arrivalRadius: ENTRY_EXPLORATION_SCENE_CONFIG.arrivalRadius,
     getDistance: getEntryExplorationSceneDistance,
@@ -219,10 +237,7 @@ export function useEntryExplorationThreeScene({
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
       );
-      guideArrowRef.current?.start(
-        performance.now(),
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
-      );
+      startGuideArrow();
     },
     speedPerSecond: ENTRY_EXPLORATION_SCENE_CONFIG.characterSpeedPerSecond,
   });

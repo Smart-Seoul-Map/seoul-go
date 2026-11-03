@@ -1,0 +1,77 @@
+/* 첫 진입 가이드 오버레이. 정렬·간격은 AppVStack gap 단계를 쓰고(시안 수치와는 조금 다르다),
+   휴대폰·PC 모두 묶음을 화면 세로 가운데에 둔다. */
+.entry-guide-overlay {
+  --entry-guide-overlay-dim: rgba(0, 0, 0, 0.8);
+  /* 브랜드 분홍 그대로는 딤 위에서 14px 글자 대비(4.5:1)에 못 미쳐 흰색을 섞어 밝힌다. */
+  --entry-guide-overlay-accent: color-mix(
+    in srgb,
+    var(--sg-color-text-brand) 70%,
+    var(--sg-color-text-inverted)
+  );
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--entry-guide-overlay-dim);
+  /* 떠 있는 동안 뒤 지도로 터치·스크롤이 넘어가지 않게 한다. */
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+.entry-guide-overlay-stage {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 430px;
+  padding: 0 24px;
+}
+
+/* 단계가 바뀔 때 이미지·제목·팁만 바꿔 끼운다. 버튼은 묶음 밖에 그대로 있어 위치가 흔들리지 않는다.
+   문구의 \n 줄바꿈과 낱말 단위 줄넘김은 상속되므로 제목·팁을 감싸는 여기에 둔다. */
+.entry-guide-overlay-content {
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.entry-guide-overlay-content[data-fade] {
+  animation: entry-guide-overlay-fade 200ms ease-out;
+}
+
+@keyframes entry-guide-overlay-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.entry-guide-overlay-image {
+  flex: none;
+  width: 138px;
+  height: 111px;
+  margin: 0;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.entry-guide-overlay-highlight {
+  color: var(--entry-guide-overlay-accent);
+}
+
+/* 바깥 묶음은 stretch라 버튼만 시안 너비로 줄여 가운데에 둔다. */
+.entry-guide-overlay-button {
+  align-self: center;
+  width: 104px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-guide-overlay-content[data-fade] {
+    animation: none;
+  }
+}
+
+/* 세로가 낮은 화면(가로 모드 휴대폰 등)은 이미지만 빼서 제목·팁·버튼이 잘리지 않게 한다. 다른 수치는 그대로다. */
+@media (max-height: 420px) {
+  .entry-guide-overlay-image {
+    display: none;
+  }
+}
