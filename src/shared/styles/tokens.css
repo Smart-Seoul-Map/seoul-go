@@ -480,3 +480,10 @@
     var(--sg-color-bg-floating)
   );
 }
+
+/* PC 오른쪽 패널은 화면 폭에 맞춰 줄인다. 모바일 시트 카드도 이 토큰을 써서 861 이상에서만 바꾼다. */
+@media (min-width: 861px) {
+  :root {
+    --sg-detail-width: min(500px, max(360px, 44vw));
+  }
+}
