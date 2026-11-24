@@ -59,10 +59,9 @@ function normalizeSmartSeoulImageUrl(value: string): string {
 }
 
 function parseSeoulEdition25SelectionYear(sourceContentId: string): number | undefined {
-  const match = /^(\d{2})_edition25_\d+$/.exec(sourceContentId);
+  const match = /^(\d{4})_/.exec(sourceContentId);
 
-  // The API contract uses a two-digit selection year, not the trailing place sequence.
-  return match ? Number(`20${match[1]}`) : undefined;
+  return match ? Number(match[1]) : undefined;
 }
 
 export function normalizeSmartSeoulThemeContent(raw: unknown): SmartSeoulThemePlace | null {
