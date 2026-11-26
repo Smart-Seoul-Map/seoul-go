@@ -36,7 +36,7 @@ test("shows API images without captions and connects image buttons to scene dest
 
 test("keeps a place visitable with its API image when its mapped GLB fails", async () => {
   vi.mocked(loadEntryExplorationGltf).mockRejectedValue(new Error("failed"));
-  const place = { ...ENTRY_TEST_PLACES[0], id: "smart-seoul:1786321258890:25_edition25_24" };
+  const place = { ...ENTRY_TEST_PLACES[0], id: "smart-seoul:1786321258890:2025_Jung-gu" };
   const scenery = createEntryEditionScenery([place], vi.fn());
   await vi.waitFor(() => {
     const label = scenery.landmarks.get(place.id)!.children[0] as THREE.Object3D & {

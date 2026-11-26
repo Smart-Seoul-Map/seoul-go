@@ -104,13 +104,13 @@ describe("EntryExplorationPage", () => {
       rewards: [
         FIRST_REWARD,
         {
-          placeId: "smart-seoul:1786321258890:26_edition25_24",
+          placeId: "smart-seoul:1786321258890:2026_Jongno-gu",
           placeName: "을지로 골목",
           east: 55,
           north: 52,
         },
         {
-          placeId: "smart-seoul:1786321258890:26_edition25_23",
+          placeId: "smart-seoul:1786321258890:2026_Mapo-gu",
           placeName: "서순라길",
           east: 55,
           north: 52,

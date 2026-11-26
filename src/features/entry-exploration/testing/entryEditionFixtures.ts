@@ -3,7 +3,7 @@ import type { EntryEditionPlace } from "../domain/entryEditionPlace";
 
 export const ENTRY_TEST_PLACES: readonly EntryEditionPlace[] = [
   {
-    id: "smart-seoul:1786321258890:25_edition25_21",
+    id: "smart-seoul:1786321258890:2025_Yongsan-gu",
     name: "해방촌신흥시장",
     description: "시장 소개",
     imageUrl: "/test-market.png",
@@ -12,7 +12,7 @@ export const ENTRY_TEST_PLACES: readonly EntryEditionPlace[] = [
     position: { lat: 37.54532375, lng: 126.985085516 },
   },
   {
-    id: "smart-seoul:1786321258890:26_edition25_21",
+    id: "smart-seoul:1786321258890:2026_Yongsan-gu",
     name: "리움미술관",
     description: "미술관 소개",
     imageUrl: "/test-museum.png",
