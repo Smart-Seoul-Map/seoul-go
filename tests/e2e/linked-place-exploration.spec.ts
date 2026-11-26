@@ -39,7 +39,7 @@ async function setup(page: Page) {
           version: 1,
           places: [
             {
-              id: `smart-seoul:${edition}:25_edition25_1`,
+              id: `smart-seoul:${edition}:2025_Yongsan-gu`,
               name: "기준 장소 A",
               themeId: edition,
               position: pointA,
@@ -72,8 +72,8 @@ async function setup(page: Page) {
     const isA = params.get("coord_x") === String(pointA.lng);
     requests.push({ themeId, center: params.get("coord_x"), page: pageNo });
     let rows = [
-      row("25_edition25_1", "기준 장소 A", edition, pointA),
-      row("26_edition25_1", "기준 장소 B", edition, pointB),
+      row("2025_Yongsan-gu", "기준 장소 A", edition, pointA),
+      row("2026_Yongsan-gu", "기준 장소 B", edition, pointB),
     ];
     if (themeId !== edition) {
       rows =

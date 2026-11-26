@@ -10,7 +10,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
     "normalizes the description for theme %s",
     (themeId) => {
       const place = normalizeSmartSeoulThemeContent({
-        COT_CONTS_ID: "26_edition25_24",
+        COT_CONTS_ID: "2026_Yongsan-gu",
         COT_CONTS_NAME: "Place",
         COT_COORD_X: 126.991821159,
         COT_COORD_Y: 37.566987659,
@@ -39,9 +39,9 @@ describe("normalizeSmartSeoulThemeContent", () => {
   );
 
   test.each([
-    ["25_edition25_1", 2025],
-    ["26_edition25_24", 2026],
-    ["27_edition25_9", 2027],
+    ["2025_Jongno-gu", 2025],
+    ["2026_Yongsan-gu", 2026],
+    ["2027_Mapo-gu", 2027],
   ])("reads the selection year from %s", (sourceContentId, selectionYear) => {
     const place = normalizeSmartSeoulThemeContent({
       COT_CONTS_ID: sourceContentId,
@@ -65,7 +65,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
 
   test("does not assign an edition year to another theme", () => {
     const place = normalizeSmartSeoulThemeContent({
-      COT_CONTS_ID: "26_edition25_24",
+      COT_CONTS_ID: "2026_Yongsan-gu",
       COT_CONTS_NAME: "Old store",
       COT_COORD_X: 126.9,
       COT_COORD_Y: 37.5,
@@ -76,7 +76,7 @@ describe("normalizeSmartSeoulThemeContent", () => {
     expect(place).not.toHaveProperty("selectionYear", 2026);
   });
 
-  test.each(["edition25_24", "2026_edition25_24", "26_other_24", "26_edition25_24_extra"])(
+  test.each(["edition25_24", "26_edition25_24", "Yongsan-gu", "2026Yongsan-gu"])(
     "does not invent a selection year for malformed ID %s",
     (sourceContentId) => {
       const place = normalizeSmartSeoulThemeContent({

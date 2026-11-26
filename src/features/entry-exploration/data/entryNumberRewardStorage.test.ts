@@ -10,19 +10,19 @@ import type { EntryNumberReward } from "../domain/entryNumberReward";
 const LEGACY_STORAGE_KEY = "seoul-go:entry-number-rewards:v1";
 
 const HAEBANGCHON: EntryNumberReward = {
-  placeId: "smart-seoul:1786321258890:25_edition25_21",
+  placeId: "smart-seoul:1786321258890:2025_Yongsan-gu",
   placeName: "해방촌신흥시장",
   east: 54,
   north: 49,
 };
 const EULJIRO: EntryNumberReward = {
-  placeId: "smart-seoul:1786321258890:26_edition25_24",
+  placeId: "smart-seoul:1786321258890:2026_Jongno-gu",
   placeName: "을지로 골목",
   east: 55,
   north: 52,
 };
 const SEOSUNRA: EntryNumberReward = {
-  placeId: "smart-seoul:1786321258890:26_edition25_23",
+  placeId: "smart-seoul:1786321258890:2026_Mapo-gu",
   placeName: "서순라길",
   east: 55,
   north: 52,
@@ -86,7 +86,7 @@ describe("entry reward session storage", () => {
 
   test("filters invalid values and duplicate places without losing valid rewards", () => {
     const boundary = {
-      placeId: "smart-seoul:1786321258890:25_edition25_1",
+      placeId: "smart-seoul:1786321258890:2025_Jongno-gu",
       placeName: "경계 번호 장소",
       east: 0,
       north: 99,
@@ -119,7 +119,7 @@ describe("entry reward session storage", () => {
 
   test("restores every saved place reward without a count limit", () => {
     const stored = Array.from({ length: 12 }, (_, index) => ({
-      placeId: `smart-seoul:1786321258890:25_edition25_${index + 1}`,
+      placeId: `smart-seoul:1786321258890:2025_Gu-${String.fromCharCode(65 + index)}`,
       placeName: `장소 ${index + 1}`,
       east: 40 + index,
       north: 50,

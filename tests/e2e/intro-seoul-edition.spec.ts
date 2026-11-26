@@ -3,20 +3,22 @@ import { expect, test, type Page } from "@playwright/test";
 import { startIntro } from "./helpers/introEdition";
 
 const THEME = "1786321258890";
-const MODELED_PLACE_IDS = [
-  "26_edition25_1",
-  "25_edition25_12",
-  "25_edition25_20",
-  "25_edition25_2",
-  "25_edition25_6",
-  "25_edition25_24",
-  "25_edition25_14",
-  "26_edition25_14",
-  "26_edition25_9",
-  "25_edition25_4",
-]
-  .map((contentId) => `smart-seoul:${THEME}:${contentId}`)
-  .sort();
+const MODELED_CONTENT_IDS = [
+  "2026_Gangnam-gu",
+  "2025_Dongjak-gu",
+  "2025_Yeongdeungpo-gu",
+  "2025_Gangdong-gu",
+  "2025_Gwangjin-gu",
+  "2025_Jung-gu",
+  "2025_Seodaemun-gu",
+  "2025_Gangseo-gu",
+  "2026_Seodaemun-gu",
+  "2026_Nowon-gu",
+];
+const UNMODELED_CONTENT_IDS = ["2025_Mapo-gu", "2026_Jongno-gu", "2025_Songpa-gu"];
+const MODELED_PLACE_IDS = MODELED_CONTENT_IDS.map(
+  (contentId) => `smart-seoul:${THEME}:${contentId}`
+).sort();
 const MODEL_PATHS = [
   "/models/places/achasan_eoullim_garden.glb",
   "/models/places/amsa_dong_site.glb",
@@ -70,16 +72,17 @@ test("shows only places with a GLB model in the same slots on every visit, falls
           PAGE_NO: 1,
           PAGE_SIZE: 100,
           PAGE_COUNT: 1,
-          TOTAL_COUNT: 50,
-          DATA_COUNT: 50,
+          TOTAL_COUNT: 13,
+          DATA_COUNT: 13,
         },
-        body: Array.from({ length: 50 }, (_, index) => ({
+        // Unmodeled places must never be shown; coordinates differ so every anchor is unique.
+        body: [...MODELED_CONTENT_IDS, ...UNMODELED_CONTENT_IDS].map((contentId, index) => ({
           COT_THEME_ID: THEME,
-          COT_CONTS_ID: `${index < 25 ? 25 : 26}_edition25_${(index % 25) + 1}`,
+          COT_CONTS_ID: contentId,
           COT_CONTS_NAME: `서울에디션 장소 ${index + 1}`,
           COT_VALUE_01: `장소 ${index + 1} 소개`,
-          COT_COORD_X: 126.985,
-          COT_COORD_Y: 37.545,
+          COT_COORD_X: 126.985 + index * 0.001,
+          COT_COORD_Y: 37.545 + index * 0.001,
           COT_GU_NAME: "용산구",
         })),
       },
@@ -143,7 +146,7 @@ test("keeps entry closed while loading and retries after an API error", async ({
             body: [
               {
                 COT_THEME_ID: THEME,
-                COT_CONTS_ID: "25_edition25_24",
+                COT_CONTS_ID: "2025_Seodaemun-gu",
                 COT_CONTS_NAME: "해방촌신흥시장",
                 COT_COORD_X: 126.985,
                 COT_COORD_Y: 37.545,

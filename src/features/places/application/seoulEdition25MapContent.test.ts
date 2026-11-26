@@ -8,9 +8,9 @@ describe("createSeoulEdition25MapContent", () => {
   test("shows only edition places in the current district and preserves marker selection years", () => {
     const places = normalizeSmartSeoulThemeContentsResponse({
       body: [
-        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "26_edition25_24", COT_GU_NAME: "용산구" },
-        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "25_edition25_24", COT_GU_NAME: "용산구" },
-        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "26_edition25_23", COT_GU_NAME: "종로구" },
+        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "2026_Yongsan-gu", COT_GU_NAME: "용산구" },
+        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "2025_Yongsan-gu", COT_GU_NAME: "용산구" },
+        { COT_THEME_ID: "1786321258890", COT_CONTS_ID: "2026_Jongno-gu", COT_GU_NAME: "종로구" },
         { COT_THEME_ID: "100575", COT_CONTS_ID: "old-store", COT_GU_NAME: "용산구" },
       ].map((row) => ({
         ...row,
@@ -25,8 +25,8 @@ describe("createSeoulEdition25MapContent", () => {
     );
 
     expect(content.placeMarkers.features.map((feature) => feature.id)).toEqual([
-      "smart-seoul:1786321258890:26_edition25_24",
-      "smart-seoul:1786321258890:25_edition25_24",
+      "smart-seoul:1786321258890:2026_Yongsan-gu",
+      "smart-seoul:1786321258890:2025_Yongsan-gu",
     ]);
     expect(content).not.toHaveProperty("selectionYearLabel");
     expect(

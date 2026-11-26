@@ -67,9 +67,10 @@ describe("entry reward store", () => {
     const store = createEntryNumberRewardStore({ storage: null });
     for (let index = 1; index <= 12; index += 1) {
       expect(
-        store
-          .getState()
-          .visitPlace({ ...HAEBANGCHON, id: `smart-seoul:1786321258890:25_edition25_${index}` })
+        store.getState().visitPlace({
+          ...HAEBANGCHON,
+          id: `smart-seoul:1786321258890:2025_Gu-${String.fromCharCode(64 + index)}`,
+        })
       ).not.toBeNull();
     }
     expect(store.getState().rewards).toHaveLength(12);

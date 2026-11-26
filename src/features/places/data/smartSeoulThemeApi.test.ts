@@ -195,8 +195,8 @@ describe("Smart Seoul theme API", () => {
   test("loads later edition years across pages without merging different year IDs", async () => {
     const requestedPages: string[] = [];
     const rows = [
-      { COT_CONTS_ID: "26_edition25_24", COT_VALUE_01: "Selected in 2026" },
-      { COT_CONTS_ID: "27_edition25_24", COT_VALUE_01: "Selected in 2027" },
+      { COT_CONTS_ID: "2026_Yongsan-gu", COT_VALUE_01: "Selected in 2026" },
+      { COT_CONTS_ID: "2027_Yongsan-gu", COT_VALUE_01: "Selected in 2027" },
     ];
     const places = await fetchSmartSeoulThemePlaces({
       apiKey: "KEY",
@@ -224,12 +224,12 @@ describe("Smart Seoul theme API", () => {
     expect(requestedPages).toEqual(["1", "2"]);
     expect(places).toMatchObject([
       {
-        id: "smart-seoul:1786321258890:26_edition25_24",
+        id: "smart-seoul:1786321258890:2026_Yongsan-gu",
         selectionYear: 2026,
         description: "Selected in 2026",
       },
       {
-        id: "smart-seoul:1786321258890:27_edition25_24",
+        id: "smart-seoul:1786321258890:2027_Yongsan-gu",
         selectionYear: 2027,
         description: "Selected in 2027",
       },

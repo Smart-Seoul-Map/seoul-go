@@ -12,7 +12,7 @@ export async function mockIntroEdition(page: Page): Promise<void> {
         ? [
             {
               COT_THEME_ID: themeId,
-              COT_CONTS_ID: "26_edition25_1",
+              COT_CONTS_ID: "2026_Gangnam-gu",
               COT_CONTS_NAME: INTRO_PLACE_NAME,
               COT_GU_NAME: "용산구",
               COT_COORD_X: 126.985085516,
