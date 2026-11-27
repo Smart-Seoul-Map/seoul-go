@@ -44,5 +44,12 @@ export const ENTRY_EXPLORATION_SCENE_CONFIG = {
     },
   },
   maxFrameDeltaSeconds: 0.04,
+  movementBounds: {
+    characterWallMargin: {
+      across: 1.2,
+      along: 5,
+    },
+    padding: 6,
+  },
   shadowCameraSize: 1000,
 } as const;

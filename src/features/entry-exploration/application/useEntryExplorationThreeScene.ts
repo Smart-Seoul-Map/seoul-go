@@ -37,6 +37,13 @@ import {
   type EntryExplorationScenePoint,
 } from "../domain/entryExplorationSceneMath";
 import { resolveEntryIntroLayout } from "../domain/entryIntroLayout";
+import {
+  clampEntryIntroCameraFocus,
+  clampEntryIntroMovementPoint,
+  createEntryIntroMovementBounds,
+  getEntryIntroCameraGroundHalfExtent,
+  type EntryIntroMovementBounds,
+} from "../domain/entryIntroMovementBounds";
 import { loadEntryExplorationGltf } from "./entryExplorationGltfLoader";
 import {
   createEntryExplorationIntroFloor,
@@ -147,6 +154,7 @@ export function useEntryExplorationThreeScene({
   );
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const sceneHandlesRef = useRef<SceneHandles | null>(null);
+  const movementBoundsRef = useRef<EntryIntroMovementBounds | null>(null);
   const {
     activateReadySceneInteraction,
     clearSceneInteractionApproach,
@@ -169,6 +177,26 @@ export function useEntryExplorationThreeScene({
     updateSceneInteractionTriggers,
   } = useEntryExplorationSceneInteractionRegistry();
 
+  const toCameraFocus = useCallback(
+    (camera: THREE.OrthographicCamera, position: EntryExplorationScenePoint) => {
+      const movementBounds = movementBoundsRef.current;
+
+      if (!movementBounds) {
+        return position;
+      }
+
+      const cameraGroundHalfExtent = getEntryIntroCameraGroundHalfExtent({
+        cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
+        viewHalfHeight: (camera.top - camera.bottom) / 2,
+        viewHalfWidth: (camera.right - camera.left) / 2,
+        zoom: 1,
+      });
+
+      return clampEntryIntroCameraFocus(position, movementBounds, cameraGroundHalfExtent);
+    },
+    []
+  );
+
   const applyScenePosition = useCallback(
     (position: EntryExplorationScenePoint) => {
       const handles = sceneHandlesRef.current;
@@ -180,10 +208,10 @@ export function useEntryExplorationThreeScene({
       handles.character?.position.set(position.x, 0, position.z);
 
       if (introStatusRef.current === "ready" && !hasActiveSceneInteraction()) {
-        updateEntryExplorationCameraFocus(handles.camera, position);
+        updateEntryExplorationCameraFocus(handles.camera, toCameraFocus(handles.camera, position));
       }
     },
-    [hasActiveSceneInteraction]
+    [hasActiveSceneInteraction, toCameraFocus]
   );
 
   // 인트로 도착 뒤이고 그려도 될 때만 바닥 점선 화살표를 그리기 시작한다. 두 번째 호출부터는 무시된다.
@@ -233,7 +261,7 @@ export function useEntryExplorationThreeScene({
       handles.renderer.domElement.tabIndex = -1;
       updateEntryExplorationCameraView(
         handles.camera,
-        introTargetRef.current,
+        toCameraFocus(handles.camera, introTargetRef.current),
         ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
         1
       );
@@ -251,7 +279,7 @@ export function useEntryExplorationThreeScene({
       return;
     }
 
-    const { x, z } = movementRef.current.getCurrentPosition();
+    const { x, z } = toCameraFocus(handles.camera, movementRef.current.getCurrentPosition());
     const { cameraOffset, cameraTransitionDurationMs } = ENTRY_EXPLORATION_SCENE_CONFIG;
 
     cameraTransitionRef.current = createSceneCameraTransition({
@@ -262,7 +290,7 @@ export function useEntryExplorationThreeScene({
       toPosition: new THREE.Vector3(x + cameraOffset.x, cameraOffset.y, z + cameraOffset.z),
       toZoom: 1,
     });
-  }, []);
+  }, [toCameraFocus]);
 
   const deactivateActiveInteraction = useCallback(() => {
     if (deactivateActiveSceneInteraction()) {
@@ -385,6 +413,16 @@ export function useEntryExplorationThreeScene({
         sceneObjectMeshes[index].position.setX(point.x).setZ(point.z);
       });
       setSceneInteractionLayout(layout);
+      movementBoundsRef.current = createEntryIntroMovementBounds({
+        cameraOffset: ENTRY_EXPLORATION_SCENE_CONFIG.cameraOffset,
+        padding: ENTRY_EXPLORATION_SCENE_CONFIG.movementBounds.padding,
+        points: [
+          ...Object.values(layout.objects),
+          ...layout.edition,
+          ENTRY_EXPLORATION_SCENE_CONFIG.intro.characterSpawnPosition,
+          ENTRY_EXPLORATION_SCENE_CONFIG.intro.targetPosition,
+        ],
+      });
 
       return editionScenery?.applyLayout(layout) ?? null;
     };
@@ -489,6 +527,7 @@ export function useEntryExplorationThreeScene({
       );
       const { cameraOffset } = ENTRY_EXPLORATION_SCENE_CONFIG;
       const introCenter = introFloor.getCenter();
+      const cameraFocus = toCameraFocus(camera, cameraTarget);
 
       if (guideDestination) {
         const guide = createEntryExplorationGuideArrow({
@@ -511,11 +550,11 @@ export function useEntryExplorationThreeScene({
         durationMs: ENTRY_EXPLORATION_SCENE_CONFIG.intro.camera.transitionDurationMs,
         fromLookAt: new THREE.Vector3(introCenter.x, 0, introCenter.z),
         now: time,
-        toLookAt: new THREE.Vector3(cameraTarget.x, 0, cameraTarget.z),
+        toLookAt: new THREE.Vector3(cameraFocus.x, 0, cameraFocus.z),
         toPosition: new THREE.Vector3(
-          cameraTarget.x + cameraOffset.x,
+          cameraFocus.x + cameraOffset.x,
           cameraOffset.y,
-          cameraTarget.z + cameraOffset.z
+          cameraFocus.z + cameraOffset.z
         ),
         toZoom: 1,
       });
@@ -603,10 +642,17 @@ export function useEntryExplorationThreeScene({
       }
 
       Object.values(placeVisitsRef.current ?? {}).forEach((visit) => visit.dismiss());
-      movementRef.current.moveTo({
-        x: floorHit.point.x,
-        z: floorHit.point.z,
-      });
+      const floorPoint = { x: floorHit.point.x, z: floorHit.point.z };
+      const movementBounds = movementBoundsRef.current;
+      movementRef.current.moveTo(
+        movementBounds
+          ? clampEntryIntroMovementPoint(
+              floorPoint,
+              movementBounds,
+              ENTRY_EXPLORATION_SCENE_CONFIG.movementBounds.characterWallMargin
+            )
+          : floorPoint
+      );
     };
 
     const handlePointerMove = (event: PointerEvent) => {
@@ -721,7 +767,10 @@ export function useEntryExplorationThreeScene({
       }
 
       if (introStatusRef.current === "ready" && releaseInactiveSceneInteraction()) {
-        updateEntryExplorationCameraFocus(camera, movementRef.current.getCurrentPosition());
+        updateEntryExplorationCameraFocus(
+          camera,
+          toCameraFocus(camera, movementRef.current.getCurrentPosition())
+        );
       }
 
       if (introStatusRef.current === "ready") {
@@ -793,6 +842,7 @@ export function useEntryExplorationThreeScene({
     setSceneInteractionCharacter,
     setSceneInteractionLayout,
     takeSceneInteractionCharacterDestination,
+    toCameraFocus,
     updateActiveSceneInteractionCamera,
     updateSceneInteractions,
     updateSceneInteractionTriggers,
