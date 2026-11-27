@@ -47,7 +47,7 @@ type DartArrowMetrics = {
   width: number;
 };
 
-const { clickHint, crosshair, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
+const { crosshair, flight, idleArrow, sprite } = ENTRY_EXPLORATION_DART_CONFIG;
 
 function getArrowLayout(containerWidth: number): DartArrowLayout {
   const { narrowViewport } = idleArrow;
@@ -116,7 +116,6 @@ export function EntryExplorationDartArrow({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<HTMLButtonElement | null>(null);
   const crosshairRef = useRef<HTMLImageElement | null>(null);
-  const clickHintRef = useRef<HTMLImageElement | null>(null);
   const pointerRef = useRef<EntryExplorationDartScreenPoint | null>(null);
   const flightRef = useRef<DartFlight | null>(null);
   const landedShotRef = useRef<EntryExplorationDartThrowResult | null>(null);
@@ -174,7 +173,6 @@ export function EntryExplorationDartArrow({
       }
 
       drawCrosshair(crosshairRef.current, activeFlight?.to ?? pointerRef.current, metrics);
-      drawClickHint(clickHintRef.current, metrics);
       drawArrow(arrowRef.current, activeFlight, rotationRef.current, time, metrics);
 
       frameId = requestAnimationFrame(render);
@@ -230,14 +228,6 @@ export function EntryExplorationDartArrow({
         src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartCrosshair.src}
       />
 
-      <img
-        ref={clickHintRef}
-        alt=""
-        className="entry-exploration-dart-arrow__click-hint"
-        data-shown={shot === null && !isTargetHovered}
-        src={ENTRY_EXPLORATION_TEXTURE_ASSETS.dartClickHint.src}
-      />
-
       <button
         ref={arrowRef}
         aria-label="화살 쏘기"
@@ -274,20 +264,6 @@ function drawCrosshair(
 
   element.style.width = `${metrics.crosshairSize}px`;
   drawCentered(element, point);
-}
-
-function drawClickHint(element: HTMLImageElement | null, metrics: DartArrowMetrics): void {
-  if (!element) {
-    return;
-  }
-
-  const restTipPoint = getTipPoint(idleArrow.restRotationDegrees, metrics);
-
-  element.style.width = `${clickHint.width * metrics.scale}px`;
-  drawCentered(element, {
-    x: restTipPoint.x + clickHint.offsetFromTip.x * metrics.scale,
-    y: restTipPoint.y + clickHint.offsetFromTip.y * metrics.scale,
-  });
 }
 
 function drawArrow(

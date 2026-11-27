@@ -18,7 +18,7 @@ const SECOND_PLACE_ID = ENTRY_TEST_PLACES[1].id;
 const FIRST_REWARD = { placeId: FIRST_PLACE_ID, placeName: "해방촌신흥시장", east: 54, north: 49 };
 const SECOND_REWARD = { placeId: SECOND_PLACE_ID, placeName: "리움미술관", east: 55, north: 48 };
 const TOAST_MESSAGE = "번호를 추가했어요";
-const DART_TOAST_ACTION = "다트게임하기";
+const DART_TOAST_ACTION = "시작 지점 뽑기";
 import type { CreateEntryExplorationSceneInteractionControllersOptions } from "../application/createEntryExplorationSceneInteractionControllers";
 import { createEntryNumberRewardStore } from "../application/entryNumberRewardStore";
 
@@ -74,14 +74,7 @@ describe("EntryExplorationPage", () => {
     renderEntryExplorationPage();
     startExploration();
     expect(gridOptions.getCollectedNumbers?.()).toEqual([]);
-    act(() => gridOptions.onDartEntryBlocked?.());
-    expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
-  });
-
-  test("explains how to unlock the grid when the roulette entry is rejected", () => {
-    renderEntryExplorationPage();
-    startExploration();
-    act(() => gridOptions.onRouletteEntryBlocked?.());
+    act(() => gridOptions.onEntryBlocked?.());
     expect(screen.getByText(ENTRY_GUIDE_MESSAGES.toast.numberRequired)).toBeTruthy();
   });
 
@@ -573,10 +566,9 @@ function registerDartViewControls() {
     requestApproach: vi.fn(),
     startRoulette: vi.fn(),
     resetThrow: vi.fn(),
-    setHitCell: vi.fn(),
     throwAtRandomCell: vi.fn(),
   };
-  act(() => gridOptions.onDartViewControlsReady?.(controls));
+  act(() => gridOptions.onControlsReady?.(controls));
   return controls;
 }
 

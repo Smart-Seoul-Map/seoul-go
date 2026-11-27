@@ -26,9 +26,6 @@ export type EntryExplorationSceneObject = EntryExplorationFloorOverlayObject;
 export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID = "seoul-tile-map-floor-sketch";
 export const ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID =
   "seoul-tile-map-background-floor-sketch";
-export const ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID = "seoul-tile-map-roulette-floor-sketch";
-export const ENTRY_EXPLORATION_ROULETTE_TILE_MAP_BACKGROUND_OBJECT_ID =
-  "seoul-tile-map-roulette-background-floor-sketch";
 
 const SEOUL_TILE_MAP_BACKGROUND_OBJECT = {
   assetKey: "seoulTileMapBackground",
@@ -55,9 +52,4 @@ export const ENTRY_EXPLORATION_SCENE_OBJECTS = [
     id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_BACKGROUND_OBJECT_ID,
   },
   { ...SEOUL_TILE_MAP_OBJECT, id: ENTRY_EXPLORATION_SEOUL_TILE_MAP_OBJECT_ID },
-  {
-    ...SEOUL_TILE_MAP_BACKGROUND_OBJECT,
-    id: ENTRY_EXPLORATION_ROULETTE_TILE_MAP_BACKGROUND_OBJECT_ID,
-  },
-  { ...SEOUL_TILE_MAP_OBJECT, id: ENTRY_EXPLORATION_ROULETTE_TILE_MAP_OBJECT_ID },
 ] as const satisfies readonly EntryExplorationSceneObject[];

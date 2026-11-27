@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
+import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import type {
   EntryExplorationDartRouletteLayout,
   EntryExplorationDartThrowResult,
@@ -28,22 +29,67 @@ function createViewControls(): EntryExplorationDartViewControls {
   return {
     requestApproach: vi.fn(),
     resetThrow: vi.fn(),
-    setHitCell: vi.fn(),
     startRoulette: vi.fn(() => true),
     throwAtRandomCell: vi.fn(),
   };
 }
 
 describe("useEntryExplorationDartShot", () => {
-  test("tracks the roulette board and shows START again after retrying", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("plays the roulette win on the arrow landing cell before showing the result", () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() => useEntryExplorationDartShot());
+
+    act(() => {
+      result.current.onActiveChange(true);
+      result.current.onDartThrowResult(ROULETTE_RESULT);
+    });
+
+    expect(result.current.dartShot.shotResult).toBe(ROULETTE_RESULT);
+    expect(result.current.dartShot.rouletteBoard.win).toBeNull();
+
+    act(() => result.current.onFlightEnd());
+
+    expect(result.current.dartShot.rouletteBoard.win).toEqual({
+      cell: ROULETTE_RESULT.cell,
+      gridNumber: ROULETTE_RESULT.gridNumber,
+    });
+    expect(result.current.dartShot.landedResult).toBeNull();
+
+    act(() => vi.advanceTimersByTime(ENTRY_EXPLORATION_DART_ROULETTE_CONFIG.steps.winHoldMs));
+
+    expect(result.current.dartShot.landedResult).toBe(ROULETTE_RESULT);
+  });
+
+  test("drops the pending arrow result when the view closes", () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() => useEntryExplorationDartShot());
+
+    act(() => {
+      result.current.onActiveChange(true);
+      result.current.onDartThrowResult(ROULETTE_RESULT);
+    });
+    act(() => result.current.onFlightEnd());
+    act(() => result.current.onActiveChange(false));
+    act(() => vi.runAllTimers());
+
+    expect(result.current.dartShot.landedResult).toBeNull();
+  });
+
+  test("tracks the roulette board and shows the random pick button again after retrying", () => {
     const controls = createViewControls();
     const win = { cell: NEXT_CELL, gridNumber: ROULETTE_RESULT.gridNumber };
     const { result } = renderHook(() => useEntryExplorationDartShot());
 
     act(() => {
-      result.current.onRouletteViewControlsReady(controls);
-      result.current.onRouletteViewActiveChange(true);
-      result.current.onRouletteCameraSettled();
+      result.current.onControlsReady(controls);
+      result.current.onActiveChange(true);
+      result.current.onCameraSettled();
       result.current.onRouletteLayoutChange(LAYOUT);
     });
     act(() => result.current.onRouletteStart());
@@ -67,7 +113,6 @@ describe("useEntryExplorationDartShot", () => {
     act(() => result.current.onRouletteThrowResult(ROULETTE_RESULT));
 
     expect(result.current.dartShot.landedResult).toBe(ROULETTE_RESULT);
-    expect(controls.setHitCell).not.toHaveBeenCalled();
 
     act(() => result.current.onRetryThrow());
 
@@ -77,7 +122,6 @@ describe("useEntryExplorationDartShot", () => {
       isRouletteStarted: false,
       rouletteBoard: { activeCell: null, layout: BOARD_LAYOUT, step: 0, win: null },
       shotResult: null,
-      viewKind: "roulette",
     });
   });
 
@@ -87,7 +131,7 @@ describe("useEntryExplorationDartShot", () => {
     const { result } = renderHook(() => useEntryExplorationDartShot());
 
     act(() => {
-      result.current.onRouletteViewActiveChange(true);
+      result.current.onActiveChange(true);
       result.current.onRouletteLayoutChange(LAYOUT);
     });
 
@@ -107,11 +151,11 @@ describe("useEntryExplorationDartShot", () => {
     const { result } = renderHook(() => useEntryExplorationDartShot());
 
     act(() => {
-      result.current.onRouletteViewActiveChange(true);
+      result.current.onActiveChange(true);
       result.current.onRouletteLayoutChange(LAYOUT);
       result.current.onRouletteHighlight({ cell: FIRST_CELL, step: 0 });
     });
-    act(() => result.current.onRouletteViewActiveChange(false));
+    act(() => result.current.onActiveChange(false));
 
     expect(result.current.dartShot.rouletteBoard).toEqual({
       activeCell: null,

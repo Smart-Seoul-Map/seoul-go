@@ -1,30 +1,14 @@
 import { useCallback, useRef } from "react";
 
 import { createEntryExplorationSceneInteractionControllers } from "./createEntryExplorationSceneInteractionControllers";
-import type {
-  EntryExplorationDartRouletteHighlight,
-  EntryExplorationDartRouletteLayout,
-  EntryExplorationDartRouletteWin,
-  EntryExplorationDartThrowResult,
-  EntryExplorationDartViewControls,
-} from "./entryExplorationSeoulTileMapViewInteraction";
+import type { EntryExplorationSeoulTileMapViewInteractionOptions } from "./entryExplorationSeoulTileMapViewInteraction";
 import type { EntryExplorationSceneInteractionController } from "./useEntryExplorationSceneInteractionRegistry";
 
-export type UseEntryExplorationSceneInteractionControllersOptions = {
+export type UseEntryExplorationSceneInteractionControllersOptions = Omit<
+  EntryExplorationSeoulTileMapViewInteractionOptions,
+  "getCollectedNumbers"
+> & {
   collectedNumbers?: readonly number[];
-  onDartEntryBlocked?: () => void;
-  onDartThrowResult?: (result: EntryExplorationDartThrowResult) => void;
-  onDartTargetHoverChange?: (isOverValidCell: boolean) => void;
-  onDartViewActiveChange?: (isActive: boolean) => void;
-  onDartViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
-  onRouletteCameraSettled?: () => void;
-  onRouletteEntryBlocked?: () => void;
-  onRouletteHighlight?: (highlight: EntryExplorationDartRouletteHighlight) => void;
-  onRouletteLayoutChange?: (layout: EntryExplorationDartRouletteLayout) => void;
-  onRouletteThrowResult?: (result: EntryExplorationDartThrowResult) => void;
-  onRouletteViewActiveChange?: (isActive: boolean) => void;
-  onRouletteViewControlsReady?: (controls: EntryExplorationDartViewControls) => void;
-  onRouletteWin?: (win: EntryExplorationDartRouletteWin) => void;
 };
 
 type UseEntryExplorationSceneInteractionControllersResult = {
@@ -33,63 +17,51 @@ type UseEntryExplorationSceneInteractionControllersResult = {
 
 export function useEntryExplorationSceneInteractionControllers({
   collectedNumbers = [],
-  onDartEntryBlocked,
+  onActiveChange,
+  onCameraSettled,
+  onControlsReady,
   onDartThrowResult,
-  onDartTargetHoverChange,
-  onDartViewActiveChange,
-  onDartViewControlsReady,
-  onRouletteCameraSettled,
-  onRouletteEntryBlocked,
+  onEntryBlocked,
   onRouletteHighlight,
   onRouletteLayoutChange,
   onRouletteThrowResult,
-  onRouletteViewActiveChange,
-  onRouletteViewControlsReady,
   onRouletteWin,
+  onTargetHoverChange,
 }: UseEntryExplorationSceneInteractionControllersOptions = {}): UseEntryExplorationSceneInteractionControllersResult {
   const collectedNumbersRef = useRef(collectedNumbers);
   collectedNumbersRef.current = collectedNumbers;
-  const onDartEntryBlockedRef = useRef(onDartEntryBlocked);
-  onDartEntryBlockedRef.current = onDartEntryBlocked;
-  const onRouletteEntryBlockedRef = useRef(onRouletteEntryBlocked);
-  onRouletteEntryBlockedRef.current = onRouletteEntryBlocked;
+  const onEntryBlockedRef = useRef(onEntryBlocked);
+  onEntryBlockedRef.current = onEntryBlocked;
   const getCollectedNumbers = useCallback(() => collectedNumbersRef.current, []);
-  const handleDartEntryBlocked = useCallback(() => onDartEntryBlockedRef.current?.(), []);
-  const handleRouletteEntryBlocked = useCallback(() => onRouletteEntryBlockedRef.current?.(), []);
+  const handleEntryBlocked = useCallback(() => onEntryBlockedRef.current?.(), []);
 
   const createSceneInteractionControllers = useCallback(
     () =>
       createEntryExplorationSceneInteractionControllers({
         getCollectedNumbers,
-        onDartEntryBlocked: handleDartEntryBlocked,
-        onDartTargetHoverChange,
+        onActiveChange,
+        onCameraSettled,
+        onControlsReady,
         onDartThrowResult,
-        onDartViewActiveChange,
-        onDartViewControlsReady,
-        onRouletteCameraSettled,
-        onRouletteEntryBlocked: handleRouletteEntryBlocked,
+        onEntryBlocked: handleEntryBlocked,
         onRouletteHighlight,
         onRouletteLayoutChange,
         onRouletteThrowResult,
-        onRouletteViewActiveChange,
-        onRouletteViewControlsReady,
         onRouletteWin,
+        onTargetHoverChange,
       }),
     [
       getCollectedNumbers,
-      handleDartEntryBlocked,
-      handleRouletteEntryBlocked,
-      onDartTargetHoverChange,
+      handleEntryBlocked,
+      onActiveChange,
+      onCameraSettled,
+      onControlsReady,
       onDartThrowResult,
-      onDartViewActiveChange,
-      onDartViewControlsReady,
-      onRouletteCameraSettled,
       onRouletteHighlight,
       onRouletteLayoutChange,
       onRouletteThrowResult,
-      onRouletteViewActiveChange,
-      onRouletteViewControlsReady,
       onRouletteWin,
+      onTargetHoverChange,
     ]
   );
 

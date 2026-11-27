@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ENTRY_EXPLORATION_DART_ROULETTE_CONFIG } from "../config/entryExplorationDartRouletteConfig";
 import type { SeoulGridCell } from "../domain/seoulGridNumber";
@@ -8,7 +8,6 @@ import type {
   EntryExplorationDartRouletteWin,
   EntryExplorationDartThrowResult,
   EntryExplorationDartViewControls,
-  EntryExplorationDartViewKind,
   EntryExplorationDartViewportRect,
 } from "./entryExplorationSeoulTileMapViewInteraction";
 
@@ -38,29 +37,25 @@ export type EntryExplorationDartShotViewModel = {
   landedResult: EntryExplorationDartThrowResult | null;
   rouletteBoard: EntryExplorationDartRouletteBoardState;
   shotResult: EntryExplorationDartThrowResult | null;
-  viewKind: EntryExplorationDartViewKind;
 };
 
 type EntryExplorationDartShotHookResult = {
   dartShot: EntryExplorationDartShotViewModel;
+  onActiveChange: (isActive: boolean) => void;
   onArrowThrow: () => void;
-  onDartTargetHoverChange: (isTargetHovered: boolean) => void;
+  onCameraSettled: () => void;
+  onControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onDartThrowResult: (result: EntryExplorationDartThrowResult) => void;
-  onDartViewActiveChange: (isActive: boolean) => void;
-  onDartViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onFlightEnd: () => void;
-  onRequestRouletteView: () => void;
   onRetryThrow: () => void;
-  onRouletteCameraSettled: () => void;
   onRouletteHighlight: (highlight: EntryExplorationDartRouletteHighlight) => void;
   onRouletteLayoutChange: (layout: EntryExplorationDartRouletteLayout) => void;
-  rouletteMapRectStore: EntryExplorationDartRouletteMapRectStore;
   onRouletteStart: () => void;
   onRouletteThrowResult: (result: EntryExplorationDartThrowResult) => void;
-  onRouletteViewActiveChange: (isActive: boolean) => void;
-  onRouletteViewControlsReady: (controls: EntryExplorationDartViewControls) => void;
   onRouletteWin: (win: EntryExplorationDartRouletteWin) => void;
+  onTargetHoverChange: (isTargetHovered: boolean) => void;
   requestDartView: () => void;
+  rouletteMapRectStore: EntryExplorationDartRouletteMapRectStore;
 };
 
 const EMPTY_ROULETTE_BOARD: EntryExplorationDartRouletteBoardState = {
@@ -82,35 +77,34 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   const [rouletteBoard, setRouletteBoard] = useState(EMPTY_ROULETTE_BOARD);
   const [rouletteMapRectStore] = useState(createRouletteMapRectStore);
   const rouletteBoardLayoutRef = useRef<EntryExplorationDartRouletteBoardLayout | null>(null);
-  const [viewKind, setViewKind] = useState<EntryExplorationDartViewKind>("arrow");
   const shotResultRef = useRef<EntryExplorationDartThrowResult | null>(null);
-  const viewKindRef = useRef<EntryExplorationDartViewKind>("arrow");
-  const viewControlsRef = useRef<
-    Record<EntryExplorationDartViewKind, EntryExplorationDartViewControls | null>
-  >({
-    arrow: null,
-    roulette: null,
-  });
+  const arrowWinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const viewControlsRef = useRef<EntryExplorationDartViewControls | null>(null);
 
-  const onDartViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
-    viewControlsRef.current.arrow = controls;
+  const cancelArrowWin = useCallback(() => {
+    if (arrowWinTimerRef.current !== null) {
+      clearTimeout(arrowWinTimerRef.current);
+    }
+
+    arrowWinTimerRef.current = null;
   }, []);
 
-  const onRouletteViewControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
-    viewControlsRef.current.roulette = controls;
+  useEffect(() => cancelArrowWin, [cancelArrowWin]);
+
+  const onControlsReady = useCallback((controls: EntryExplorationDartViewControls) => {
+    viewControlsRef.current = controls;
   }, []);
 
-  const handleViewActiveChange = useCallback(
-    (kind: EntryExplorationDartViewKind, isActive: boolean) => {
+  const onActiveChange = useCallback(
+    (isActive: boolean) => {
       setIsGuideVisible(isActive);
 
       if (isActive) {
-        viewKindRef.current = kind;
-        setViewKind(kind);
-
         return;
       }
 
+      cancelArrowWin();
+      shotResultRef.current = null;
       setIsTargetHovered(false);
       setIsRouletteReady(false);
       setIsRouletteStarted(false);
@@ -118,19 +112,8 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
       rouletteBoardLayoutRef.current = null;
       setShotResult(null);
       setLandedResult(null);
-      viewControlsRef.current[kind]?.setHitCell(null);
     },
-    []
-  );
-
-  const onDartViewActiveChange = useCallback(
-    (isActive: boolean) => handleViewActiveChange("arrow", isActive),
-    [handleViewActiveChange]
-  );
-
-  const onRouletteViewActiveChange = useCallback(
-    (isActive: boolean) => handleViewActiveChange("roulette", isActive),
-    [handleViewActiveChange]
+    [cancelArrowWin]
   );
 
   const onDartThrowResult = useCallback((result: EntryExplorationDartThrowResult) => {
@@ -147,10 +130,10 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   );
 
   const onArrowThrow = useCallback(() => {
-    viewControlsRef.current.arrow?.throwAtRandomCell();
+    viewControlsRef.current?.throwAtRandomCell();
   }, []);
 
-  const onRouletteCameraSettled = useCallback(() => {
+  const onCameraSettled = useCallback(() => {
     setIsRouletteReady(true);
   }, []);
 
@@ -189,33 +172,37 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
   }, []);
 
   const onRouletteStart = useCallback(() => {
-    const hasStarted = viewControlsRef.current.roulette?.startRoulette() ?? false;
+    const hasStarted = viewControlsRef.current?.startRoulette() ?? false;
 
     setIsRouletteStarted(hasStarted);
   }, []);
 
-  const onRequestRouletteView = useCallback(() => {
-    viewControlsRef.current.roulette?.requestApproach();
-  }, []);
-
   const onRetryThrow = useCallback(() => {
+    cancelArrowWin();
     shotResultRef.current = null;
     setShotResult(null);
     setLandedResult(null);
     setIsRouletteStarted(false);
     setRouletteBoard((board) => ({ ...EMPTY_ROULETTE_BOARD, layout: board.layout }));
-    viewControlsRef.current[viewKindRef.current]?.resetThrow();
-  }, []);
+    viewControlsRef.current?.resetThrow();
+  }, [cancelArrowWin]);
 
   const onFlightEnd = useCallback(() => {
     const landed = shotResultRef.current;
 
-    setLandedResult(landed);
-    viewControlsRef.current.arrow?.setHitCell(landed?.cell ?? null);
-  }, []);
+    if (!landed || arrowWinTimerRef.current !== null) {
+      return;
+    }
+
+    onRouletteWin({ cell: landed.cell, gridNumber: landed.gridNumber });
+    arrowWinTimerRef.current = setTimeout(() => {
+      arrowWinTimerRef.current = null;
+      setLandedResult(landed);
+    }, steps.winHoldMs);
+  }, [onRouletteWin]);
 
   const requestDartView = useCallback(() => {
-    viewControlsRef.current.arrow?.requestApproach();
+    viewControlsRef.current?.requestApproach();
   }, []);
 
   return {
@@ -227,24 +214,20 @@ export function useEntryExplorationDartShot(): EntryExplorationDartShotHookResul
       landedResult,
       rouletteBoard,
       shotResult,
-      viewKind,
     },
+    onActiveChange,
     onArrowThrow,
-    onDartTargetHoverChange: setIsTargetHovered,
+    onCameraSettled,
+    onControlsReady,
     onDartThrowResult,
-    onDartViewActiveChange,
-    onDartViewControlsReady,
     onFlightEnd,
-    onRequestRouletteView,
     onRetryThrow,
-    onRouletteCameraSettled,
     onRouletteHighlight,
     onRouletteLayoutChange,
     onRouletteStart,
     onRouletteThrowResult,
-    onRouletteViewActiveChange,
-    onRouletteViewControlsReady,
     onRouletteWin,
+    onTargetHoverChange: setIsTargetHovered,
     requestDartView,
     rouletteMapRectStore,
   };

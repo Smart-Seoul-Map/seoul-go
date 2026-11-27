@@ -4,37 +4,8 @@
   pointer-events: none;
 }
 
-.entry-exploration-dart-guide__intro,
-.entry-exploration-dart-guide__note,
-.entry-exploration-dart-guide__hint,
 .entry-exploration-dart-guide__result {
   position: absolute;
-}
-
-.entry-exploration-dart-guide__intro {
-  top: var(--sg-spacing-6);
-  right: var(--sg-spacing-4_5);
-  left: var(--sg-spacing-4_5);
-}
-
-.entry-exploration-dart-guide__note {
-  right: var(--sg-spacing-4_5);
-  bottom: calc(var(--sg-spacing-16) + var(--sg-spacing-6));
-  width: 58%;
-}
-
-.entry-exploration-dart-guide__hint {
-  right: var(--sg-spacing-4_5);
-  bottom: var(--sg-spacing-6);
-  left: var(--sg-spacing-4_5);
-  border-radius: var(--sg-radius-5);
-}
-
-.entry-exploration-dart-guide__hint .AppHeading {
-  width: 100%;
-}
-
-.entry-exploration-dart-guide__result {
   display: flex;
   flex-direction: column;
   gap: var(--sg-spacing-4);
@@ -47,10 +18,6 @@
 .entry-exploration-dart-guide__result .AppText[data-role="supporting"] {
   color: var(--sg-v3-blue-600);
   font-weight: var(--sg-font-weight-bold);
-}
-
-.entry-exploration-dart-guide__accent {
-  color: var(--sg-color-text-brand);
 }
 
 .entry-exploration-dart-guide__divider {
@@ -76,31 +43,6 @@
 }
 
 @media (min-width: 768px) {
-  .entry-exploration-dart-guide__intro {
-    top: var(--sg-spacing-10);
-    right: auto;
-    left: 50%;
-    width: max-content;
-    max-width: calc(100% - var(--sg-spacing-10) * 2);
-    transform: translateX(-50%);
-    white-space: nowrap;
-  }
-
-  .entry-exploration-dart-guide__note {
-    top: 48%;
-    right: var(--sg-spacing-10);
-    bottom: auto;
-    width: 18%;
-  }
-
-  .entry-exploration-dart-guide__hint {
-    right: auto;
-    bottom: var(--sg-spacing-10);
-    left: 50%;
-    width: 29%;
-    transform: translateX(-50%);
-  }
-
   .entry-exploration-dart-guide__result {
     top: 50%;
     right: var(--sg-spacing-10);
@@ -108,11 +50,5 @@
     left: auto;
     width: 18%;
     transform: translateY(-50%);
-  }
-
-  .entry-exploration-dart-guide__intro .AppHeading[data-align],
-  .entry-exploration-dart-guide__intro .AppText[data-align] {
-    width: 100%;
-    text-align: center;
   }
 }

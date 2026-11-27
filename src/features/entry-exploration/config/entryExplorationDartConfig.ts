@@ -1,8 +1,4 @@
 export const ENTRY_EXPLORATION_DART_CONFIG = {
-  clickHint: {
-    offsetFromTip: { x: -68, y: -42 },
-    width: 118,
-  },
   crosshair: {
     narrowViewportSize: 24,
     size: 48,

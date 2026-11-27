@@ -85,7 +85,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
     );
     expect(getRoot(container)).toHaveAttribute("data-phase", "idle");
 
-    fireEvent.click(screen.getByRole("button", { name: "START" }));
+    fireEvent.click(screen.getByRole("button", { name: "랜덤으로 뽑기" }));
 
     expect(onStart).toHaveBeenCalledOnce();
   });
@@ -117,7 +117,7 @@ describe("EntryExplorationDartRouletteBoard", () => {
     expect(litPaths[0]).toHaveClass("entry-exploration-dart-roulette__path");
     expect(container.querySelector(".entry-exploration-dart-roulette__marker")).toBeNull();
     expect(getRoot(container)).toHaveAttribute("data-phase", "fast");
-    expect(screen.getByRole("button", { name: "START" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "랜덤으로 뽑기" })).toBeDisabled();
 
     rerender(
       <EntryExplorationDartRouletteBoard
