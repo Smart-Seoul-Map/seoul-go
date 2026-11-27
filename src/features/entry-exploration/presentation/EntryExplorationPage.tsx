@@ -73,23 +73,12 @@ export function EntryExplorationPage({
   const {
     dartShot,
     onArrowThrow,
-    onDartTargetHoverChange,
-    onDartThrowResult,
-    onDartViewActiveChange,
-    onDartViewControlsReady,
     onFlightEnd,
-    onRequestRouletteView,
     onRetryThrow,
-    onRouletteCameraSettled,
-    onRouletteHighlight,
-    onRouletteLayoutChange,
     onRouletteStart,
-    onRouletteThrowResult,
-    onRouletteViewActiveChange,
-    onRouletteViewControlsReady,
-    onRouletteWin,
     requestDartView,
     rouletteMapRectStore,
+    ...dartSceneCallbacks
   } = useEntryExplorationDartShot();
   const characterSpeech = useEntryCharacterSpeech({
     hasStarted,
@@ -143,26 +132,12 @@ export function EntryExplorationPage({
   };
   const visibleRewards = rewards.filter((reward) => !pendingPlaceIds.has(reward.placeId));
   const { createSceneInteractionControllers } = useEntryExplorationSceneInteractionControllers({
+    ...dartSceneCallbacks,
     collectedNumbers: getEntryDartNumbers(visibleRewards),
-    onDartEntryBlocked: () => {
+    onEntryBlocked: () => {
       track({ name: "entry_dart_blocked" });
       showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
     },
-    onDartTargetHoverChange,
-    onDartThrowResult,
-    onDartViewActiveChange,
-    onDartViewControlsReady,
-    onRouletteCameraSettled,
-    onRouletteEntryBlocked: () => {
-      track({ name: "entry_roulette_blocked" });
-      showToast({ message: ENTRY_GUIDE_MESSAGES.toast.numberRequired });
-    },
-    onRouletteHighlight,
-    onRouletteLayoutChange,
-    onRouletteThrowResult,
-    onRouletteViewActiveChange,
-    onRouletteViewControlsReady,
-    onRouletteWin,
   });
   useEntryExplorationThreeScene({
     places,
@@ -193,7 +168,6 @@ export function EntryExplorationPage({
     navigate(createDistrictExplorationPath(district.id, toSeoulGridCellCenter(result.cell)));
   };
 
-  const isRouletteView = dartShot.isGuideVisible && dartShot.viewKind === "roulette";
   const rouletteVisitedPlaces = getEntryNumberRewardCells(
     visibleRewards,
     dartShot.rouletteBoard.layout?.selectableCells ?? [],
@@ -207,11 +181,11 @@ export function EntryExplorationPage({
         aria-label="서울고 탐색 진입 화면"
         className="entry-exploration-scene"
       />
-      {isRouletteView && (
+      {dartShot.isGuideVisible && (
         <EntryExplorationDartRouletteBoard
           board={dartShot.rouletteBoard}
-          hasResult={dartShot.shotResult !== null}
-          isReady={dartShot.isRouletteReady}
+          hasResult={dartShot.landedResult !== null}
+          isReady={dartShot.isRouletteReady && dartShot.shotResult === null}
           isStarted={dartShot.isRouletteStarted}
           mapRectStore={rouletteMapRectStore}
           onStart={onRouletteStart}
@@ -221,15 +195,13 @@ export function EntryExplorationPage({
       <EntryExplorationDartGuide
         isVisible={dartShot.isGuideVisible}
         landedResult={dartShot.landedResult}
-        viewKind={dartShot.viewKind}
         onClose={handleDeactivateActiveInteraction}
         onRetryThrow={onRetryThrow}
         onStartExploration={handleStartGridExploration}
-        shotResult={dartShot.shotResult}
       />
       <EntryExplorationDartArrow
         isTargetHovered={dartShot.isTargetHovered}
-        isVisible={dartShot.isGuideVisible && !isRouletteView}
+        isVisible={dartShot.isGuideVisible && !dartShot.isRouletteStarted}
         onFlightEnd={onFlightEnd}
         onThrow={onArrowThrow}
         shot={dartShot.shotResult}
@@ -244,7 +216,7 @@ export function EntryExplorationPage({
       )}
       <EntryExplorationSceneButton
         isVisible={hasStarted && !dartShot.isGuideVisible}
-        onClick={onRequestRouletteView}
+        onClick={requestDartView}
         placement="corner"
       >
         시작 지점 뽑기

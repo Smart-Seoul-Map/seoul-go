@@ -1,5 +1,4 @@
 import dartArrowUrl from "../../../assets/entry-exploration/dart-arrow.png";
-import dartClickHintUrl from "../../../assets/entry-exploration/dart-click-hint.png";
 import dartCrosshairUrl from "../../../assets/entry-exploration/dart-crosshair.png";
 import introBackgroundUrl from "../../../assets/entry-exploration/intro-background.webp";
 import seoulTileMapBackgroundUrl from "../../../assets/entry-exploration/seoul-grid-map-background.webp";
@@ -13,9 +12,6 @@ type EntryExplorationTextureAsset = {
 export const ENTRY_EXPLORATION_TEXTURE_ASSETS = {
   dartArrow: {
     src: dartArrowUrl,
-  },
-  dartClickHint: {
-    src: dartClickHintUrl,
   },
   dartCrosshair: {
     src: dartCrosshairUrl,

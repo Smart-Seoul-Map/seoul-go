@@ -11,7 +11,6 @@
 }
 
 .entry-exploration-dart-arrow__arrow,
-.entry-exploration-dart-arrow__click-hint,
 .entry-exploration-dart-arrow__crosshair {
   position: absolute;
   left: 0;
@@ -41,7 +40,6 @@
   pointer-events: none;
 }
 
-.entry-exploration-dart-arrow__click-hint,
 .entry-exploration-dart-arrow__crosshair {
   opacity: 0;
   transition: opacity var(--sg-motion-duration-2) var(--sg-motion-easing-standard);
@@ -51,7 +49,6 @@
   filter: drop-shadow(var(--sg-floating-control-shadow));
 }
 
-.entry-exploration-dart-arrow__click-hint[data-shown="true"],
 .entry-exploration-dart-arrow__crosshair[data-shown="true"] {
   opacity: 1;
 }
