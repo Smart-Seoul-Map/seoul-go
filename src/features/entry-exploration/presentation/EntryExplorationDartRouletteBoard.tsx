@@ -83,7 +83,7 @@ export function EntryExplorationDartRouletteBoard({
   const [tappedPlaceId, setTappedPlaceId] = useState<string | null>(null);
   const phase = getRoulettePhase(board, isStarted, hasResult);
   const isWinHolding = phase === "win";
-  // 점멸 중(START 후 결과 전)에는 방문 장소 정보를 열지 않는다.
+  // 점멸 중(랜덤으로 뽑기 후 결과 전)에는 방문 장소 정보를 열지 않는다.
   const isInfoAvailable = phase === "idle" || phase === "done";
   const infoPlaceId = isInfoAvailable ? (tappedPlaceId ?? hoveredPlaceId) : null;
   const infoPlace = visitedPlaces.find((place) => place.placeId === infoPlaceId) ?? null;
@@ -246,9 +246,8 @@ export function EntryExplorationDartRouletteBoard({
         isDisabled={isStarted}
         isVisible={isReady && !hasResult}
         onClick={handleStartClick}
-        placement="bottom"
       >
-        START
+        랜덤으로 뽑기
       </EntryExplorationSceneButton>
     </div>
   );

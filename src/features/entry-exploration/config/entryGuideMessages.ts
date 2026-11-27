@@ -8,7 +8,7 @@ export const ENTRY_GUIDE_MESSAGES = {
   toast: {
     numberRequired: "장소를 방문해 번호를 모으면, 그 번호 줄에 다트를 던질 수 있어요",
     numberReward: "번호를 추가했어요",
-    numberRewardAction: "다트게임하기",
+    numberRewardAction: "시작 지점 뽑기",
   },
   // 첫 진입 가이드 오버레이. 줄바꿈은 \n, 강조는 [[ ]], {pointerAction}은 기기에 따라 클릭·터치로 바꾼다.
   firstEntryGuide: {

@@ -22,7 +22,6 @@ import { EntryExplorationDartArrow } from "./EntryExplorationDartArrow";
 import { EntryExplorationDartGuide } from "./EntryExplorationDartGuide";
 import { EntryExplorationDartHitBadge } from "./EntryExplorationDartHitBadge";
 import { EntryExplorationDartRouletteBoard } from "./EntryExplorationDartRouletteBoard";
-import { EntryExplorationSceneButton } from "./EntryExplorationSceneButton";
 import { EntryCollectedNumbersPanel } from "./EntryCollectedNumbersPanel";
 import { EntryGuideOverlay } from "./EntryGuideOverlay";
 import { useEntryNumberRewardStore } from "../application/useEntryNumberRewardStore";
@@ -214,13 +213,6 @@ export function EntryExplorationPage({
           isDartViewActive={dartShot.isGuideVisible}
         />
       )}
-      <EntryExplorationSceneButton
-        isVisible={hasStarted && !dartShot.isGuideVisible}
-        onClick={requestDartView}
-        placement="corner"
-      >
-        시작 지점 뽑기
-      </EntryExplorationSceneButton>
       {hasStarted && renderPlacePanel?.(panelProps)}
       {characterSpeech.message &&
         createPortal(
